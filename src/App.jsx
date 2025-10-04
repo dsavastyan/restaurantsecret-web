@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Routes, Route, Link } from 'react-router-dom'
 import Home from './pages/Home.jsx'
 import Restaurant from './pages/Restaurant.jsx'
@@ -6,6 +6,26 @@ import Menu from './pages/Menu.jsx'
 import Search from './pages/Search.jsx'
 
 export default function App() {
+  useEffect(() => {
+    const tg = window.Telegram?.WebApp
+    if (!tg) return
+
+    tg.ready()
+    tg.expand()
+    tg.setHeaderColor('bg_color')
+
+    const handleThemeChange = () => {
+      document.body.classList.toggle('tg-dark', tg.colorScheme === 'dark')
+    }
+
+    handleThemeChange()
+    tg.onEvent('themeChanged', handleThemeChange)
+
+    return () => {
+      tg.offEvent('themeChanged', handleThemeChange)
+    }
+  }, [])
+
   return (
     <div className="container">
       <header className="topbar">
