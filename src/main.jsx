@@ -4,8 +4,7 @@ import { BrowserRouter, HashRouter } from 'react-router-dom'
 import App from './App.jsx'
 import './styles.css'
 
-const inTelegram = typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp;
-const Router = inTelegram ? HashRouter : BrowserRouter;
+const inTelegram = typeof window !== 'undefined' && Boolean(window.Telegram?.WebApp)
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -14,7 +13,13 @@ if ('serviceWorker' in navigator) {
 }
 
 createRoot(document.getElementById('root')).render(
-  <Router>
-    <App />
-  </Router>
+  inTelegram ? (
+    <HashRouter>
+      <App />
+    </HashRouter>
+  ) : (
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  )
 )
