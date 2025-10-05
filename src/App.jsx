@@ -149,7 +149,11 @@ export default function App() {
           <Route path="/pay/mock-success" element={<PayMockSuccess />} />
         </Routes>
       </main>
-      {showPaywall && <Paywall onRefresh={refreshAccess} />}
+      {showPaywall && (
+        <div className="rs-paywall-overlay">
+          <Paywall onRefresh={refreshAccess} />
+        </div>
+      )}
     </div>
   )
 }
