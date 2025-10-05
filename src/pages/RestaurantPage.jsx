@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { apiGet } from '@/lib/requests';
+import { flattenMenuDishes, formatNumeric } from '@/lib/nutrition';
 
 // Assumption: subscription is active when you render this page
 // If you still keep useSubscription, you can gate this page by redirecting beforehand.
@@ -44,7 +45,7 @@ export default function RestaurantPage() {
 
   // применение фильтров
   const filtered = useMemo(() => {
-    const dishes = flattenDishes(menu); // [{id,name,kcal,protein,fat,carbs,category,price,weight}, ...]
+    const dishes = flattenMenuDishes(menu); // [{id,name,kcal,protein,fat,carbs,category,price,weight}, ...]
     return dishes.filter(d => {
       // 1) поиск по названию
       if (q && !d.name.toLowerCase().includes(q.trim().toLowerCase())) return false;
@@ -148,31 +149,6 @@ function normalizeMenu(raw) {
   return raw || {};
 }
 
-function flattenDishes(menu) {
-  if (!menu?.categories) return [];
-  const out = [];
-  for (const cat of menu.categories) {
-    for (const dish of (cat.dishes || [])) {
-      out.push({
-        ...dish,
-        category: cat.name,
-        kcal:   coerceNum(dish.kcal ?? dish.calories),
-        protein:coerceNum(dish.protein ?? dish.proteins),
-        fat:    coerceNum(dish.fat ?? dish.fats),
-        carbs:  coerceNum(dish.carbs ?? dish.carbohydrates),
-        price:  coerceNum(dish.price),
-        weight: coerceNum(dish.weight),
-      });
-    }
-  }
-  return out;
-}
-function coerceNum(v) {
-  if (v == null) return NaN;
-  if (typeof v === 'number') return v;
-  const m = String(v).match(/[\d.]+/);
-  return m ? Number(m[0]) : NaN;
-}
 
 function Chip({ active, onClick, children }) {
   return (
@@ -222,20 +198,16 @@ function DishCard({ dish }) {
         {Number.isFinite(dish.price) && <div className="dish__price">{Math.round(dish.price)} ₽</div>}
       </div>
       <div className="dish__meta">
-        <span className="pill">{fmt(dish.kcal)} ккал</span>
-        <span className="pill">Б {fmt(dish.protein)} г</span>
-        <span className="pill">Ж {fmt(dish.fat)} г</span>
-        <span className="pill">У {fmt(dish.carbs)} г</span>
-        {dish.weight && <span className="pill">{fmt(dish.weight)} г</span>}
+        <span className="pill">{formatNumeric(dish.kcal)} ккал</span>
+        <span className="pill">Б {formatNumeric(dish.protein)} г</span>
+        <span className="pill">Ж {formatNumeric(dish.fat)} г</span>
+        <span className="pill">У {formatNumeric(dish.carbs)} г</span>
+        {Number.isFinite(dish.weight) && <span className="pill">{formatNumeric(dish.weight)} г</span>}
       </div>
       {dish.category && <div className="dish__category">{dish.category}</div>}
       {dish.ingredients && <div className="dish__ing">{dish.ingredients}</div>}
     </div>
   );
-}
-function fmt(v) {
-  if (!Number.isFinite(v)) return '—';
-  return Math.round(v);
 }
 
 const styles = `

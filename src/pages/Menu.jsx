@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 import { apiGet } from '@/lib/requests'
+import { flattenMenuDishes, formatNumeric } from '@/lib/nutrition'
 
 const createDefaultPresets = () => ({ highProtein: false, lowFat: false, lowKcal: false })
 const createDefaultRange = () => ({
@@ -69,7 +70,7 @@ export default function Menu() {
     }
   }, [slug, hasAccess])
 
-  const dishes = useMemo(() => flattenDishes(menu), [menu])
+  const dishes = useMemo(() => flattenMenuDishes(menu), [menu])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -176,11 +177,11 @@ export default function Menu() {
                   <div className="row-main">
                     <strong>{dish.name}</strong>
                     <div className="tags">
-                      <span className="tag">{formatValue(dish.kcal)} ккал</span>
-                      <span className="tag">Б {formatValue(dish.protein)}</span>
-                      <span className="tag">Ж {formatValue(dish.fat)}</span>
-                      <span className="tag">У {formatValue(dish.carbs)}</span>
-                      {Number.isFinite(dish.weight) && <span className="tag">{formatValue(dish.weight)} г</span>}
+                      <span className="tag">{formatNumeric(dish.kcal)} ккал</span>
+                      <span className="tag">Б {formatNumeric(dish.protein)}</span>
+                      <span className="tag">Ж {formatNumeric(dish.fat)}</span>
+                      <span className="tag">У {formatNumeric(dish.carbs)}</span>
+                      {Number.isFinite(dish.weight) && <span className="tag">{formatNumeric(dish.weight)} г</span>}
                       {dish.category && <span className="tag">{dish.category}</span>}
                     </div>
                     {dish.ingredients && <div className="muted">{dish.ingredients}</div>}
@@ -235,33 +236,6 @@ function normalizeMenu(raw) {
   return raw || {}
 }
 
-function flattenDishes(menu) {
-  if (!menu?.categories) return []
-  const output = []
-  for (const category of menu.categories) {
-    for (const dish of category.dishes || []) {
-      output.push({
-        ...dish,
-        category: category.name,
-        kcal: toNumber(dish.kcal ?? dish.calories),
-        protein: toNumber(dish.protein ?? dish.proteins),
-        fat: toNumber(dish.fat ?? dish.fats),
-        carbs: toNumber(dish.carbs ?? dish.carbohydrates),
-        price: toNumber(dish.price),
-        weight: toNumber(dish.weight)
-      })
-    }
-  }
-  return output
-}
-
-function toNumber(value) {
-  if (value == null) return NaN
-  if (typeof value === 'number' && Number.isFinite(value)) return value
-  const match = String(value).match(/[\d.]+/)
-  return match ? Number(match[0]) : NaN
-}
-
 function inRange(value, min, max) {
   const numeric = Number(value)
   if (!Number.isFinite(numeric)) {
@@ -270,8 +244,4 @@ function inRange(value, min, max) {
   const lower = min === '' ? -Infinity : Number(min)
   const upper = max === '' ? Infinity : Number(max)
   return numeric >= lower && numeric <= upper
-}
-
-function formatValue(value) {
-  return Number.isFinite(value) ? Math.round(value) : '—'
 }
