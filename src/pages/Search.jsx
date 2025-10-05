@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { useSearchParams, Link } from 'react-router-dom'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useNavigate, useOutletContext, useSearchParams } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { useSWRLite } from '../hooks/useSWRLite.js'
 
@@ -7,11 +7,49 @@ export default function Search() {
   const [sp, setSp] = useSearchParams()
   const q = sp.get('q') ?? ''
   const [query, setQuery] = useState(q)
+  const navigate = useNavigate()
+  const { access, requireAccess, requestPaywall } = useOutletContext() || {}
+  const canAccess = access?.isActive
+
+  const ensureAccess = useCallback(() => {
+    if (requireAccess) {
+      return requireAccess()
+    }
+    if (canAccess) return true
+    if (requestPaywall) requestPaywall()
+    return false
+  }, [canAccess, requireAccess, requestPaywall])
+
+  useEffect(() => {
+    if (canAccess === false) {
+      ensureAccess()
+    }
+  }, [canAccess, ensureAccess])
 
   useEffect(() => setQuery(q), [q])
 
   const key = useMemo(() => `s-${q}`, [q])
-  const { data, loading, error } = useSWRLite(key, () => q ? api.search(q, { limit: 50 }) : Promise.resolve({ items: [] }), { initialData: { items: [] } })
+  const { data, loading, error } = useSWRLite(
+    key,
+    () => q ? api.search(q, { limit: 50 }) : Promise.resolve({ items: [] }),
+    { initialData: { items: [] }, enabled: Boolean(canAccess) }
+  )
+
+  const openMenu = useCallback((slug) => {
+    if (!slug) return
+    if (ensureAccess()) {
+      navigate(`/restaurant/${slug}/menu`)
+    }
+  }, [ensureAccess, navigate])
+
+  if (canAccess === false) {
+    return (
+      <div className="stack">
+        <h2>Поиск</h2>
+        <p>Оформите подписку, чтобы пользоваться поиском блюд.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="stack">
@@ -35,7 +73,7 @@ export default function Search() {
               <div className="muted">{it.kcal ?? '—'} ккал · {it.proteins_g ?? '—'}/{it.fats_g ?? '—'}/{it.carbs_g ?? '—'}</div>
             </div>
             <div className="card-actions">
-              <Link to={`/restaurant/${it.restaurant_slug}/menu`}>К меню</Link>
+              <button type="button" className="link" onClick={() => openMenu(it.restaurant_slug)}>К меню</button>
             </div>
           </li>
         ))}

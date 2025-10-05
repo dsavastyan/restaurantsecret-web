@@ -19,6 +19,7 @@ export default function AppShell() {
       return defaultAccess
     }
   })
+  const [paywallVisible, setPaywallVisible] = useState(false)
 
   const handleAccessUpdate = useCallback((next) => {
     if (!next) {
@@ -90,10 +91,31 @@ export default function AppShell() {
     }
   }, [])
 
+  useEffect(() => {
+    if (access?.isActive) {
+      setPaywallVisible(false)
+    }
+  }, [access?.isActive])
+
+  const requestPaywall = useCallback(() => {
+    setPaywallVisible(true)
+  }, [])
+
+  const closePaywall = useCallback(() => {
+    setPaywallVisible(false)
+  }, [])
+
+  const requireAccess = useCallback(() => {
+    if (access?.isActive) return true
+    setPaywallVisible(true)
+    return false
+  }, [access?.isActive])
+
   const showPaywall = useMemo(() => {
     if (access?.isActive) return false
-    return !location.pathname.startsWith('/pay')
-  }, [access?.isActive, location.pathname])
+    if (location.pathname.startsWith('/pay')) return false
+    return paywallVisible
+  }, [access?.isActive, location.pathname, paywallVisible])
 
   const refreshAccess = useCallback(async () => {
     try {
@@ -126,7 +148,14 @@ export default function AppShell() {
     }
   }, [handleAccessUpdate])
 
-  const outletContext = useMemo(() => ({ access, handleAccessUpdate, refreshAccess }), [access, handleAccessUpdate, refreshAccess])
+  const outletContext = useMemo(() => ({
+    access,
+    handleAccessUpdate,
+    refreshAccess,
+    requestPaywall,
+    closePaywall,
+    requireAccess
+  }), [access, handleAccessUpdate, refreshAccess, requestPaywall, closePaywall, requireAccess])
 
   return (
     <div className={showPaywall ? 'container locked' : 'container'}>
@@ -142,7 +171,7 @@ export default function AppShell() {
       {showPaywall && (
         <PaywallPortal>
           <div className="rs-paywall-overlay">
-            <Paywall onRefresh={refreshAccess} />
+            <Paywall onRefresh={refreshAccess} onClose={closePaywall} />
           </div>
         </PaywallPortal>
       )}

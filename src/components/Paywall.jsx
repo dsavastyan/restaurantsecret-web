@@ -1,9 +1,14 @@
 import React from 'react'
 
-export default function Paywall({ onRefresh }) {
+export default function Paywall({ onRefresh, onClose }) {
   return (
-    <section className="rs-paywall">
-      <h1>Оформите подписку</h1>
+    <section className="rs-paywall" role="dialog" aria-modal="true" aria-labelledby="rs-paywall-title">
+      {onClose && (
+        <button type="button" className="rs-paywall-close" aria-label="Закрыть" onClick={onClose}>
+          ×
+        </button>
+      )}
+      <h1 id="rs-paywall-title">Оформите подписку</h1>
       <p className="rs-lead">
         Подписка открывает доступ ко всему каталогу RestaurantSecret и регулярным обновлениям.
       </p>

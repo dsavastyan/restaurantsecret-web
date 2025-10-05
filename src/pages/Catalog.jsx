@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useCallback, useMemo, useState } from 'react'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { useSWRLite } from '../hooks/useSWRLite.js'
 
@@ -8,6 +8,31 @@ export default function Catalog() {
   const [selectedCuisines, setSelectedCuisines] = useState([])
   const [calKey, setCalKey] = useState('')
   const [page, setPage] = useState(1)
+  const navigate = useNavigate()
+  const { access, requireAccess, requestPaywall } = useOutletContext() || {}
+
+  const ensureAccess = useCallback(() => {
+    if (requireAccess) {
+      return requireAccess()
+    }
+    if (access?.isActive) return true
+    if (requestPaywall) requestPaywall()
+    return false
+  }, [access?.isActive, requireAccess, requestPaywall])
+
+  const openProfile = useCallback((slug) => {
+    if (!slug) return
+    if (ensureAccess()) {
+      navigate(`/restaurant/${slug}`)
+    }
+  }, [ensureAccess, navigate])
+
+  const openMenu = useCallback((slug) => {
+    if (!slug) return
+    if (ensureAccess()) {
+      navigate(`/restaurant/${slug}/menu`)
+    }
+  }, [ensureAccess, navigate])
 
   const { data, loading, error } = useSWRLite(
     `restaurants-${page}-${selectedCuisines.join(',')}-${calKey}`,
@@ -16,13 +41,16 @@ export default function Catalog() {
 
   const items = data?.items ?? []
 
+  const cuisineOptions = useMemo(() => filters?.cuisines ?? [], [filters?.cuisines])
+  const calorieOptions = useMemo(() => filters?.calorie_ranges ?? [], [filters?.calorie_ranges])
+
   return (
     <div className="stack">
       <div className="filters">
         <div>
           <label>Кухни</label>
           <div className="chips">
-            {filters?.cuisines?.map(c => (
+            {cuisineOptions.map(c => (
               <button
                 key={c}
                 className={selectedCuisines.includes(c) ? 'chip active' : 'chip'}
@@ -38,7 +66,7 @@ export default function Catalog() {
         <div>
           <label>Калории</label>
           <div className="chips">
-            {filters?.calorie_ranges?.map(r => (
+            {calorieOptions.map(r => (
               <button key={r.key}
                 className={calKey === r.key ? 'chip active' : 'chip'}
                 onClick={() => { setPage(1); setCalKey(k => k === r.key ? '' : r.key) }}>
@@ -55,15 +83,15 @@ export default function Catalog() {
 
       <ul className="cards">
         {items.map(r => (
-          <li key={r.slug} className="card">
-            <div className="card-body">
+          <li key={r.slug} className="card" role="group" aria-label={r?.name ?? 'Ресторан'}>
+            <button type="button" className="card-body card-button" onClick={() => openProfile(r.slug)}>
               <h3>{r.name}</h3>
               <div className="muted">{r.cuisine ?? '—'}</div>
               <div className="muted">Блюд: {r.dish_count ?? '—'}</div>
-            </div>
+            </button>
             <div className="card-actions">
-              <Link to={`/restaurant/${r.slug}`}>Профиль</Link>
-              <Link to={`/restaurant/${r.slug}/menu`}>Меню</Link>
+              <button type="button" className="link" onClick={() => openProfile(r.slug)}>Профиль</button>
+              <button type="button" className="link" onClick={() => openMenu(r.slug)}>Меню</button>
             </div>
           </li>
         ))}
