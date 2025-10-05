@@ -12,19 +12,31 @@ import PayMockSuccess from '../pages/PayMockSuccess.jsx'
 function AppRoutes() {
   return (
     <Routes>
+      {/* Публичные маршруты */}
       <Route path="/" element={<Landing />} />
-      <Route element={<AppShell />}>
-        <Route path="/app" element={<Catalog />} />
-        <Route path="/restaurants" element={<Catalog />} />
-        <Route path="/restaurant/:slug" element={<RestaurantPage />} />
-        <Route path="/restaurant/:slug/menu" element={<Menu />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/pay/success" element={<PaySuccess />} />
-        <Route path="/pay/mock-success" element={<PayMockSuccess />} />
+      <Route path="/restaurants" element={<Catalog />} />
+      <Route path="/restaurant/:slug" element={<RestaurantPage />} />
+      <Route path="/restaurant/:slug/menu" element={<Menu />} />
+      <Route path="/search" element={<Search />} />
+      <Route path="/pay/success" element={<PaySuccess />} />
+      <Route path="/pay/mock-success" element={<PayMockSuccess />} />
+
+      {/* AppShell зона с табами */}
+      <Route path="/app" element={<AppShell />}>
+        <Route index element={<Catalog />} />
+        <Route path="catalog" element={<Catalog />} />
+        <Route path="search" element={<Search />} />
+        <Route path="favorites" element={<div>TODO: Favorites</div>} />
+        <Route path="profile" element={<div>TODO: Profile</div>} />
+        <Route path="*" element={<Navigate to="catalog" replace />} />
       </Route>
+
+      {/* Легаси-ссылки */}
       <Route path="/r/:slug" element={<LegacyRestaurantRedirect />} />
       <Route path="/r/:slug/menu" element={<LegacyMenuRedirect />} />
-      <Route path="/app/*" element={<Navigate to="/app" replace />} />
+
+      {/* 404 */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
