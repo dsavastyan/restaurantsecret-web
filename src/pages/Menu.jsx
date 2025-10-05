@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
-import { API_BASE } from '@/config/api'
+import { apiGet } from '@/lib/requests'
 
 const createDefaultPresets = () => ({ highProtein: false, lowFat: false, lowKcal: false })
 const createDefaultRange = () => ({
@@ -51,11 +51,7 @@ export default function Menu() {
       try {
         setLoading(true)
         setError('')
-        const url = `${API_BASE}/restaurants/${slug}/menu`
-        console.log('MENU FETCH URL:', url)
-        const res = await fetch(url)
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const raw = await res.json()
+        const raw = await apiGet(`/restaurants/${slug}/menu`)
         const data = raw?.categories ? raw : { name: raw?.name || slug, categories: [] }
         if (!aborted) setMenu(normalizeMenu(data))
       } catch (err) {
