@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { API_BASE } from '@/config/api';
+import { apiGet } from '@/lib/requests';
 
 // Assumption: subscription is active when you render this page
 // If you still keep useSubscription, you can gate this page by redirecting beforehand.
@@ -31,9 +31,7 @@ export default function RestaurantPage() {
       try {
         setLoading(true);
         setErr(null);
-        const res = await fetch(`${API_BASE}/restaurant/${slug}/menu`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+        const data = await apiGet(`/restaurants/${slug}/menu`);
         if (!aborted) setMenu(normalizeMenu(data));
       } catch (e) {
         if (!aborted) setErr('Не удалось загрузить меню');
