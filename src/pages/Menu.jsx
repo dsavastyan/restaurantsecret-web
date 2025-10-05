@@ -47,32 +47,26 @@ export default function Menu() {
       return () => { aborted = true }
     }
 
-    async function load() {
+    ;(async () => {
       try {
         setLoading(true)
         setError('')
-        const res = await fetch(`${API_BASE}/restaurants/${slug}/menu`)
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`)
-        }
+        const url = `${API_BASE}/restaurants/${slug}/menu`
+        console.log('MENU FETCH URL:', url)
+        const res = await fetch(url)
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const raw = await res.json()
         const data = raw?.categories ? raw : { name: raw?.name || slug, categories: [] }
-        if (!aborted) {
-          setMenu(normalizeMenu(data))
-        }
+        if (!aborted) setMenu(normalizeMenu(data))
       } catch (err) {
         if (!aborted) {
           console.error('Failed to load menu', err)
           setError('Не удалось загрузить меню. Попробуйте обновить страницу позже.')
         }
       } finally {
-        if (!aborted) {
-          setLoading(false)
-        }
+        if (!aborted) setLoading(false)
       }
-    }
-
-    load()
+    })()
 
     return () => {
       aborted = true
