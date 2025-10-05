@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Routes, Route, Link, useLocation } from 'react-router-dom'
 import Home from './pages/Home.jsx'
 import Restaurant from './pages/Restaurant.jsx'
@@ -150,10 +151,31 @@ export default function App() {
         </Routes>
       </main>
       {showPaywall && (
-        <div className="rs-paywall-overlay">
-          <Paywall onRefresh={refreshAccess} />
-        </div>
+        <PaywallPortal>
+          <div className="rs-paywall-overlay">
+            <Paywall onRefresh={refreshAccess} />
+          </div>
+        </PaywallPortal>
       )}
     </div>
   )
+}
+
+function PaywallPortal({ children }) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return undefined
+
+    setMounted(true)
+    document.body.classList.add('rs-paywall-open')
+
+    return () => {
+      document.body.classList.remove('rs-paywall-open')
+    }
+  }, [])
+
+  if (!mounted || typeof document === 'undefined') return null
+
+  return createPortal(children, document.body)
 }
