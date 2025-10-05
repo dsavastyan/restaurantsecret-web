@@ -100,6 +100,37 @@ export default function App() {
     return !location.pathname.startsWith('/pay')
   }, [access?.isActive, location.pathname])
 
+  const refreshAccess = useCallback(async () => {
+    try {
+      const user = (typeof window !== 'undefined' && window.localStorage.getItem('rs_tg_user_id')) || '176483490'
+      const response = await fetch('https://api.restaurantsecret.ru/me', {
+        headers: {
+          'Authorization': `Bearer ${user}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error(`Ошибка ${response.status}`)
+      }
+
+      const me = await response.json()
+      const detail = {
+        ok: me?.ok ?? true,
+        isActive: Boolean(me?.isActive),
+        expiresAt: me?.expiresAt ?? null
+      }
+
+      handleAccessUpdate(detail)
+
+      if (!detail.isActive) {
+        alert('Подписка пока не активна. Попробуйте повторить проверку позже.')
+      }
+    } catch (err) {
+      console.error('Failed to refresh access', err)
+      alert('Не удалось проверить доступ. Попробуйте позже.')
+    }
+  }, [handleAccessUpdate])
+
   return (
     <div className={showPaywall ? 'container locked' : 'container'}>
       <header className="topbar">
@@ -118,7 +149,7 @@ export default function App() {
           <Route path="/pay/mock-success" element={<PayMockSuccess />} />
         </Routes>
       </main>
-      {showPaywall && <Paywall />}
+      {showPaywall && <Paywall onRefresh={refreshAccess} />}
     </div>
   )
 }

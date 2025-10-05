@@ -1,85 +1,68 @@
-import React, { useState } from 'react'
+import React from 'react'
 
-const plans = [
-  {
-    key: 'monthly',
-    title: 'Ежемесячная подписка',
-    description: 'Доступ к каталогу и обновлениям с помесячной оплатой.'
-  },
-  {
-    key: 'annual',
-    title: 'Годовая подписка',
-    description: 'Экономия при оплате сразу за год и непрерывный доступ.'
-  }
-]
+export default function Paywall({ onRefresh }) {
+  return (
+    <section className="rs-paywall">
+      <h1>Оформите подписку</h1>
+      <p className="rs-lead">
+        Подписка открывает доступ ко всему каталогу RestaurantSecret и регулярным обновлениям.
+      </p>
 
-async function startCheckout(plan, setLoadingPlan, setError) {
-  setLoadingPlan(plan)
-  setError('')
-  try {
-    const user = (typeof window !== 'undefined' && window.localStorage.getItem('rs_tg_user_id')) || '176483490'
-    const response = await fetch('https://api.restaurantsecret.ru/subscribe/session', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${user}`
-      },
-      body: JSON.stringify({ plan })
-    })
+      <div className="rs-cards">
+        {/* Месяц */}
+        <article className="rs-card">
+          <div className="rs-card-body">
+            <div className="rs-term">1 месяц</div>
+            <div className="rs-price">
+              <span className="rs-price-value">99</span>
+              <span className="rs-price-rub">руб.</span>
+            </div>
+            <button className="rs-btn" onClick={() => startCheckout('monthly')}>
+              Оформить подписку
+            </button>
+          </div>
+        </article>
 
-    const payload = await response.json()
-    const { ok, redirect_url: redirectUrl } = payload ?? {}
-    if (ok && redirectUrl) {
-      if (window.Telegram?.WebApp?.openLink) {
-        window.Telegram.WebApp.openLink(redirectUrl)
-      } else if (typeof window !== 'undefined') {
-        const opened = window.open(redirectUrl, '_blank', 'noopener')
-        if (!opened) {
-          window.location.href = redirectUrl
-        }
-      }
-    } else {
-      throw new Error('Не удалось создать платёж. Попробуйте позже.')
-    }
-  } catch (err) {
-    console.error('Failed to start checkout', err)
-    setError('Не удалось создать платёж. Попробуйте позже.')
-    alert('Не удалось создать платёж. Попробуйте позже.')
-  } finally {
-    setLoadingPlan(null)
-  }
+        {/* Год */}
+        <article className="rs-card rs-card--accent">
+          <div className="rs-ribbon">Самая выгодная цена</div>
+          <div className="rs-card-body">
+            <div className="rs-term">1 год</div>
+            <div className="rs-price">
+              <span className="rs-price-value">999</span>
+              <span className="rs-price-rub">руб.</span>
+            </div>
+            <div className="rs-save">Выгоднее на 16&nbsp;%</div>
+            <button className="rs-btn" onClick={() => startCheckout('annual')}>
+              Оформить подписку
+            </button>
+          </div>
+        </article>
+      </div>
+
+      <p className="rs-hint">
+        После оплаты вернитесь в приложение и нажмите «Проверить доступ».
+      </p>
+
+      <div className="rs-actions">
+        <button className="rs-link" onClick={onRefresh}>Проверить доступ</button>
+      </div>
+    </section>
+  )
 }
 
-export default function Paywall() {
-  const [loadingPlan, setLoadingPlan] = useState(null)
-  const [error, setError] = useState('')
-
-  return (
-    <div className="paywall-overlay" role="dialog" aria-modal="true">
-      <div className="paywall-dialog">
-        <h2>Оформите подписку</h2>
-        <p>Подписка открывает доступ ко всему каталогу RestaurantSecret и регулярным обновлениям.</p>
-        <div className="paywall-plans">
-          {plans.map(plan => (
-            <div key={plan.key} className="paywall-plan">
-              <div>
-                <p className="paywall-plan-title">{plan.title}</p>
-                <p className="paywall-plan-desc">{plan.description}</p>
-              </div>
-              <button
-                type="button"
-                className="primary"
-                onClick={() => startCheckout(plan.key, setLoadingPlan, setError)}
-                disabled={loadingPlan === plan.key}
-              >
-                {loadingPlan === plan.key ? 'Подготовка…' : 'Оформить подписку'}
-              </button>
-            </div>
-          ))}
-        </div>
-        {error && <p className="err" role="alert">{error}</p>}
-        <p className="paywall-note">После оплаты вернитесь в приложение и нажмите «Проверить доступ».</p>
-      </div>
-    </div>
-  )
+/* Если у тебя нет функции — оставь этот helper тут или вынеси в utils */
+async function startCheckout(plan) {
+  const uid = localStorage.getItem('rs_tg_user_id') || '176483490'
+  const r = await fetch('https://api.restaurantsecret.ru/subscribe/session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${uid}` },
+    body: JSON.stringify({ plan })
+  })
+  const { ok, redirect_url: redirectUrl } = await r.json()
+  if (ok && redirectUrl) {
+    window.Telegram?.WebApp?.openLink(redirectUrl) // открывает внешний браузер
+  } else {
+    alert('Не удалось создать платеж. Попробуйте позже.')
+  }
 }
