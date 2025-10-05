@@ -47,9 +47,9 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
   .rs-paywall-overlay { padding:48px 24px; }
 }
 
-.rs-paywall{max-width:880px;margin:24px auto;padding:8px 16px;color:var(--rs-text);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;}
-.rs-paywall h1{margin:6px 0 10px;text-align:center;font-weight:800;font-size:32px;letter-spacing:-.02em;}
-.rs-lead{margin:0 auto 24px;max-width:640px;text-align:center;color:var(--rs-muted);font-size:18px;line-height:1.5;}
+.rs-paywall{max-width:880px;margin:24px auto;padding:8px 16px 72px;color:var(--rs-text);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;}
+.rs-paywall h1{margin:6px 0 12px;text-align:center;font-weight:800;font-size:32px;letter-spacing:-.02em;}
+.rs-lead{margin:0 auto 28px;max-width:640px;text-align:center;color:var(--rs-muted);font-size:18px;line-height:1.5;}
 
 .rs-cards{display:grid;grid-template-columns:1fr;gap:18px;align-items:stretch;}
 @media (min-width:640px){.rs-cards{grid-template-columns:1fr 1fr;gap:22px;}}
@@ -70,9 +70,12 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
 .rs-btn{display:block;width:100%;border:0;cursor:pointer;background:var(--rs-primary);color:#fff;font-weight:700;border-radius:999px;padding:14px 18px;font-size:16px;box-shadow:0 6px 20px rgba(242,95,58,.3);transition:transform .06s ease;}
 .rs-btn:active{transform:translateY(1px);}
 
-.rs-hint{text-align:center;color:var(--rs-muted);margin:18px 0 6px;font-size:16px;}
+.rs-hint{text-align:center;color:var(--rs-muted);margin:24px 0 10px;font-size:16px;}
 .rs-actions{display:flex;justify-content:center;margin-top:2px;}
 .rs-link{background:transparent;border:0;color:#2563eb;font-weight:600;cursor:pointer;padding:8px 10px;}
+.rs-paywall-overlay .rs-paywall h1{color:#fff;text-shadow:0 10px 24px rgba(15,23,42,0.55);}
+.rs-paywall-overlay .rs-paywall .rs-lead{color:rgba(255,255,255,0.92);text-shadow:0 8px 20px rgba(15,23,42,0.55);}
+.rs-paywall-overlay .rs-paywall .rs-hint{color:rgba(255,255,255,0.85);text-shadow:0 6px 18px rgba(15,23,42,0.5);}
 .page { display:flex; flex-direction:column; gap:12px; padding:16px 0; }
 .page h1 { margin:0; font-size:26px; }
 .page p { margin:0; color:#444; }
