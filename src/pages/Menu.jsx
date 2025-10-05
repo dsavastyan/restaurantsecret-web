@@ -1,11 +1,24 @@
-import React from 'react'
-import { useParams } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { useOutletContext, useParams } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { useSWRLite } from '../hooks/useSWRLite.js'
 
 export default function Menu() {
   const { slug } = useParams()
-  const { data, loading, error } = useSWRLite(`menu-${slug}`, () => api.menu(slug))
+  const { access, requireAccess } = useOutletContext() || {}
+  const canAccess = access?.isActive
+
+  useEffect(() => {
+    if (canAccess === false && requireAccess) {
+      requireAccess()
+    }
+  }, [canAccess, requireAccess])
+
+  const { data, loading, error } = useSWRLite(`menu-${slug}`, () => api.menu(slug), { enabled: Boolean(canAccess) })
+
+  if (canAccess === false) {
+    return <p>Оформите подписку, чтобы просматривать меню.</p>
+  }
 
   if (loading) return <p>Загрузка…</p>
   if (error) return <p className="err">Ошибка: {String(error.message || error)}</p>
