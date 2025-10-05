@@ -141,7 +141,7 @@ function RestaurantCard({ item }) {
   const cuisine = item?.cuisine || item?.cuisine_name || ''
   const slug = item?.slug || ''
   const initials = useMemo(() => getInitials(title), [title])
-  const href = slug ? `/restaurant/${slug}` : '#'
+  const href = slug ? `/r/${slug}/menu` : '#'
 
   return (
     <Link className="card restaurant-card" to={href} title={`Меню ${title} с КБЖУ и составом блюд`}>

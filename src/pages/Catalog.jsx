@@ -23,14 +23,14 @@ export default function Catalog() {
   const openProfile = useCallback((slug) => {
     if (!slug) return
     if (ensureAccess()) {
-      navigate(`/restaurant/${slug}`)
+      navigate(`/r/${slug}`)
     }
   }, [ensureAccess, navigate])
 
   const openMenu = useCallback((slug) => {
     if (!slug) return
     if (ensureAccess()) {
-      navigate(`/restaurant/${slug}/menu`)
+      navigate(`/r/${slug}/menu`)
     }
   }, [ensureAccess, navigate])
 

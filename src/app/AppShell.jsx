@@ -171,7 +171,7 @@ export default function AppShell() {
       {showPaywall && (
         <PaywallPortal>
           <div className="rs-paywall-overlay">
-            <Paywall onRefresh={refreshAccess} onClose={closePaywall} />
+            <Paywall onRefresh={refreshAccess} returnTo={location.pathname} />
           </div>
         </PaywallPortal>
       )}

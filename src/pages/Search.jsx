@@ -38,7 +38,7 @@ export default function Search() {
   const openMenu = useCallback((slug) => {
     if (!slug) return
     if (ensureAccess()) {
-      navigate(`/restaurant/${slug}/menu`)
+      navigate(`/r/${slug}/menu`)
     }
   }, [ensureAccess, navigate])
 
