@@ -10,7 +10,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-const API_BASE = 'https://api.restaurantsecret.ru'
+import { API_BASE } from '@/config/api'
 
 export default function Landing() {
   const catalogRef = useRef(null)
@@ -82,12 +82,17 @@ function RestaurantsSection({ refEl }) {
         setLoading(true)
         setError(null)
         const res = await fetch(`${API_BASE}/restaurants?limit=24`)
-        if (!res.ok) throw new Error('NETWORK')
+        if (!res.ok) {
+          const t = await res.text().catch(() => '')
+          throw new Error(`HTTP ${res.status} ${res.statusText} — ${t}`)
+        }
         const data = await res.json()
         if (!aborted) {
-          setItems(Array.isArray(data?.items) ? data.items : (Array.isArray(data) ? data : []))
+          const list = Array.isArray(data?.items) ? data.items : (Array.isArray(data) ? data : [])
+          setItems(list)
         }
       } catch (e) {
+        console.error('Restaurants load failed:', e)
         if (!aborted) setError('Не удалось загрузить рестораны')
       } finally {
         if (!aborted) setLoading(false)
