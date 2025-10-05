@@ -8,6 +8,7 @@
 // - SEO meta tags to be placed in index.html (not here)
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 const API_BASE = 'https://api.restaurantsecret.ru'
 
@@ -123,7 +124,7 @@ function RestaurantsSection({ refEl }) {
         )}
 
         <div className="center">
-          <a className="btn btn--outline" href="/restaurants">Показать все рестораны</a>
+          <Link className="btn btn--outline" to="/restaurants">Показать все рестораны</Link>
         </div>
       </div>
     </section>
@@ -138,13 +139,13 @@ function RestaurantCard({ item }) {
   const href = slug ? `/restaurant/${slug}` : '#'
 
   return (
-    <a className="card restaurant-card" href={href} title={`Меню ${title} с КБЖУ и составом блюд`}>
+    <Link className="card restaurant-card" to={href} title={`Меню ${title} с КБЖУ и составом блюд`}>
       <div className="avatar" aria-hidden="true">{initials}</div>
       <div className="card__content">
         <div className="restaurant__name">{title}</div>
         {cuisine && <div className="restaurant__cuisine">{cuisine}</div>}
       </div>
-    </a>
+    </Link>
   )
 }
 
@@ -204,11 +205,11 @@ function Footer() {
   return (
     <footer className="footer" role="contentinfo">
       <div className="container footer__inner">
-        <nav className="footer__nav" aria-label="Нижняя навигация">
-          <a href="/legal" className="footer__link">Политика</a>
-          <a href="/contact" className="footer__link">Контакты</a>
-          <a href="https://t.me/restaurantsecret" className="footer__link" target="_blank" rel="noreferrer">Telegram-бот</a>
-        </nav>
+          <nav className="footer__nav" aria-label="Нижняя навигация">
+            <Link to="/legal" className="footer__link">Политика</Link>
+            <Link to="/contact" className="footer__link">Контакты</Link>
+            <a href="https://t.me/restaurantsecret" className="footer__link" target="_blank" rel="noreferrer">Telegram-бот</a>
+          </nav>
         <div className="footer__copy">RestaurantSecret © 2025. Все меню ресторанов Москвы — с КБЖУ.</div>
       </div>
     </footer>
