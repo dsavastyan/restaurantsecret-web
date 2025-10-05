@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter, HashRouter, Navigate, Route, Routes, useParams } from 'react-router-dom'
+import { BrowserRouter, HashRouter, Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom'
 import AppShell from '../app/AppShell.jsx'
 import Landing from '../pages/Landing.jsx'
 import Catalog from '../pages/Catalog.jsx'
@@ -14,21 +14,25 @@ function AppRoutes() {
     <Routes>
       {/* Публичные маршруты */}
       <Route path="/" element={<Landing />} />
-      <Route path="/restaurants" element={<Catalog />} />
-      <Route path="/r/:slug" element={<RestaurantPage />} />
-      <Route path="/r/:slug/menu" element={<Menu />} />
-      <Route path="/search" element={<Search />} />
-      <Route path="/pay/success" element={<PaySuccess />} />
-      <Route path="/pay/mock-success" element={<PayMockSuccess />} />
 
-      {/* AppShell зона с табами */}
-      <Route path="/app" element={<AppShell />}>
-        <Route index element={<Catalog />} />
-        <Route path="catalog" element={<Catalog />} />
+      {/* Основной layout с Paywall и шапкой */}
+      <Route element={<AppShell />}>
+        <Route path="restaurants" element={<Catalog />} />
+        <Route path="r/:slug" element={<RestaurantPage />} />
+        <Route path="r/:slug/menu" element={<Menu />} />
         <Route path="search" element={<Search />} />
-        <Route path="favorites" element={<div>TODO: Favorites</div>} />
-        <Route path="profile" element={<div>TODO: Profile</div>} />
-        <Route path="*" element={<Navigate to="catalog" replace />} />
+        <Route path="pay/success" element={<PaySuccess />} />
+        <Route path="pay/mock-success" element={<PayMockSuccess />} />
+
+        {/* AppShell зона с табами */}
+        <Route path="app" element={<Outlet />}>
+          <Route index element={<Catalog />} />
+          <Route path="catalog" element={<Catalog />} />
+          <Route path="search" element={<Search />} />
+          <Route path="favorites" element={<div>TODO: Favorites</div>} />
+          <Route path="profile" element={<div>TODO: Profile</div>} />
+          <Route path="*" element={<Navigate to="catalog" replace />} />
+        </Route>
       </Route>
 
       {/* Легаси-ссылки */}
