@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useOutletContext, useSearchParams } from 'react-router-dom'
 
 const queryErrors = {
   no_id: 'Платёж не найден. Попробуйте оформить подписку ещё раз.',
@@ -19,7 +19,10 @@ function formatDate(value) {
   }
 }
 
-export default function PaySuccess({ onAccessUpdate, access = {} }) {
+export default function PaySuccess() {
+  const outlet = useOutletContext() ?? {}
+  const access = outlet.access ?? {}
+  const onAccessUpdate = outlet.handleAccessUpdate
   const [searchParams] = useSearchParams()
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState('idle')

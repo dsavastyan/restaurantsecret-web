@@ -1,0 +1,332 @@
+// Landing.jsx — MVP landing page for RestaurantSecret
+// Assumptions:
+// - React + Vite SPA already set up
+// - Global stylesheet (styles.css) exists; this file adds semantic classNames
+// - API base: https://api.restaurantsecret.ru
+// - No payment/subscription flows here (frozen by product decision)
+// - Chips under "Почему это важно" are examples only (non-clickable)
+// - SEO meta tags to be placed in index.html (not here)
+
+import { useEffect, useMemo, useRef, useState } from 'react'
+
+const API_BASE = 'https://api.restaurantsecret.ru'
+
+export default function Landing() {
+  const catalogRef = useRef(null)
+
+  const scrollToCatalog = () => {
+    catalogRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  return (
+    <main className="landing">
+      <Hero onPrimaryCta={scrollToCatalog} />
+      <WhyImportant />
+      <RestaurantsSection refEl={catalogRef} />
+      <SuggestRestaurant />
+      <Footer />
+    </main>
+  )
+}
+
+function Hero({ onPrimaryCta }) {
+  return (
+    <section className="hero" aria-labelledby="hero-title">
+      <div className="hero__inner">
+        <Logo />
+        <h1 id="hero-title" className="hero__title">
+          Все меню ресторанов с КБЖУ и составом блюд
+        </h1>
+        <p className="hero__subtitle">Ешь вкусно, выбирай осознанно.</p>
+        <button className="btn btn--primary hero__cta" onClick={onPrimaryCta}>
+          Посмотреть рестораны
+        </button>
+      </div>
+      <div className="hero__bg" aria-hidden="true" />
+    </section>
+  )
+}
+
+function WhyImportant() {
+  return (
+    <section className="why" aria-labelledby="why-title">
+      <div className="container">
+        <h2 id="why-title" className="section-title">Почему это важно</h2>
+        <div className="why__cards">
+          <Card icon="🕒" title="Экономь время" text="Больше не ищи меню по сайтам." />
+          <Card icon="🍽️" title="Планируй питание" text="Заранее подбирай блюда по КБЖУ." />
+          <Card icon="💪" title="Контролируй рацион" text="Выбирай, не выходя за цели." />
+        </div>
+        <p className="why__example" aria-label="Примеры фильтров">
+          Выбирай по параметрам: <span className="chip">💪 Много белка</span>
+          <span className="dot" />
+          <span className="chip">🥗 Мало жиров</span>
+          <span className="dot" />
+          <span className="chip">🔥 Мало калорий</span>
+        </p>
+      </div>
+    </section>
+  )
+}
+
+function RestaurantsSection({ refEl }) {
+  const [items, setItems] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    let aborted = false
+    async function load() {
+      try {
+        setLoading(true)
+        setError(null)
+        const res = await fetch(`${API_BASE}/restaurants?limit=24`)
+        if (!res.ok) throw new Error('NETWORK')
+        const data = await res.json()
+        if (!aborted) {
+          setItems(Array.isArray(data?.items) ? data.items : (Array.isArray(data) ? data : []))
+        }
+      } catch (e) {
+        if (!aborted) setError('Не удалось загрузить рестораны')
+      } finally {
+        if (!aborted) setLoading(false)
+      }
+    }
+    load()
+    return () => { aborted = true }
+  }, [])
+
+  return (
+    <section ref={refEl} className="restaurants" aria-labelledby="restaurants-title">
+      <div className="container">
+        <h2 id="restaurants-title" className="section-title">Мы уже собрали меню этих ресторанов Москвы</h2>
+        <p className="section-subtitle">Мы постепенно добавляем новые рестораны — напишите нам, если вашего пока нет.</p>
+
+        {loading && (
+          <div className="grid grid--skeleton">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="card card--skeleton" />
+            ))}
+          </div>
+        )}
+
+        {!loading && error && (
+          <div className="error">{error}</div>
+        )}
+
+        {!loading && !error && (
+          <div className="grid">
+            {items.map((r) => (
+              <RestaurantCard key={r.id || r.slug || r.name} item={r} />
+            ))}
+          </div>
+        )}
+
+        <div className="center">
+          <a className="btn btn--outline" href="/restaurants">Показать все рестораны</a>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function RestaurantCard({ item }) {
+  const title = item?.name || 'Ресторан'
+  const cuisine = item?.cuisine || item?.cuisine_name || ''
+  const slug = item?.slug || ''
+  const initials = useMemo(() => getInitials(title), [title])
+  const href = slug ? `/restaurant/${slug}` : '#'
+
+  return (
+    <a className="card restaurant-card" href={href} title={`Меню ${title} с КБЖУ и составом блюд`}>
+      <div className="avatar" aria-hidden="true">{initials}</div>
+      <div className="card__content">
+        <div className="restaurant__name">{title}</div>
+        {cuisine && <div className="restaurant__cuisine">{cuisine}</div>}
+      </div>
+    </a>
+  )
+}
+
+function SuggestRestaurant() {
+  const [name, setName] = useState('')
+  const [state, setState] = useState('idle') // idle | sending | done | error
+
+  async function submit(e) {
+    e.preventDefault()
+    if (!name.trim()) return
+    try {
+      setState('sending')
+      const res = await fetch('/suggest-restaurant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ restaurant_name: name.trim(), city: 'Москва', source: 'landing' })
+      })
+      if (!res.ok) throw new Error('NETWORK')
+      setName('')
+      setState('done')
+      // Optional toast can be triggered by parent app
+      // Here we keep it quiet to avoid intrusive alerts
+    } catch (e) {
+      setState('error')
+    }
+  }
+
+  return (
+    <section className="suggest" aria-labelledby="suggest-title">
+      <div className="container">
+        <h3 id="suggest-title" className="section-title section-title--small">Не нашли нужный ресторан?</h3>
+        <p className="section-subtitle">Сообщите нам, и мы добавим его в базу.</p>
+        <form onSubmit={submit} className="suggest__form" noValidate>
+          <input
+            className="input"
+            type="text"
+            name="restaurant_name"
+            placeholder="Введите название ресторана"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            aria-label="Название ресторана"
+            required
+            minLength={2}
+          />
+          <button className="btn btn--primary" type="submit" disabled={state==='sending'}>
+            {state === 'sending' ? 'Отправляем…' : 'Отправить'}
+          </button>
+        </form>
+        {state === 'done' && <p className="hint" role="status">Спасибо! Мы учтём ваш запрос 🙌</p>}
+        {state === 'error' && <p className="hint hint--error" role="status">Не удалось отправить. Попробуйте ещё раз позже.</p>}
+      </div>
+    </section>
+  )
+}
+
+function Footer() {
+  return (
+    <footer className="footer" role="contentinfo">
+      <div className="container footer__inner">
+        <nav className="footer__nav" aria-label="Нижняя навигация">
+          <a href="/legal" className="footer__link">Политика</a>
+          <a href="/contact" className="footer__link">Контакты</a>
+          <a href="https://t.me/restaurantsecret" className="footer__link" target="_blank" rel="noreferrer">Telegram-бот</a>
+        </nav>
+        <div className="footer__copy">RestaurantSecret © 2025. Все меню ресторанов Москвы — с КБЖУ.</div>
+      </div>
+    </footer>
+  )
+}
+
+function Card({ icon, title, text }) {
+  return (
+    <div className="card why__card">
+      <div className="card__icon" aria-hidden="true">{icon}</div>
+      <div className="card__title">{title}</div>
+      <div className="card__text">{text}</div>
+    </div>
+  )
+}
+
+function Logo() {
+  return (
+    <div className="logo" aria-label="RestaurantSecret">
+      {/* Use your actual SVG/IMG here */}
+      <span className="logo__mark" aria-hidden="true">🥗</span>
+      <span className="logo__text">RestaurantSecret</span>
+    </div>
+  )
+}
+
+function getInitials(name) {
+  const parts = String(name).split(/\s+/).filter(Boolean)
+  const first = parts[0]?.[0] || ''
+  const last = parts[1]?.[0] || ''
+  return (first + last).toUpperCase()
+}
+
+/* ---------------------------------------------------------
+  Minimal styles to complement existing styles.css.
+  If you prefer a separate CSS file, move these rules there.
+--------------------------------------------------------- */
+
+const styles = `
+:root {
+  --bg: #f7faf7;
+  --fg: #0f172a;
+  --muted: #64748b;
+  --card: #ffffff;
+  --line: #e5e7eb;
+  --brand: #0ea5e9;
+  --brand-2: #22c55e;
+}
+
+.landing { color: var(--fg); }
+.container { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+.section-title { font-size: 28px; line-height: 1.25; margin: 0 0 8px; }
+.section-title--small { font-size: 22px; }
+.section-subtitle { color: var(--muted); margin: 0 0 16px; }
+.center { display: flex; justify-content: center; margin-top: 16px; }
+.hint { color: var(--muted); font-size: 13px; margin-top: 8px; }
+.hint--error { color: #b91c1c; }
+
+/* Hero */
+.hero { position: relative; overflow: clip; padding: 72px 0 56px; }
+.hero__inner { position: relative; z-index: 1; text-align: center; }
+.hero__title { font-size: clamp(26px, 4vw, 40px); line-height: 1.15; margin: 12px 0 8px; }
+.hero__subtitle { font-size: 18px; color: var(--muted); margin: 0 0 16px; }
+.hero__cta { margin-top: 8px; }
+.hero__bg { position: absolute; inset: -10% -10% 0 -10%; background: radial-gradient(1200px 400px at 50% 0, #e7f9ed 0%, #f7faf7 45%, transparent 75%); pointer-events: none; }
+
+/* Why */
+.why { padding: 40px 0; }
+.why__cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; }
+.why__example { margin-top: 12px; color: var(--muted); text-align: center; }
+.chip { display: inline-block; padding: 6px 10px; border-radius: 999px; background: #f1f5f9; border: 1px solid var(--line); margin: 0 4px; font-size: 14px; }
+.dot { display: inline-block; width: 4px; height: 4px; background: var(--line); border-radius: 50%; margin: 0 6px; vertical-align: middle; }
+
+/* Restaurants grid */
+.restaurants { padding: 40px 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.grid--skeleton { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; box-shadow: 0 1px 1px rgba(0,0,0,0.02); }
+.card--skeleton { height: 84px; background: linear-gradient(90deg, #f6f7f8 0%, #eef1f4 50%, #f6f7f8 100%); background-size: 200% 100%; animation: shimmer 1.1s infinite linear; border-radius: 14px; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.restaurant-card { display: flex; gap: 12px; align-items: center; text-decoration: none; color: inherit; }
+.avatar { width: 44px; height: 44px; border-radius: 12px; background: #f0f9ff; display: grid; place-items: center; font-weight: 700; }
+.card__content { min-width: 0; }
+.restaurant__name { font-weight: 600; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+.restaurant__cuisine { color: var(--muted); font-size: 14px; margin-top: 2px; }
+
+/* Suggest */
+.suggest { padding: 40px 0; }
+.suggest__form { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.input { padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; }
+
+/* Footer */
+.footer { padding: 28px 0 36px; border-top: 1px solid var(--line); background: #fcfdfc; margin-top: 20px; }
+.footer__inner { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.footer__nav { display: flex; gap: 12px; }
+.footer__link { color: #0f172a; opacity: .8; text-decoration: none; }
+.footer__link:hover { opacity: 1; text-decoration: underline; }
+.footer__copy { color: var(--muted); font-size: 13px; }
+
+/* Buttons */
+.btn { --btn-bg: var(--brand); --btn-fg: #fff; appearance: none; border: none; border-radius: 12px; padding: 12px 16px; cursor: pointer; font-weight: 600; }
+.btn--primary { background: var(--btn-bg); color: var(--btn-fg); }
+.btn--primary:hover { filter: brightness(0.98); }
+.btn--outline { background: #fff; border: 1px solid var(--line); color: var(--fg); }
+
+/* Logo */
+.logo { display: inline-flex; align-items: center; gap: 8px; }
+.logo__mark { font-size: 22px; }
+.logo__text { font-weight: 800; letter-spacing: 0.2px; }
+`
+
+if (typeof document !== 'undefined') {
+  // Inject component-scoped styles at runtime (keeps single-file delivery)
+  const id = 'landing-inline-styles'
+  if (!document.getElementById(id)) {
+    const el = document.createElement('style')
+    el.id = id
+    el.appendChild(document.createTextNode(styles))
+    document.head.appendChild(el)
+  }
+}

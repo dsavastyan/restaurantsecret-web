@@ -1,17 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Routes, Route, Link, useLocation } from 'react-router-dom'
-import Home from './pages/Home.jsx'
-import Restaurant from './pages/Restaurant.jsx'
-import Menu from './pages/Menu.jsx'
-import Search from './pages/Search.jsx'
-import PaySuccess from './pages/PaySuccess.jsx'
-import PayMockSuccess from './pages/PayMockSuccess.jsx'
-import Paywall from './components/Paywall.jsx'
+import { Link, Outlet, useLocation } from 'react-router-dom'
+import Paywall from '../components/Paywall.jsx'
 
 const defaultAccess = { ok: false, isActive: false, expiresAt: null }
 
-export default function App() {
+export default function AppShell() {
   const location = useLocation()
   const [access, setAccess] = useState(() => {
     if (typeof window === 'undefined') return defaultAccess
@@ -132,6 +126,8 @@ export default function App() {
     }
   }, [handleAccessUpdate])
 
+  const outletContext = useMemo(() => ({ access, handleAccessUpdate, refreshAccess }), [access, handleAccessUpdate, refreshAccess])
+
   return (
     <div className={showPaywall ? 'container locked' : 'container'}>
       <header className="topbar">
@@ -141,14 +137,7 @@ export default function App() {
         </form>
       </header>
       <main>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/r/:slug" element={<Restaurant />} />
-          <Route path="/r/:slug/menu" element={<Menu />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/pay/success" element={<PaySuccess onAccessUpdate={handleAccessUpdate} access={access} />} />
-          <Route path="/pay/mock-success" element={<PayMockSuccess />} />
-        </Routes>
+        <Outlet context={outletContext} />
       </main>
       {showPaywall && (
         <PaywallPortal>

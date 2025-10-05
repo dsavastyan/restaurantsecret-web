@@ -35,7 +35,7 @@ export default function Search() {
               <div className="muted">{it.kcal ?? '—'} ккал · {it.proteins_g ?? '—'}/{it.fats_g ?? '—'}/{it.carbs_g ?? '—'}</div>
             </div>
             <div className="card-actions">
-              <Link to={`/r/${it.restaurant_slug}/menu`}>К меню</Link>
+              <Link to={`/restaurant/${it.restaurant_slug}/menu`}>К меню</Link>
             </div>
           </li>
         ))}
