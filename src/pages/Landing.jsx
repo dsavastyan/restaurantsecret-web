@@ -258,7 +258,7 @@ const styles = `
   --brand-2: #22c55e;
 }
 
-.landing { color: var(--fg); }
+.landing { color: var(--fg); min-height: 100dvh; }
 .container { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
 .section-title { font-size: 28px; line-height: 1.25; margin: 0 0 8px; }
 .section-title--small { font-size: 22px; }
