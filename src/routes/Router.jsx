@@ -15,8 +15,8 @@ function AppRoutes() {
       {/* Публичные маршруты */}
       <Route path="/" element={<Landing />} />
       <Route path="/restaurants" element={<Catalog />} />
-      <Route path="/restaurant/:slug" element={<RestaurantPage />} />
-      <Route path="/restaurant/:slug/menu" element={<Menu />} />
+      <Route path="/r/:slug" element={<RestaurantPage />} />
+      <Route path="/r/:slug/menu" element={<Menu />} />
       <Route path="/search" element={<Search />} />
       <Route path="/pay/success" element={<PaySuccess />} />
       <Route path="/pay/mock-success" element={<PayMockSuccess />} />
@@ -32,8 +32,8 @@ function AppRoutes() {
       </Route>
 
       {/* Легаси-ссылки */}
-      <Route path="/r/:slug" element={<LegacyRestaurantRedirect />} />
-      <Route path="/r/:slug/menu" element={<LegacyMenuRedirect />} />
+      <Route path="/restaurant/:slug" element={<LegacyRestaurantRedirect />} />
+      <Route path="/restaurant/:slug/menu" element={<LegacyMenuRedirect />} />
 
       {/* 404 */}
       <Route path="*" element={<Navigate to="/" replace />} />
@@ -54,10 +54,10 @@ export default function Router() {
 
 function LegacyRestaurantRedirect() {
   const { slug = '' } = useParams()
-  return <Navigate to={`/restaurant/${slug}`} replace />
+  return <Navigate to={`/r/${slug}`} replace />
 }
 
 function LegacyMenuRedirect() {
   const { slug = '' } = useParams()
-  return <Navigate to={`/restaurant/${slug}/menu`} replace />
+  return <Navigate to={`/r/${slug}/menu`} replace />
 }

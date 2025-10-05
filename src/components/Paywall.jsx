@@ -1,13 +1,31 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
-export default function Paywall({ onRefresh, onClose }) {
+export default function Paywall({ onRefresh, returnTo = '/' }) {
+  const nav = useNavigate()
+
+  async function grantAccess(months = 1) {
+    const expires = new Date()
+    expires.setMonth(expires.getMonth() + months)
+    const detail = {
+      ok: true,
+      isActive: true,
+      expiresAt: expires.toISOString(),
+    }
+
+    try {
+      window.localStorage.setItem('rs_access_state', JSON.stringify(detail))
+    } catch {}
+
+    window.dispatchEvent(new CustomEvent('rs-access-update', { detail }))
+
+    if (returnTo && window.location.pathname !== returnTo) {
+      nav(returnTo, { replace: true })
+    }
+  }
+
   return (
     <section className="rs-paywall" role="dialog" aria-modal="true" aria-labelledby="rs-paywall-title">
-      {onClose && (
-        <button type="button" className="rs-paywall-close" aria-label="Закрыть" onClick={onClose}>
-          ×
-        </button>
-      )}
       <h1 id="rs-paywall-title">Оформите подписку</h1>
       <p className="rs-lead">
         Подписка открывает доступ ко всему каталогу RestaurantSecret и регулярным обновлениям.
@@ -22,7 +40,7 @@ export default function Paywall({ onRefresh, onClose }) {
               <span className="rs-price-value">99</span>
               <span className="rs-price-rub">руб.</span>
             </div>
-            <button className="rs-btn" onClick={() => startCheckout('monthly')}>
+            <button className="rs-btn" onClick={() => grantAccess(1)}>
               Оформить подписку
             </button>
           </div>
@@ -38,7 +56,7 @@ export default function Paywall({ onRefresh, onClose }) {
               <span className="rs-price-rub">руб.</span>
             </div>
             <div className="rs-save">Выгоднее на 16&nbsp;%</div>
-            <button className="rs-btn" onClick={() => startCheckout('annual')}>
+            <button className="rs-btn" onClick={() => grantAccess(12)}>
               Оформить подписку
             </button>
           </div>
@@ -56,7 +74,7 @@ export default function Paywall({ onRefresh, onClose }) {
   )
 }
 
-/* Если у тебя нет функции — оставь этот helper тут или вынеси в utils */
+/* Оставляем старый helper закомментированным — пригодится, когда включишь YooKassa
 async function startCheckout(plan) {
   const uid = localStorage.getItem('rs_tg_user_id') || '176483490'
   const r = await fetch('https://api.restaurantsecret.ru/subscribe/session', {
@@ -66,8 +84,9 @@ async function startCheckout(plan) {
   })
   const { ok, redirect_url: redirectUrl } = await r.json()
   if (ok && redirectUrl) {
-    window.Telegram?.WebApp?.openLink(redirectUrl) // открывает внешний браузер
+    window.Telegram?.WebApp?.openLink(redirectUrl)
   } else {
     alert('Не удалось создать платеж. Попробуйте позже.')
   }
 }
+*/
