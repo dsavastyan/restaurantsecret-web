@@ -16,6 +16,7 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
 .card-actions { display:flex; gap:8px; align-items:center; }
 .link { background:none; border:none; color:#555; text-decoration:underline; cursor:pointer; }
 .primary { padding:10px 12px; border-radius:10px; background:#111; color:#fff; border:none; }
+.primary:disabled { opacity:0.6; cursor:not-allowed; }
 .list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
 .row { display:flex; justify-content:space-between; gap:12px; border-bottom:1px solid #f0f0f0; padding:10px 0; }
 .row-main { max-width: 70%; }
@@ -28,3 +29,26 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
 @media (min-width:700px) {
   .cards { grid-template-columns: 1fr 1fr; }
 }
+
+.container.locked main { filter: blur(2px); pointer-events:none; user-select:none; }
+.paywall-overlay { position:fixed; inset:0; background:rgba(17,17,17,0.55); display:flex; align-items:center; justify-content:center; padding:24px; z-index:50; }
+.paywall-dialog { width:min(480px, 100%); background:#fff; color:#111; border-radius:20px; padding:24px; box-shadow:0 20px 48px rgba(0,0,0,0.25); display:flex; flex-direction:column; gap:16px; }
+.paywall-dialog h2 { margin:0; font-size:22px; }
+.paywall-dialog p { margin:0; color:#444; }
+.paywall-plans { display:flex; flex-direction:column; gap:12px; }
+.paywall-plan { border:1px solid #e5e5e5; border-radius:16px; padding:16px; background:#fafafa; display:flex; flex-direction:column; gap:10px; }
+.paywall-plan-title { margin:0; font-weight:600; font-size:16px; }
+.paywall-plan-desc { margin:0; color:#555; font-size:14px; }
+.paywall-note { margin:0; font-size:13px; color:#666; }
+.page { display:flex; flex-direction:column; gap:12px; padding:16px 0; }
+.page h1 { margin:0; font-size:26px; }
+.page p { margin:0; color:#444; }
+.page .actions { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+.page .actions .link { text-decoration:none; }
+
+body.tg-dark .paywall-dialog { background:#1f1f21; color:#f5f5f5; box-shadow:0 20px 48px rgba(0,0,0,0.45); }
+body.tg-dark .paywall-dialog p { color:#d5d5d5; }
+body.tg-dark .paywall-plan { border-color:#2a2a2a; background:#262628; }
+body.tg-dark .paywall-plan-desc { color:#c8c8c8; }
+body.tg-dark .paywall-note { color:#bcbcbc; }
+body.tg-dark .page p { color:#d5d5d5; }
