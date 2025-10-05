@@ -51,11 +51,12 @@ export default function Menu() {
       try {
         setLoading(true)
         setError('')
-        const res = await fetch(`${API_BASE}/restaurant/${slug}/menu`)
+        const res = await fetch(`${API_BASE}/restaurants/${slug}/menu`)
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`)
         }
-        const data = await res.json()
+        const raw = await res.json()
+        const data = raw?.categories ? raw : { name: raw?.name || slug, categories: [] }
         if (!aborted) {
           setMenu(normalizeMenu(data))
         }
@@ -201,7 +202,11 @@ export default function Menu() {
               ))}
             </ul>
           ) : (
-            <p className="muted">Под эти параметры сейчас ничего нет. Измени фильтры.</p>
+            menu?.categories?.length ? (
+              <p className="muted">Под эти параметры сейчас ничего нет. Измени фильтры.</p>
+            ) : (
+              <p className="muted">Меню этого ресторана пока не добавлено. Мы работаем над этим.</p>
+            )
           )
         )}
       </section>
