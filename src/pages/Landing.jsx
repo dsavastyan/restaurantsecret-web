@@ -115,31 +115,43 @@ function RestaurantsSection() {
     return () => { aborted = true }
   }, [])
 
+  let content = null
+
+  if (loading) {
+    content = (
+      <ul className="restaurants__grid" aria-hidden="true">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <li key={i} className="restaurant-item">
+            <div className="restaurant-card skeleton" aria-hidden="true">
+              <div className="restaurant-badge" aria-hidden="true">&nbsp;</div>
+              <div className="restaurant-text">
+                <div className="restaurant-name">&nbsp;</div>
+                <div className="restaurant-cuisine">&nbsp;</div>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+    )
+  } else if (error) {
+    content = <div className="error">{error}</div>
+  } else {
+    content = (
+      <ul className="restaurants__grid">
+        {items.map((r) => (
+          <RestaurantCard key={r.id || r.slug || r.name} item={r} />
+        ))}
+      </ul>
+    )
+  }
+
   return (
-    <section className="restaurants" aria-labelledby="restaurants-title">
+    <section className="restaurants" aria-label="Список ресторанов">
       <div className="container">
         <h2 id="restaurants-title" className="section-title">Мы уже собрали меню этих ресторанов Москвы</h2>
         <p className="section-subtitle">Мы постепенно добавляем новые рестораны — напишите нам, если вашего пока нет.</p>
 
-        {loading && (
-          <div className="grid grid--skeleton">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="card card--skeleton" />
-            ))}
-          </div>
-        )}
-
-        {!loading && error && (
-          <div className="error">{error}</div>
-        )}
-
-        {!loading && !error && (
-          <div className="grid">
-            {items.map((r) => (
-              <RestaurantCard key={r.id || r.slug || r.name} item={r} />
-            ))}
-          </div>
-        )}
+        {content}
 
         <div className="center">
           <Link className="btn btn--outline" to="/restaurants">Показать все рестораны</Link>
@@ -157,13 +169,15 @@ function RestaurantCard({ item }) {
   const href = slug ? `/r/${slug}/menu` : '#'
 
   return (
-    <Link className="card restaurant-card" to={href} title={`Меню ${title} с КБЖУ и составом блюд`}>
-      <div className="avatar" aria-hidden="true">{initials}</div>
-      <div className="card__content">
-        <div className="restaurant__name">{title}</div>
-        {cuisine && <div className="restaurant__cuisine">{cuisine}</div>}
-      </div>
-    </Link>
+    <li className="restaurant-item">
+      <Link className="restaurant-card" to={href} title={`Меню ${title} с КБЖУ и составом блюд`}>
+        <div className="restaurant-badge" aria-hidden="true">{initials}</div>
+        <div className="restaurant-text">
+          <div className="restaurant-name">{title}</div>
+          {cuisine && <div className="restaurant-cuisine">{cuisine}</div>}
+        </div>
+      </Link>
+    </li>
   )
 }
 
@@ -283,17 +297,22 @@ const styles = `
 }
 
 /* Restaurants grid */
-.restaurants { padding: 40px 0; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-.grid--skeleton { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; box-shadow: 0 1px 1px rgba(0,0,0,0.02); }
-.card--skeleton { height: 84px; background: linear-gradient(90deg, #f6f7f8 0%, #eef1f4 50%, #f6f7f8 100%); background-size: 200% 100%; animation: shimmer 1.1s infinite linear; border-radius: 14px; }
-@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-.restaurant-card { display: flex; gap: 12px; align-items: center; text-decoration: none; color: inherit; }
-.avatar { width: 44px; height: 44px; border-radius: 12px; background: #f0f9ff; display: grid; place-items: center; font-weight: 700; }
-.card__content { min-width: 0; }
-.restaurant__name { font-weight: 600; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
-.restaurant__cuisine { color: var(--muted); font-size: 14px; margin-top: 2px; }
+.restaurants { padding: clamp(8px, 3vw, 24px); }
+.restaurants__grid { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(8px, 2vw, 16px); grid-template-columns: 1fr; }
+@media (min-width: 768px) { .restaurants__grid { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1140px) { .restaurants__grid { grid-template-columns: 1fr 1fr 1fr; } }
+.restaurant-item { }
+.restaurant-card { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 14px; width: 100%; padding: 14px 16px; text-decoration: none; background: #fff; border-radius: 18px; border: 1px solid #e8edf0; box-shadow: 0 1px 0 #ffffff inset, 0 6px 18px rgba(31, 74, 62, 0.06); transition: transform .12s ease, box-shadow .15s ease, border-color .12s ease; }
+.restaurant-card:hover { transform: translateY(-1px); box-shadow: 0 1px 0 #ffffff inset, 0 12px 28px rgba(31, 74, 62, 0.10); border-color: #dfe8e6; }
+.restaurant-card:focus-visible { outline: 0; box-shadow: 0 0 0 3px #cfe3da, 0 10px 24px rgba(31, 74, 62, 0.10); }
+.restaurant-badge { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; font-weight: 800; font-size: 16px; letter-spacing: 0.3px; color: #1f4a3e; background: radial-gradient(80% 80% at 30% 20%, #e8f2ea 0%, #dfeee5 60%, #d7e8de 100%); box-shadow: 0 1px 0 #ffffff inset, 0 2px 8px rgba(31, 74, 62, 0.08); user-select: none; }
+.restaurant-text { min-width: 0; }
+.restaurant-name { color: #1f4a3e; font-weight: 800; font-size: clamp(15px, 2.6vw, 20px); line-height: 1.18; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.restaurant-cuisine { margin-top: 2px; color: #2c5149cc; font-size: clamp(13px, 2.2vw, 15px); line-height: 1.2; }
+@media (max-width: 400px) { .restaurant-card { padding: 12px 14px; border-radius: 16px; } .restaurant-badge { width: 44px; height: 44px; border-radius: 12px; } }
+.restaurant-card.skeleton { position: relative; overflow: hidden; color: transparent; }
+.restaurant-card.skeleton::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #f4f7f5 0%, #eef3f0 40%, #f4f7f5 80%); animation: shimmer 1.1s linear infinite; border-radius: inherit; }
+@keyframes shimmer { 0% { transform: translateX(-60%); } 100% { transform: translateX(60%); } }
 
 /* Suggest */
 .suggest { padding: 40px 0; }

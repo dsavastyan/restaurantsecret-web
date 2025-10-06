@@ -269,3 +269,124 @@ body.tg-dark .range-dash { color:#6b7280; }
     font-size: 20px;
   }
 }
+
+/* ===== RESTAURANTS GRID ===== */
+.restaurants {
+  padding: clamp(8px, 3vw, 24px);
+}
+
+.restaurants__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: clamp(8px, 2vw, 16px);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .restaurants__grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (min-width: 1140px) {
+  .restaurants__grid { grid-template-columns: 1fr 1fr 1fr; }
+}
+
+.restaurant-item {
+  /* container for each restaurant card */
+}
+
+.restaurant-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 16px;
+  text-decoration: none;
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid #e8edf0;
+  box-shadow: 0 1px 0 #ffffff inset, 0 6px 18px rgba(31, 74, 62, 0.06);
+  transition: transform .12s ease, box-shadow .15s ease, border-color .12s ease;
+}
+
+.restaurant-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 1px 0 #ffffff inset, 0 12px 28px rgba(31, 74, 62, 0.10);
+  border-color: #dfe8e6;
+}
+
+.restaurant-card:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px #cfe3da, 0 10px 24px rgba(31, 74, 62, 0.10);
+}
+
+.restaurant-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.3px;
+  color: #1f4a3e;
+  background: radial-gradient(80% 80% at 30% 20%, #e8f2ea 0%, #dfeee5 60%, #d7e8de 100%);
+  box-shadow: 0 1px 0 #ffffff inset, 0 2px 8px rgba(31, 74, 62, 0.08);
+  user-select: none;
+}
+
+.restaurant-text {
+  min-width: 0;
+}
+
+.restaurant-name {
+  color: #1f4a3e;
+  font-weight: 800;
+  font-size: clamp(15px, 2.6vw, 20px);
+  line-height: 1.18;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.restaurant-cuisine {
+  margin-top: 2px;
+  color: #2c5149cc;
+  font-size: clamp(13px, 2.2vw, 15px);
+  line-height: 1.2;
+}
+
+@media (max-width: 400px) {
+  .restaurant-card {
+    padding: 12px 14px;
+    border-radius: 16px;
+  }
+
+  .restaurant-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+  }
+}
+
+.restaurant-card.skeleton {
+  position: relative;
+  overflow: hidden;
+  color: transparent;
+}
+
+.restaurant-card.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #f4f7f5 0%, #eef3f0 40%, #f4f7f5 80%);
+  animation: shimmer 1.1s linear infinite;
+  border-radius: inherit;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-60%); }
+  100% { transform: translateX(60%); }
+}
