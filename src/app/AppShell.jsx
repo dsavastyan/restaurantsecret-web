@@ -157,13 +157,17 @@ export default function AppShell() {
     requireAccess
   }), [access, handleAccessUpdate, refreshAccess, requestPaywall, closePaywall, requireAccess])
 
+  const hideGlobalSearch = location.pathname.startsWith('/r/')
+
   return (
     <div className={showPaywall ? 'container locked' : 'container'}>
       <header className="topbar">
         <Link to="/" className="brand">RestaurantSecret</Link>
-        <form action="/search" method="get" className="search">
-          <input name="q" placeholder="Найти блюдо..." aria-label="Search" />
-        </form>
+        {!hideGlobalSearch && (
+          <form action="/search" method="get" className="search">
+            <input name="q" placeholder="Найти блюдо..." aria-label="Search" />
+          </form>
+        )}
       </header>
       <main>
         <Outlet context={outletContext} />
