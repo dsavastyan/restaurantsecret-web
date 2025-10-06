@@ -7,44 +7,45 @@
 // - Chips under "Почему это важно" are examples only (non-clickable)
 // - SEO meta tags to be placed in index.html (not here)
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { API_BASE } from '@/config/api'
 
 export default function Landing() {
-  const catalogRef = useRef(null)
-
-  const scrollToCatalog = () => {
-    catalogRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
-
   return (
     <main className="landing">
-      <Hero onPrimaryCta={scrollToCatalog} />
+      <Hero />
       <WhyImportant />
-      <RestaurantsSection refEl={catalogRef} />
+      <RestaurantsSection />
       <SuggestRestaurant />
       <Footer />
     </main>
   )
 }
 
-function Hero({ onPrimaryCta }) {
+function Hero() {
   return (
-    <section className="hero" aria-labelledby="hero-title">
-      <div className="hero__inner">
-        <Logo />
-        <h1 id="hero-title" className="hero__title">
-          Все меню ресторанов с КБЖУ и составом блюд
-        </h1>
-        <p className="hero__subtitle">Ешь вкусно, выбирай осознанно.</p>
-        <button className="btn btn--primary hero__cta" onClick={onPrimaryCta}>
-          Посмотреть рестораны
-        </button>
+    <header className="hero" aria-labelledby="hero-title">
+      <div className="hero__brand">
+        <img src="/assets/logo.png" alt="RestaurantSecret" className="brand__logo" />
+        <span className="brand__name">RestaurantSecret</span>
       </div>
-      <div className="hero__bg" aria-hidden="true" />
-    </section>
+
+      <h1 id="hero-title" className="hero__title">
+        Все меню ресторанов
+        <br />
+        с КБЖУ и составом
+        <br />
+        блюд
+      </h1>
+
+      <p className="hero__subtitle">Ешь вкусно, выбирай осознанно.</p>
+
+      <Link to="/restaurants" className="hero__cta">
+        Посмотреть рестораны
+      </Link>
+    </header>
   )
 }
 
@@ -70,7 +71,7 @@ function WhyImportant() {
   )
 }
 
-function RestaurantsSection({ refEl }) {
+function RestaurantsSection() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -103,7 +104,7 @@ function RestaurantsSection({ refEl }) {
   }, [])
 
   return (
-    <section ref={refEl} className="restaurants" aria-labelledby="restaurants-title">
+    <section className="restaurants" aria-labelledby="restaurants-title">
       <div className="container">
         <h2 id="restaurants-title" className="section-title">Мы уже собрали меню этих ресторанов Москвы</h2>
         <p className="section-subtitle">Мы постепенно добавляем новые рестораны — напишите нам, если вашего пока нет.</p>
@@ -231,16 +232,6 @@ function Card({ icon, title, text }) {
   )
 }
 
-function Logo() {
-  return (
-    <div className="logo" aria-label="RestaurantSecret">
-      {/* Use your actual SVG/IMG here */}
-      <span className="logo__mark" aria-hidden="true">🥗</span>
-      <span className="logo__text">RestaurantSecret</span>
-    </div>
-  )
-}
-
 function getInitials(name) {
   const parts = String(name).split(/\s+/).filter(Boolean)
   const first = parts[0]?.[0] || ''
@@ -272,14 +263,6 @@ const styles = `
 .center { display: flex; justify-content: center; margin-top: 16px; }
 .hint { color: var(--muted); font-size: 13px; margin-top: 8px; }
 .hint--error { color: #b91c1c; }
-
-/* Hero */
-.hero { position: relative; overflow: clip; padding: 72px 0 56px; }
-.hero__inner { position: relative; z-index: 1; text-align: center; }
-.hero__title { font-size: clamp(26px, 4vw, 40px); line-height: 1.15; margin: 12px 0 8px; }
-.hero__subtitle { font-size: 18px; color: var(--muted); margin: 0 0 16px; }
-.hero__cta { margin-top: 8px; }
-.hero__bg { position: absolute; inset: -10% -10% 0 -10%; background: radial-gradient(1200px 400px at 50% 0, #e7f9ed 0%, #f7faf7 45%, transparent 75%); pointer-events: none; }
 
 /* Why */
 .why { padding: 40px 0; }
@@ -320,10 +303,6 @@ const styles = `
 .btn--primary:hover { filter: brightness(0.98); }
 .btn--outline { background: #fff; border: 1px solid var(--line); color: var(--fg); }
 
-/* Logo */
-.logo { display: inline-flex; align-items: center; gap: 8px; }
-.logo__mark { font-size: 22px; }
-.logo__text { font-weight: 800; letter-spacing: 0.2px; }
 `
 
 if (typeof document !== 'undefined') {
