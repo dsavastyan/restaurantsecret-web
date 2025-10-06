@@ -4,7 +4,7 @@
 // - Global stylesheet (styles.css) exists; this file adds semantic classNames
 // - API base: https://api.restaurantsecret.ru
 // - No payment/subscription flows here (frozen by product decision)
-// - Chips under "Почему это важно" are examples only (non-clickable)
+// - Блок преимуществ под hero показывает три ключевые выгоды (без отдельного заголовка)
 // - SEO meta tags to be placed in index.html (not here)
 
 import { useEffect, useMemo, useState } from 'react'
@@ -51,21 +51,33 @@ function Hero() {
 
 function WhyImportant() {
   return (
-    <section className="why" aria-labelledby="why-title">
+    <section className="benefits" aria-label="Преимущества">
       <div className="container">
-        <h2 id="why-title" className="section-title">Почему это важно</h2>
-        <div className="why__cards">
-          <Card icon="🕒" title="Экономь время" text="Больше не ищи меню по сайтам." />
-          <Card icon="🍽️" title="Планируй питание" text="Заранее подбирай блюда по КБЖУ." />
-          <Card icon="💪" title="Контролируй рацион" text="Выбирай, не выходя за цели." />
-        </div>
-        <p className="why__example" aria-label="Примеры фильтров">
-          Выбирай по параметрам: <span className="chip">💪 Много белка</span>
-          <span className="dot" />
-          <span className="chip">🥗 Мало жиров</span>
-          <span className="dot" />
-          <span className="chip">🔥 Мало калорий</span>
-        </p>
+        <ul className="benefits__grid">
+          <li className="benefit-card">
+            <div className="benefit-icon" aria-hidden="true">🕓</div>
+            <div className="benefit-text">
+              <div className="benefit-title">Экономь время</div>
+              <div className="benefit-desc">Больше не ищи меню по сайтам.</div>
+            </div>
+          </li>
+
+          <li className="benefit-card">
+            <div className="benefit-icon" aria-hidden="true">🍽️</div>
+            <div className="benefit-text">
+              <div className="benefit-title">Планируй питание</div>
+              <div className="benefit-desc">Заранее подбирай блюда по КБЖУ.</div>
+            </div>
+          </li>
+
+          <li className="benefit-card">
+            <div className="benefit-icon" aria-hidden="true">💪</div>
+            <div className="benefit-text">
+              <div className="benefit-title">Контролируй рацион</div>
+              <div className="benefit-desc">Выбирай, не выходя за цели.</div>
+            </div>
+          </li>
+        </ul>
       </div>
     </section>
   )
@@ -222,16 +234,6 @@ function Footer() {
   )
 }
 
-function Card({ icon, title, text }) {
-  return (
-    <div className="card why__card">
-      <div className="card__icon" aria-hidden="true">{icon}</div>
-      <div className="card__title">{title}</div>
-      <div className="card__text">{text}</div>
-    </div>
-  )
-}
-
 function getInitials(name) {
   const parts = String(name).split(/\s+/).filter(Boolean)
   const first = parts[0]?.[0] || ''
@@ -264,12 +266,21 @@ const styles = `
 .hint { color: var(--muted); font-size: 13px; margin-top: 8px; }
 .hint--error { color: #b91c1c; }
 
-/* Why */
-.why { padding: 40px 0; }
-.why__cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; }
-.why__example { margin-top: 12px; color: var(--muted); text-align: center; }
-.chip { display: inline-block; padding: 6px 10px; border-radius: 999px; background: #f1f5f9; border: 1px solid var(--line); margin: 0 4px; font-size: 14px; }
-.dot { display: inline-block; width: 4px; height: 4px; background: var(--line); border-radius: 50%; margin: 0 6px; vertical-align: middle; }
+/* Benefits */
+.benefits { padding: clamp(12px, 3vw, 24px); }
+.benefits__grid { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(8px, 2vw, 14px); grid-template-columns: 1fr; }
+@media (min-width: 900px) {
+  .benefits__grid { grid-template-columns: 1fr 1fr; }
+}
+.benefit-card { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 12px; padding: 14px 16px; background: #ffffff; border-radius: 16px; border: 1px solid #e8edf0; box-shadow: 0 1px 0 #ffffff inset, 0 6px 18px rgba(31, 74, 62, 0.06); }
+.benefit-icon { width: 42px; height: 42px; display: grid; place-items: center; font-size: 22px; border-radius: 12px; background: linear-gradient(180deg, #f4f8f5 0%, #eef4f0 100%); box-shadow: 0 1px 0 #ffffff inset, 0 2px 8px rgba(31, 74, 62, 0.08); user-select: none; }
+.benefit-text { min-width: 0; }
+.benefit-title { color: #1f4a3e; font-weight: 700; font-size: clamp(15px, 2.2vw, 18px); line-height: 1.2; }
+.benefit-desc { margin-top: 2px; color: #294b43cc; font-size: clamp(13px, 2vw, 16px); line-height: 1.35; }
+@media (max-width: 420px) {
+  .benefit-card { padding: 12px 14px; border-radius: 14px; }
+  .benefit-icon { width: 38px; height: 38px; font-size: 20px; }
+}
 
 /* Restaurants grid */
 .restaurants { padding: 40px 0; }
