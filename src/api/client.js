@@ -1,3 +1,5 @@
+// Tiny wrapper around fetch for GET requests. Handles query parameters and
+// surfaces JSON parsing errors.
 const BASE = import.meta.env.VITE_API_BASE ?? 'https://api.restaurantsecret.ru';
 
 async function get(path, params = {}) {
@@ -12,6 +14,7 @@ async function get(path, params = {}) {
   return res.json();
 }
 
+// Export a small client surface the rest of the app can use.
 export const api = {
   filters: () => get('/filters'),
   restaurants: (opts) => get('/restaurants', opts),

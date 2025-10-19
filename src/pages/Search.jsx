@@ -1,3 +1,4 @@
+// Dish search view shared between the web app and Telegram mini app.
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useOutletContext, useSearchParams } from 'react-router-dom'
 import { api } from '../api/client.js'
@@ -11,6 +12,7 @@ export default function Search() {
   const { access, requireAccess, requestPaywall } = useOutletContext() || {}
   const canAccess = access?.isActive
 
+  // Prevent non-subscribers from navigating deeper into the app.
   const ensureAccess = useCallback(() => {
     if (requireAccess) {
       return requireAccess()
@@ -29,12 +31,15 @@ export default function Search() {
   useEffect(() => setQuery(q), [q])
 
   const key = useMemo(() => `s-${q}`, [q])
+  // Debounce is handled outside; here we simply fetch when a query exists and
+  // access is allowed.
   const { data, loading, error } = useSWRLite(
     key,
     () => q ? api.search(q, { limit: 50 }) : Promise.resolve({ items: [] }),
     { initialData: { items: [] }, enabled: Boolean(canAccess) }
   )
 
+  // Navigate to a specific restaurant menu from the search results.
   const openMenu = useCallback((slug) => {
     if (!slug) return
     if (ensureAccess()) {
@@ -57,6 +62,8 @@ export default function Search() {
       <input value={query} onChange={(e) => {
         const v = e.target.value
         setQuery(v)
+        // Lightweight debounce implemented with setTimeout; for real-world use
+        // consider a dedicated hook.
         const t = setTimeout(() => {
           setSp(v ? { q: v } : {})
         }, 300)

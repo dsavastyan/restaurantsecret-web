@@ -1,3 +1,5 @@
+// Lightweight modal explaining that menu access requires a subscription. Used
+// in places where we do not show the full paywall.
 export default function SubscriptionModal({ open, onClose }) {
   if (!open) return null
 
@@ -13,6 +15,7 @@ export default function SubscriptionModal({ open, onClose }) {
         </ul>
         <button className="btn" onClick={onClose}>Ок</button>
       </div>
+      {/* Inline styles keep this component fully self-contained for the MVP. */}
       <style>{`
         .sub-modal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:grid;place-items:center;z-index:1000}
         .sub-modal__card{background:#fff;max-width:420px;width:92%;border-radius:16px;padding:20px;border:1px solid #e5e7eb}

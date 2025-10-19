@@ -1,3 +1,6 @@
+// Helpers for normalizing nutritional values that come from heterogeneous API
+// payloads. Many partner APIs use different keys, hence the large lookup lists
+// below.
 const VALUE_KEYS = ['value', 'amount', 'quantity', 'qty', 'number', 'grams', 'grammage', 'val', 'content']
 const LABEL_KEYS = ['key', 'code', 'name', 'title', 'label', 'type', 'slug', 'short', 'abbr']
 
@@ -144,6 +147,7 @@ const NUTRITION_ARRAY_KEYS = [
   'additionalNutrition'
 ]
 
+// Safe getter for nested values using dot-separated paths.
 function getByPath(obj, path) {
   if (!obj) return undefined
   const segments = path.split('.')
@@ -155,6 +159,7 @@ function getByPath(obj, path) {
   return current
 }
 
+// Attempt to coerce any primitive or object-ish value into a finite number.
 export function parseNumber(value, depth = 0) {
   if (value == null) return NaN
   if (typeof value === 'number') return Number.isFinite(value) ? value : NaN
@@ -184,6 +189,7 @@ export function parseNumber(value, depth = 0) {
   return NaN
 }
 
+// Iterate over a list of possible paths and return the first numeric value.
 function readNumber(obj, paths) {
   for (const path of paths) {
     const raw = getByPath(obj, path)
@@ -193,6 +199,9 @@ function readNumber(obj, paths) {
   return NaN
 }
 
+// Some APIs deliver nutrition as arrays (label + value). This helper inspects
+// those structures and returns a parsed number when the label matches one of the
+// provided tokens.
 function readFromNutritionArrays(obj, tokens) {
   const loweredTokens = tokens.map((token) => token.toLowerCase())
   for (const key of NUTRITION_ARRAY_KEYS) {
@@ -221,6 +230,7 @@ function readFromNutritionArrays(obj, tokens) {
   return NaN
 }
 
+// Combine direct lookups and array scanning to extract a specific macro value.
 function readNutritionValue(dish, directPaths, tokens) {
   const direct = readNumber(dish, directPaths)
   if (Number.isFinite(direct)) return direct
@@ -229,6 +239,8 @@ function readNutritionValue(dish, directPaths, tokens) {
   return NaN
 }
 
+// Enrich a dish object with normalized nutrition fields and the category it
+// belongs to.
 function normalizeDish(dish = {}, categoryName) {
   return {
     ...dish,
@@ -242,6 +254,7 @@ function normalizeDish(dish = {}, categoryName) {
   }
 }
 
+// Flatten all menu categories into a single list of normalized dishes.
 export function flattenMenuDishes(menu) {
   if (!menu?.categories) return []
   const result = []
@@ -254,10 +267,12 @@ export function flattenMenuDishes(menu) {
   return result
 }
 
+// Present numbers rounded to the nearest integer or fallback to an em dash.
 export function formatNumeric(value) {
   return Number.isFinite(value) ? Math.round(value) : '—'
 }
 
+// Convenience helper for readability at call sites.
 export function hasFiniteNumber(value) {
   return Number.isFinite(value)
 }

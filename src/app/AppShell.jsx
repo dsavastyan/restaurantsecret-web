@@ -1,8 +1,11 @@
+// Shared layout for authenticated areas. Manages subscription state and toggles
+// the paywall overlay when required.
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import Paywall from '../components/Paywall.jsx'
 
+// Default shape for the subscription/access status persisted in localStorage.
 const defaultAccess = { ok: false, isActive: false, expiresAt: null }
 
 export default function AppShell() {
@@ -21,6 +24,7 @@ export default function AppShell() {
   })
   const [paywallVisible, setPaywallVisible] = useState(false)
 
+  // Merge new access info into state. A falsy value resets to defaults.
   const handleAccessUpdate = useCallback((next) => {
     if (!next) {
       setAccess(defaultAccess)
@@ -29,6 +33,7 @@ export default function AppShell() {
     setAccess(prev => ({ ...prev, ...next }))
   }, [])
 
+  // Persist subscription state so that a refresh keeps the paywall status.
   useEffect(() => {
     if (typeof window === 'undefined') return
     try {
@@ -38,6 +43,7 @@ export default function AppShell() {
     }
   }, [access])
 
+  // Sync access state across tabs/windows via the storage event.
   useEffect(() => {
     if (typeof window === 'undefined') return
     const onStorage = (event) => {
@@ -59,6 +65,8 @@ export default function AppShell() {
     }
   }, [handleAccessUpdate])
 
+  // Listen for custom `rs-access-update` events fired by Paywall and other
+  // components to update access immediately after purchase.
   useEffect(() => {
     if (typeof window === 'undefined') return
     const handler = (event) => {
@@ -71,6 +79,7 @@ export default function AppShell() {
     }
   }, [handleAccessUpdate])
 
+  // Apply Telegram-specific tweaks when running inside the WebApp container.
   useEffect(() => {
     const tg = window.Telegram?.WebApp
     if (!tg) return
@@ -91,12 +100,14 @@ export default function AppShell() {
     }
   }, [])
 
+  // Whenever access becomes active we close the paywall.
   useEffect(() => {
     if (access?.isActive) {
       setPaywallVisible(false)
     }
   }, [access?.isActive])
 
+  // Expose helpers to descendants through React Router outlet context.
   const requestPaywall = useCallback(() => {
     setPaywallVisible(true)
   }, [])
@@ -111,12 +122,15 @@ export default function AppShell() {
     return false
   }, [access?.isActive])
 
+  // Determine when to show the paywall. We hide it on payment routes to avoid
+  // trapping the user in a loop while confirming purchase.
   const showPaywall = useMemo(() => {
     if (access?.isActive) return false
     if (location.pathname.startsWith('/pay')) return false
     return paywallVisible
   }, [access?.isActive, location.pathname, paywallVisible])
 
+  // Manual refresh triggered by the user after completing payment.
   const refreshAccess = useCallback(async () => {
     try {
       const user = (typeof window !== 'undefined' && window.localStorage.getItem('rs_tg_user_id')) || '176483490'
@@ -148,6 +162,7 @@ export default function AppShell() {
     }
   }, [handleAccessUpdate])
 
+  // Values passed to nested routes via useOutletContext.
   const outletContext = useMemo(() => ({
     access,
     handleAccessUpdate,
@@ -186,6 +201,8 @@ export default function AppShell() {
 function PaywallPortal({ children }) {
   const [mounted, setMounted] = useState(false)
 
+  // Delay rendering until after the component has mounted to avoid SSR issues
+  // and toggle a body class while the paywall overlay is visible.
   useEffect(() => {
     if (typeof document === 'undefined') return undefined
 
@@ -199,5 +216,7 @@ function PaywallPortal({ children }) {
 
   if (!mounted || typeof document === 'undefined') return null
 
+  // Render the paywall overlay straight into the body element to bypass any
+  // parent stacking-context limitations.
   return createPortal(children, document.body)
 }
