@@ -41,7 +41,7 @@ function Hero() {
         блюд
       </h1>
 
-      <p className="hero__subtitle">Ешь вкусно, выбирай осознанно.</p>
+      <p className="hero__subtitle">Ешь вкусно, выбирай осознанно</p>
 
       <Link to="/restaurants" className="hero__cta">
         Посмотреть рестораны
@@ -60,7 +60,7 @@ function WhyImportant() {
             <div className="benefit-icon" aria-hidden="true">🕓</div>
             <div className="benefit-text">
               <div className="benefit-title">Экономь время</div>
-              <div className="benefit-desc">Больше не ищи меню по сайтам.</div>
+              <div className="benefit-desc">Больше не ищи меню по сайтам</div>
             </div>
           </li>
 
@@ -68,7 +68,7 @@ function WhyImportant() {
             <div className="benefit-icon" aria-hidden="true">🍽️</div>
             <div className="benefit-text">
               <div className="benefit-title">Планируй питание</div>
-              <div className="benefit-desc">Заранее подбирай блюда по КБЖУ.</div>
+              <div className="benefit-desc">Заранее подбирай блюда по КБЖУ</div>
             </div>
           </li>
 
@@ -76,7 +76,7 @@ function WhyImportant() {
             <div className="benefit-icon" aria-hidden="true">💪</div>
             <div className="benefit-text">
               <div className="benefit-title">Контролируй рацион</div>
-              <div className="benefit-desc">Выбирай, не выходя за цели.</div>
+              <div className="benefit-desc">Выбирай, не выходя за цели</div>
             </div>
           </li>
         </ul>
