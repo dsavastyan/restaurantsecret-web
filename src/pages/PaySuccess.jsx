@@ -1,3 +1,5 @@
+// Confirmation page displayed after a payment is completed. Allows users to
+// re-validate access from the API.
 import React, { useEffect, useMemo, useState } from 'react'
 import { Link, useOutletContext, useSearchParams } from 'react-router-dom'
 
@@ -6,6 +8,7 @@ const queryErrors = {
   mock_error: 'Не удалось подтвердить оплату. Попробуйте проверить доступ немного позже.'
 }
 
+// Format ISO strings in the locale we target (ru-RU).
 function formatDate(value) {
   if (!value) return ''
   try {
@@ -29,16 +32,20 @@ export default function PaySuccess() {
   const [message, setMessage] = useState('')
   const [expiresAt, setExpiresAt] = useState(access?.expiresAt ?? null)
 
+  // Keep the local expiration date in sync with context updates.
   useEffect(() => {
     setExpiresAt(access?.expiresAt ?? null)
   }, [access?.expiresAt])
 
+  // Surface any error codes forwarded from the payment provider redirect.
   const queryMessage = useMemo(() => {
     const code = searchParams.get('e')
     if (!code) return ''
     return queryErrors[code] ?? 'Не удалось обработать параметры платежа. Пожалуйста, проверьте подписку.'
   }, [searchParams])
 
+  // Manual re-check against the backend. This duplicates the logic used in
+  // AppShell but keeps the flow explicit on this screen.
   const refreshAccess = async () => {
     setLoading(true)
     setStatus('loading')

@@ -1,3 +1,4 @@
+// Restaurant menu page with filters for macros and calories.
 import React, { useEffect, useMemo, useState } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 import { apiGet } from '@/lib/requests'
@@ -27,18 +28,21 @@ export default function Menu() {
 
   const hasAccess = access?.isActive
 
+  // Kick users without access back to the paywall.
   useEffect(() => {
     if (hasAccess === false && typeof requireAccess === 'function') {
       requireAccess()
     }
   }, [hasAccess, requireAccess])
 
+  // Reset filters whenever the restaurant slug changes.
   useEffect(() => {
     setQuery('')
     setPresets(createDefaultPresets())
     setRange(createDefaultRange())
   }, [slug])
 
+  // Fetch the menu when access is available.
   useEffect(() => {
     let aborted = false
 
@@ -72,6 +76,7 @@ export default function Menu() {
 
   const dishes = useMemo(() => flattenMenuDishes(menu), [menu])
 
+  // Apply search and macro filters locally to keep the UI responsive.
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     return dishes.filter((dish) => {
@@ -87,6 +92,7 @@ export default function Menu() {
     })
   }, [dishes, query, presets, range])
 
+  // Toggle a preset chip and re-run memoized filtering.
   const togglePreset = (key) => {
     setPresets((prev) => ({ ...prev, [key]: !prev[key] }))
   }
@@ -102,6 +108,7 @@ export default function Menu() {
     }))
   }
 
+  // Reset search, presets and custom ranges in one click.
   const resetFilters = () => {
     setQuery('')
     setPresets(createDefaultPresets())
@@ -205,6 +212,7 @@ export default function Menu() {
   )
 }
 
+// Controlled inputs for selecting min/max bounds of a macro nutrient.
 function MacroRange({ label, value, onChange }) {
   return (
     <div className="range">
@@ -232,10 +240,12 @@ function MacroRange({ label, value, onChange }) {
   )
 }
 
+// Preserve nullish menus but ensure we always return an object.
 function normalizeMenu(raw) {
   return raw || {}
 }
 
+// Inclusive range check that treats empty fields as unbounded.
 function inRange(value, min, max) {
   const numeric = Number(value)
   if (!Number.isFinite(numeric)) {

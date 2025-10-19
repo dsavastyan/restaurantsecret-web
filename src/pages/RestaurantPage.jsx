@@ -1,3 +1,4 @@
+// Detailed restaurant profile view with advanced filtering controls.
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { apiGet } from '@/lib/requests';

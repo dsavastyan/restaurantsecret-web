@@ -1,3 +1,5 @@
+/* Global stylesheet for the RestaurantSecret web app. Most selectors target
+   layout primitives, paywall, and the landing page hero. */
 :root {
   color-scheme: light dark;
   --rs-text: #111827;

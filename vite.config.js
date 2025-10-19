@@ -1,3 +1,5 @@
+// Vite configuration that adds React plugin support and a convenient `@` alias
+// for importing files from the src directory.
 import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'

@@ -2,12 +2,14 @@
 // file: src/lib/requests.js
 import { API_BASE } from '@/config/api';
 
+// Normalize API paths so callers can pass either relative or absolute URLs.
 function buildUrl(path) {
   if (!path) return API_BASE;
   if (path.startsWith('http://') || path.startsWith('https://')) return path;
   return `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
 }
 
+// Basic GET helper that throws rich errors when the response is not OK.
 export async function apiGet(path, opts = {}) {
   const url = buildUrl(path);
   console.log('[apiGet]', url); // оставить на время отладки
@@ -20,6 +22,7 @@ export async function apiGet(path, opts = {}) {
   return res.json();
 }
 
+// Basic POST helper used by internal tools and mock payment confirmations.
 export async function apiPost(path, body, opts = {}) {
   const url = buildUrl(path);
   console.log('[apiPost]', url);

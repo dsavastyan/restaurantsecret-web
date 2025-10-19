@@ -24,6 +24,7 @@ export default function Landing() {
   )
 }
 
+// Hero section with simple CTA guiding users to the catalog.
 function Hero() {
   return (
     <header className="hero" aria-labelledby="hero-title">
@@ -49,6 +50,7 @@ function Hero() {
   )
 }
 
+// Highlights the three main value propositions of RestaurantSecret.
 function WhyImportant() {
   return (
     <section className="benefits" aria-label="Преимущества">
@@ -83,6 +85,8 @@ function WhyImportant() {
   )
 }
 
+// Fetch and display a small preview grid of restaurants directly on the
+// landing page.
 function RestaurantsSection() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -161,6 +165,7 @@ function RestaurantsSection() {
   )
 }
 
+// A single restaurant card used in the preview grid.
 function RestaurantCard({ item }) {
   const title = item?.name || 'Ресторан'
   const cuisine = item?.cuisine || item?.cuisine_name || ''
@@ -181,6 +186,7 @@ function RestaurantCard({ item }) {
   )
 }
 
+// Minimal form for collecting user suggestions when a restaurant is missing.
 function SuggestRestaurant() {
   const [name, setName] = useState('')
   const [state, setState] = useState('idle') // idle | sending | done | error
@@ -233,6 +239,7 @@ function SuggestRestaurant() {
   )
 }
 
+// Simple footer with legal links and contact info.
 function Footer() {
   return (
     <footer className="footer" role="contentinfo">
@@ -248,6 +255,8 @@ function Footer() {
   )
 }
 
+// Create two-character initials from the restaurant name to display in the
+// circular badge.
 function getInitials(name) {
   const parts = String(name).split(/\s+/).filter(Boolean)
   const first = parts[0]?.[0] || ''

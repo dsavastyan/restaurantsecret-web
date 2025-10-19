@@ -1,3 +1,4 @@
+// Catalog page showing the full list of restaurants with lightweight filters.
 import React, { useCallback, useMemo, useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { api } from '../api/client.js'
@@ -11,6 +12,8 @@ export default function Catalog() {
   const navigate = useNavigate()
   const { access, requireAccess, requestPaywall } = useOutletContext() || {}
 
+  // Ask the parent layout for access; show the paywall if the user is not
+  // subscribed yet.
   const ensureAccess = useCallback(() => {
     if (requireAccess) {
       return requireAccess()
@@ -20,6 +23,7 @@ export default function Catalog() {
     return false
   }, [access?.isActive, requireAccess, requestPaywall])
 
+  // Navigate to the restaurant profile only when access is granted.
   const openProfile = useCallback((slug) => {
     if (!slug) return
     if (ensureAccess()) {
@@ -27,6 +31,7 @@ export default function Catalog() {
     }
   }, [ensureAccess, navigate])
 
+  // Same for direct menu navigation.
   const openMenu = useCallback((slug) => {
     if (!slug) return
     if (ensureAccess()) {
@@ -41,6 +46,7 @@ export default function Catalog() {
 
   const items = data?.items ?? []
 
+  // Options are memoized so the filter chips do not re-render unnecessarily.
   const cuisineOptions = useMemo(() => filters?.cuisines ?? [], [filters?.cuisines])
   const calorieOptions = useMemo(() => filters?.calorie_ranges ?? [], [filters?.calorie_ranges])
 

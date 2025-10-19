@@ -1,9 +1,14 @@
+// Paywall overlay that simulates subscription activation in the MVP. Buttons
+// simply grant access locally and notify the rest of the app via an event.
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export default function Paywall({ onRefresh, returnTo = '/' }) {
   const nav = useNavigate()
 
+  // Temporary helper used while the real payment flow is not wired. It grants
+  // access for the requested number of months and redirects back to the page
+  // the user came from.
   async function grantAccess(months = 1) {
     const expires = new Date()
     expires.setMonth(expires.getMonth() + months)
@@ -17,6 +22,8 @@ export default function Paywall({ onRefresh, returnTo = '/' }) {
       window.localStorage.setItem('rs_access_state', JSON.stringify(detail))
     } catch {}
 
+    // Notify the rest of the app that access state changed. AppShell listens to
+    // this event and updates local state immediately.
     window.dispatchEvent(new CustomEvent('rs-access-update', { detail }))
 
     if (returnTo && window.location.pathname !== returnTo) {

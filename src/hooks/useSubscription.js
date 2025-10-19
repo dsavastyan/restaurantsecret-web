@@ -1,3 +1,5 @@
+// Hook for checking if the current user has an active subscription. It performs
+// the fetch on mount and exposes loading + boolean state.
 import { useEffect, useState } from 'react'
 import { API_BASE } from '@/config/api'
 
@@ -8,6 +10,7 @@ export function useSubscription() {
   useEffect(() => {
     let aborted = false
 
+    // Fire once on mount and ignore updates if the component unmounts.
     async function load() {
       try {
         setLoading(true)
@@ -32,5 +35,7 @@ export function useSubscription() {
     }
   }, [])
 
+  // Consumers only need to know if we are still loading and whether access is
+  // active, so keep the API deliberately small.
   return { loading, isActive }
 }
