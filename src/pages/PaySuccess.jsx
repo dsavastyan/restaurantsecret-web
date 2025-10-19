@@ -2,6 +2,7 @@
 // re-validate access from the API.
 import React, { useEffect, useMemo, useState } from 'react'
 import { Link, useOutletContext, useSearchParams } from 'react-router-dom'
+import { API_BASE } from '@/config/api'
 
 const queryErrors = {
   no_id: 'Платёж не найден. Попробуйте оформить подписку ещё раз.',
@@ -52,7 +53,7 @@ export default function PaySuccess() {
     setMessage('')
     try {
       const user = (typeof window !== 'undefined' && window.localStorage.getItem('rs_tg_user_id')) || '176483490'
-      const response = await fetch('https://api.restaurantsecret.ru/me', {
+      const response = await fetch(`${API_BASE}/me`, {
         headers: {
           'Authorization': `Bearer ${user}`
         }

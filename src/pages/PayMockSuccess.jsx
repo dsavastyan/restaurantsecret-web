@@ -1,6 +1,7 @@
 // Helper page that simulates a YooKassa webhook when testing payments locally.
 import React, { useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { API_BASE } from '@/config/api'
 
 export default function PayMockSuccess() {
   const navigate = useNavigate()
@@ -20,7 +21,7 @@ export default function PayMockSuccess() {
     // explanatory error code.
     const confirmMock = async () => {
       try {
-        const res = await fetch('https://api.restaurantsecret.ru/pay/webhook/yookassa', {
+        const res = await fetch(`${API_BASE}/pay/webhook/yookassa`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ event: 'payment.succeeded', object: { id: paymentId } })

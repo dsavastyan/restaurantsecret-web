@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import Paywall from '../components/Paywall.jsx'
+import { API_BASE } from '@/config/api'
 
 // Default shape for the subscription/access status persisted in localStorage.
 const defaultAccess = { ok: false, isActive: false, expiresAt: null }
@@ -134,7 +135,7 @@ export default function AppShell() {
   const refreshAccess = useCallback(async () => {
     try {
       const user = (typeof window !== 'undefined' && window.localStorage.getItem('rs_tg_user_id')) || '176483490'
-      const response = await fetch('https://api.restaurantsecret.ru/me', {
+      const response = await fetch(`${API_BASE}/me`, {
         headers: {
           'Authorization': `Bearer ${user}`
         }

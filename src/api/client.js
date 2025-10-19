@@ -1,6 +1,8 @@
 // Tiny wrapper around fetch for GET requests. Handles query parameters and
 // surfaces JSON parsing errors.
-const BASE = import.meta.env.VITE_API_BASE ?? 'https://api.restaurantsecret.ru';
+import { API_BASE } from '@/config/api';
+
+const BASE = API_BASE.endsWith('/') ? API_BASE : `${API_BASE}/`;
 
 async function get(path, params = {}) {
   const url = new URL(path, BASE);

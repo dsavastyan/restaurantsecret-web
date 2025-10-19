@@ -2,6 +2,7 @@
 // simply grant access locally and notify the rest of the app via an event.
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { API_BASE } from '@/config/api'
 
 export default function Paywall({ onRefresh, returnTo = '/' }) {
   const nav = useNavigate()
@@ -84,7 +85,7 @@ export default function Paywall({ onRefresh, returnTo = '/' }) {
 /* Оставляем старый helper закомментированным — пригодится, когда включишь YooKassa
 async function startCheckout(plan) {
   const uid = localStorage.getItem('rs_tg_user_id') || '176483490'
-  const r = await fetch('https://api.restaurantsecret.ru/subscribe/session', {
+  const r = await fetch(`${API_BASE}/subscribe/session`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${uid}` },
     body: JSON.stringify({ plan })
