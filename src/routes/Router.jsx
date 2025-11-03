@@ -11,6 +11,8 @@ import Menu from '../pages/Menu.jsx'
 import Search from '../pages/Search.jsx'
 import PaySuccess from '../pages/PaySuccess.jsx'
 import PayMockSuccess from '../pages/PayMockSuccess.jsx'
+import Login from '../pages/Login.tsx'
+import Account from '../pages/Account.tsx'
 
 // Defines the route tree shared between BrowserRouter and HashRouter. Keeping
 // this as a separate component makes it easier to unit test in isolation.
@@ -19,6 +21,8 @@ function AppRoutes() {
     <Routes>
       {/* Публичные маршруты */}
       <Route path="/" element={<Landing />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/account" element={<Account />} />
 
       {/* Основной layout с Paywall и шапкой */}
       <Route element={<AppShell />}>
