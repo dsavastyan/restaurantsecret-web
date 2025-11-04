@@ -1,8 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
-import { useAuthStore } from "@/store/auth";
+import { useAuth } from "@/store/auth";
 
 export default function NavBar() {
-  const { token } = useAuthStore();
+  const token = useAuth((state) => state.accessToken);
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
 
