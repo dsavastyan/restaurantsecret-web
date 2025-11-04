@@ -1,10 +1,11 @@
 // src/pages/Login.tsx
 import { useEffect, useState } from "react";
 import { apiPost } from "@/lib/api";
-import useAuthStore from "@/store/auth";
+import { useAuth, selectSetToken } from "@/store/auth"; // <— меняем импорт
 
 export default function LoginPage() {
-  const { setToken } = useAuthStore();
+  const setToken = useAuth(selectSetToken); // <— берём сеттер из стора
+
   const [email, setEmail] = useState("");
   const [step, setStep] = useState<"enter"|"code"|"done">("enter");
   const [code, setCode] = useState("");
@@ -12,7 +13,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [timer, setTimer] = useState(0);
 
-  // простой таймер на повторную отправку
   useEffect(() => {
     if (timer <= 0) return;
     const id = setInterval(() => setTimer((t) => t - 1), 1000);
@@ -27,11 +27,10 @@ export default function LoginPage() {
     }
     setLoading(true);
     try {
-      // не меняем backend, просто пример: подставь твой существующий эндпоинт
       const res = await apiPost("/auth/email/request", { email });
       if (res?.ok) {
         setStep("code");
-        setTimer(60); // 60 сек до повторной отправки
+        setTimer(60);
       } else {
         setErr(res?.message || "Не удалось отправить код");
       }
@@ -50,12 +49,9 @@ export default function LoginPage() {
     }
     setLoading(true);
     try {
-      // подставь твой действующий verify-эндпоинт
       const res = await apiPost("/auth/email/verify", { email, code });
       if (res?.ok && res?.access_token) {
-        setToken(res.access_token);
-        setStep("done");
-        // редирект делаем через location, чтобы точно сбросить состояние страницы
+        setToken(res.access_token);       // <— сохраняем токен в твой стор (rs_access)
         window.location.replace("/account");
       } else {
         setErr(res?.message || "Неверный код");
@@ -77,9 +73,7 @@ export default function LoginPage() {
       <div className="login__wrap">
         <div className="login__card">
           <h1 className="login__title">Вход по e-mail</h1>
-          <p className="login__subtitle">
-            Без пароля. Отправим одноразовый код на вашу почту.
-          </p>
+          <p className="login__subtitle">Без пароля. Отправим одноразовый код на вашу почту.</p>
 
           {err && <div className="login__alert">{err}</div>}
 
@@ -134,13 +128,11 @@ export default function LoginPage() {
                 {timer > 0 ? `Отправить код ещё раз — через ${timer} сек` : "Отправить код ещё раз"}
               </button>
 
-              <p className="login__hint">Код пришёл с адреса <b>no-reply@restaurantsecret.ru</b>. Проверьте «Спам», если письма нет.</p>
+              <p className="login__hint">Код придёт с адреса <b>no-reply@restaurantsecret.ru</b>.</p>
             </div>
           )}
 
-          <p className="login__legal">
-            Продолжая, вы соглашаетесь с обработкой персональных данных.
-          </p>
+          <p className="login__legal">Продолжая, вы соглашаетесь с обработкой персональных данных.</p>
         </div>
       </div>
     </div>
