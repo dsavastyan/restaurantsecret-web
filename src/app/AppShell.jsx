@@ -174,7 +174,8 @@ export default function AppShell() {
     requireAccess
   }), [access, handleAccessUpdate, refreshAccess, requestPaywall, closePaywall, requireAccess])
 
-  const hideGlobalSearch = location.pathname.startsWith('/r/')
+  const isLanding = location.pathname === '/'
+  const hideGlobalSearch = isLanding || location.pathname.startsWith('/r/')
 
   return (
     <div className="min-h-screen flex flex-col">
