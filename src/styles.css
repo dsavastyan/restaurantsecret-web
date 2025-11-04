@@ -55,6 +55,14 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
   color: #fff;
   box-shadow: 0 4px 14px rgba(0, 0, 0, .12);
 }
+.navbar .btn--primary {
+  background: var(--rs-accent);
+  color: #fff;
+}
+.navbar .btn--primary:hover {
+  background: #111;
+  color: #fff;
+}
 .btn--primary:active {
   transform: translateY(1px);
 }
