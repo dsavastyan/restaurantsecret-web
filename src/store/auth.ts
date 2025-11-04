@@ -5,6 +5,9 @@ type AuthState = {
   setToken: (token: string | null) => void;
 };
 
+export const selectAccessToken = (state: AuthState) => state.accessToken;
+export const selectSetToken = (state: AuthState) => state.setToken;
+
 const listeners = new Set<() => void>();
 
 const notify = () => {
