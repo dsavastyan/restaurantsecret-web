@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Navigate, useLocation } from "react-router-dom";
 import { apiGet, apiPost } from "@/lib/api";
 import { useAuth } from "@/store/auth";
 
@@ -7,6 +8,7 @@ type Me = { ok:boolean; user?: { id:string; email:string; created_at:string; sub
 
 export default function Account() {
   const token = useAuth(s=>s.accessToken);
+  const location = useLocation();
   const [me, setMe] = useState<Me|null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -24,7 +26,9 @@ export default function Account() {
     await load();
   }
 
-  if (!token) return <div className="p-6">Вы не авторизованы. <a href="/login" className="underline">Войти</a></div>;
+  if (!token) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
   if (loading) return <div className="p-6">Загрузка…</div>;
 
   const sub = me?.user?.subscription || null;
