@@ -1,49 +1,148 @@
-import { useState } from "react";
+// src/pages/Login.tsx
+import { useEffect, useState } from "react";
 import { apiPost } from "@/lib/api";
-import { useAuth } from "@/store/auth";
+import { useAuthStore } from "@/store/auth";
 
-export default function Login() {
+export default function LoginPage() {
+  const { setToken } = useAuthStore();
   const [email, setEmail] = useState("");
-  const [stage, setStage] = useState<"email"|"code">("email");
+  const [step, setStep] = useState<"enter"|"code"|"done">("enter");
   const [code, setCode] = useState("");
-  const setToken = useAuth((s)=>s.setToken);
+  const [err, setErr] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [timer, setTimer] = useState(0);
 
-  async function requestOtp() {
-    const r = await apiPost("/auth/request-otp", { email });
-    if (r?.ok) setStage("code");
-    else alert(r?.error || "error");
-  }
-  async function verifyOtp() {
-    const r = await apiPost("/auth/verify-otp", { email, code });
-    // наш PD-API сейчас возвращает { ok, access_token, expires_in } (без refresh)
-    if (r?.access_token) {
-      setToken(r.access_token);
-      window.location.href = "/account";
-    } else alert(r?.error || "error");
-  }
+  // простой таймер на повторную отправку
+  useEffect(() => {
+    if (timer <= 0) return;
+    const id = setInterval(() => setTimer((t) => t - 1), 1000);
+    return () => clearInterval(id);
+  }, [timer]);
+
+  const sendCode = async () => {
+    setErr(null);
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+      setErr("Укажите корректный e-mail");
+      return;
+    }
+    setLoading(true);
+    try {
+      // не меняем backend, просто пример: подставь твой существующий эндпоинт
+      const res = await apiPost("/auth/email/request", { email });
+      if (res?.ok) {
+        setStep("code");
+        setTimer(60); // 60 сек до повторной отправки
+      } else {
+        setErr(res?.message || "Не удалось отправить код");
+      }
+    } catch {
+      setErr("Не удалось отправить код");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyCode = async () => {
+    setErr(null);
+    if (!code || code.length < 4) {
+      setErr("Введите код из письма");
+      return;
+    }
+    setLoading(true);
+    try {
+      // подставь твой действующий verify-эндпоинт
+      const res = await apiPost("/auth/email/verify", { email, code });
+      if (res?.ok && res?.access_token) {
+        setToken(res.access_token);
+        setStep("done");
+        // редирект делаем через location, чтобы точно сбросить состояние страницы
+        window.location.replace("/account");
+      } else {
+        setErr(res?.message || "Неверный код");
+      }
+    } catch {
+      setErr("Не удалось подтвердить код");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resend = () => {
+    if (timer > 0) return;
+    sendCode();
+  };
 
   return (
-    <div className="max-w-sm mx-auto p-6">
-      <h1 className="text-xl font-semibold mb-4">Вход по e-mail</h1>
-      {stage==="email" ? (
-        <>
-          <input value={email} onChange={e=>setEmail(e.target.value)}
-            placeholder="you@example.com"
-            className="border rounded w-full p-2 mb-3"/>
-          <button onClick={requestOtp} className="px-4 py-2 rounded bg-black text-white w-full">
-            Получить код
-          </button>
-        </>
-      ) : (
-        <>
-          <p className="mb-2 text-sm text-gray-600">Мы отправили код на {email}</p>
-          <input value={code} onChange={e=>setCode(e.target.value)}
-            placeholder="6-значный код" className="border rounded w-full p-2 mb-3"/>
-          <button onClick={verifyOtp} className="px-4 py-2 rounded bg-black text-white w-full">
-            Войти
-          </button>
-        </>
-      )}
+    <div className="login">
+      <div className="login__wrap">
+        <div className="login__card">
+          <h1 className="login__title">Вход по e-mail</h1>
+          <p className="login__subtitle">
+            Без пароля. Отправим одноразовый код на вашу почту.
+          </p>
+
+          {err && <div className="login__alert">{err}</div>}
+
+          {step === "enter" && (
+            <div className="login__form">
+              <label className="login__label" htmlFor="email">E-mail</label>
+              <input
+                id="email"
+                type="email"
+                className="login__input"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                autoFocus
+                disabled={loading}
+                aria-invalid={!!err}
+              />
+              <button className="btn btn--primary login__submit" onClick={sendCode} disabled={loading}>
+                {loading ? "Отправляем…" : "Получить код"}
+              </button>
+            </div>
+          )}
+
+          {step === "code" && (
+            <div className="login__form">
+              <label className="login__label" htmlFor="code">Код из письма</label>
+              <input
+                id="code"
+                type="text"
+                inputMode="numeric"
+                className="login__input"
+                placeholder="123456"
+                value={code}
+                onChange={(e) => setCode(e.target.value.trim())}
+                autoFocus
+                disabled={loading}
+                aria-invalid={!!err}
+              />
+              <button className="btn btn--primary login__submit" onClick={verifyCode} disabled={loading}>
+                {loading ? "Проверяем…" : "Войти"}
+              </button>
+
+              <button
+                type="button"
+                className="login__resend"
+                onClick={resend}
+                disabled={loading || timer > 0}
+                aria-disabled={loading || timer > 0}
+                title={timer > 0 ? `Повторно через ${timer} сек` : "Отправить код ещё раз"}
+              >
+                {timer > 0 ? `Отправить код ещё раз — через ${timer} сек` : "Отправить код ещё раз"}
+              </button>
+
+              <p className="login__hint">Код пришёл с адреса <b>no-reply@restaurantsecret.ru</b>. Проверьте «Спам», если письма нет.</p>
+            </div>
+          )}
+
+          <p className="login__legal">
+            Продолжая, вы соглашаетесь с обработкой персональных данных.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
