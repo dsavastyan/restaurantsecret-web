@@ -2,7 +2,8 @@
 // the paywall overlay when required.
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Link, Outlet, useLocation } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
+import NavBar from '@/components/NavBar'
 import Paywall from '../components/Paywall.jsx'
 import { API_BASE } from '@/config/api'
 
@@ -176,17 +177,17 @@ export default function AppShell() {
   const hideGlobalSearch = location.pathname.startsWith('/r/')
 
   return (
-    <div className={showPaywall ? 'container locked' : 'container'}>
-      <header className="topbar">
-        <Link to="/" className="brand">RestaurantSecret</Link>
-        {!hideGlobalSearch && (
-          <form action="/search" method="get" className="search">
-            <input name="q" placeholder="Найти блюдо..." aria-label="Search" />
-          </form>
-        )}
-      </header>
-      <main>
-        <Outlet context={outletContext} />
+    <div className="min-h-screen flex flex-col">
+      <NavBar />
+      <main className="flex-1">
+        <div className={showPaywall ? 'container locked' : 'container'}>
+          {!hideGlobalSearch && (
+            <form action="/search" method="get" className="search">
+              <input name="q" placeholder="Найти блюдо..." aria-label="Search" />
+            </form>
+          )}
+          <Outlet context={outletContext} />
+        </div>
       </main>
       {showPaywall && (
         <PaywallPortal>
