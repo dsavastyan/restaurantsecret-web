@@ -27,7 +27,7 @@ export default function LoginPage() {
     }
     setLoading(true);
     try {
-      const res = await apiPost("/auth/email/request", { email });
+      const res = await apiPost("/auth/request-otp", { email });
       if (res?.ok) {
         setStep("code");
         setTimer(60);
@@ -49,7 +49,7 @@ export default function LoginPage() {
     }
     setLoading(true);
     try {
-      const res = await apiPost("/auth/email/verify", { email, code });
+      const res = await apiPost("/auth/verify-otp", { email, code });
       if (res?.ok && res?.access_token) {
         setToken(res.access_token);       // <— сохраняем токен в твой стор (rs_access)
         window.location.replace("/account");
