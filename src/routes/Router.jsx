@@ -19,17 +19,18 @@ import Account from '../pages/Account.tsx'
 function AppRoutes() {
   return (
     <Routes>
-      {/* Публичные маршруты */}
-      <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/account" element={<Account />} />
+      <Route path="/" element={<AppShell />}>
+        {/* Публичные страницы */}
+        <Route index element={<Landing />} />
+        <Route path="login" element={<Login />} />
+        <Route path="account" element={<Account />} />
 
-      {/* Основной layout с Paywall и шапкой */}
-      <Route element={<AppShell />}>
+        {/* Основной контент */}
+        <Route path="catalog" element={<Catalog />} />
         <Route path="restaurants" element={<Catalog />} />
+        <Route path="search" element={<Search />} />
         <Route path="r/:slug" element={<RestaurantPage />} />
         <Route path="r/:slug/menu" element={<Menu />} />
-        <Route path="search" element={<Search />} />
         <Route path="pay/success" element={<PaySuccess />} />
         <Route path="pay/mock-success" element={<PayMockSuccess />} />
 
@@ -42,14 +43,14 @@ function AppRoutes() {
           <Route path="profile" element={<div>TODO: Profile</div>} />
           <Route path="*" element={<Navigate to="catalog" replace />} />
         </Route>
+
+        {/* Легаси-ссылки */}
+        <Route path="restaurant/:slug" element={<LegacyRestaurantRedirect />} />
+        <Route path="restaurant/:slug/menu" element={<LegacyMenuRedirect />} />
+
+        {/* 404 */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
-
-      {/* Легаси-ссылки */}
-      <Route path="/restaurant/:slug" element={<LegacyRestaurantRedirect />} />
-      <Route path="/restaurant/:slug/menu" element={<LegacyMenuRedirect />} />
-
-      {/* 404 */}
-      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
