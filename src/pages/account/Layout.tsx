@@ -3,7 +3,16 @@ import { NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
 import { apiGet } from "@/lib/api";
 import { useAuth } from "@/store/auth";
 
-export type Sub = { plan: string; status: string; expires_at: string; expired: boolean };
+export type Sub = {
+  plan: string;
+  status: string;
+  expires_at: string;
+  expired: boolean;
+  payment_provider?: string | null;
+  payment_method?: string | null;
+  provider?: string | null;
+  gateway?: string | null;
+};
 export type Me = { ok: boolean; user?: { id: string; email: string; created_at: string; subscription: Sub | null } };
 
 export type AccountOutletContext = {
@@ -12,19 +21,40 @@ export type AccountOutletContext = {
   daysLeft: number | null;
   reload: () => Promise<void>;
   token: string | null;
+  isLoading: boolean;
+  error: string | null;
 };
 
 export default function AccountLayout() {
   const token = useAuth((state) => state.accessToken);
   const location = useLocation();
   const [me, setMe] = useState<Me | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(Boolean(token));
+  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
+    if (!token) {
+      setMe(null);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
-    const response: Me = await apiGet("/me", token || undefined);
-    setMe(response);
-    setLoading(false);
+    setError(null);
+    try {
+      const response: Me = await apiGet("/me", token);
+      if (!response?.ok) {
+        throw new Error("ME_NOT_OK");
+      }
+      setMe(response);
+    } catch (err) {
+      console.error("Failed to load account data", err);
+      setMe((prev) => prev);
+      setError("Не удалось загрузить данные. Попробуйте обновить страницу.");
+    } finally {
+      setLoading(false);
+    }
   }, [token]);
 
   useEffect(() => {
@@ -42,16 +72,12 @@ export default function AccountLayout() {
   }, [sub?.expires_at]);
 
   const outletContext: AccountOutletContext = useMemo(
-    () => ({ me, sub, daysLeft, reload: load, token: token || null }),
-    [me, sub, daysLeft, load, token]
+    () => ({ me, sub, daysLeft, reload: load, token: token || null, isLoading: loading, error }),
+    [me, sub, daysLeft, load, token, loading, error]
   );
 
   if (!token) {
     return <Navigate to="/login" replace state={{ from: location }} />;
-  }
-
-  if (loading) {
-    return <div className="p-6">Загрузка…</div>;
   }
 
   return (
