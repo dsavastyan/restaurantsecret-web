@@ -178,7 +178,8 @@ export default function AppShell() {
   const hideGlobalSearch =
     isLanding ||
     location.pathname.startsWith('/r/') ||
-    location.pathname.startsWith('/login')
+    location.pathname.startsWith('/login') ||
+    location.pathname.startsWith('/account')
 
   return (
     <div className="min-h-screen flex flex-col">
