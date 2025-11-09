@@ -55,38 +55,37 @@ export default function AccountLayout() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <h1 className="text-xl font-semibold">Личный кабинет</h1>
-      <div className="flex flex-col gap-6 md:flex-row md:items-start">
-        <nav className="md:w-64 flex md:flex-col gap-2">
-          <NavLink
-            to="/account"
-            end
-            className={({ isActive }) =>
-              `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-black text-white"
-                  : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-              }`
-            }
-          >
-            Профиль
-          </NavLink>
-          <NavLink
-            to="/account/subscription"
-            className={({ isActive }) =>
-              `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-black text-white"
-                  : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-              }`
-            }
-          >
-            Управлять подпиской
-          </NavLink>
-        </nav>
-        <div className="flex-1 min-w-0">
-          <Outlet context={outletContext} />
+    <div className="account">
+      <div className="account__inner">
+        <header className="account__header">
+          <h1 className="account__title">Личный кабинет</h1>
+          <p className="account__subtitle">
+            Управляйте профилем и подпиской в едином пространстве.
+          </p>
+        </header>
+        <div className="account__layout">
+          <nav className="account-nav" aria-label="Навигация по личному кабинету">
+            <NavLink
+              to="/account"
+              end
+              className={({ isActive }) =>
+                `account-nav__link${isActive ? " account-nav__link--active" : ""}`
+              }
+            >
+              <span className="account-nav__label">Профиль</span>
+            </NavLink>
+            <NavLink
+              to="/account/subscription"
+              className={({ isActive }) =>
+                `account-nav__link${isActive ? " account-nav__link--active" : ""}`
+              }
+            >
+              <span className="account-nav__label">Управлять подпиской</span>
+            </NavLink>
+          </nav>
+          <div className="account__content">
+            <Outlet context={outletContext} />
+          </div>
         </div>
       </div>
     </div>

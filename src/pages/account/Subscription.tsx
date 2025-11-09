@@ -10,41 +10,52 @@ export default function AccountSubscription() {
   }, [reload]);
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-semibold">Управление подпиской</h2>
-        <p className="text-sm text-gray-600">
-          Здесь можно посмотреть актуальный статус подписки и обновить данные после оплаты.
+    <section className="account-panel" aria-labelledby="account-subscription-heading">
+      <div className="account-panel__header">
+        <h2 id="account-subscription-heading" className="account-panel__title">
+          Управление подпиской
+        </h2>
+        <p className="account-panel__lead">
+          Проверяйте статус подписки и обновляйте информацию после оплаты.
         </p>
       </div>
 
       {sub ? (
-        <div className="space-y-3">
-          <div className="p-4 border rounded">
-            <div className="font-medium">Тариф: {sub.plan}</div>
-            <div className="text-sm text-gray-600">Статус: {sub.status}</div>
-            {daysLeft !== null && !sub.expired && (
-              <div className="text-sm text-gray-600">Осталось: {daysLeft} дней</div>
-            )}
-            {sub.expired && (
-              <div className="text-sm text-red-600">Подписка истекла</div>
-            )}
+        <div className="account-panel__box">
+          <div className="account-panel__row">
+            <span className="account-panel__term">Тариф</span>
+            <span className="account-panel__description">{sub.plan}</span>
           </div>
-          <p className="text-sm text-gray-600">
-            Если вы только что оформили подписку и не видите изменений, попробуйте обновить данные.
-          </p>
+          <div className="account-panel__row">
+            <span className="account-panel__term">Статус</span>
+            <span className="account-panel__description">{sub.status}</span>
+          </div>
+          {daysLeft !== null && !sub.expired && (
+            <div className="account-panel__row">
+              <span className="account-panel__term">Дней доступа</span>
+              <span className="account-panel__description">{daysLeft}</span>
+            </div>
+          )}
+          {sub.expired && (
+            <div className="account-panel__row account-panel__row--alert">
+              <span className="account-panel__term">Статус доступа</span>
+              <span className="account-panel__description">Подписка истекла</span>
+            </div>
+          )}
         </div>
       ) : (
-        <div className="p-4 border rounded bg-gray-50 text-sm text-gray-600">
-          У вас пока нет активной подписки. Оформите подписку, чтобы получить доступ к эксклюзивным материалам.
+        <div className="account-panel__box account-panel__box--muted">
+          <p className="account-panel__empty">
+            У вас пока нет активной подписки. Оформите подписку, чтобы открыть доступ ко всем материалам.
+          </p>
         </div>
       )}
 
-      <div>
-        <button onClick={handleRefresh} className="px-4 py-2 rounded bg-black text-white">
+      <div className="account-panel__actions">
+        <button type="button" onClick={handleRefresh} className="account-button">
           Обновить данные
         </button>
       </div>
-    </div>
+    </section>
   );
 }

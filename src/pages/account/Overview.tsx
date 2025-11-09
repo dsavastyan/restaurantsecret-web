@@ -1,41 +1,46 @@
-import { useCallback } from "react";
+import { useMemo } from "react";
 import { useOutletContext } from "react-router-dom";
-import { apiPost } from "@/lib/api";
 import type { AccountOutletContext } from "./Layout";
 
 export default function AccountOverview() {
-  const { me, sub, daysLeft, reload, token } = useOutletContext<AccountOutletContext>();
+  const { me } = useOutletContext<AccountOutletContext>();
 
-  const handleActivateMock = useCallback(async () => {
-    const response = await apiPost("/subscriptions/activate-mock", undefined, token || undefined);
-    if (!response?.ok) {
-      alert(response?.error || "error");
-      return;
+  const createdAt = useMemo(() => {
+    if (!me?.user?.created_at) return null;
+    try {
+      return new Date(me.user.created_at).toLocaleDateString("ru-RU", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    } catch (error) {
+      console.error("Failed to format created_at", error);
+      return null;
     }
-    await reload();
-  }, [reload, token]);
+  }, [me?.user?.created_at]);
 
   return (
-    <div className="space-y-4">
-      <div className="p-4 border rounded">
-        <div className="text-sm text-gray-500 mb-1">{me?.user?.email}</div>
-        <div className="flex items-center gap-3">
-          <span className="font-medium">Подписка:</span>
-          {sub ? (
-            <span className={`px-2 py-0.5 rounded text-white ${sub.expired ? "bg-gray-500" : "bg-green-600"}`}>
-              {sub.plan} · {sub.status}
-              {!sub.expired && daysLeft !== null ? ` · осталось ${daysLeft} дн.` : ""}
-            </span>
-          ) : (
-            <span className="px-2 py-0.5 rounded bg-gray-300">нет</span>
-          )}
-        </div>
-        <div className="mt-4">
-          <button onClick={handleActivateMock} className="px-4 py-2 rounded bg-black text-white">
-            Активировать тест на 14 дней
-          </button>
-        </div>
+    <section className="account-panel" aria-labelledby="account-profile-heading">
+      <div className="account-panel__header">
+        <h2 id="account-profile-heading" className="account-panel__title">
+          Профиль
+        </h2>
+        <p className="account-panel__lead">
+          Здесь хранится основная информация о вашем аккаунте.
+        </p>
       </div>
-    </div>
+      <dl className="account-panel__list">
+        <div className="account-panel__item">
+          <dt className="account-panel__term">Электронная почта</dt>
+          <dd className="account-panel__description">{me?.user?.email || "—"}</dd>
+        </div>
+        {createdAt && (
+          <div className="account-panel__item">
+            <dt className="account-panel__term">С нами с</dt>
+            <dd className="account-panel__description">{createdAt}</dd>
+          </div>
+        )}
+      </dl>
+    </section>
   );
 }
