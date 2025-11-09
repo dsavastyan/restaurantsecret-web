@@ -269,7 +269,15 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
 .account-panel__header {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .account-panel__header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
 }
 
 .account-panel__title {
@@ -359,7 +367,22 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
   gap: 12px;
 }
 
+.account-panel__box--error {
+  border: 1px solid rgba(220, 38, 38, 0.32);
+  background: rgba(254, 226, 226, 0.64);
+  color: #991b1b;
+  align-items: flex-start;
+}
+
+.account-panel__error-text {
+  margin: 0;
+  font-weight: 600;
+}
+
 .account-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   border-radius: 999px;
   padding: 12px 24px;
@@ -367,9 +390,36 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
   font-weight: 700;
   cursor: pointer;
   color: #fff;
+  text-decoration: none;
   background: linear-gradient(120deg, var(--rs-primary) 0%, #111827 120%);
   box-shadow: 0 16px 40px rgba(17, 24, 39, 0.18);
   transition: transform 0.12s ease, box-shadow 0.2s ease;
+}
+
+.account-button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.account-button--outline {
+  background: #ffffff;
+  color: var(--rs-primary);
+  box-shadow: none;
+  border: 1px solid rgba(17, 24, 39, 0.12);
+}
+
+.account-button--outline:hover {
+  box-shadow: none;
+  background: rgba(17, 24, 39, 0.06);
+}
+
+.account-button--danger {
+  background: linear-gradient(120deg, #ef4444 0%, #b91c1c 120%);
+  box-shadow: 0 18px 38px rgba(220, 38, 38, 0.24);
+}
+
+.account-button--danger:hover {
+  box-shadow: 0 22px 46px rgba(220, 38, 38, 0.32);
 }
 
 .account-button:hover {
@@ -380,6 +430,150 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
 .account-button:active {
   transform: translateY(0);
   box-shadow: 0 12px 32px rgba(17, 24, 39, 0.16);
+}
+
+.account-subscription__grid {
+  display: grid;
+  gap: clamp(16px, 3vw, 22px);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: 24px;
+}
+
+.account-subscription__tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: clamp(18px, 3vw, 24px);
+  border-radius: 24px;
+  background: rgba(17, 24, 39, 0.04);
+  min-height: 180px;
+}
+
+.account-subscription__tile--accent {
+  background:
+    linear-gradient(140deg, rgba(34, 197, 94, 0.16) 0%, rgba(16, 185, 129, 0.08) 45%, rgba(59, 130, 246, 0.1) 100%),
+    rgba(17, 24, 39, 0.04);
+}
+
+.account-subscription__tile-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(17, 24, 39, 0.55);
+}
+
+.account-subscription__tile-value {
+  margin: 0;
+  font-size: clamp(20px, 2.6vw, 26px);
+  font-weight: 700;
+  color: var(--rs-text);
+}
+
+.account-subscription__tile-hint {
+  margin: 0;
+  color: var(--rs-muted);
+  line-height: 1.55;
+}
+
+.account-subscription__error {
+  margin: 0;
+  font-size: 14px;
+  color: #b91c1c;
+}
+
+.account-subscription__empty {
+  margin-top: 24px;
+  padding: clamp(32px, 5vw, 48px);
+  border-radius: 28px;
+  background:
+    linear-gradient(160deg, rgba(59, 130, 246, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%),
+    rgba(17, 24, 39, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  text-align: left;
+}
+
+.account-subscription__empty h3 {
+  margin: 0;
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 700;
+  color: var(--rs-text);
+}
+
+.account-subscription__empty p {
+  margin: 0;
+  color: var(--rs-muted);
+  line-height: 1.6;
+  max-width: 520px;
+}
+
+.account-subscription__footer {
+  margin-top: clamp(28px, 5vw, 40px);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.account-subscription__history {
+  font-weight: 700;
+  color: var(--rs-primary);
+  text-decoration: none;
+  position: relative;
+}
+
+.account-subscription__history::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 2px;
+  background: currentColor;
+  opacity: 0.3;
+  transition: opacity 0.2s ease;
+}
+
+.account-subscription__history:hover::after {
+  opacity: 0.6;
+}
+
+.account-skeleton {
+  position: relative;
+  overflow: hidden;
+  color: transparent;
+  background: rgba(17, 24, 39, 0.06);
+  min-height: 180px;
+}
+
+.account-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.65) 50%, rgba(255, 255, 255, 0) 100%);
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+.account-skeleton__line {
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.08);
+  margin-top: 16px;
+}
+
+.account-skeleton__line:first-child {
+  margin-top: 0;
+  width: 45%;
+}
+
+.account-skeleton__line--wide {
+  width: 70%;
+}
+
+.account-skeleton__line--short {
+  width: 55%;
 }
 
 body.tg-dark .account {
@@ -418,6 +612,66 @@ body.tg-dark .account-panel__box {
 body.tg-dark .account-panel__box--muted {
   background: rgba(255, 255, 255, 0.02);
   color: rgba(229, 231, 235, 0.76);
+}
+
+body.tg-dark .account-panel__box--error {
+  border-color: rgba(248, 113, 113, 0.55);
+  background: rgba(248, 113, 113, 0.2);
+  color: rgba(254, 242, 242, 0.92);
+}
+
+body.tg-dark .account-button--outline {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+body.tg-dark .account-button--outline:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+body.tg-dark .account-subscription__tile {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+body.tg-dark .account-subscription__tile--accent {
+  background:
+    linear-gradient(140deg, rgba(52, 211, 153, 0.25) 0%, rgba(37, 99, 235, 0.25) 100%),
+    rgba(255, 255, 255, 0.02);
+}
+
+body.tg-dark .account-subscription__tile-title {
+  color: rgba(229, 231, 235, 0.7);
+}
+
+body.tg-dark .account-subscription__tile-value {
+  color: #f9fafb;
+}
+
+body.tg-dark .account-subscription__tile-hint {
+  color: rgba(229, 231, 235, 0.78);
+}
+
+body.tg-dark .account-subscription__empty {
+  background:
+    linear-gradient(160deg, rgba(59, 130, 246, 0.2) 0%, rgba(16, 185, 129, 0.2) 100%),
+    rgba(255, 255, 255, 0.02);
+}
+
+body.tg-dark .account-subscription__history {
+  color: rgba(96, 165, 250, 0.92);
+}
+
+body.tg-dark .account-skeleton {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+body.tg-dark .account-skeleton::after {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0) 100%);
+}
+
+body.tg-dark .account-skeleton__line {
+  background: rgba(255, 255, 255, 0.16);
 }
 
 body.tg-dark .account-panel__row--alert {
