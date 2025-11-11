@@ -540,6 +540,212 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
   opacity: 0.6;
 }
 
+.account-history__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(18px, 3vw, 24px);
+}
+
+.account-history__item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  padding: clamp(22px, 4vw, 30px);
+  background:
+    linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(16, 185, 129, 0.1) 45%, rgba(236, 72, 153, 0.12) 100%),
+    rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(17, 24, 39, 0.06);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 2.4vw, 20px);
+  backdrop-filter: blur(8px);
+}
+
+.account-history__item::before {
+  content: "";
+  position: absolute;
+  inset: -40% -20% auto;
+  height: 220px;
+  background: radial-gradient(circle at top, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0) 65%);
+  pointer-events: none;
+}
+
+.account-history__item-header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .account-history__item-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+}
+
+.account-history__plan-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.account-history__plan {
+  margin: 0;
+  font-size: clamp(20px, 3vw, 24px);
+  font-weight: 700;
+  color: var(--rs-text);
+}
+
+.account-history__source {
+  margin: 0;
+  font-size: 14px;
+  color: var(--rs-muted);
+}
+
+.account-history__status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: rgba(59, 130, 246, 0.16);
+  color: #1d4ed8;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.account-history__status--active {
+  background: rgba(16, 185, 129, 0.2);
+  color: #047857;
+}
+
+.account-history__status--cancelled {
+  background: rgba(249, 115, 22, 0.2);
+  color: #9a3412;
+}
+
+.account-history__status--expired {
+  background: rgba(239, 68, 68, 0.2);
+  color: #b91c1c;
+}
+
+.account-history__status--pending {
+  background: rgba(59, 130, 246, 0.16);
+  color: #1d4ed8;
+}
+
+.account-history__meta {
+  display: grid;
+  gap: clamp(14px, 2vw, 18px);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.account-history__meta-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.account-history__meta-term {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(17, 24, 39, 0.55);
+}
+
+.account-history__meta-value {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--rs-text);
+}
+
+.account-history__empty {
+  margin-top: 12px;
+  padding: clamp(32px, 5vw, 48px);
+  border-radius: 30px;
+  background:
+    linear-gradient(150deg, rgba(59, 130, 246, 0.12) 0%, rgba(236, 72, 153, 0.08) 100%),
+    rgba(17, 24, 39, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  text-align: left;
+}
+
+.account-history__empty h3 {
+  margin: 0;
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 700;
+  color: var(--rs-text);
+}
+
+.account-history__empty p {
+  margin: 0;
+  color: var(--rs-muted);
+  line-height: 1.6;
+  max-width: 520px;
+}
+
+.account-history__item--skeleton {
+  background: rgba(17, 24, 39, 0.05);
+  border: 1px solid rgba(17, 24, 39, 0.06);
+  box-shadow: none;
+  min-height: 180px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.account-history__item--skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.55) 50%, rgba(255, 255, 255, 0) 100%);
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+.account-history__skeleton-line {
+  display: block;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.12);
+}
+
+.account-history__skeleton-line--wide {
+  width: 60%;
+}
+
+.account-history__skeleton-line--narrow {
+  width: 36%;
+}
+
+.account-history__skeleton-grid {
+  margin-top: 12px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.account-history__skeleton-dot {
+  display: block;
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.1);
+}
+
 .account-skeleton {
   position: relative;
   overflow: hidden;
@@ -660,6 +866,70 @@ body.tg-dark .account-subscription__empty {
 
 body.tg-dark .account-subscription__history {
   color: rgba(96, 165, 250, 0.92);
+}
+
+body.tg-dark .account-history__item {
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.28) 0%, rgba(16, 185, 129, 0.2) 45%, rgba(236, 72, 153, 0.18) 100%),
+    rgba(17, 24, 39, 0.55);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+}
+
+body.tg-dark .account-history__item::before {
+  background: radial-gradient(circle at top, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 65%);
+}
+
+body.tg-dark .account-history__plan,
+body.tg-dark .account-history__meta-value,
+body.tg-dark .account-history__empty h3 {
+  color: #f8fafc;
+}
+
+body.tg-dark .account-history__source,
+body.tg-dark .account-history__meta-term {
+  color: rgba(226, 232, 240, 0.7);
+}
+
+body.tg-dark .account-history__empty {
+  background:
+    linear-gradient(150deg, rgba(37, 99, 235, 0.28) 0%, rgba(236, 72, 153, 0.22) 100%),
+    rgba(17, 24, 39, 0.6);
+}
+
+body.tg-dark .account-history__empty p {
+  color: rgba(226, 232, 240, 0.76);
+}
+
+body.tg-dark .account-history__status {
+  background: rgba(59, 130, 246, 0.32);
+  color: #bfdbfe;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+body.tg-dark .account-history__status--active {
+  background: rgba(16, 185, 129, 0.32);
+  color: #6ee7b7;
+}
+
+body.tg-dark .account-history__status--cancelled {
+  background: rgba(249, 115, 22, 0.32);
+  color: #fdba74;
+}
+
+body.tg-dark .account-history__status--expired {
+  background: rgba(239, 68, 68, 0.34);
+  color: #fca5a5;
+}
+
+body.tg-dark .account-history__item--skeleton {
+  background: rgba(148, 163, 184, 0.16);
+  border-color: rgba(226, 232, 240, 0.08);
+}
+
+body.tg-dark .account-history__skeleton-line,
+body.tg-dark .account-history__skeleton-dot {
+  background: rgba(226, 232, 240, 0.16);
 }
 
 body.tg-dark .account-skeleton {
