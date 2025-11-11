@@ -1049,7 +1049,12 @@ body.tg-dark .range-dash { color:#6b7280; }
   border: 1px solid #d1d5db;
   background: #fff;
   font: inherit;
+  color: #111827;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login__input::placeholder {
+  color: #9ca3af;
 }
 
 .login__input:focus {
@@ -1131,6 +1136,10 @@ body.tg-dark .login__input {
   background: rgba(17, 24, 39, 0.9);
   border-color: #4b5563;
   color: #f9fafb;
+}
+
+body.tg-dark .login__input::placeholder {
+  color: #9ca3af;
 }
 
 body.tg-dark .login__input:focus {
