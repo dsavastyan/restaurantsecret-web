@@ -1,6 +1,7 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
-import { apiPost } from "@/lib/api";
+import Button from "@/components/ui/Button";
+import { apiGet, apiPost } from "@/lib/api";
 import type { AccountOutletContext } from "./Layout";
 
 function SubscriptionSkeleton() {
@@ -17,11 +18,36 @@ function SubscriptionSkeleton() {
   );
 }
 
+type SubscriptionStatus = {
+  status?: string | null;
+  status_label?: string | null;
+  can_cancel?: boolean;
+};
+
 export default function AccountSubscription() {
   const { sub, daysLeft, reload, token, isLoading, error } =
     useOutletContext<AccountOutletContext>();
+  const accessToken = token || undefined;
+  const [data, setData] = useState<SubscriptionStatus | null>(null);
   const [cancelLoading, setCancelLoading] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
+
+  const fetchStatus = useCallback(async () => {
+    if (!accessToken) {
+      setData(null);
+      return;
+    }
+    try {
+      const status = await apiGet("/subscriptions/status", accessToken);
+      setData(status);
+    } catch (err) {
+      console.error("Failed to load subscription status", err);
+    }
+  }, [accessToken]);
+
+  useEffect(() => {
+    fetchStatus();
+  }, [fetchStatus]);
 
   const formattedExpiresAt = useMemo(() => {
     if (!sub?.expires_at) return null;
@@ -38,10 +64,25 @@ export default function AccountSubscription() {
   }, [sub?.expires_at]);
 
   const statusLabel = useMemo(() => {
+    const labelFromData = (() => {
+      if (!data) return null;
+      if (typeof data.status_label === "string" && data.status_label.trim()) {
+        return data.status_label;
+      }
+      if (typeof data.status === "string" && data.status.trim()) {
+        return data.status;
+      }
+      return null;
+    })();
+
+    if (labelFromData) {
+      return labelFromData;
+    }
+
     if (!sub) return "—";
     if (!formattedExpiresAt) return sub.expired ? "Истекла" : sub.status || "Активна";
     return sub.expired ? `Истекла ${formattedExpiresAt}` : `Активна до ${formattedExpiresAt}`;
-  }, [sub, formattedExpiresAt]);
+  }, [data, sub, formattedExpiresAt]);
 
   const accessLabel = useMemo(() => {
     if (!sub) return "—";
@@ -70,26 +111,8 @@ export default function AccountSubscription() {
 
   const handleRefresh = useCallback(async () => {
     setCancelError(null);
-    await reload();
-  }, [reload]);
-
-  const handleCancel = useCallback(async () => {
-    if (!sub || cancelLoading) return;
-    setCancelError(null);
-    setCancelLoading(true);
-    try {
-      const response = await apiPost("/subscription/cancel", undefined, token || undefined);
-      if (response && typeof response === "object" && "ok" in response && !response.ok) {
-        throw new Error("CANCEL_NOT_OK");
-      }
-      await reload();
-    } catch (err) {
-      console.error("Failed to cancel subscription", err);
-      setCancelError("Не удалось отменить подписку. Попробуйте позже.");
-    } finally {
-      setCancelLoading(false);
-    }
-  }, [sub, cancelLoading, token, reload]);
+    await Promise.all([reload(), fetchStatus()]);
+  }, [reload, fetchStatus]);
 
   return (
     <section className="account-panel" aria-labelledby="account-subscription-heading">
@@ -138,14 +161,38 @@ export default function AccountSubscription() {
               Подписка открывает доступ к расширенному меню и фильтрам.
             </p>
             {!sub.expired && (
-              <button
-                type="button"
+              <Button
                 className="account-button account-button--danger"
-                onClick={handleCancel}
-                disabled={cancelLoading}
+                disabled={!data?.can_cancel || cancelLoading}
+                onClick={async () => {
+                  if (!accessToken || cancelLoading) return;
+                  setCancelError(null);
+                  setCancelLoading(true);
+                  try {
+                    const res = await apiPost(
+                      "/subscriptions/cancel",
+                      undefined,
+                      accessToken
+                    );
+                    if (res?.ok) {
+                      const s = await apiGet("/subscriptions/status", accessToken);
+                      setData(s);
+                      await reload();
+                    } else {
+                      alert("Не удалось отменить подписку");
+                      setCancelError("Не удалось отменить подписку. Попробуйте позже.");
+                    }
+                  } catch (err) {
+                    console.error("Failed to cancel subscription", err);
+                    alert("Не удалось отменить подписку");
+                    setCancelError("Не удалось отменить подписку. Попробуйте позже.");
+                  } finally {
+                    setCancelLoading(false);
+                  }
+                }}
               >
                 {cancelLoading ? "Отменяем…" : "Отменить подписку"}
-              </button>
+              </Button>
             )}
             {cancelError && (
               <p className="account-subscription__error" role="status">
