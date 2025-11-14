@@ -3,10 +3,12 @@ import { useSyncExternalStore } from "react";
 type AuthState = {
   accessToken: string | null;
   setToken: (token: string | null) => void;
+  logout: () => void;
 };
 
 export const selectAccessToken = (state: AuthState) => state.accessToken;
 export const selectSetToken = (state: AuthState) => state.setToken;
+export const selectLogout = (state: AuthState) => state.logout;
 
 const listeners = new Set<() => void>();
 
@@ -45,9 +47,14 @@ const setToken = (token: string | null) => {
   notify();
 };
 
+const logout = () => {
+  setToken(null);
+};
+
 state = {
   accessToken: readStoredToken(),
   setToken,
+  logout,
 };
 
 const subscribe = (listener: () => void) => {

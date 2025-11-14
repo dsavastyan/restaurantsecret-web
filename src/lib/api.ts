@@ -13,6 +13,18 @@ async function doFetch(path: string, init: RequestInit = {}, token?: string) {
   return res;
 }
 
+export function apiPostAuth(path: string, body?: unknown, token?: string) {
+  return fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    credentials: "include",
+    body: body ? JSON.stringify(body) : undefined,
+  });
+}
+
 async function tryRefresh(): Promise<string | null> {
   try {
     const res = await fetch(`${API_BASE}/auth/refresh`, {
