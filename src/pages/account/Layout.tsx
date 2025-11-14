@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
-import { apiGet } from "@/lib/api";
+import { apiGet, isUnauthorizedError } from "@/lib/api";
 import { useAuth } from "@/store/auth";
 
 export type Sub = {
@@ -26,14 +26,17 @@ export type AccountOutletContext = {
 };
 
 export default function AccountLayout() {
-  const token = useAuth((state) => state.accessToken);
+  const { accessToken, logout } = useAuth((state) => ({
+    accessToken: state.accessToken,
+    logout: state.logout,
+  }));
   const location = useLocation();
   const [me, setMe] = useState<Me | null>(null);
-  const [loading, setLoading] = useState<boolean>(Boolean(token));
+  const [loading, setLoading] = useState<boolean>(Boolean(accessToken));
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!token) {
+    if (!accessToken) {
       setMe(null);
       setError(null);
       setLoading(false);
@@ -43,25 +46,31 @@ export default function AccountLayout() {
     setLoading(true);
     setError(null);
     try {
-      const response: Me = await apiGet("/me", token);
+      const response = await apiGet<Me>("/users/me", accessToken);
       if (!response?.ok) {
         throw new Error("ME_NOT_OK");
       }
       setMe(response);
     } catch (err) {
+      if (isUnauthorizedError(err)) {
+        logout();
+        setMe(null);
+        setError(null);
+        return;
+      }
       console.error("Failed to load account data", err);
       setMe((prev) => prev);
       setError("Не удалось загрузить данные. Попробуйте обновить страницу.");
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [accessToken, logout]);
 
   useEffect(() => {
-    if (token) {
+    if (accessToken) {
       load();
     }
-  }, [token, load]);
+  }, [accessToken, load]);
 
   const sub = me?.user?.subscription || null;
   const daysLeft = useMemo(() => {
@@ -72,11 +81,11 @@ export default function AccountLayout() {
   }, [sub?.expires_at]);
 
   const outletContext: AccountOutletContext = useMemo(
-    () => ({ me, sub, daysLeft, reload: load, token: token || null, isLoading: loading, error }),
-    [me, sub, daysLeft, load, token, loading, error]
+    () => ({ me, sub, daysLeft, reload: load, token: accessToken || null, isLoading: loading, error }),
+    [me, sub, daysLeft, load, accessToken, loading, error]
   );
 
-  if (!token) {
+  if (!accessToken) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
