@@ -1,6 +1,40 @@
 // src/lib/api.ts
 export const API_BASE = import.meta.env.VITE_PD_API_BASE || "https://pd.restaurantsecret.ru";
 
+export class ApiError extends Error {
+  status?: number;
+  payload?: unknown;
+
+  constructor(message: string, status?: number, payload?: unknown) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.payload = payload;
+  }
+}
+
+const parseBody = async (response: Response) => {
+  try {
+    return await response.clone().json();
+  } catch {
+    try {
+      const text = await response.text();
+      return text.length ? text : null;
+    } catch {
+      return null;
+    }
+  }
+};
+
+const toApiError = async (response: Response) => {
+  const payload = await parseBody(response);
+  const message =
+    typeof payload === "string" && payload
+      ? payload
+      : `Request failed with status ${response.status}`;
+  throw new ApiError(message, response.status, payload);
+};
+
 async function doFetch(path: string, init: RequestInit = {}, token?: string) {
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
@@ -12,6 +46,10 @@ async function doFetch(path: string, init: RequestInit = {}, token?: string) {
   });
   return res;
 }
+
+export const isUnauthorizedError = (error: unknown): error is ApiError => {
+  return error instanceof ApiError && error.status === 401;
+};
 
 export function apiPostAuth(path: string, body?: unknown, token?: string) {
   return fetch(`${API_BASE}${path}`, {
@@ -45,7 +83,19 @@ async function tryRefresh(): Promise<string | null> {
   }
 }
 
-export async function apiGet(path: string, token?: string) {
+async function handleResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    await toApiError(response);
+  }
+
+  try {
+    return (await response.json()) as T;
+  } catch {
+    return null as T;
+  }
+}
+
+export async function apiGet<T = unknown>(path: string, token?: string): Promise<T> {
   // 1-й заход
   let res = await doFetch(path, { method: "GET" }, token);
   if (res.status === 401) {
@@ -54,10 +104,11 @@ export async function apiGet(path: string, token?: string) {
       res = await doFetch(path, { method: "GET" }, newToken); // ретрай 1 раз
     }
   }
-  return res.json();
+
+  return handleResponse<T>(res);
 }
 
-export async function apiPost(path: string, body?: unknown, token?: string) {
+export async function apiPost<T = unknown>(path: string, body?: unknown, token?: string): Promise<T> {
   // 1-й заход
   let res = await doFetch(
     path,
@@ -82,5 +133,6 @@ export async function apiPost(path: string, body?: unknown, token?: string) {
       ); // ретрай 1 раз
     }
   }
-  return res.json();
+
+  return handleResponse<T>(res);
 }

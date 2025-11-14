@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import Button from "@/components/ui/Button";
-import { apiGet, apiPost } from "@/lib/api";
+import { apiGet, apiPost, isUnauthorizedError } from "@/lib/api";
+import { useAuth } from "@/store/auth";
 import type { AccountOutletContext } from "./Layout";
 
 function SubscriptionSkeleton() {
@@ -28,6 +29,7 @@ export default function AccountSubscription() {
   const { sub, daysLeft, reload, token, isLoading, error } =
     useOutletContext<AccountOutletContext>();
   const accessToken = token || undefined;
+  const logout = useAuth((state) => state.logout);
   const [data, setData] = useState<SubscriptionStatus | null>(null);
   const [cancelLoading, setCancelLoading] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
@@ -41,9 +43,14 @@ export default function AccountSubscription() {
       const status = await apiGet("/subscriptions/status", accessToken);
       setData(status);
     } catch (err) {
+      if (isUnauthorizedError(err)) {
+        logout();
+        setData(null);
+        return;
+      }
       console.error("Failed to load subscription status", err);
     }
-  }, [accessToken]);
+  }, [accessToken, logout]);
 
   useEffect(() => {
     fetchStatus();
@@ -183,6 +190,11 @@ export default function AccountSubscription() {
                       setCancelError("Не удалось отменить подписку. Попробуйте позже.");
                     }
                   } catch (err) {
+                    if (isUnauthorizedError(err)) {
+                      logout();
+                      setCancelError(null);
+                      return;
+                    }
                     console.error("Failed to cancel subscription", err);
                     alert("Не удалось отменить подписку");
                     setCancelError("Не удалось отменить подписку. Попробуйте позже.");

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
-import { apiGet } from "@/lib/api";
+import { apiGet, isUnauthorizedError } from "@/lib/api";
+import { useAuth } from "@/store/auth";
 import type { AccountOutletContext } from "./Layout";
 
 type RawHistoryResponse = unknown;
@@ -112,6 +113,7 @@ export default function SubscriptionHistoryPage() {
   const { token } = useOutletContext<AccountOutletContext>();
   const [state, setState] = useState<FetchState>({ data: [], loading: true, error: null });
   const accessToken = token || undefined;
+  const logout = useAuth((state) => state.logout);
 
   const loadHistory = useCallback(async () => {
     if (!accessToken) {
@@ -126,10 +128,15 @@ export default function SubscriptionHistoryPage() {
       const normalized = normalizeHistoryResponse(response);
       setState({ data: normalized, loading: false, error: null });
     } catch (error) {
+      if (isUnauthorizedError(error)) {
+        logout();
+        setState({ data: [], loading: false, error: null });
+        return;
+      }
       console.error("Failed to load subscription history", error);
       setState({ data: [], loading: false, error: "Не удалось загрузить историю. Попробуйте снова." });
     }
-  }, [accessToken]);
+  }, [accessToken, logout]);
 
   useEffect(() => {
     loadHistory();
