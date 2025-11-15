@@ -1,5 +1,44 @@
 // src/lib/api.ts
-export const API_BASE = import.meta.env.VITE_PD_API_BASE || "https://pd.restaurantsecret.ru";
+export const API_BASE =
+  import.meta.env.VITE_PD_API_BASE || "https://pd.restaurantsecret.ru";
+
+export type SearchSuggestionRestaurant = {
+  id: number;
+  slug: string;
+  name: string;
+  city?: string | null;
+};
+
+export type SearchSuggestionDish = {
+  id: number;
+  dishName: string;
+  restaurantName: string;
+  restaurantSlug: string;
+};
+
+export type SearchSuggestions = {
+  restaurants: SearchSuggestionRestaurant[];
+  dishes: SearchSuggestionDish[];
+};
+
+export type SearchRestaurant = {
+  id: number;
+  slug: string;
+  name: string;
+  city?: string | null;
+};
+
+export type SearchDish = {
+  id: number;
+  dishName: string;
+  restaurantName: string;
+  restaurantSlug: string;
+};
+
+export type SearchResult = {
+  restaurants: SearchRestaurant[];
+  dishes: SearchDish[];
+};
 
 export class ApiError extends Error {
   status?: number;
@@ -135,4 +174,12 @@ export async function apiPost<T = unknown>(path: string, body?: unknown, token?:
   }
 
   return handleResponse<T>(res);
+}
+
+export async function searchSuggest(query: string): Promise<SearchSuggestions> {
+  return apiGet(`/search/suggest?query=${encodeURIComponent(query)}`);
+}
+
+export async function searchFull(query: string): Promise<SearchResult> {
+  return apiGet(`/search?query=${encodeURIComponent(query)}`);
 }
