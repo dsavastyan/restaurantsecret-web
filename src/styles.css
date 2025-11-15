@@ -1361,6 +1361,12 @@ body.tg-dark .login__alert {
   color: #294b43cc;
 }
 
+.hero__search {
+  width: 100%;
+  max-width: 460px;
+  margin-top: clamp(8px, 2vw, 16px);
+}
+
 .hero__cta {
   display: inline-block;
   margin-top: clamp(8px, 2vw, 16px);

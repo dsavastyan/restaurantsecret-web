@@ -9,8 +9,9 @@ const waitForSuccessfulResponse = (page, predicate) =>
 test('@smoke landing to restaurant flow is gated by paywall', async ({ page }) => {
   await page.goto('/')
 
-  const cta = page.getByRole('link', { name: 'Посмотреть рестораны' })
-  await expect(cta).toBeVisible()
+  const search = page.getByPlaceholder('Найти ресторан или блюдо')
+  await expect(search).toBeVisible()
+  await search.fill('суши')
 
   // Moving past the landing page should fetch the catalog data.
   const catalogResponsePromise = waitForSuccessfulResponse(page, (response) => {
@@ -19,8 +20,8 @@ test('@smoke landing to restaurant flow is gated by paywall', async ({ page }) =
   })
 
   await Promise.all([
-    page.waitForURL('**/restaurants'),
-    cta.click()
+    page.waitForURL('**/catalog*'),
+    search.press('Enter')
   ])
 
   const catalogResponse = await catalogResponsePromise

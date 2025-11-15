@@ -10,6 +10,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import SearchInput from '@/components/SearchInput'
 import { API_BASE } from '@/config/api'
 
 export default function Landing() {
@@ -26,6 +27,8 @@ export default function Landing() {
 
 // Hero section with simple CTA guiding users to the catalog.
 function Hero() {
+  const [query, setQuery] = useState('')
+
   return (
     <header className="hero" aria-labelledby="hero-title">
       <div className="hero__brand">
@@ -43,9 +46,9 @@ function Hero() {
 
       <p className="hero__subtitle">Ешь вкусно, выбирай осознанно</p>
 
-      <Link to="/restaurants" className="hero__cta">
-        Посмотреть рестораны
-      </Link>
+      <div className="hero__search">
+        <SearchInput value={query} onChange={setQuery} />
+      </div>
     </header>
   )
 }
