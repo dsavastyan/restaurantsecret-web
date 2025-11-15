@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Outlet, useLocation } from 'react-router-dom'
 import NavBar from '@/components/NavBar'
+import SearchInput from '@/components/SearchInput'
 import Paywall from '../components/Paywall.jsx'
 import { API_BASE } from '@/config/api'
 
@@ -25,6 +26,7 @@ export default function AppShell() {
     }
   })
   const [paywallVisible, setPaywallVisible] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   // Merge new access info into state. A falsy value resets to defaults.
   const handleAccessUpdate = useCallback((next) => {
@@ -178,6 +180,7 @@ export default function AppShell() {
   const hideGlobalSearch =
     isLanding ||
     location.pathname.startsWith('/r/') ||
+    location.pathname.startsWith('/restaurants/') ||
     location.pathname.startsWith('/login') ||
     location.pathname.startsWith('/account')
 
@@ -187,9 +190,11 @@ export default function AppShell() {
       <main className="flex-1">
         <div className={showPaywall ? 'container locked' : 'container'}>
           {!hideGlobalSearch && (
-            <form action="/search" method="get" className="search">
-              <input name="q" placeholder="Найти блюдо..." aria-label="Search" />
-            </form>
+            <div className="app-shell__search">
+              <div className="app-shell__search-inner">
+                <SearchInput value={searchQuery} onChange={setSearchQuery} />
+              </div>
+            </div>
           )}
           <Outlet context={outletContext} />
         </div>
