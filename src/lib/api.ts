@@ -2,6 +2,9 @@
 export const API_BASE =
   import.meta.env.VITE_PD_API_BASE || "https://pd.restaurantsecret.ru";
 
+export const PUBLIC_API_BASE =
+  import.meta.env.VITE_PUBLIC_API_BASE || "https://api.restaurantsecret.ru";
+
 export type SearchSuggestionRestaurant = {
   id: number;
   slug: string;
@@ -84,6 +87,17 @@ async function doFetch(path: string, init: RequestInit = {}, token?: string) {
     credentials: "include", // важно для refresh
   });
   return res;
+}
+
+async function publicGet<T>(path: string): Promise<T> {
+  const res = await fetch(`${PUBLIC_API_BASE}${path}`, {
+    method: "GET",
+    credentials: "omit",
+  });
+  if (!res.ok) {
+    throw new Error(`Public API error ${res.status}`);
+  }
+  return res.json();
 }
 
 export const isUnauthorizedError = (error: unknown): error is ApiError => {
@@ -177,9 +191,13 @@ export async function apiPost<T = unknown>(path: string, body?: unknown, token?:
 }
 
 export async function searchSuggest(query: string): Promise<SearchSuggestions> {
-  return apiGet(`/search/suggest?query=${encodeURIComponent(query)}`);
+  return publicGet<SearchSuggestions>(
+    `/search/suggest?query=${encodeURIComponent(query)}`
+  );
 }
 
 export async function searchFull(query: string): Promise<SearchResult> {
-  return apiGet(`/search?query=${encodeURIComponent(query)}`);
+  return publicGet<SearchResult>(
+    `/search?query=${encodeURIComponent(query)}`
+  );
 }
