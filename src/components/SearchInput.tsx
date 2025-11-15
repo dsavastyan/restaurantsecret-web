@@ -99,13 +99,13 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
     setIsOpen(false);
     setSuggestions(null);
     setHighlightedIndex(null);
+    onChange("");
 
     if (item.kind === "restaurant") {
-      navigate(`/r/${item.slug}`);
-      return;
+      navigate(`/restaurants/${item.slug}`);
+    } else {
+      navigate(`/restaurants/${item.restaurantSlug}/menu#dish-${item.id}`);
     }
-
-    navigate(`/r/${item.restaurantSlug}/menu`);
   };
 
   const hasHighlightedSuggestion = isOpen && highlightedIndex !== null;
@@ -179,6 +179,7 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
                 {suggestions.restaurants.map((restaurant, idx) => {
                   const flatIndex = idx;
                   const isActive = highlightedIndex === flatIndex;
+                  const item = flatItems[flatIndex];
                   return (
                     <li key={`restaurant-${restaurant.id}`}>
                       <button
@@ -188,12 +189,7 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
                         onMouseEnter={() => setHighlightedIndex(flatIndex)}
                         onMouseLeave={() => setHighlightedIndex(null)}
                         onMouseDown={(event) => event.preventDefault()}
-                        onClick={() =>
-                          handleSelect({
-                            ...restaurant,
-                            kind: "restaurant",
-                          })
-                        }
+                        onClick={() => item && handleSelect(item)}
                       >
                         <span className="search-input__item-title">{restaurant.name}</span>
                         {restaurant.city && (
@@ -214,6 +210,7 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
                 {suggestions.dishes.map((dish, idx) => {
                   const flatIndex = restaurantCount + idx;
                   const isActive = highlightedIndex === flatIndex;
+                  const item = flatItems[flatIndex];
                   return (
                     <li key={`dish-${dish.id}`}>
                       <button
@@ -223,12 +220,7 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
                         onMouseEnter={() => setHighlightedIndex(flatIndex)}
                         onMouseLeave={() => setHighlightedIndex(null)}
                         onMouseDown={(event) => event.preventDefault()}
-                        onClick={() =>
-                          handleSelect({
-                            ...dish,
-                            kind: "dish",
-                          })
-                        }
+                        onClick={() => item && handleSelect(item)}
                       >
                         <span className="search-input__item-title">{dish.dishName}</span>
                         <span className="search-input__item-subtitle">

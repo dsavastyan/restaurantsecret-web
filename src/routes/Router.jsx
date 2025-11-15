@@ -36,6 +36,8 @@ function AppRoutes() {
         <Route path="catalog" element={<Catalog />} />
         <Route path="restaurants" element={<Catalog />} />
         <Route path="search" element={<Search />} />
+        <Route path="restaurants/:slug" element={<RestaurantPage />} />
+        <Route path="restaurants/:slug/menu" element={<Menu />} />
         <Route path="r/:slug" element={<RestaurantPage />} />
         <Route path="r/:slug/menu" element={<Menu />} />
         <Route path="pay/success" element={<PaySuccess />} />
