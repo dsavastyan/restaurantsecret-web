@@ -3,6 +3,7 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import Router from './routes/Router.jsx'
+import ToastViewport from './components/ui/ToastViewport.tsx'
 import './styles.css'
 
 // Register the service worker (if supported) once the page has fully loaded so
@@ -15,4 +16,9 @@ if ('serviceWorker' in navigator) {
 }
 
 // Mount the root router. The Router component contains all route definitions.
-createRoot(document.getElementById('root')).render(<Router />)
+createRoot(document.getElementById('root')).render(
+  <>
+    <Router />
+    <ToastViewport />
+  </>
+)
