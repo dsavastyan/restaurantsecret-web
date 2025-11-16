@@ -7,7 +7,7 @@
 // - Блок преимуществ под hero показывает три ключевые выгоды (без отдельного заголовка)
 // - SEO meta tags to be placed in index.html (not here)
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import SearchInput from '@/components/SearchInput'
@@ -22,7 +22,6 @@ export default function Landing() {
       <Hero />
       <WhyImportant />
       <RestaurantsSection />
-      <SuggestRestaurant />
       <Footer />
     </main>
   )
@@ -31,6 +30,31 @@ export default function Landing() {
 // Hero section with simple CTA guiding users to the catalog.
 function Hero() {
   const [query, setQuery] = useState('')
+  const [suggestOpen, setSuggestOpen] = useState(false)
+  const searchZoneRef = useRef(null)
+
+  useEffect(() => {
+    if (!suggestOpen) return
+
+    function handleClickOutside(event) {
+      if (!searchZoneRef.current?.contains(event.target)) {
+        setSuggestOpen(false)
+      }
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        setSuggestOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [suggestOpen])
 
   return (
     <header className="hero" aria-labelledby="hero-title">
@@ -49,8 +73,17 @@ function Hero() {
 
       <p className="hero__subtitle">Ешь вкусно, выбирай осознанно</p>
 
-      <div className="hero__search">
+      <div className="hero__search" ref={searchZoneRef}>
         <SearchInput value={query} onChange={setQuery} />
+        <button
+          type="button"
+          className="hero__suggest-trigger"
+          onClick={() => setSuggestOpen((prev) => !prev)}
+          aria-expanded={suggestOpen}
+        >
+          Не нашли нужный ресторан или блюдо?
+        </button>
+        {suggestOpen && <SuggestPopover onClose={() => setSuggestOpen(false)} />}
       </div>
     </header>
   )
@@ -192,45 +225,52 @@ function RestaurantCard({ item }) {
   )
 }
 
-// Minimal form for collecting user suggestions when a restaurant is missing.
-function SuggestRestaurant() {
+// Popover with a suggestion form that posts to the /suggest endpoint.
+function SuggestPopover({ onClose }) {
   const accessToken = useAuth((state) => state.accessToken)
   const accessTokenOrUndefined = accessToken || undefined
+  const [type, setType] = useState('restaurant')
   const [name, setName] = useState('')
-  const [status, setStatus] = useState('idle') // idle | done | error
+  const [city, setCity] = useState('')
+  const [url, setUrl] = useState('')
+  const [comment, setComment] = useState('')
+  const [email, setEmail] = useState('')
   const [validationError, setValidationError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  async function submit(e) {
-    e.preventDefault()
+  async function handleSubmit(event) {
+    event.preventDefault()
     const trimmedName = name.trim()
     if (!trimmedName) {
-      setValidationError('Введите название ресторана')
+      setValidationError('Укажите название')
       return
     }
 
     setValidationError('')
     setSubmitting(true)
-    setStatus('idle')
 
     try {
       await postSuggest(
         {
-          type: 'restaurant',
+          type,
           name: trimmedName,
-          city: 'Москва',
-          url: null,
-          comment: null,
-          email: null,
+          city: city.trim() || null,
+          url: url.trim() || null,
+          comment: comment.trim() || null,
+          email: email.trim() || null,
         },
         accessTokenOrUndefined
       )
-      setName('')
-      setStatus('done')
       toast.success('Заявка отправлена')
+      setType('restaurant')
+      setName('')
+      setCity('')
+      setUrl('')
+      setComment('')
+      setEmail('')
+      onClose?.()
     } catch (error) {
       console.error('Failed to submit suggestion', error)
-      setStatus('error')
       toast.error('Не удалось отправить заявку. Попробуйте ещё раз.')
     } finally {
       setSubmitting(false)
@@ -238,39 +278,68 @@ function SuggestRestaurant() {
   }
 
   return (
-    <section className="suggest" aria-labelledby="suggest-title">
-      <div className="container">
-        <h3 id="suggest-title" className="section-title section-title--small">Не нашли нужный ресторан?</h3>
-        <p className="section-subtitle">Сообщите нам, и мы добавим его в базу.</p>
-        <form onSubmit={submit} className="suggest__form" noValidate>
-          <input
-            className="input"
-            type="text"
-            name="restaurant_name"
-            placeholder="Введите название ресторана"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value)
-              if (status !== 'idle') setStatus('idle')
-              if (validationError) setValidationError('')
-            }}
-            aria-label="Название ресторана"
-            required
-            minLength={2}
-          />
-          <button className="btn btn--primary" type="submit" disabled={submitting}>
-            {submitting ? 'Отправляем…' : 'Отправить'}
-          </button>
-        </form>
-        {validationError && (
-          <p className="hint hint--error" role="status">{validationError}</p>
-        )}
-        {status === 'done' && <p className="hint" role="status">Спасибо! Мы учтём ваш запрос 🙌</p>}
-        {status === 'error' && !validationError && (
-          <p className="hint hint--error" role="status">Не удалось отправить. Попробуйте ещё раз позже.</p>
-        )}
+    <div className="suggest-popover" role="dialog" aria-label="Форма заявки" aria-modal="false">
+      <div className="suggest-popover__header">
+        <p className="suggest-popover__title">Расскажите, что нужно добавить</p>
+        <button type="button" className="suggest-popover__close" onClick={onClose} aria-label="Закрыть">
+          ×
+        </button>
       </div>
-    </section>
+      <form className="suggest-popover__form" onSubmit={handleSubmit} noValidate>
+        <fieldset className="suggest-popover__fieldset">
+          <legend className="suggest-popover__legend">Тип заявки</legend>
+          <label className="suggest-popover__choice">
+            <input type="radio" name="suggest-type" value="restaurant" checked={type === 'restaurant'} onChange={() => setType('restaurant')} />
+            Ресторан
+          </label>
+          <label className="suggest-popover__choice">
+            <input type="radio" name="suggest-type" value="dish" checked={type === 'dish'} onChange={() => setType('dish')} />
+            Блюдо
+          </label>
+        </fieldset>
+
+        <label className="suggest-popover__field">
+          <span>Название *</span>
+          <input
+            type="text"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            placeholder={type === 'restaurant' ? 'Например, Cafe Pushkin' : 'Например, Том ям'}
+            required
+          />
+        </label>
+
+        <label className="suggest-popover__field">
+          <span>Город</span>
+          <input type="text" value={city} onChange={(event) => setCity(event.target.value)} placeholder="Москва" />
+        </label>
+
+        <label className="suggest-popover__field">
+          <span>Ссылка</span>
+          <input type="url" value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://" inputMode="url" />
+        </label>
+
+        <label className="suggest-popover__field">
+          <span>Комментарий</span>
+          <textarea value={comment} onChange={(event) => setComment(event.target.value)} rows={3} placeholder="Что именно нужно добавить" />
+        </label>
+
+        <label className="suggest-popover__field">
+          <span>Email для обратной связи</span>
+          <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@example.com" inputMode="email" />
+        </label>
+
+        {validationError && (
+          <p className="hint hint--error" role="status">
+            {validationError}
+          </p>
+        )}
+
+        <button className="btn btn--primary" type="submit" disabled={submitting}>
+          {submitting ? 'Отправляем…' : 'Отправить'}
+        </button>
+      </form>
+    </div>
   )
 }
 
