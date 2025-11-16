@@ -43,6 +43,15 @@ export type SearchResult = {
   dishes: SearchDish[];
 };
 
+export type SuggestRequest = {
+  type: string;
+  name: string;
+  city?: string | null;
+  url?: string | null;
+  comment?: string | null;
+  email?: string | null;
+};
+
 export class ApiError extends Error {
   status?: number;
   payload?: unknown;
@@ -188,6 +197,10 @@ export async function apiPost<T = unknown>(path: string, body?: unknown, token?:
   }
 
   return handleResponse<T>(res);
+}
+
+export function postSuggest(body: SuggestRequest, token?: string) {
+  return apiPost("/suggest", body, token);
 }
 
 export async function searchSuggest(query: string): Promise<SearchSuggestions> {

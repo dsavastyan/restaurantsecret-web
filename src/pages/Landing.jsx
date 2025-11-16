@@ -12,6 +12,9 @@ import { Link } from 'react-router-dom'
 
 import SearchInput from '@/components/SearchInput'
 import { API_BASE } from '@/config/api'
+import { postSuggest } from '@/lib/api'
+import { toast } from '@/lib/toast'
+import { useAuth } from '@/store/auth'
 
 export default function Landing() {
   return (
@@ -191,26 +194,46 @@ function RestaurantCard({ item }) {
 
 // Minimal form for collecting user suggestions when a restaurant is missing.
 function SuggestRestaurant() {
+  const accessToken = useAuth((state) => state.accessToken)
+  const accessTokenOrUndefined = accessToken || undefined
   const [name, setName] = useState('')
-  const [state, setState] = useState('idle') // idle | sending | done | error
+  const [status, setStatus] = useState('idle') // idle | done | error
+  const [validationError, setValidationError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   async function submit(e) {
     e.preventDefault()
-    if (!name.trim()) return
+    const trimmedName = name.trim()
+    if (!trimmedName) {
+      setValidationError('Введите название ресторана')
+      return
+    }
+
+    setValidationError('')
+    setSubmitting(true)
+    setStatus('idle')
+
     try {
-      setState('sending')
-      const res = await fetch('/suggest-restaurant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ restaurant_name: name.trim(), city: 'Москва', source: 'landing' })
-      })
-      if (!res.ok) throw new Error('NETWORK')
+      await postSuggest(
+        {
+          type: 'restaurant',
+          name: trimmedName,
+          city: 'Москва',
+          url: null,
+          comment: null,
+          email: null,
+        },
+        accessTokenOrUndefined
+      )
       setName('')
-      setState('done')
-      // Optional toast can be triggered by parent app
-      // Here we keep it quiet to avoid intrusive alerts
-    } catch (e) {
-      setState('error')
+      setStatus('done')
+      toast.success('Заявка отправлена')
+    } catch (error) {
+      console.error('Failed to submit suggestion', error)
+      setStatus('error')
+      toast.error('Не удалось отправить заявку. Попробуйте ещё раз.')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -226,17 +249,26 @@ function SuggestRestaurant() {
             name="restaurant_name"
             placeholder="Введите название ресторана"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value)
+              if (status !== 'idle') setStatus('idle')
+              if (validationError) setValidationError('')
+            }}
             aria-label="Название ресторана"
             required
             minLength={2}
           />
-          <button className="btn btn--primary" type="submit" disabled={state==='sending'}>
-            {state === 'sending' ? 'Отправляем…' : 'Отправить'}
+          <button className="btn btn--primary" type="submit" disabled={submitting}>
+            {submitting ? 'Отправляем…' : 'Отправить'}
           </button>
         </form>
-        {state === 'done' && <p className="hint" role="status">Спасибо! Мы учтём ваш запрос 🙌</p>}
-        {state === 'error' && <p className="hint hint--error" role="status">Не удалось отправить. Попробуйте ещё раз позже.</p>}
+        {validationError && (
+          <p className="hint hint--error" role="status">{validationError}</p>
+        )}
+        {status === 'done' && <p className="hint" role="status">Спасибо! Мы учтём ваш запрос 🙌</p>}
+        {status === 'error' && !validationError && (
+          <p className="hint hint--error" role="status">Не удалось отправить. Попробуйте ещё раз позже.</p>
+        )}
       </div>
     </section>
   )
