@@ -19,15 +19,12 @@ export type SearchInputProps = {
   onChange: (value: string) => void;
 };
 
-type SearchMode = "restaurants" | "dishes";
-
 export function SearchInput({ value, onChange }: SearchInputProps) {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [suggestions, setSuggestions] = useState<SearchSuggestions | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
-  const [mode, setMode] = useState<SearchMode>("restaurants");
 
   useEffect(() => {
     const q = value.trim();
@@ -119,16 +116,11 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
     ? `search-suggestion-${activeItem.kind}-${activeItem.id}`
     : undefined;
 
-  const buildCatalogUrl = (q: string) => {
-    const base =
-      mode === "restaurants" ? "/catalog/restaurants" : "/catalog/dishes";
-    return `${base}?query=${encodeURIComponent(q)}`;
-  };
+  const buildCatalogUrl = (q: string) => `/catalog?query=${encodeURIComponent(q)}`;
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    const q = value.trim();
-
     if (e.key === "Enter" && !hasHighlightedSuggestion) {
+      const q = value.trim();
       if (!q) return;
       navigate(buildCatalogUrl(q));
       return;
@@ -164,28 +156,6 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
 
   return (
     <div className="search-input" ref={containerRef}>
-      <div className="search-input__mode-toggle" role="group" aria-label="Режим поиска">
-        <button
-          type="button"
-          className={`search-input__mode-button${
-            mode === "restaurants" ? " is-active" : ""
-          }`}
-          onClick={() => setMode("restaurants")}
-          aria-pressed={mode === "restaurants"}
-        >
-          Рестораны
-        </button>
-        <button
-          type="button"
-          className={`search-input__mode-button${
-            mode === "dishes" ? " is-active" : ""
-          }`}
-          onClick={() => setMode("dishes")}
-          aria-pressed={mode === "dishes"}
-        >
-          Блюда
-        </button>
-      </div>
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
