@@ -1580,30 +1580,73 @@ body.tg-dark .login__alert {
   }
 }
 
-/* ===== RESTAURANTS GRID ===== */
+/* ===== RESTAURANTS MARQUEE ===== */
 .restaurants {
   padding: clamp(8px, 3vw, 24px);
 }
 
-.restaurants__grid {
-  list-style: none;
+.section-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.section-heading .section-title {
   margin: 0;
-  padding: 0;
-  display: grid;
-  gap: clamp(8px, 2vw, 16px);
-  grid-template-columns: 1fr;
 }
 
-@media (min-width: 768px) {
-  .restaurants__grid { grid-template-columns: 1fr 1fr; }
+.section-heading .section-subtitle {
+  margin: 0;
+  color: #4b635a;
+  font-size: 14px;
 }
 
-@media (min-width: 1140px) {
-  .restaurants__grid { grid-template-columns: 1fr 1fr 1fr; }
+.restaurants-marquee {
+  position: relative;
+  overflow: hidden;
+  margin: 4px 0 10px;
+}
+
+.restaurants-marquee__track {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  animation: marquee-scroll 28s linear infinite;
+  padding: 4px 2px;
+}
+
+.restaurants-marquee.is-loading .restaurants-marquee__track {
+  animation-duration: 16s;
+}
+
+.restaurants-marquee__fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 68px;
+  pointer-events: none;
+  background: linear-gradient(to right, #fff 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+.restaurants-marquee__fade--left {
+  left: 0;
+}
+
+.restaurants-marquee__fade--right {
+  right: 0;
+  transform: rotate(180deg);
 }
 
 .restaurant-item {
-  /* container for each restaurant card */
+  flex: 0 0 240px;
+}
+
+@media (max-width: 520px) {
+  .restaurant-item {
+    flex-basis: 200px;
+  }
 }
 
 .restaurant-card {
@@ -1699,6 +1742,15 @@ body.tg-dark .login__alert {
 @keyframes shimmer {
   0% { transform: translateX(-60%); }
   100% { transform: translateX(60%); }
+}
+
+@keyframes marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .restaurants-marquee__track { animation: none; }
 }
 
 /* Toasts */

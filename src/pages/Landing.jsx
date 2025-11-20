@@ -158,43 +158,38 @@ function RestaurantsSection() {
     return () => { aborted = true }
   }, [])
 
-  let content = null
-
-  if (loading) {
-    content = (
-      <ul className="restaurants__grid" aria-hidden="true">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <li key={i} className="restaurant-item">
-            <div className="restaurant-card skeleton" aria-hidden="true">
-              <div className="restaurant-badge" aria-hidden="true">&nbsp;</div>
-              <div className="restaurant-text">
-                <div className="restaurant-name">&nbsp;</div>
-                <div className="restaurant-cuisine">&nbsp;</div>
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
-    )
-  } else if (error) {
-    content = <div className="error">{error}</div>
-  } else {
-    content = (
-      <ul className="restaurants__grid">
-        {items.map((r) => (
-          <RestaurantCard key={r.id || r.slug || r.name} item={r} />
-        ))}
-      </ul>
-    )
-  }
+  const hasData = items.length > 0
+  const marqueeItems = hasData
+    ? [...items, ...items]
+    : Array.from({ length: 12 }).map((_, i) => ({ id: `placeholder-${i}` }))
 
   return (
     <section className="restaurants" aria-label="Список ресторанов">
       <div className="container">
-        <h2 id="restaurants-title" className="section-title">Мы уже собрали меню этих ресторанов Москвы</h2>
-        <p className="section-subtitle">Мы постепенно добавляем новые рестораны — напишите нам, если вашего пока нет.</p>
+        <div className="section-heading">
+          <h2 id="restaurants-title" className="section-title">Рестораны в каталоге</h2>
+          <p className="section-subtitle">Лента листается автоматически — кликните карточку, чтобы перейти к меню.</p>
+        </div>
 
-        {content}
+        {error ? (
+          <div className="error">{error}</div>
+        ) : (
+          <div
+            className={`restaurants-marquee${loading ? ' is-loading' : ''}`}
+            role="presentation"
+            aria-hidden={loading && !hasData}
+          >
+            <div className="restaurants-marquee__track" aria-live={loading ? 'polite' : 'off'}>
+              {marqueeItems.map((r, index) => (
+                <div className="restaurant-item" key={`${r.id || r.slug || r.name || 'item'}-${index}`}>
+                  <RestaurantCard item={r} skeleton={!hasData} />
+                </div>
+              ))}
+            </div>
+            <div className="restaurants-marquee__fade restaurants-marquee__fade--left" aria-hidden="true" />
+            <div className="restaurants-marquee__fade restaurants-marquee__fade--right" aria-hidden="true" />
+          </div>
+        )}
 
         <div className="center">
           <Link className="btn btn--outline" to="/restaurants">Показать все рестораны</Link>
@@ -205,23 +200,33 @@ function RestaurantsSection() {
 }
 
 // A single restaurant card used in the preview grid.
-function RestaurantCard({ item }) {
+function RestaurantCard({ item, skeleton = false }) {
   const title = item?.name || 'Ресторан'
   const cuisine = item?.cuisine || item?.cuisine_name || ''
   const slug = item?.slug || ''
   const initials = useMemo(() => getInitials(title), [title])
   const href = slug ? `/r/${slug}/menu` : '#'
 
-  return (
-    <li className="restaurant-item">
-      <Link className="restaurant-card" to={href} title={`Меню ${title} с КБЖУ и составом блюд`}>
-        <div className="restaurant-badge" aria-hidden="true">{initials}</div>
+  if (skeleton) {
+    return (
+      <div className="restaurant-card skeleton" aria-hidden="true">
+        <div className="restaurant-badge" aria-hidden="true">&nbsp;</div>
         <div className="restaurant-text">
-          <div className="restaurant-name">{title}</div>
-          {cuisine && <div className="restaurant-cuisine">{cuisine}</div>}
+          <div className="restaurant-name">&nbsp;</div>
+          <div className="restaurant-cuisine">&nbsp;</div>
         </div>
-      </Link>
-    </li>
+      </div>
+    )
+  }
+
+  return (
+    <Link className="restaurant-card" to={href} title={`Меню ${title} с КБЖУ и составом блюд`}>
+      <div className="restaurant-badge" aria-hidden="true">{initials}</div>
+      <div className="restaurant-text">
+        <div className="restaurant-name">{title}</div>
+        {cuisine && <div className="restaurant-cuisine">{cuisine}</div>}
+      </div>
+    </Link>
   )
 }
 
