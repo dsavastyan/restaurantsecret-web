@@ -13,6 +13,7 @@ import {
   type SearchSuggestionRestaurant,
   type SearchSuggestions,
 } from "@/lib/api";
+import { useDishCardStore } from "@/store/dishCard";
 
 export type SearchInputProps = {
   value: string;
@@ -25,6 +26,7 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
   const [suggestions, setSuggestions] = useState<SearchSuggestions | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
+  const openDishCard = useDishCardStore((state) => state.open);
 
   useEffect(() => {
     const q = value.trim();
@@ -93,18 +95,34 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
     ];
   }, [suggestions]);
 
+  const handleDishOpen = useMemo(
+    () =>
+      (dish: SearchSuggestionDish) => {
+        setIsOpen(false);
+        setSuggestions(null);
+        setHighlightedIndex(null);
+        onChange("");
+        openDishCard({
+          id: dish.id,
+          dishName: dish.dishName,
+          restaurantSlug: dish.restaurantSlug,
+          restaurantName: dish.restaurantName,
+        });
+      },
+    [onChange, openDishCard]
+  );
+
   const restaurantCount = suggestions?.restaurants.length ?? 0;
 
   const handleSelect = (item: FlatItem) => {
-    setIsOpen(false);
-    setSuggestions(null);
-    setHighlightedIndex(null);
-    onChange("");
-
     if (item.kind === "restaurant") {
+      setIsOpen(false);
+      setSuggestions(null);
+      setHighlightedIndex(null);
+      onChange("");
       navigate(`/restaurants/${item.slug}`);
     } else {
-      navigate(`/restaurants/${item.restaurantSlug}/menu#dish-${item.id}`);
+      handleDishOpen(item);
     }
   };
 
@@ -153,6 +171,21 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
       setHighlightedIndex(null);
     }
   };
+
+  useEffect(() => {
+    if (!suggestions) return;
+
+    const onlyDish = suggestions.dishes.length === 1 ? suggestions.dishes[0] : null;
+    const normalizedQuery = value.trim().toLowerCase();
+
+    if (
+      onlyDish &&
+      normalizedQuery &&
+      normalizedQuery === onlyDish.dishName.trim().toLowerCase()
+    ) {
+      handleDishOpen(onlyDish);
+    }
+  }, [handleDishOpen, suggestions, value]);
 
   return (
     <div className="search-input" ref={containerRef}>
