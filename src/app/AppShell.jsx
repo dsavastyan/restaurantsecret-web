@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { Outlet, useLocation } from 'react-router-dom'
 import NavBar from '@/components/NavBar'
 import SearchInput from '@/components/SearchInput'
+import DishCardModal from '@/components/DishCardModal'
 import Paywall from '../components/Paywall.jsx'
 import { API_BASE } from '@/config/api'
 
@@ -187,6 +188,7 @@ export default function AppShell() {
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
+      <DishCardModal />
       <main className="flex-1">
         <div className={showPaywall ? 'container locked' : 'container'}>
           {!hideGlobalSearch && (
