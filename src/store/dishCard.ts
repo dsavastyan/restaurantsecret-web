@@ -265,10 +265,9 @@ function closeDishCard() {
 
 state = { ...state, open: openDishCard, close: closeDishCard } as DishCardState;
 
-export const useDishCardStore = <T,>(
-  selector: (state: DishCardState) => T,
-): T => {
-  return useSyncExternalStore(subscribe, () => selector(state));
+export const useDishCardStore = <T,>(selector: (state: DishCardState) => T): T => {
+  const snapshot = useSyncExternalStore(subscribe, () => state, () => state);
+  return selector(snapshot);
 };
 
 export type { DishCardData, DishCardDraft };
