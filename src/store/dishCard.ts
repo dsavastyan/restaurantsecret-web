@@ -129,6 +129,15 @@ const normalizeAllergens = (dish: Record<string, unknown> | null) => {
   return Array.from(result);
 };
 
+const sanitizePortionLabel = (label: string) => {
+  const withoutPerPrefix = label
+    .trim()
+    .replace(/^per\s+/i, "")
+    .replace(/^(portion|serving)\s*/i, "");
+
+  return withoutPerPrefix.trim();
+};
+
 const buildPortionLabel = (dish: Record<string, unknown>) => {
   const explicitLabel =
     (dish?.portionLabel as string) ||
@@ -137,7 +146,8 @@ const buildPortionLabel = (dish: Record<string, unknown>) => {
     (dish?.per as string);
 
   if (explicitLabel && explicitLabel.trim().length > 0) {
-    return explicitLabel.trim();
+    const cleaned = sanitizePortionLabel(explicitLabel);
+    if (cleaned) return cleaned;
   }
 
   const weight = pickNumber(dish, [
