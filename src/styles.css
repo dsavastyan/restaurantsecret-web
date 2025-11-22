@@ -5,7 +5,7 @@
   --rs-text: #111827;
   --rs-muted: #6b7280;
   --rs-bg: #fff;
-  --rs-accent: #34c759;
+  --rs-accent: #2f8f5b;
   --rs-primary: #f25f3a;
   --rs-shadow: 0 12px 34px rgba(17, 24, 39, 0.08);
   --rs-radius: 22px;
@@ -51,17 +51,18 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
   color: #fff;
 }
 .btn--primary:hover {
-  background: #111;
+  background: #27774c;
   color: #fff;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, .12);
+  box-shadow: 0 8px 20px rgba(39, 119, 76, 0.22);
 }
 .navbar .btn--primary {
   background: var(--rs-accent);
   color: #fff;
 }
 .navbar .btn--primary:hover {
-  background: #111;
+  background: #27774c;
   color: #fff;
+  box-shadow: 0 10px 22px rgba(39, 119, 76, 0.26);
 }
 .btn--primary:active {
   transform: translateY(1px);
@@ -106,7 +107,7 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
 .search-input__control:focus {
   outline: none;
   border-color: var(--rs-accent);
-  box-shadow: 0 16px 34px rgba(52, 199, 89, 0.16);
+  box-shadow: 0 16px 34px rgba(47, 143, 91, 0.22);
   background: #fff;
 }
 .search-input__dropdown {
@@ -152,8 +153,8 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
 }
 .search-input__item:hover { background: rgba(243, 244, 246, 0.7); }
 .search-input__item.is-active {
-  background: linear-gradient(135deg, rgba(52, 199, 89, 0.12), rgba(242, 95, 58, 0.12));
-  box-shadow: 0 12px 22px rgba(52, 199, 89, 0.18);
+  background: linear-gradient(135deg, rgba(47, 143, 91, 0.14), rgba(242, 95, 58, 0.12));
+  box-shadow: 0 12px 22px rgba(47, 143, 91, 0.24);
   transform: translateY(-1px);
 }
 .search-input__item-title { font-weight: 600; font-size: 15px; color: var(--rs-text); }
@@ -201,7 +202,7 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
 .dish-card-overlay {
   position: fixed;
   inset: 0;
-  background: radial-gradient(circle at 20% 20%, rgba(52, 199, 89, 0.15), transparent 45%),
+  background: radial-gradient(circle at 20% 20%, rgba(47, 143, 91, 0.15), transparent 45%),
     radial-gradient(circle at 80% 0%, rgba(242, 95, 58, 0.15), transparent 40%),
     rgba(17, 24, 39, 0.5);
   backdrop-filter: blur(10px);
@@ -227,7 +228,7 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(52, 199, 89, 0.08), rgba(242, 95, 58, 0.08));
+  background: linear-gradient(135deg, rgba(47, 143, 91, 0.08), rgba(242, 95, 58, 0.08));
   opacity: 0.8;
   filter: blur(40px);
   z-index: 0;
@@ -277,8 +278,8 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  border: 4px solid rgba(52, 199, 89, 0.25);
-  border-top-color: #34c759;
+  border: 4px solid rgba(47, 143, 91, 0.25);
+  border-top-color: #2f8f5b;
   animation: spin 0.9s linear infinite;
 }
 
@@ -326,7 +327,7 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
 
 .dish-card__portion {
   padding: 10px 14px;
-  background: rgba(52, 199, 89, 0.12);
+  background: rgba(47, 143, 91, 0.12);
   color: #166534;
   border-radius: 14px;
   font-weight: 700;
@@ -362,8 +363,8 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
 }
 
 .dish-card__macro.is-accent {
-  background: linear-gradient(135deg, rgba(52, 199, 89, 0.14), rgba(242, 95, 58, 0.12));
-  border-color: rgba(52, 199, 89, 0.3);
+  background: linear-gradient(135deg, rgba(47, 143, 91, 0.14), rgba(242, 95, 58, 0.12));
+  border-color: rgba(47, 143, 91, 0.3);
 }
 
 .dish-card__macro-value {
@@ -479,7 +480,7 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
 .account {
   padding: clamp(32px, 6vw, 72px) 0 80px;
   background:
-    radial-gradient(120% 160% at 0% 0%, rgba(52, 199, 89, 0.05) 0%, transparent 55%),
+    radial-gradient(120% 160% at 0% 0%, rgba(47, 143, 91, 0.05) 0%, transparent 55%),
     radial-gradient(120% 160% at 100% 0%, rgba(242, 95, 58, 0.05) 0%, transparent 55%);
 }
 
@@ -1155,7 +1156,7 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
 
 body.tg-dark .account {
   background:
-    radial-gradient(120% 160% at 0% 0%, rgba(52, 199, 89, 0.12) 0%, transparent 55%),
+    radial-gradient(120% 160% at 0% 0%, rgba(47, 143, 91, 0.12) 0%, transparent 55%),
     radial-gradient(120% 160% at 100% 0%, rgba(96, 165, 250, 0.12) 0%, transparent 55%);
 }
 
@@ -1371,7 +1372,7 @@ body.tg-dark .search-input__dropdown {
 body.tg-dark .search-input__heading { color: rgba(229, 231, 235, 0.9); }
 body.tg-dark .search-input__item:hover { background: rgba(255, 255, 255, 0.06); }
 body.tg-dark .search-input__item.is-active {
-  box-shadow: 0 12px 22px rgba(52, 199, 89, 0.28);
+  box-shadow: 0 12px 22px rgba(47, 143, 91, 0.28);
 }
 body.tg-dark .search-input__empty { color: rgba(209, 213, 219, 0.9); }
 body.tg-dark .filter-search { background:#111827; color:#f9fafb; border-color:#374151; }
@@ -1390,7 +1391,7 @@ body.tg-dark .range-dash { color:#6b7280; }
   min-height: clamp(480px, 75vh, 640px);
   padding: clamp(24px, 5vw, 48px) 0;
   background:
-    radial-gradient(120% 160% at 0% 0%, rgba(52, 199, 89, 0.08) 0%, transparent 55%),
+    radial-gradient(120% 160% at 0% 0%, rgba(47, 143, 91, 0.08) 0%, transparent 55%),
     radial-gradient(120% 160% at 100% 10%, rgba(242, 95, 58, 0.08) 0%, transparent 55%);
 }
 
@@ -1465,7 +1466,7 @@ body.tg-dark .range-dash { color:#6b7280; }
 .login__input:focus {
   outline: none;
   border-color: var(--rs-accent);
-  box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.15);
+  box-shadow: 0 0 0 4px rgba(47, 143, 91, 0.15);
 }
 
 .login__input[aria-invalid="true"] {
@@ -1520,7 +1521,7 @@ body.tg-dark .range-dash { color:#6b7280; }
 
 body.tg-dark .login {
   background:
-    radial-gradient(120% 160% at 0% 0%, rgba(52, 199, 89, 0.22) 0%, transparent 55%),
+    radial-gradient(120% 160% at 0% 0%, rgba(47, 143, 91, 0.22) 0%, transparent 55%),
     radial-gradient(120% 160% at 100% 10%, rgba(242, 95, 58, 0.18) 0%, transparent 55%);
 }
 
@@ -1548,7 +1549,7 @@ body.tg-dark .login__input::placeholder {
 }
 
 body.tg-dark .login__input:focus {
-  box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.32);
+  box-shadow: 0 0 0 4px rgba(47, 143, 91, 0.32);
 }
 
 body.tg-dark .login__resend {
