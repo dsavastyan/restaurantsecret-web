@@ -1357,6 +1357,23 @@ body.tg-dark .rs-price-rub { color:#d1d5db; }
 body.tg-dark .rs-save { color:#34d399; border-bottom-color:rgba(52,211,153,0.35); }
 body.tg-dark .rs-link { color:#93c5fd; }
 body.tg-dark .page p { color:#d5d5d5; }
+body.tg-dark .search-input__control {
+  background: #111827;
+  border-color: #374151;
+  color: #f9fafb;
+}
+body.tg-dark .search-input__control::placeholder { color: rgba(156, 163, 175, 0.9); }
+body.tg-dark .search-input__dropdown {
+  background: #0b1220;
+  border-color: #1f2937;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+}
+body.tg-dark .search-input__heading { color: rgba(229, 231, 235, 0.9); }
+body.tg-dark .search-input__item:hover { background: rgba(255, 255, 255, 0.06); }
+body.tg-dark .search-input__item.is-active {
+  box-shadow: 0 12px 22px rgba(52, 199, 89, 0.28);
+}
+body.tg-dark .search-input__empty { color: rgba(209, 213, 219, 0.9); }
 body.tg-dark .filter-search { background:#111827; color:#f9fafb; border-color:#374151; }
 body.tg-dark .filter-reset { background:#1f2937; color:#f9fafb; border-color:#374151; }
 body.tg-dark .chip { background:#1f2937; border-color:#374151; color:#f8fafc; }
