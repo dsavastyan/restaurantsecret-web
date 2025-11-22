@@ -167,8 +167,7 @@ function RestaurantsSection() {
     <section className="restaurants" aria-label="Список ресторанов">
       <div className="container">
         <div className="section-heading">
-          <h2 id="restaurants-title" className="section-title">Рестораны в каталоге</h2>
-          <p className="section-subtitle">Лента листается автоматически — кликните карточку, чтобы перейти к меню.</p>
+          <h2 id="restaurants-title" className="section-title">Мы уже собрали меню этих ресторанов</h2>
         </div>
 
         {error ? (
