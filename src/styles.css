@@ -1655,9 +1655,10 @@ body.tg-dark .login__alert {
 
 .suggest-popover__header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  gap: 12px;
+  position: relative;
+  padding-right: 28px;
   margin-bottom: 12px;
 }
 
@@ -1673,6 +1674,10 @@ body.tg-dark .login__alert {
   font-size: 20px;
   cursor: pointer;
   line-height: 1;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
   color: #6b7280;
 }
 
