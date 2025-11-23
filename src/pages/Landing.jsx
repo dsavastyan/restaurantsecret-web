@@ -370,7 +370,7 @@ const styles = `
   --muted: #64748b;
   --card: #ffffff;
   --line: #e5e7eb;
-  --brand: #0ea5e9;
+  --brand: var(--rs-accent, #2f8f5b);
   --brand-2: #22c55e;
 }
 
