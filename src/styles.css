@@ -1688,7 +1688,8 @@ body.tg-dark .login__alert {
   padding: 10px 12px;
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 16px;
+  justify-content: center;
 }
 
 .suggest-popover__legend {
@@ -1719,6 +1720,13 @@ body.tg-dark .login__alert {
   padding: 10px 12px;
   font: inherit;
   resize: vertical;
+  background: #fff;
+  color: #0f172a;
+}
+
+.suggest-popover__field input::placeholder,
+.suggest-popover__field textarea::placeholder {
+  color: #9ca3af;
 }
 
 .suggest-popover__field textarea {

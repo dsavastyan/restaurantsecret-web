@@ -236,8 +236,6 @@ function SuggestPopover({ onClose }) {
   const [type, setType] = useState('restaurant')
   const [name, setName] = useState('')
   const [city, setCity] = useState('')
-  const [url, setUrl] = useState('')
-  const [comment, setComment] = useState('')
   const [email, setEmail] = useState('')
   const [validationError, setValidationError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -259,8 +257,6 @@ function SuggestPopover({ onClose }) {
           type,
           name: trimmedName,
           city: city.trim() || null,
-          url: url.trim() || null,
-          comment: comment.trim() || null,
           email: email.trim() || null,
         },
         accessTokenOrUndefined
@@ -269,8 +265,6 @@ function SuggestPopover({ onClose }) {
       setType('restaurant')
       setName('')
       setCity('')
-      setUrl('')
-      setComment('')
       setEmail('')
       onClose?.()
     } catch (error) {
@@ -300,6 +294,16 @@ function SuggestPopover({ onClose }) {
             <input type="radio" name="suggest-type" value="dish" checked={type === 'dish'} onChange={() => setType('dish')} />
             Блюдо
           </label>
+          <label className="suggest-popover__choice">
+            <input
+              type="radio"
+              name="suggest-type"
+              value="restaurant-and-dish"
+              checked={type === 'restaurant-and-dish'}
+              onChange={() => setType('restaurant-and-dish')}
+            />
+            Ресторан и блюдо
+          </label>
         </fieldset>
 
         <label className="suggest-popover__field">
@@ -308,7 +312,13 @@ function SuggestPopover({ onClose }) {
             type="text"
             value={name}
             onChange={(event) => setName(event.target.value)}
-            placeholder={type === 'restaurant' ? 'Например, Cafe Pushkin' : 'Например, Том ям'}
+            placeholder={
+              type === 'restaurant'
+                ? 'Например, Cafe Pushkin'
+                : type === 'dish'
+                  ? 'Например, Том ям'
+                  : 'Например, Cafe Pushkin + Том ям'
+            }
             required
           />
         </label>
@@ -316,16 +326,6 @@ function SuggestPopover({ onClose }) {
         <label className="suggest-popover__field">
           <span>Город</span>
           <input type="text" value={city} onChange={(event) => setCity(event.target.value)} placeholder="Москва" />
-        </label>
-
-        <label className="suggest-popover__field">
-          <span>Ссылка</span>
-          <input type="url" value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://" inputMode="url" />
-        </label>
-
-        <label className="suggest-popover__field">
-          <span>Комментарий</span>
-          <textarea value={comment} onChange={(event) => setComment(event.target.value)} rows={3} placeholder="Что именно нужно добавить" />
         </label>
 
         <label className="suggest-popover__field">
