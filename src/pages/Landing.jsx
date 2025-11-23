@@ -233,8 +233,8 @@ function RestaurantCard({ item, skeleton = false }) {
 function SuggestPopover({ onClose }) {
   const accessToken = useAuth((state) => state.accessToken)
   const accessTokenOrUndefined = accessToken || undefined
-  const [type, setType] = useState('restaurant')
-  const [name, setName] = useState('')
+  const [restaurant, setRestaurant] = useState('')
+  const [dish, setDish] = useState('')
   const [city, setCity] = useState('')
   const [email, setEmail] = useState('')
   const [validationError, setValidationError] = useState('')
@@ -242,9 +242,9 @@ function SuggestPopover({ onClose }) {
 
   async function handleSubmit(event) {
     event.preventDefault()
-    const trimmedName = name.trim()
-    if (!trimmedName) {
-      setValidationError('Укажите название')
+    const trimmedRestaurant = restaurant.trim()
+    if (!trimmedRestaurant) {
+      setValidationError('Укажите ресторан')
       return
     }
 
@@ -254,16 +254,16 @@ function SuggestPopover({ onClose }) {
     try {
       await postSuggest(
         {
-          type,
-          name: trimmedName,
+          restaurant: trimmedRestaurant,
+          dish: dish.trim() || null,
           city: city.trim() || null,
           email: email.trim() || null,
         },
         accessTokenOrUndefined
       )
       toast.success('Заявка отправлена')
-      setType('restaurant')
-      setName('')
+      setRestaurant('')
+      setDish('')
       setCity('')
       setEmail('')
       onClose?.()
@@ -284,52 +284,34 @@ function SuggestPopover({ onClose }) {
         </button>
       </div>
       <form className="suggest-popover__form" onSubmit={handleSubmit} noValidate>
-        <fieldset className="suggest-popover__fieldset">
-          <legend className="suggest-popover__legend">Тип заявки</legend>
-          <label className="suggest-popover__choice">
-            <input type="radio" name="suggest-type" value="restaurant" checked={type === 'restaurant'} onChange={() => setType('restaurant')} />
-            Ресторан
-          </label>
-          <label className="suggest-popover__choice">
-            <input type="radio" name="suggest-type" value="dish" checked={type === 'dish'} onChange={() => setType('dish')} />
-            Блюдо
-          </label>
-          <label className="suggest-popover__choice">
-            <input
-              type="radio"
-              name="suggest-type"
-              value="restaurant-and-dish"
-              checked={type === 'restaurant-and-dish'}
-              onChange={() => setType('restaurant-and-dish')}
-            />
-            Ресторан и блюдо
-          </label>
-        </fieldset>
-
         <label className="suggest-popover__field">
-          <span>Название *</span>
+          <span>Ресторан *</span>
           <input
             type="text"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            placeholder={
-              type === 'restaurant'
-                ? 'Например, Cafe Pushkin'
-                : type === 'dish'
-                  ? 'Например, Том ям'
-                  : 'Например, Cafe Pushkin + Том ям'
-            }
+            value={restaurant}
+            onChange={(event) => setRestaurant(event.target.value)}
+            placeholder="Например, Cafe Pushkin"
             required
           />
         </label>
 
         <label className="suggest-popover__field">
-          <span>Город</span>
+          <span>Блюдо (необязательно)</span>
+          <input
+            type="text"
+            value={dish}
+            onChange={(event) => setDish(event.target.value)}
+            placeholder="Например, Том ям"
+          />
+        </label>
+
+        <label className="suggest-popover__field">
+          <span>Город (необязательно)</span>
           <input type="text" value={city} onChange={(event) => setCity(event.target.value)} placeholder="Москва" />
         </label>
 
         <label className="suggest-popover__field">
-          <span>Email для обратной связи</span>
+          <span>Email для обратной связи (необязательно)</span>
           <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@example.com" inputMode="email" />
         </label>
 

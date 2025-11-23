@@ -1682,30 +1682,6 @@ body.tg-dark .login__alert {
   gap: 12px;
 }
 
-.suggest-popover__fieldset {
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 14px;
-  padding: 10px 12px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  justify-content: center;
-}
-
-.suggest-popover__legend {
-  padding: 0 6px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #0f172a;
-}
-
-.suggest-popover__choice {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-}
-
 .suggest-popover__field {
   display: flex;
   flex-direction: column;
