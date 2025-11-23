@@ -244,7 +244,7 @@ function SuggestPopover({ onClose }) {
     event.preventDefault()
     const trimmedRestaurant = restaurant.trim()
     if (!trimmedRestaurant) {
-      setValidationError('Укажите ресторан')
+      setValidationError('Укажите название ресторана')
       return
     }
 
@@ -289,14 +289,18 @@ function SuggestPopover({ onClose }) {
           <input
             type="text"
             value={restaurant}
-            onChange={(event) => setRestaurant(event.target.value)}
+            onChange={(event) => {
+              setRestaurant(event.target.value)
+              if (validationError) setValidationError('')
+            }}
             placeholder="Например, Cafe Pushkin"
             required
+            className={validationError ? 'is-invalid' : ''}
           />
         </label>
 
         <label className="suggest-popover__field">
-          <span>Блюдо (необязательно)</span>
+          <span>Блюдо</span>
           <input
             type="text"
             value={dish}
@@ -306,12 +310,12 @@ function SuggestPopover({ onClose }) {
         </label>
 
         <label className="suggest-popover__field">
-          <span>Город (необязательно)</span>
+          <span>Город</span>
           <input type="text" value={city} onChange={(event) => setCity(event.target.value)} placeholder="Москва" />
         </label>
 
         <label className="suggest-popover__field">
-          <span>Email для обратной связи (необязательно)</span>
+          <span>Email для обратной связи</span>
           <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@example.com" inputMode="email" />
         </label>
 

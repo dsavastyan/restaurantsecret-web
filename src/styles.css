@@ -1700,6 +1700,11 @@ body.tg-dark .login__alert {
   color: #0f172a;
 }
 
+.suggest-popover__field input.is-invalid {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 1px #ef4444 inset;
+}
+
 .suggest-popover__field input::placeholder,
 .suggest-popover__field textarea::placeholder {
   color: #9ca3af;
