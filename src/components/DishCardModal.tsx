@@ -103,7 +103,6 @@ export default function DishCardModal() {
                   {data.restaurantName || "Ресторан"}
                 </Link>
               </div>
-              <div className="dish-card__portion">{data.portionLabel}</div>
             </div>
 
             <section className="dish-card__section">
