@@ -2,9 +2,29 @@ import React from 'react'
 
 const contacts = [
   {
-    label: 'E-mail для обращений',
+    label: 'Общие вопросы',
+    value: 'info@restaurantsecret.ru',
+    href: 'mailto:info@restaurantsecret.ru',
+  },
+  {
+    label: 'Техподдержка',
     value: 'support@restaurantsecret.ru',
     href: 'mailto:support@restaurantsecret.ru',
+  },
+  {
+    label: 'Партнёрства/СМИ',
+    value: 'partners@restaurantsecret.ru',
+    href: 'mailto:partners@restaurantsecret.ru',
+  },
+  {
+    label: 'Юридические вопросы/претензии',
+    value: 'legal@restaurantsecret.ru',
+    href: 'mailto:legal@restaurantsecret.ru',
+  },
+  {
+    label: 'Обратная связь',
+    value: 'feedback@restaurantsecret.ru',
+    href: 'mailto:feedback@restaurantsecret.ru',
   },
   {
     label: 'Поддержка в Telegram',
