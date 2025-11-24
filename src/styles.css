@@ -2047,3 +2047,45 @@ body.tg-dark .login__alert {
     text-align: center;
   }
 }
+
+/* Footer */
+.site-footer {
+  padding: 28px 0 36px;
+  border-top: 1px solid var(--line);
+  background: #fcfdfc;
+  margin-top: 20px;
+}
+
+.site-footer__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.site-footer__nav {
+  display: flex;
+  gap: 12px;
+}
+
+.site-footer__link {
+  color: #0f172a;
+  opacity: 0.8;
+  text-decoration: none;
+}
+
+.site-footer__link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.site-footer__copy {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.site-footer__legal {
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
