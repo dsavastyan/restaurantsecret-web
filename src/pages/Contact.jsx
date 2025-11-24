@@ -16,12 +16,6 @@ const contacts = [
 export default function Contact() {
   return (
     <main className="contact-page">
-      <div className="contact-hero">
-        <div className="container contact-hero__inner">
-          <h1 className="contact-hero__title">Всегда на связи</h1>
-        </div>
-      </div>
-
       <div className="container contact-layout">
         <section className="contact-card">
           <header className="contact-card__header">
