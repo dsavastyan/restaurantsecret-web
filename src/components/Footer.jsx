@@ -22,9 +22,9 @@ export default function Footer() {
           </a>
         </nav>
 
-        <div className="site-footer__copy">RestaurantSecret © 2025. Все меню ресторанов Москвы — с КБЖУ.</div>
+        <div className="site-footer__copy">© 2025 RestaurantSecret</div>
         <div className="site-footer__legal">
-          Самозанятое лицо (НПД), Савастьян Дарья, ИНН 7 7 1 0 0 7 7 5 0 9 4 6
+          Самозанятое лицо (НПД), Савастьян Дарья, ИНН 771007750946
         </div>
       </div>
     </footer>

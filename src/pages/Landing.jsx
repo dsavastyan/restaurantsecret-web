@@ -11,7 +11,6 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import SearchInput from '@/components/SearchInput'
-import Footer from '@/components/Footer.jsx'
 import { API_BASE } from '@/config/api'
 import { postSuggest } from '@/lib/api'
 import { toast } from '@/lib/toast'
@@ -23,7 +22,6 @@ export default function Landing() {
       <Hero />
       <WhyImportant />
       <RestaurantsSection />
-      <Footer />
     </main>
   )
 }
