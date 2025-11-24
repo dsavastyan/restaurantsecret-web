@@ -1655,9 +1655,10 @@ body.tg-dark .login__alert {
 
 .suggest-popover__header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  gap: 12px;
+  position: relative;
+  padding-right: 28px;
   margin-bottom: 12px;
 }
 
@@ -1673,6 +1674,10 @@ body.tg-dark .login__alert {
   font-size: 20px;
   cursor: pointer;
   line-height: 1;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
   color: #6b7280;
 }
 
@@ -1680,29 +1685,6 @@ body.tg-dark .login__alert {
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.suggest-popover__fieldset {
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 14px;
-  padding: 10px 12px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.suggest-popover__legend {
-  padding: 0 6px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #0f172a;
-}
-
-.suggest-popover__choice {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
 }
 
 .suggest-popover__field {
@@ -1719,6 +1701,18 @@ body.tg-dark .login__alert {
   padding: 10px 12px;
   font: inherit;
   resize: vertical;
+  background: #fff;
+  color: #0f172a;
+}
+
+.suggest-popover__field input.is-invalid {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 1px #ef4444 inset;
+}
+
+.suggest-popover__field input::placeholder,
+.suggest-popover__field textarea::placeholder {
+  color: #9ca3af;
 }
 
 .suggest-popover__field textarea {

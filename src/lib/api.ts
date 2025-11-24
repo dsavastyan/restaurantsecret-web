@@ -44,11 +44,9 @@ export type SearchResult = {
 };
 
 export type SuggestRequest = {
-  type: string;
-  name: string;
+  restaurant: string;
+  dish?: string | null;
   city?: string | null;
-  url?: string | null;
-  comment?: string | null;
   email?: string | null;
 };
 
