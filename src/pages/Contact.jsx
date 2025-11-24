@@ -19,9 +19,6 @@ export default function Contact() {
       <div className="contact-hero">
         <div className="container contact-hero__inner">
           <h1 className="contact-hero__title">Всегда на связи</h1>
-          <p className="contact-hero__subtitle">
-            Мы отвечаем быстро, поддерживаем вас в удобном канале и честно публикуем данные исполнителя.
-          </p>
         </div>
       </div>
 
@@ -79,7 +76,9 @@ export default function Contact() {
                     {item.value}
                   </a>
                 </div>
-                <span className="contact-list__cta">Написать</span>
+                <a className="contact-list__cta" href={item.href} target="_blank" rel="noreferrer">
+                  Написать
+                </a>
               </li>
             ))}
           </ul>

@@ -235,7 +235,8 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
 
 .contact-note { border-radius: 14px; border: 1px dashed #cbd5e1; padding: 12px 14px; color: #334155; line-height: 1.5; background: #f8fafc; }
 .contact-card--accent .contact-note { border-color: rgba(255, 255, 255, 0.24); color: #e5e7eb; background: rgba(255, 255, 255, 0.06); }
-.contact-note a { color: #2563eb; font-weight: 700; }
+.contact-note a { color: var(--rs-accent); font-weight: 700; }
+.contact-note a:hover { color: #27774c; }
 .contact-card--accent .contact-note a { color: #c7f0d8; }
 
 .contact-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
@@ -244,7 +245,7 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
 .contact-list__label { margin: 0; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(229, 231, 235, 0.75); }
 .contact-list__value { color: #fff; font-weight: 800; text-decoration: none; }
 .contact-list__value:hover { text-decoration: underline; }
-.contact-list__cta { background: rgba(255, 255, 255, 0.12); padding: 8px 12px; border-radius: 12px; font-weight: 700; color: #fff; }
+.contact-list__cta { background: rgba(255, 255, 255, 0.12); padding: 8px 12px; border-radius: 12px; font-weight: 700; color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
 
 .contact-cta { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 16px; padding: 16px; display: grid; gap: 6px; }
 .contact-cta__title { margin: 0; font-weight: 800; color: #fff; font-size: 17px; }
