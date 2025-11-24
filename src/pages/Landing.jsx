@@ -11,6 +11,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import SearchInput from '@/components/SearchInput'
+import Footer from '@/components/Footer.jsx'
 import { API_BASE } from '@/config/api'
 import { postSuggest } from '@/lib/api'
 import { toast } from '@/lib/toast'
@@ -333,22 +334,6 @@ function SuggestPopover({ onClose }) {
   )
 }
 
-// Simple footer with legal links and contact info.
-function Footer() {
-  return (
-    <footer className="footer" role="contentinfo">
-      <div className="container footer__inner">
-          <nav className="footer__nav" aria-label="Нижняя навигация">
-            <Link to="/legal" className="footer__link">Политика</Link>
-            <Link to="/contact" className="footer__link">Контакты</Link>
-            <a href="https://t.me/restaurantsecret" className="footer__link" target="_blank" rel="noreferrer">Telegram-бот</a>
-          </nav>
-        <div className="footer__copy">RestaurantSecret © 2025. Все меню ресторанов Москвы — с КБЖУ.</div>
-      </div>
-    </footer>
-  )
-}
-
 // Create two-character initials from the restaurant name to display in the
 // circular badge.
 function getInitials(name) {
@@ -421,14 +406,6 @@ const styles = `
 .suggest { padding: 40px 0; }
 .suggest__form { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
 .input { padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; }
-
-/* Footer */
-.footer { padding: 28px 0 36px; border-top: 1px solid var(--line); background: #fcfdfc; margin-top: 20px; }
-.footer__inner { display: flex; flex-direction: column; gap: 10px; align-items: center; }
-.footer__nav { display: flex; gap: 12px; }
-.footer__link { color: #0f172a; opacity: .8; text-decoration: none; }
-.footer__link:hover { opacity: 1; text-decoration: underline; }
-.footer__copy { color: var(--muted); font-size: 13px; }
 
 /* Buttons */
 .btn { --btn-bg: var(--brand); --btn-fg: #fff; appearance: none; border: none; border-radius: 12px; padding: 12px 16px; cursor: pointer; font-weight: 600; }
