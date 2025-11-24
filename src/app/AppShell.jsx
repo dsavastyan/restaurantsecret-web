@@ -179,28 +179,36 @@ export default function AppShell() {
   }), [access, handleAccessUpdate, refreshAccess, requestPaywall, closePaywall, requireAccess])
 
   const isLanding = location.pathname === '/'
+  const isContact = location.pathname.startsWith('/contact')
   const hideGlobalSearch =
     isLanding ||
     location.pathname.startsWith('/r/') ||
     location.pathname.startsWith('/restaurants/') ||
     location.pathname.startsWith('/login') ||
-    location.pathname.startsWith('/account')
+    location.pathname.startsWith('/account') ||
+    isContact
 
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
       <DishCardModal />
       <main className="flex-1">
-        <div className={showPaywall ? 'container locked' : 'container'}>
-          {!hideGlobalSearch && (
-            <div className="app-shell__search">
-              <div className="app-shell__search-inner">
-                <SearchInput value={searchQuery} onChange={setSearchQuery} />
+        {isContact ? (
+          <div className={showPaywall ? 'contact-wrapper locked' : 'contact-wrapper'}>
+            <Outlet context={outletContext} />
+          </div>
+        ) : (
+          <div className={showPaywall ? 'container locked' : 'container'}>
+            {!hideGlobalSearch && (
+              <div className="app-shell__search">
+                <div className="app-shell__search-inner">
+                  <SearchInput value={searchQuery} onChange={setSearchQuery} />
+                </div>
               </div>
-            </div>
-          )}
-          <Outlet context={outletContext} />
-        </div>
+            )}
+            <Outlet context={outletContext} />
+          </div>
+        )}
       </main>
       {showPaywall && (
         <PaywallPortal>

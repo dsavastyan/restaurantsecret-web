@@ -1,5 +1,4 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
 
 const contacts = [
   {
@@ -19,19 +18,10 @@ export default function Contact() {
     <main className="contact-page">
       <div className="contact-hero">
         <div className="container contact-hero__inner">
-          <div className="contact-hero__badge">Контакты и реквизиты</div>
-          <h1 className="contact-hero__title">Всегда на связи и открыты по всем вопросам</h1>
+          <h1 className="contact-hero__title">Всегда на связи</h1>
           <p className="contact-hero__subtitle">
             Мы отвечаем быстро, поддерживаем вас в удобном канале и честно публикуем данные исполнителя.
           </p>
-          <div className="contact-hero__actions">
-            {contacts.map((item) => (
-              <a key={item.value} className="contact-chip" href={item.href} target="_blank" rel="noreferrer">
-                <span className="contact-chip__label">{item.label}</span>
-                <span className="contact-chip__value">{item.value}</span>
-              </a>
-            ))}
-          </div>
         </div>
       </div>
 
@@ -40,9 +30,6 @@ export default function Contact() {
           <header className="contact-card__header">
             <p className="contact-card__eyebrow">Сведения об исполнителе</p>
             <h2 className="contact-card__title">Официальные данные</h2>
-            <p className="contact-card__hint">
-              Информация актуальна для заключения договоров, возвратов и подтверждения статуса самозанятого.
-            </p>
           </header>
 
           <dl className="contact-details" aria-label="Реквизиты исполнителя">
@@ -61,20 +48,6 @@ export default function Contact() {
             <div className="contact-details__row">
               <dt>Место осуществления деятельности</dt>
               <dd>г. Москва, Российская Федерация</dd>
-            </div>
-            <div className="contact-details__row">
-              <dt>E-mail для обращений потребителей</dt>
-              <dd>
-                <a href="mailto:support@restaurantsecret.ru">support@restaurantsecret.ru</a>
-              </dd>
-            </div>
-            <div className="contact-details__row">
-              <dt>Поддержка в телеграм</dt>
-              <dd>
-                <a href="http://t.me/RestSecretSupport_bot" target="_blank" rel="noreferrer">
-                  @RestSecretSupport_bot
-                </a>
-              </dd>
             </div>
           </dl>
 
@@ -110,12 +83,6 @@ export default function Contact() {
               </li>
             ))}
           </ul>
-
-          <div className="contact-cta">
-            <p className="contact-cta__title">Уже выбрали ресторан?</p>
-            <p className="contact-cta__text">Перейдите в каталог, чтобы продолжить подбор блюд с КБЖУ.</p>
-            <Link to="/catalog" className="contact-cta__button">Открыть каталог</Link>
-          </div>
         </section>
       </div>
     </main>
