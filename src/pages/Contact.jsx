@@ -30,6 +30,7 @@ const contacts = [
     label: 'Поддержка в Telegram',
     value: '@RestSecretSupport_bot',
     href: 'http://t.me/RestSecretSupport_bot',
+    showCta: true,
   },
 ]
 
@@ -90,9 +91,11 @@ export default function Contact() {
                     {item.value}
                   </a>
                 </div>
-                <a className="contact-list__cta" href={item.href} target="_blank" rel="noreferrer">
-                  Написать
-                </a>
+                {item.showCta ? (
+                  <a className="contact-list__cta" href={item.href} target="_blank" rel="noreferrer">
+                    Написать
+                  </a>
+                ) : null}
               </li>
             ))}
           </ul>
