@@ -9,6 +9,9 @@ export default function Footer() {
           <Link to="/legal" className="site-footer__link">
             Пользовательское соглашение
           </Link>
+          <Link to="/privacy" className="site-footer__link">
+            Политика конфиденциальности
+          </Link>
           <Link to="/contact" className="site-footer__link">
             Контакты
           </Link>
