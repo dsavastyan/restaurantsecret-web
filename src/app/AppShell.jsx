@@ -178,15 +178,13 @@ export default function AppShell() {
     requireAccess
   }), [access, handleAccessUpdate, refreshAccess, requestPaywall, closePaywall, requireAccess])
 
-  const isLanding = location.pathname === '/'
   const isContact = location.pathname.startsWith('/contact')
-  const hideGlobalSearch =
-    isLanding ||
-    location.pathname.startsWith('/r/') ||
-    location.pathname.startsWith('/restaurants/') ||
-    location.pathname.startsWith('/login') ||
-    location.pathname.startsWith('/account') ||
-    isContact
+  const showGlobalSearch = useMemo(() => {
+    const allowedPrefixes = ['/catalog', '/search', '/restaurants', '/app']
+    return allowedPrefixes.some((prefix) =>
+      location.pathname === prefix || location.pathname.startsWith(`${prefix}/`)
+    )
+  }, [location.pathname])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -199,7 +197,7 @@ export default function AppShell() {
           </div>
         ) : (
           <div className={showPaywall ? 'container locked' : 'container'}>
-            {!hideGlobalSearch && (
+            {showGlobalSearch && (
               <div className="app-shell__search">
                 <div className="app-shell__search-inner">
                   <SearchInput value={searchQuery} onChange={setSearchQuery} />
