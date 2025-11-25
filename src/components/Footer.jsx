@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="container site-footer__inner">
         <nav className="site-footer__nav" aria-label="Нижняя навигация">
           <Link to="/legal" className="site-footer__link">
-            Политика
+            Пользовательское соглашение
           </Link>
           <Link to="/contact" className="site-footer__link">
             Контакты
