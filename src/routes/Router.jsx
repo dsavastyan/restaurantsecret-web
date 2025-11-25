@@ -14,6 +14,7 @@ import PayMockSuccess from '../pages/PayMockSuccess.jsx'
 import Login from '../pages/Login.tsx'
 import Contact from '../pages/Contact.jsx'
 import Legal from '../pages/Legal.jsx'
+import Privacy from '../pages/Privacy.jsx'
 import AccountLayout from '../pages/account/Layout.tsx'
 import AccountOverview from '../pages/account/Overview.tsx'
 import AccountSubscription from '../pages/account/Subscription.tsx'
@@ -29,6 +30,7 @@ function AppRoutes() {
         <Route index element={<Landing />} />
         <Route path="login" element={<Login />} />
         <Route path="legal" element={<Legal />} />
+        <Route path="privacy" element={<Privacy />} />
         <Route path="contact" element={<Contact />} />
         <Route path="account" element={<AccountLayout />}> 
           <Route index element={<AccountOverview />} />
