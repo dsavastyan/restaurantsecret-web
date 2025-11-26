@@ -180,10 +180,18 @@ export default function AppShell() {
 
   const isContact = location.pathname.startsWith('/contact')
   const showGlobalSearch = useMemo(() => {
-    const allowedPrefixes = ['/catalog', '/search', '/restaurants', '/app']
-    return allowedPrefixes.some((prefix) =>
+    const allowedPrefixes = ['/catalog', '/search', '/app']
+    const matchesPrefix = allowedPrefixes.some((prefix) =>
       location.pathname === prefix || location.pathname.startsWith(`${prefix}/`)
     )
+
+    // Каталог ресторанов имеет собственный поисковый блок, поэтому общий поиск
+    // здесь не показываем, чтобы избежать дублирования.
+    if (location.pathname === '/restaurants' || location.pathname.startsWith('/restaurants/')) {
+      return false
+    }
+
+    return matchesPrefix
   }, [location.pathname])
 
   return (
