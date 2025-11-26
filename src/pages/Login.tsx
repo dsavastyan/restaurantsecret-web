@@ -132,7 +132,19 @@ export default function LoginPage() {
             </div>
           )}
 
-          <p className="login__legal">Продолжая, вы соглашаетесь с обработкой персональных данных.</p>
+          <p className="login__legal">
+            Продолжая, вы соглашаетесь с
+            {" "}
+            <a href="https://restaurantsecret.ru/#/privacy" target="_blank" rel="noopener noreferrer">
+              обработкой персональных данных
+            </a>{" "}
+            и
+            {" "}
+            <a href="https://restaurantsecret.ru/#/legal" target="_blank" rel="noopener noreferrer">
+              пользовательским соглашением
+            </a>
+            .
+          </p>
         </div>
       </div>
     </div>
