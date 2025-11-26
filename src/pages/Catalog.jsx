@@ -32,14 +32,6 @@ export default function Catalog() {
     return false
   }, [access?.isActive, requireAccess, requestPaywall])
 
-  // Navigate to the restaurant profile only when access is granted.
-  const openProfile = useCallback((slug) => {
-    if (!slug) return
-    if (ensureAccess()) {
-      navigate(`/r/${slug}`)
-    }
-  }, [ensureAccess, navigate])
-
   // Same for direct menu navigation.
   const openMenu = useCallback((slug) => {
     if (!slug) return
@@ -60,10 +52,19 @@ export default function Catalog() {
 
   const items = data?.items ?? []
   const visibleItems = useMemo(() => {
-    if (!debouncedQuery) return items
-    const q = debouncedQuery.toLowerCase()
-    return items.filter((item) => item?.name?.toLowerCase().includes(q))
-  }, [debouncedQuery, items])
+    const normalizedQuery = debouncedQuery.toLowerCase()
+
+    return items.filter((item) => {
+      const name = item?.name?.toLowerCase() || ''
+      const cuisine = item?.cuisine?.toLowerCase() || ''
+      const matchesQuery = !normalizedQuery || name.includes(normalizedQuery)
+      const matchesCuisine = !selectedCuisines.length || selectedCuisines
+        .map((c) => c?.toLowerCase())
+        .includes(cuisine)
+
+      return matchesQuery && matchesCuisine
+    })
+  }, [debouncedQuery, items, selectedCuisines])
 
   // Options are memoized so the filter chips do not re-render unnecessarily.
   const cuisineOptions = useMemo(() => filters?.cuisines ?? [], [filters?.cuisines])
@@ -181,33 +182,33 @@ export default function Catalog() {
 
         <ul className="catalog-grid">
           {visibleItems.map(r => {
-            const dishes = extractDishes(r).slice(0, 8)
+            const allDishes = extractDishes(r)
+            const dishes = allDishes.slice(0, 8)
+            const dishCount = allDishes.length
             return (
               <li key={r.slug || r.name} className="catalog-card" role="group" aria-label={r?.name ?? 'Ресторан'}>
                 <div className="catalog-card__header">
                   <div className="catalog-card__badge" aria-hidden="true">{getInitials(r?.name)}</div>
                   <div className="catalog-card__title-block">
-                    <p className="catalog-card__eyebrow">Ресторан</p>
                     <h3 className="catalog-card__title">{r.name}</h3>
                     {r.cuisine && <div className="catalog-card__cuisine">{r.cuisine}</div>}
                   </div>
                 </div>
 
                 <div className="catalog-card__body">
-                  <div className="catalog-card__label">Блюда из меню</div>
-                  {dishes.length ? (
+                  <div className="catalog-card__label">Блюда в меню {dishCount}</div>
+                  {dishCount ? (
                     <ul className="catalog-card__dishes">
                       {dishes.map((dish, idx) => (
                         <li key={`${r.slug || r.name}-dish-${idx}`} className="catalog-card__dish">{dish}</li>
                       ))}
                     </ul>
                   ) : (
-                    <div className="catalog-card__empty">Меню скоро добавим</div>
+                    <div className="catalog-card__empty">Скоро добавим</div>
                   )}
                 </div>
 
                 <div className="catalog-card__actions">
-                  <button type="button" className="btn btn--ghost" onClick={() => openProfile(r.slug)}>Профиль ресторана</button>
                   <button type="button" className="btn btn--primary" onClick={() => openMenu(r.slug)}>Открыть меню</button>
                 </div>
               </li>
