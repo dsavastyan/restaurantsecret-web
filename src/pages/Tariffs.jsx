@@ -8,10 +8,6 @@ export default function Tariffs() {
         <header className="tariffs-hero">
           <p className="tariffs-eyebrow">Подписка RestaurantSecret</p>
           <h1 className="tariffs-title">Доступ ко всему меню — без ограничений</h1>
-          <p className="tariffs-subtitle">
-            Узнавайте, что именно входит в блюда и как они влияют на ваш рацион. Подписка открывает все
-            подробности меню и помогает подбирать подходящие варианты быстрее.
-          </p>
         </header>
 
         <section className="tariffs-benefits" aria-label="Что даёт подписка">
