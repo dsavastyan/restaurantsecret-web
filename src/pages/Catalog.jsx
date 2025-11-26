@@ -184,7 +184,9 @@ export default function Catalog() {
           {visibleItems.map(r => {
             const allDishes = extractDishes(r)
             const dishes = allDishes.slice(0, 8)
-            const dishCount = allDishes.length
+            const dishesCount = typeof r?.dishesCount === 'number'
+              ? r.dishesCount
+              : allDishes.length
             return (
               <li key={r.slug || r.name} className="catalog-card" role="group" aria-label={r?.name ?? 'Ресторан'}>
                 <div className="catalog-card__header">
@@ -196,15 +198,16 @@ export default function Catalog() {
                 </div>
 
                 <div className="catalog-card__body">
-                  <div className="catalog-card__label">Блюда в меню {dishCount}</div>
-                  {dishCount ? (
+                  <div className="catalog-card__label">Блюда в меню {dishesCount}</div>
+                  {dishesCount === 0 && (
+                    <div className="catalog-card__empty">Скоро добавим</div>
+                  )}
+                  {dishesCount > 0 && dishes.length > 0 && (
                     <ul className="catalog-card__dishes">
                       {dishes.map((dish, idx) => (
                         <li key={`${r.slug || r.name}-dish-${idx}`} className="catalog-card__dish">{dish}</li>
                       ))}
                     </ul>
-                  ) : (
-                    <div className="catalog-card__empty">Скоро добавим</div>
                   )}
                 </div>
 

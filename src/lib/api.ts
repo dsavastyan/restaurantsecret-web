@@ -24,6 +24,14 @@ export type SearchSuggestions = {
   dishes: SearchSuggestionDish[];
 };
 
+export type Restaurant = {
+  id: number;
+  slug: string;
+  name: string;
+  cuisine: string;
+  dishesCount: number;
+};
+
 export type SearchRestaurant = {
   id: number;
   slug: string;
