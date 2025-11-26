@@ -198,6 +198,43 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
 
 .container.locked { position:relative; }
 .container.locked main { filter: blur(2px); pointer-events:none; user-select:none; }
+
+/* Tariffs page */
+.tariffs-page { background: radial-gradient(circle at 30% 20%, rgba(47, 143, 91, 0.05), transparent 40%), #f9fbf9; }
+.tariffs-hero { padding: 40px 0 20px; text-align: left; }
+.tariffs-eyebrow { letter-spacing: 0.08em; text-transform: uppercase; font-size: 12px; font-weight: 700; color: #2f8f5b; margin: 0 0 8px; }
+.tariffs-title { margin: 0 0 12px; font-size: clamp(28px, 4vw, 36px); line-height: 1.2; color: #0f172a; }
+.tariffs-subtitle { margin: 0; max-width: 760px; color: #4b5563; font-size: 16px; line-height: 1.6; }
+.tariffs-section-title { font-size: 22px; margin: 0 0 12px; color: #0f172a; }
+.tariffs-benefits { background: #fff; border: 1px solid #e5e7eb; border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(17, 24, 39, 0.08); }
+.tariffs-benefits__list { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.tariffs-benefits__item { padding: 12px 14px; border-radius: 14px; background: linear-gradient(135deg, rgba(47, 143, 91, 0.08), rgba(47, 143, 91, 0.02)); border: 1px solid #e5f1ea; color: #0f172a; font-weight: 600; box-shadow: 0 1px 0 #fff inset; }
+
+.tariffs-plans { margin-top: 28px; padding: 8px 0 12px; }
+.tariffs-plans__header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; justify-content: space-between; }
+.tariffs-note { margin: 0; color: #6b7280; font-size: 13px; }
+.tariffs-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 12px; }
+.tariff-card { position: relative; border-radius: 20px; padding: 18px; background: #ffffff; border: 1px solid #e5e7eb; box-shadow: 0 14px 36px rgba(17, 24, 39, 0.08); overflow: hidden; }
+.tariff-card--featured { background: linear-gradient(140deg, rgba(47, 143, 91, 0.12), rgba(34, 197, 94, 0.1)), #ffffff; border-color: #d1e7d8; box-shadow: 0 16px 40px rgba(47, 143, 91, 0.22); }
+.tariff-card__badge { position: absolute; top: 14px; right: 14px; font-size: 12px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; background: #0f172a; color: #fff; padding: 6px 10px; border-radius: 999px; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.18); }
+.tariff-card__body { display: flex; flex-direction: column; gap: 8px; }
+.tariff-card__title { margin: 0; font-size: 18px; color: #0f172a; }
+.tariff-card__price { margin: 0; font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+.tariff-card__footnote { margin: 0; color: #6b7280; font-size: 14px; }
+.tariff-card__tagline { margin: 0; color: #14532d; font-weight: 700; }
+.tariff-card__desc { margin: 6px 0 0; color: #374151; line-height: 1.5; }
+
+.tariffs-cta { margin: 32px 0 40px; text-align: center; display: grid; gap: 12px; justify-items: center; }
+.tariffs-cta__lead { margin: 0; font-weight: 700; color: #0f172a; }
+.tariffs-cta__button { min-width: 200px; font-size: 15px; padding: 12px 22px; border-radius: 16px; }
+.tariffs-cta__legal { margin: 0; color: #6b7280; font-size: 14px; }
+.tariffs-cta__legal a { color: inherit; text-decoration: underline; text-decoration-color: rgba(47, 143, 91, 0.5); }
+
+@media (max-width: 640px) {
+  .tariffs-hero { text-align: left; }
+  .tariffs-cards { grid-template-columns: 1fr; }
+  .tariff-card__badge { position: static; align-self: flex-start; margin-bottom: 6px; }
+}
 .contact-wrapper { position: relative; }
 .contact-wrapper.locked main { filter: blur(2px); pointer-events: none; user-select: none; }
 
