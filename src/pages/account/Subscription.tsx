@@ -253,14 +253,12 @@ export default function AccountSubscription() {
 
       {loading && <SubscriptionSkeleton />}
 
-      {!loading && (
+      {!loading && !isActive && (
         <div className="account-subscription__plans">
-          {!isActive && (
-            <div className="account-subscription__empty" role="status">
-              <h3>Оформите подписку</h3>
-              <p>Подписка открывает доступ к КБЖУ, составу блюд и персональным рекомендациям.</p>
-            </div>
-          )}
+          <div className="account-subscription__empty" role="status">
+            <h3>Оформите подписку</h3>
+            <p>Подписка открывает доступ к КБЖУ, составу блюд и персональным рекомендациям.</p>
+          </div>
 
           <div className="account-subscription__grid" role="list">
             <TariffCard
