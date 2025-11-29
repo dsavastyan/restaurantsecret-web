@@ -6,9 +6,15 @@ import { useAuth } from "@/store/auth";
 import type { AccountOutletContext } from "./Layout";
 
 type SubscriptionStatusResponse = {
+  ok?: boolean;
+  plan?: string | null;
   status?: string | null;
   status_label?: string | null;
+  started_at?: string | null;
   expires_at?: string | null;
+  payment_method?: string | null;
+  can_cancel?: boolean;
+  error?: string | null;
 };
 
 function TariffCard({
@@ -76,8 +82,39 @@ export default function AccountSubscription() {
     setLoading(true);
     setError(null);
     try {
-      const status = await apiGet<SubscriptionStatusResponse>("/subscriptions/status", accessToken);
-      setStatusData(status);
+      const response = await apiGet<SubscriptionStatusResponse>("/subscriptions/status", accessToken);
+
+      if (response && typeof response === "object" && response.ok === false) {
+        setStatusData(null);
+        setError(
+          typeof response.error === "string" && response.error.trim()
+            ? response.error
+            : "Не удалось загрузить статус подписки. Попробуйте позже.",
+        );
+        return;
+      }
+
+      const normalizeStatus = (value?: string | null) => {
+        if (typeof value !== "string") return "none" as const;
+        const trimmed = value.trim().toLowerCase();
+        const known = ["active", "expired", "canceled", "none"] as const;
+        if (known.includes(trimmed as (typeof known)[number])) {
+          return trimmed as (typeof known)[number];
+        }
+        return trimmed || "none";
+      };
+
+      const normalized = {
+        ...response,
+        status: normalizeStatus(response?.status),
+        plan: typeof response?.plan === "string" ? response.plan.trim() : response?.plan ?? null,
+        payment_method:
+          typeof response?.payment_method === "string" && response.payment_method.trim()
+            ? response.payment_method.trim()
+            : response?.payment_method ?? null,
+      } satisfies SubscriptionStatusResponse;
+
+      setStatusData(normalized);
     } catch (err) {
       if (isUnauthorizedError(err)) {
         logout();
