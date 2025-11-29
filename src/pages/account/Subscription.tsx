@@ -82,7 +82,10 @@ export default function AccountSubscription() {
     setLoading(true);
     setError(null);
     try {
-      const response = await apiGet<SubscriptionStatusResponse>("/subscriptions/status", accessToken);
+      const response = await apiGet<SubscriptionStatusResponse>(
+        "/api/subscriptions/status",
+        accessToken,
+      );
 
       if (response && typeof response === "object" && response.ok === false) {
         setStatusData(null);
