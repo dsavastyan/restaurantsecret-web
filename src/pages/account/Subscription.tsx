@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import Button from "@/components/ui/Button";
-import { apiGet, apiPost, isUnauthorizedError } from "@/lib/api";
+import { ApiError, apiGet, apiPost, isUnauthorizedError } from "@/lib/api";
 import { useAuth } from "@/store/auth";
 import type { AccountOutletContext } from "./Layout";
 
@@ -68,7 +68,11 @@ export default function AccountSubscription() {
   const [cancelSuccess, setCancelSuccess] = useState<string | null>(null);
 
   const fetchStatus = useCallback(async () => {
-    if (!accessToken) return;
+    if (!accessToken) {
+      setStatusData(null);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -78,6 +82,11 @@ export default function AccountSubscription() {
       if (isUnauthorizedError(err)) {
         logout();
         setStatusData(null);
+        setError(null);
+        return;
+      }
+      if (err instanceof ApiError && err.status === 404) {
+        setStatusData({ status: "none", status_label: null, expires_at: null });
         setError(null);
         return;
       }
