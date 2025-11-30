@@ -11,6 +11,7 @@ import Menu from '../pages/Menu.jsx'
 import Search from '../pages/Search.jsx'
 import PaySuccess from '../pages/PaySuccess.jsx'
 import PayMockSuccess from '../pages/PayMockSuccess.jsx'
+import PaymentResult from '../pages/PaymentResult.jsx'
 import Login from '../pages/Login.tsx'
 import Contact from '../pages/Contact.jsx'
 import Legal from '../pages/Legal.jsx'
@@ -50,6 +51,7 @@ function AppRoutes() {
         <Route path="r/:slug/menu" element={<Menu />} />
         <Route path="pay/success" element={<PaySuccess />} />
         <Route path="pay/mock-success" element={<PayMockSuccess />} />
+        <Route path="payments/result" element={<PaymentResult />} />
 
         {/* AppShell зона с табами */}
         <Route path="app" element={<Outlet />}>

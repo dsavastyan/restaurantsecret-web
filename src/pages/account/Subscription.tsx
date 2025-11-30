@@ -23,17 +23,24 @@ function TariffCard({
   hint,
   description,
   accent,
+  onSelect,
+  disabled,
 }: {
   title: string;
   price: string;
   hint: string;
   description: string;
   accent?: boolean;
+  onSelect?: () => void;
+  disabled?: boolean;
 }) {
   return (
-    <article
-      className={`account-subscription__tile${accent ? " account-subscription__tile--accent" : ""}`}
+    <button
+      type="button"
+      className={`account-subscription__tile account-subscription__tile-button${accent ? " account-subscription__tile--accent" : ""}`}
       role="listitem"
+      onClick={onSelect}
+      disabled={disabled}
     >
       <div className="account-subscription__tile-header">
         <p className="account-subscription__tariff-name">{title}</p>
@@ -44,7 +51,7 @@ function TariffCard({
       <p className="account-subscription__tile-value">{price}</p>
       <p className="account-subscription__tile-hint">{hint}</p>
       <p className="account-subscription__tile-description">{description}</p>
-    </article>
+    </button>
   );
 }
 
@@ -72,6 +79,8 @@ export default function AccountSubscription() {
   const [cancelLoading, setCancelLoading] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [cancelSuccess, setCancelSuccess] = useState<string | null>(null);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [paymentPlan, setPaymentPlan] = useState<string | null>(null);
 
   const fetchStatus = useCallback(async () => {
     if (!accessToken) {
@@ -208,6 +217,51 @@ export default function AccountSubscription() {
 
   const showHistory = (isActive || isCanceled || isExpired) && !loading;
 
+  const createPayment = useCallback(
+    async (plan: string) => {
+      if (!accessToken || paymentPlan) return;
+
+      setPaymentError(null);
+      setPaymentPlan(plan);
+
+      try {
+        const res = await apiPost<{ confirmation_url?: string; error?: string }>(
+          "/api/payments/create",
+          { plan },
+          accessToken,
+        );
+
+        const confirmationUrl =
+          typeof res?.confirmation_url === "string" && res.confirmation_url.trim()
+            ? res.confirmation_url.trim()
+            : null;
+
+        if (confirmationUrl) {
+          window.location.href = confirmationUrl;
+          return;
+        }
+
+        const message =
+          typeof res?.error === "string" && res.error.trim()
+            ? res.error.trim()
+            : "Не удалось создать платёж. Попробуйте позже.";
+        setPaymentError(message);
+      } catch (err) {
+        if (isUnauthorizedError(err)) {
+          logout();
+          setPaymentError(null);
+          setPaymentPlan(null);
+          return;
+        }
+        console.error("Failed to create payment", err);
+        setPaymentError("Не удалось создать платёж. Попробуйте позже.");
+      } finally {
+        setPaymentPlan(null);
+      }
+    },
+    [accessToken, logout, paymentPlan],
+  );
+
   return (
     <section className="account-panel" aria-labelledby="account-subscription-heading">
       <header className="account-panel__header">
@@ -266,6 +320,8 @@ export default function AccountSubscription() {
               price="99 ₽ в месяц*"
               hint="Подходит, чтобы оценить удобство сервиса и подобрать ресторан под ваши цели"
               description="Подписка продлевается автоматически до отмены"
+              onSelect={() => createPayment("month")}
+              disabled={Boolean(paymentPlan)}
             />
             <TariffCard
               title="Год"
@@ -273,8 +329,21 @@ export default function AccountSubscription() {
               hint="12 месяцев за цену 10* — 2 месяца бесплатно"
               description="Лучший выбор для тех, кто регулярно следит за КБЖУ ресторанных блюд"
               accent
+              onSelect={() => createPayment("year")}
+              disabled={Boolean(paymentPlan)}
             />
           </div>
+
+          {paymentPlan && (
+            <p className="account-subscription__status" role="status">
+              Перенаправляем на оплату…
+            </p>
+          )}
+          {paymentError && (
+            <div className="account-panel__box account-panel__box--error" role="alert">
+              <p className="account-panel__error-text">{paymentError}</p>
+            </div>
+          )}
         </div>
       )}
 
