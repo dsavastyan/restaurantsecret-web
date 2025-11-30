@@ -17,6 +17,10 @@ type SubscriptionStatusResponse = {
   error?: string | null;
 };
 
+type SubscriptionCancelResponse =
+  | { ok: true; item: { id: number; plan: string; status: string; started_at: string; expires_at: string } }
+  | { ok: false; error: "no_active" | "internal_error" };
+
 function TariffCard({
   title,
   price,
@@ -92,7 +96,7 @@ export default function AccountSubscription() {
     setError(null);
     try {
       const response = await apiGet<SubscriptionStatusResponse>(
-        "/api/subscriptions/status",
+        "/subscriptions/status",
         accessToken,
       );
 
@@ -184,6 +188,8 @@ export default function AccountSubscription() {
     return status;
   }, [statusData?.status_label, status]);
 
+  const canCancel = Boolean(statusData?.can_cancel);
+
   const handleCancel = useCallback(async () => {
     if (!accessToken || cancelLoading) return;
     const confirmCancel = window.confirm("Вы уверены что хотите отменить подписку?");
@@ -193,14 +199,25 @@ export default function AccountSubscription() {
     setCancelSuccess(null);
     setCancelLoading(true);
     try {
-      const res = await apiPost("/subscriptions/cancel", undefined, accessToken);
+      const res = await apiPost<SubscriptionCancelResponse>(
+        "/subscriptions/cancel",
+        undefined,
+        accessToken,
+      );
       if (res?.ok) {
-        setCancelSuccess("Подписка успешна отменена");
+        setCancelSuccess("Подписка успешно отменена");
         await fetchStatus();
         await reload();
-      } else {
-        setCancelError("Не удалось отменить подписку. Попробуйте позже.");
+        return;
       }
+
+      if (res?.error === "no_active") {
+        setCancelError("У вас нет активной подписки для отмены.");
+        await fetchStatus();
+        return;
+      }
+
+      setCancelError("Не удалось отменить подписку. Попробуйте позже.");
     } catch (err) {
       if (isUnauthorizedError(err)) {
         logout();
@@ -271,7 +288,7 @@ export default function AccountSubscription() {
           </h2>
           <p className="account-panel__description">Отслеживайте статус и выбирайте подходящий тариф.</p>
         </div>
-        {isActive && (
+        {canCancel && (
           <Button
             className="account-button account-button--danger"
             disabled={cancelLoading}
