@@ -225,10 +225,9 @@ export default function AccountSubscription() {
       setPaymentPlan(plan);
 
       try {
-        const returnUrl = `${window.location.origin}/payments/result`;
         const res = await apiPost<{ confirmation_url?: string; error?: string }>(
           "/api/payments/create",
-          { plan, return_url: returnUrl },
+          { plan },
           accessToken,
         );
 

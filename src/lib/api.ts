@@ -1,11 +1,9 @@
 // src/lib/api.ts
-import { API_BASE as CONFIG_API_BASE } from "@/config/api";
-
 export const API_BASE =
-  (import.meta.env.VITE_PD_API_BASE as string | undefined) || CONFIG_API_BASE;
+  import.meta.env.VITE_PD_API_BASE || "https://pd.restaurantsecret.ru";
 
 export const PUBLIC_API_BASE =
-  (import.meta.env.VITE_PUBLIC_API_BASE as string | undefined) || CONFIG_API_BASE;
+  import.meta.env.VITE_PUBLIC_API_BASE || "https://api.restaurantsecret.ru";
 
 export type SearchSuggestionRestaurant = {
   id: number;
