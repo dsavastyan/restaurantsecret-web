@@ -70,9 +70,11 @@ function SubscriptionSkeleton() {
 }
 
 export default function AccountSubscription() {
-  const { token, reload } = useOutletContext<AccountOutletContext>();
-  const accessToken = token || undefined;
-  const logout = useAuth((state) => state.logout);
+  const { reload } = useOutletContext<AccountOutletContext>();
+  const { accessToken, logout } = useAuth((state) => ({
+    accessToken: state.accessToken || undefined,
+    logout: state.logout,
+  }));
   const [statusData, setStatusData] = useState<SubscriptionStatusResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
