@@ -17,6 +17,14 @@ type SubscriptionStatusResponse = {
   error?: string | null;
 };
 
+type UiPlan = "month" | "year";
+type ApiPlan = "monthly" | "annual";
+
+function mapUiPlanToApi(plan: UiPlan): ApiPlan {
+  if (plan === "month") return "monthly";
+  return "annual";
+}
+
 function TariffCard({
   title,
   price,
@@ -82,7 +90,7 @@ export default function AccountSubscription() {
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [cancelSuccess, setCancelSuccess] = useState<string | null>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
-  const [paymentPlan, setPaymentPlan] = useState<string | null>(null);
+  const [paymentPlan, setPaymentPlan] = useState<UiPlan | null>(null);
 
   const fetchStatus = useCallback(async () => {
     if (!accessToken) {
@@ -220,16 +228,17 @@ export default function AccountSubscription() {
   const showHistory = (isActive || isCanceled || isExpired) && !loading;
 
   const createPayment = useCallback(
-    async (plan: string) => {
+    async (plan: UiPlan) => {
       if (!accessToken || paymentPlan) return;
 
       setPaymentError(null);
       setPaymentPlan(plan);
+      const apiPlan = mapUiPlanToApi(plan);
 
       try {
         const res = await apiPost<{ confirmation_url?: string; error?: string }>(
           "/api/payments/create",
-          { plan },
+          { plan: apiPlan },
           accessToken,
         );
 
