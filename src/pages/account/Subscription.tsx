@@ -3,6 +3,11 @@ import { Link, useOutletContext } from "react-router-dom";
 import Button from "@/components/ui/Button";
 import { ApiError, apiGet, apiPost, isUnauthorizedError } from "@/lib/api";
 import { useAuth } from "@/store/auth";
+import {
+  selectHasActiveSub,
+  selectSetHasActiveSub,
+  useSubscriptionStore,
+} from "@/store/subscription";
 import type { AccountOutletContext } from "./Layout";
 
 type SubscriptionStatusResponse = {
@@ -83,6 +88,8 @@ export default function AccountSubscription() {
     accessToken: state.accessToken || undefined,
     logout: state.logout,
   }));
+  const hasActiveSub = useSubscriptionStore(selectHasActiveSub);
+  const setHasActiveSub = useSubscriptionStore(selectSetHasActiveSub);
   const [statusData, setStatusData] = useState<SubscriptionStatusResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -96,13 +103,16 @@ export default function AccountSubscription() {
     if (!accessToken) {
       setStatusData(null);
       setLoading(false);
+      if (hasActiveSub) {
+        setHasActiveSub(false);
+      }
       return;
     }
     setLoading(true);
     setError(null);
     try {
       const response = await apiGet<SubscriptionStatusResponse>(
-        "/api/subscriptions/status",
+        "/subscriptions/status",
         accessToken,
       );
 
@@ -137,24 +147,28 @@ export default function AccountSubscription() {
       } satisfies SubscriptionStatusResponse;
 
       setStatusData(normalized);
+      setHasActiveSub(normalized.status === "active");
     } catch (err) {
       if (isUnauthorizedError(err)) {
         logout();
         setStatusData(null);
         setError(null);
+        setHasActiveSub(false);
         return;
       }
       if (err instanceof ApiError && err.status === 404) {
         setStatusData({ status: "none", status_label: null, expires_at: null });
         setError(null);
+        setHasActiveSub(false);
         return;
       }
       console.error("Failed to load subscription status", err);
       setError("Не удалось загрузить статус подписки. Попробуйте позже.");
+      setHasActiveSub(false);
     } finally {
       setLoading(false);
     }
-  }, [accessToken, logout]);
+  }, [accessToken, hasActiveSub, logout, setHasActiveSub]);
 
   useEffect(() => {
     fetchStatus();
