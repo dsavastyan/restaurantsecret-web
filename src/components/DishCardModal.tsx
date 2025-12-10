@@ -1,8 +1,10 @@
 import { useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { useDishCardStore } from "@/store/dishCard";
+import { useAuth } from "@/store/auth";
+import { useSubscriptionStore } from "@/store/subscription";
 
 const root = typeof document !== "undefined" ? document.body : null;
 
@@ -34,12 +36,18 @@ function MacroCell({
 }
 
 export default function DishCardModal() {
+  const navigate = useNavigate();
   const { isOpen, isLoading, data, error, close } = useDishCardStore((s) => ({
     isOpen: s.isOpen,
     isLoading: s.isLoading,
     data: s.data,
     error: s.error,
     close: s.close,
+  }));
+  const accessToken = useAuth((state) => state.accessToken);
+  const { hasActiveSub, fetchStatus } = useSubscriptionStore((state) => ({
+    hasActiveSub: state.hasActiveSub,
+    fetchStatus: state.fetchStatus,
   }));
 
   useEffect(() => {
@@ -50,6 +58,19 @@ export default function DishCardModal() {
       root.style.overflow = prev;
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    fetchStatus(accessToken);
+  }, [accessToken, fetchStatus, isOpen]);
+
+  const handleSubscribeClick = () => {
+    if (accessToken) {
+      navigate("/account/subscription");
+      return;
+    }
+    navigate("/login", { state: { from: "/account/subscription" } });
+  };
 
   const anchorId = useMemo(() => {
     if (!data) return "";
@@ -105,46 +126,60 @@ export default function DishCardModal() {
               </div>
             </div>
 
-            <section className="dish-card__section">
-              <div className="dish-card__section-title">КБЖУ на порцию</div>
-              <div className="dish-card__macro-grid">
-                {(Object.keys(macroLabel) as MacroKey[]).map((key) => (
-                  <MacroCell
-                    key={key}
-                    label={macroLabel[key]}
-                    value={(data as any)[key] as number | null}
-                    highlight={key === "kcal"}
-                  />
-                ))}
-              </div>
-            </section>
-
-            {data.composition_text && (
-              <section className="dish-card__section">
-                <div className="dish-card__section-title">Состав</div>
-                <p className="dish-card__text">{data.composition_text}</p>
-              </section>
-            )}
-
-            <section className="dish-card__section">
-              <div className="dish-card__section-title">Аллергены и нежелательные продукты</div>
-              {data.allergensList.length ? (
-                <div className="dish-card__allergens">
-                  <div className="dish-card__warning">⚠️ Проверьте состав: в блюде отмечены потенциальные аллергены.</div>
-                  <div className="dish-card__chips">
-                    {data.allergensList.map((item) => (
-                      <span key={item} className="dish-card__chip">
-                        {item}
-                      </span>
+            {hasActiveSub ? (
+              <>
+                <section className="dish-card__section">
+                  <div className="dish-card__section-title">КБЖУ на порцию</div>
+                  <div className="dish-card__macro-grid">
+                    {(Object.keys(macroLabel) as MacroKey[]).map((key) => (
+                      <MacroCell
+                        key={key}
+                        label={macroLabel[key]}
+                        value={(data as any)[key] as number | null}
+                        highlight={key === "kcal"}
+                      />
                     ))}
                   </div>
-                </div>
-              ) : (
-                <p className="dish-card__text dish-card__text--muted">
-                  Аллергенов в карточке блюда не указано.
+                </section>
+
+                {data.composition_text && (
+                  <section className="dish-card__section">
+                    <div className="dish-card__section-title">Состав</div>
+                    <p className="dish-card__text">{data.composition_text}</p>
+                  </section>
+                )}
+
+                <section className="dish-card__section">
+                  <div className="dish-card__section-title">Аллергены и нежелательные продукты</div>
+                  {data.allergensList.length ? (
+                    <div className="dish-card__allergens">
+                      <div className="dish-card__warning">⚠️ Проверьте состав: в блюде отмечены потенциальные аллергены.</div>
+                      <div className="dish-card__chips">
+                        {data.allergensList.map((item) => (
+                          <span key={item} className="dish-card__chip">
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="dish-card__text dish-card__text--muted">
+                      Аллергенов в карточке блюда не указано.
+                    </p>
+                  )}
+                </section>
+              </>
+            ) : (
+              <section className="dish-card__section">
+                <div className="dish-card__section-title">Информация о блюде</div>
+                <p className="dish-card__text">
+                  Эта информация доступна только по подписке.
                 </p>
-              )}
-            </section>
+                <button type="button" className="btn btn--primary" onClick={handleSubscribeClick}>
+                  Оформить подписку
+                </button>
+              </section>
+            )}
           </div>
         )}
       </div>

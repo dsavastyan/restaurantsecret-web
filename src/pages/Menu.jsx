@@ -1,8 +1,10 @@
 // Restaurant menu page with filters for macros and calories.
 import React, { useEffect, useMemo, useState } from 'react'
-import { useOutletContext, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { apiGet } from '@/lib/requests'
 import { flattenMenuDishes, formatNumeric } from '@/lib/nutrition'
+import { useAuth } from '@/store/auth'
+import { useSubscriptionStore } from '@/store/subscription'
 
 const createDefaultPresets = () => ({ highProtein: false, lowFat: false, lowKcal: false })
 const createDefaultRange = () => ({
@@ -14,9 +16,12 @@ const createDefaultRange = () => ({
 
 export default function Menu() {
   const { slug } = useParams()
-  const outlet = useOutletContext() || {}
-  const access = outlet.access
-  const requireAccess = outlet.requireAccess
+  const navigate = useNavigate()
+  const accessToken = useAuth((state) => state.accessToken)
+  const { hasActiveSub, fetchStatus } = useSubscriptionStore((state) => ({
+    hasActiveSub: state.hasActiveSub,
+    fetchStatus: state.fetchStatus,
+  }))
 
   const [menu, setMenu] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -26,15 +31,6 @@ export default function Menu() {
   const [presets, setPresets] = useState(createDefaultPresets)
   const [range, setRange] = useState(createDefaultRange)
 
-  const hasAccess = access?.isActive
-
-  // Kick users without access back to the paywall.
-  useEffect(() => {
-    if (hasAccess === false && typeof requireAccess === 'function') {
-      requireAccess()
-    }
-  }, [hasAccess, requireAccess])
-
   // Reset filters whenever the restaurant slug changes.
   useEffect(() => {
     setQuery('')
@@ -42,18 +38,13 @@ export default function Menu() {
     setRange(createDefaultRange())
   }, [slug])
 
-  // Fetch the menu when access is available.
+  // Fetch the menu.
   useEffect(() => {
     let aborted = false
 
-    if (hasAccess === false) {
-      setLoading(false)
-      setMenu(null)
-      return () => { aborted = true }
-    }
-
     ;(async () => {
       try {
+        await fetchStatus(accessToken)
         setLoading(true)
         setError('')
         const raw = await apiGet(`/restaurants/${slug}/menu`)
@@ -72,7 +63,7 @@ export default function Menu() {
     return () => {
       aborted = true
     }
-  }, [slug, hasAccess])
+  }, [accessToken, fetchStatus, slug])
 
   const dishes = useMemo(() => flattenMenuDishes(menu), [menu])
 
@@ -115,13 +106,12 @@ export default function Menu() {
     setRange(createDefaultRange())
   }
 
-  if (hasAccess === false) {
-    return (
-      <div className="stack">
-        <h1>Меню</h1>
-        <p>Оформите подписку, чтобы просматривать меню.</p>
-      </div>
-    )
+  const handleSubscribe = () => {
+    if (accessToken) {
+      navigate('/account/subscription')
+      return
+    }
+    navigate('/login', { state: { from: '/account/subscription' } })
   }
 
   return (
@@ -183,15 +173,26 @@ export default function Menu() {
                 <li key={`${dish.category || 'dish'}-${dish.name}`} className="row">
                   <div className="row-main">
                     <strong>{dish.name}</strong>
-                    <div className="tags">
-                      <span className="tag">{formatNumeric(dish.kcal)} ккал</span>
-                      <span className="tag">Б {formatNumeric(dish.protein)}</span>
-                      <span className="tag">Ж {formatNumeric(dish.fat)}</span>
-                      <span className="tag">У {formatNumeric(dish.carbs)}</span>
-                      {Number.isFinite(dish.weight) && <span className="tag">{formatNumeric(dish.weight)} г</span>}
-                      {dish.category && <span className="tag">{dish.category}</span>}
-                    </div>
-                    {dish.ingredients && <div className="muted">{dish.ingredients}</div>}
+                    {hasActiveSub ? (
+                      <>
+                        <div className="tags">
+                          <span className="tag">{formatNumeric(dish.kcal)} ккал</span>
+                          <span className="tag">Б {formatNumeric(dish.protein)}</span>
+                          <span className="tag">Ж {formatNumeric(dish.fat)}</span>
+                          <span className="tag">У {formatNumeric(dish.carbs)}</span>
+                          {Number.isFinite(dish.weight) && <span className="tag">{formatNumeric(dish.weight)} г</span>}
+                          {dish.category && <span className="tag">{dish.category}</span>}
+                        </div>
+                        {dish.ingredients && <div className="muted">{dish.ingredients}</div>}
+                      </>
+                    ) : (
+                      <div className="menu-paywall">
+                        <p className="muted">Эта информация доступна только по подписке.</p>
+                        <button type="button" className="subscribe-btn" onClick={handleSubscribe}>
+                          Оформить подписку
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <div className="row-aside">
                     {Number.isFinite(dish.price) && <div className="price">{Math.round(dish.price)} ₽</div>}

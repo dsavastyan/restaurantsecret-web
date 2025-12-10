@@ -1,17 +1,25 @@
 // Detailed restaurant profile view with advanced filtering controls.
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { apiGet } from '@/lib/requests';
 import { flattenMenuDishes, formatNumeric } from '@/lib/nutrition';
+import { useAuth } from '@/store/auth';
+import { useSubscriptionStore } from '@/store/subscription';
 
 // Assumption: subscription is active when you render this page
 // If you still keep useSubscription, you can gate this page by redirecting beforehand.
 
 export default function RestaurantPage() {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const [menu, setMenu] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
+  const accessToken = useAuth((state) => state.accessToken);
+  const { hasActiveSub, fetchStatus } = useSubscriptionStore((state) => ({
+    hasActiveSub: state.hasActiveSub,
+    fetchStatus: state.fetchStatus,
+  }));
 
   // UI state
   const [q, setQ] = useState('');                 // поиск по названию блюда
@@ -30,6 +38,7 @@ export default function RestaurantPage() {
   useEffect(() => {
     let aborted = false;
     (async () => {
+      await fetchStatus(accessToken);
       try {
         setLoading(true);
         setErr(null);
@@ -42,7 +51,15 @@ export default function RestaurantPage() {
       }
     })();
     return () => { aborted = true; };
-  }, [slug]);
+  }, [accessToken, fetchStatus, slug]);
+
+  const handleSubscribeClick = () => {
+    if (accessToken) {
+      navigate('/account/subscription');
+      return;
+    }
+    navigate('/login', { state: { from: '/account/subscription' } });
+  };
 
   // применение фильтров
   const filtered = useMemo(() => {
@@ -120,7 +137,7 @@ export default function RestaurantPage() {
         {!loading && !err && (
           filtered.length ? (
             <div className="rp__list">
-              {filtered.map(d => <DishCard key={d.id || d.name} dish={d} />)}
+              {filtered.map(d => <DishCard key={d.id || d.name} dish={d} hasActiveSub={hasActiveSub} onSubscribe={handleSubscribeClick} />)}
             </div>
           ) : (
             <p className="rp__empty">Под эти параметры сейчас ничего нет. Измени фильтры.</p>
@@ -191,22 +208,31 @@ function MacroRange({ label, value, onChange }) {
   );
 }
 
-function DishCard({ dish }) {
+function DishCard({ dish, hasActiveSub, onSubscribe }) {
   return (
     <div className="dish">
       <div className="dish__top">
         <div className="dish__name">{dish.name}</div>
         {Number.isFinite(dish.price) && <div className="dish__price">{Math.round(dish.price)} ₽</div>}
       </div>
-      <div className="dish__meta">
-        <span className="pill">{formatNumeric(dish.kcal)} ккал</span>
-        <span className="pill">Б {formatNumeric(dish.protein)} г</span>
-        <span className="pill">Ж {formatNumeric(dish.fat)} г</span>
-        <span className="pill">У {formatNumeric(dish.carbs)} г</span>
-        {Number.isFinite(dish.weight) && <span className="pill">{formatNumeric(dish.weight)} г</span>}
-      </div>
-      {dish.category && <div className="dish__category">{dish.category}</div>}
-      {dish.ingredients && <div className="dish__ing">{dish.ingredients}</div>}
+      {hasActiveSub ? (
+        <>
+          <div className="dish__meta">
+            <span className="pill">{formatNumeric(dish.kcal)} ккал</span>
+            <span className="pill">Б {formatNumeric(dish.protein)} г</span>
+            <span className="pill">Ж {formatNumeric(dish.fat)} г</span>
+            <span className="pill">У {formatNumeric(dish.carbs)} г</span>
+            {Number.isFinite(dish.weight) && <span className="pill">{formatNumeric(dish.weight)} г</span>}
+          </div>
+          {dish.category && <div className="dish__category">{dish.category}</div>}
+          {dish.ingredients && <div className="dish__ing">{dish.ingredients}</div>}
+        </>
+      ) : (
+        <div className="dish__paywall">
+          <p className="dish__paywall-text">Эта информация доступна только по подписке.</p>
+          <button type="button" className="btn" onClick={onSubscribe}>Оформить подписку</button>
+        </div>
+      )}
     </div>
   );
 }
@@ -249,4 +275,6 @@ const styles = `
 .pill { font-size:12px; padding:4px 8px; border:1px solid #e2e8f0; border-radius:999px; color:#0f172a; background:#f8fafc; }
 .dish__category { font-size:12px; color:#64748b; }
 .dish__ing { font-size:13px; color:#334155; margin-top:4px; }
+.dish__paywall { display:flex; align-items:center; gap:10px; margin-top:8px; flex-wrap:wrap; }
+.dish__paywall-text { margin:0; color:#475569; }
 `;

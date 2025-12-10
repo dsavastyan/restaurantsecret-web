@@ -1,10 +1,14 @@
 // src/pages/Login.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { apiPost } from "@/lib/api";
 import { useAuth, selectSetToken } from "@/store/auth"; // <— меняем импорт
 
 export default function LoginPage() {
   const setToken = useAuth(selectSetToken); // <— берём сеттер из стора
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
 
   const [email, setEmail] = useState("");
   const [step, setStep] = useState<"enter"|"code"|"done">("enter");
@@ -12,6 +16,17 @@ export default function LoginPage() {
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [timer, setTimer] = useState(0);
+
+  const redirectTo = useMemo(() => {
+    const stateFrom =
+      location.state && typeof (location.state as any).from === "string"
+        ? (location.state as any).from
+        : null;
+    const queryNext = searchParams.get("next");
+    if (queryNext && queryNext.startsWith("/")) return queryNext;
+    if (stateFrom && stateFrom.startsWith("/")) return stateFrom;
+    return "/account";
+  }, [location.state, searchParams]);
 
   useEffect(() => {
     if (timer <= 0) return;
@@ -52,7 +67,7 @@ export default function LoginPage() {
       const res = await apiPost("/auth/verify-otp", { email, code });
       if (res?.ok && res?.access_token) {
         setToken(res.access_token);       // <— сохраняем токен в твой стор (rs_access)
-        window.location.replace("/account");
+        navigate(redirectTo, { replace: true });
       } else {
         setErr(res?.message || "Неверный код");
       }
