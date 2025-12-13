@@ -42,7 +42,7 @@ function TariffCard({
   title: string;
   price: string;
   hint: string;
-  description: string;
+  description?: string;
   accent?: boolean;
   onSelect?: () => void;
   disabled?: boolean;
@@ -63,7 +63,7 @@ function TariffCard({
       </div>
       <p className="account-subscription__tile-value">{price}</p>
       <p className="account-subscription__tile-hint">{hint}</p>
-      <p className="account-subscription__tile-description">{description}</p>
+      {description && <p className="account-subscription__tile-description">{description}</p>}
     </button>
   );
 }
@@ -294,7 +294,6 @@ export default function AccountSubscription() {
           <h2 id="account-subscription-heading" className="account-panel__title">
             Управление подпиской
           </h2>
-          <p className="account-panel__description">Отслеживайте статус и выбирайте подходящий тариф.</p>
         </div>
         {isActive && (
           <Button
@@ -336,28 +335,28 @@ export default function AccountSubscription() {
         <div className="account-subscription__plans">
           <div className="account-subscription__empty" role="status">
             <h3>Оформите подписку</h3>
-            <p>Подписка открывает доступ к КБЖУ, составу блюд и персональным рекомендациям.</p>
+            <p>Подписка открывает доступ к полной карточке блюд, включая КБЖУ и составы блюд.</p>
           </div>
 
           <div className="account-subscription__grid" role="list">
             <TariffCard
               title="Месяц"
               price="99 ₽ в месяц*"
-              hint="Подходит, чтобы оценить удобство сервиса и подобрать ресторан под ваши цели"
-              description="Подписка продлевается автоматически до отмены"
+              hint="Подходит чтобы оценить удобство сервиса"
               onSelect={() => createPayment("month")}
               disabled={Boolean(paymentPlan)}
             />
             <TariffCard
               title="Год"
               price="999 ₽"
-              hint="12 месяцев за цену 10* — 2 месяца бесплатно"
-              description="Лучший выбор для тех, кто регулярно следит за КБЖУ ресторанных блюд"
+              hint="12 месяцев по цене 10. Лучший выбор для тех, кто регулярно следует цели"
               accent
               onSelect={() => createPayment("year")}
               disabled={Boolean(paymentPlan)}
             />
           </div>
+
+          <p className="account-panel__description">Подписка продлевается автоматически до отмены.</p>
 
           {paymentPlan && (
             <p className="account-subscription__status" role="status">
@@ -374,11 +373,6 @@ export default function AccountSubscription() {
 
       {showHistory && (
         <footer className="account-subscription__footer account-subscription__footer--spaced">
-          <div>
-            {isCanceled || isExpired ? (
-              <p className="account-subscription__status">История доступна в отдельном разделе.</p>
-            ) : null}
-          </div>
           <Link to="/account/subscription/history" className="account-subscription__history">
             История подписок
           </Link>
