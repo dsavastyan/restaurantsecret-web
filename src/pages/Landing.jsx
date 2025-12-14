@@ -253,8 +253,8 @@ function SuggestPopover({ onClose }) {
     try {
       await postSuggest(
         {
-          restaurant: trimmedRestaurant,
-          dish: dish.trim() || null,
+          name: trimmedRestaurant,
+          dish_name: dish.trim() || null,
           city: city.trim() || null,
           email: email.trim() || null,
         },
