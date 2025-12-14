@@ -2425,6 +2425,14 @@ body.tg-dark .login__alert {
   animation: toast-in 0.2s ease-out;
 }
 
+.toast--info {
+  background: #0ea5e9;
+}
+
+.toast--warning {
+  background: #f59e0b;
+}
+
 .toast--error {
   background: #dc2626;
 }

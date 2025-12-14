@@ -1,4 +1,4 @@
-export type ToastVariant = "success" | "error";
+export type ToastVariant = "success" | "info" | "warning" | "error";
 
 export type ToastOptions = {
   duration?: number;
@@ -32,6 +32,12 @@ const emit = (variant: ToastVariant, message: string, options?: ToastOptions) =>
 export const toast = {
   success(message: string, options?: ToastOptions) {
     emit("success", message, options);
+  },
+  info(message: string, options?: ToastOptions) {
+    emit("info", message, options);
+  },
+  warning(message: string, options?: ToastOptions) {
+    emit("warning", message, options);
   },
   error(message: string, options?: ToastOptions) {
     emit("error", message, options);
