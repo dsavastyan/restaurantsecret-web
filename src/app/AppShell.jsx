@@ -10,6 +10,7 @@ import Footer from '@/components/Footer.jsx'
 import Paywall from '../components/Paywall.jsx'
 import { API_BASE } from '@/config/api'
 import { toast } from '@/lib/toast'
+import { useAuth } from '@/store/auth'
 
 // Default shape for the subscription/access status persisted in localStorage.
 const defaultAccess = { ok: false, isActive: false, expiresAt: null, event: null }
@@ -35,6 +36,7 @@ const accessEventMessages = {
 
 export default function AppShell() {
   const location = useLocation()
+  const accessToken = useAuth((state) => state.accessToken)
   const [access, setAccess] = useState(() => {
     if (typeof window === 'undefined') return defaultAccess
     try {
@@ -177,15 +179,13 @@ export default function AppShell() {
   // Manual refresh triggered by the user after completing payment.
   const refreshAccess = useCallback(async () => {
     try {
-      const user = (typeof window !== 'undefined' && window.localStorage.getItem('rs_tg_user_id')) || null
-
-      if (!user) {
-        toast.warning('Не удалось определить пользователя. Откройте приложение из Telegram и попробуйте снова.')
+      if (!accessToken) {
+        toast.info('Войдите в аккаунт, чтобы проверить доступ')
         return
       }
       const response = await fetch(`${API_BASE}/me`, {
         headers: {
-          'Authorization': `Bearer ${user}`
+          'Authorization': `Bearer ${accessToken}`
         }
       })
 
@@ -211,7 +211,7 @@ export default function AppShell() {
       console.error('Failed to refresh access', err)
       toast.error('Не удалось проверить доступ. Попробуйте позже.')
     }
-  }, [handleAccessUpdate])
+  }, [accessToken, handleAccessUpdate])
 
   // Values passed to nested routes via useOutletContext.
   const outletContext = useMemo(() => ({
