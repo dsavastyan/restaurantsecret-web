@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Link, useOutletContext, useSearchParams } from 'react-router-dom'
 import { API_BASE } from '@/config/api'
+import { useAuth } from '@/store/auth'
 
 const queryErrors = {
   no_id: 'Платёж не найден. Попробуйте оформить подписку ещё раз.',
@@ -27,6 +28,7 @@ export default function PaySuccess() {
   const outlet = useOutletContext() ?? {}
   const access = outlet.access ?? {}
   const onAccessUpdate = outlet.handleAccessUpdate
+  const accessToken = useAuth((state) => state.accessToken)
   const [searchParams] = useSearchParams()
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState('idle')
@@ -52,10 +54,14 @@ export default function PaySuccess() {
     setStatus('loading')
     setMessage('')
     try {
-      const user = (typeof window !== 'undefined' && window.localStorage.getItem('rs_tg_user_id')) || '176483490'
+      if (!accessToken) {
+        setStatus('idle')
+        setMessage('Войдите в аккаунт, чтобы подтвердить подписку.')
+        return
+      }
       const response = await fetch(`${API_BASE}/me`, {
         headers: {
-          'Authorization': `Bearer ${user}`
+          'Authorization': `Bearer ${accessToken}`
         }
       })
 
