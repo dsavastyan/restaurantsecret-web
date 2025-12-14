@@ -335,7 +335,7 @@ export default function AccountSubscription() {
         <div className="account-subscription__plans">
           <div className="account-subscription__empty" role="status">
             <h3>Оформите подписку</h3>
-            <p>Подписка открывает доступ к полной карточке блюд, включая КБЖУ и составы блюд.</p>
+            <p>Подписка открывает доступ к полной карточке блюд, включая КБЖУ и составы блюд</p>
           </div>
 
           <div className="account-subscription__grid" role="list">
@@ -356,7 +356,7 @@ export default function AccountSubscription() {
             />
           </div>
 
-          <p className="account-panel__description">Подписка продлевается автоматически до отмены.</p>
+          <p className="account-panel__description">Подписка продлевается автоматически до отмены</p>
 
           {paymentPlan && (
             <p className="account-subscription__status" role="status">
