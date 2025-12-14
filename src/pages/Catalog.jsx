@@ -198,7 +198,7 @@ export default function Catalog() {
                 </div>
 
                 <div className="catalog-card__body">
-                  <div className="catalog-card__label">Блюда в меню {dishesCount}</div>
+                  <div className="catalog-card__label">Блюда в меню: {dishesCount}</div>
                   {dishesCount === 0 && (
                     <div className="catalog-card__empty">Скоро добавим</div>
                   )}
