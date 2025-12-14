@@ -1115,6 +1115,13 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
   font-size: 14px;
 }
 
+.account-subscription__note {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
 .account-subscription__plans {
   display: flex;
   flex-direction: column;
@@ -1568,6 +1575,10 @@ body.tg-dark .account-panel__term {
 
 body.tg-dark .account-panel__description {
   color: #f9fafb;
+}
+
+body.tg-dark .account-subscription__note {
+  color: rgba(229, 231, 235, 0.78);
 }
 
 body.tg-dark .logout-modal {

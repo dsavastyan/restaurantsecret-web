@@ -348,7 +348,7 @@ export default function AccountSubscription() {
             />
             <TariffCard
               title="Год"
-              price="999 ₽"
+              price="999 ₽*"
               hint="12 месяцев по цене 10. Лучший выбор для тех, кто регулярно следует цели"
               accent
               onSelect={() => createPayment("year")}
@@ -356,7 +356,7 @@ export default function AccountSubscription() {
             />
           </div>
 
-          <p className="account-panel__description">Подписка продлевается автоматически до отмены</p>
+          <p className="account-subscription__note">* Подписка продлевается автоматически до отмены</p>
 
           {paymentPlan && (
             <p className="account-subscription__status" role="status">
