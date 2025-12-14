@@ -1,6 +1,6 @@
 // Shared layout for authenticated areas. Manages subscription state and toggles
 // the paywall overlay when required.
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Outlet, useLocation } from 'react-router-dom'
 import NavBar from '@/components/NavBar'
@@ -9,9 +9,29 @@ import DishCardModal from '@/components/DishCardModal'
 import Footer from '@/components/Footer.jsx'
 import Paywall from '../components/Paywall.jsx'
 import { API_BASE } from '@/config/api'
+import { toast } from '@/lib/toast'
 
 // Default shape for the subscription/access status persisted in localStorage.
-const defaultAccess = { ok: false, isActive: false, expiresAt: null }
+const defaultAccess = { ok: false, isActive: false, expiresAt: null, event: null }
+
+const accessEventMessages = {
+  subscription_pending: {
+    variant: 'info',
+    message: 'Оплата обрабатывается. Повторите проверку доступа через несколько секунд.'
+  },
+  subscription_expired: {
+    variant: 'warning',
+    message: 'Подписка истекла. Оформите продление, чтобы открыть доступ.'
+  },
+  subscription_inactive: {
+    variant: 'warning',
+    message: 'Подписка пока не активна. Проверьте статус оплаты или попробуйте позже.'
+  },
+  subscription_error: {
+    variant: 'error',
+    message: 'Не удалось подтвердить подписку. Попробуйте позже или обратитесь в поддержку.'
+  }
+}
 
 export default function AppShell() {
   const location = useLocation()
@@ -29,6 +49,7 @@ export default function AppShell() {
   })
   const [paywallVisible, setPaywallVisible] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const lastAccessEventRef = useRef(null)
 
   // Merge new access info into state. A falsy value resets to defaults.
   const handleAccessUpdate = useCallback((next) => {
@@ -85,6 +106,23 @@ export default function AppShell() {
     }
   }, [handleAccessUpdate])
 
+  // Surface notable access-related events to the user through toasts.
+  useEffect(() => {
+    const eventName = access?.event
+    if (!eventName) {
+      lastAccessEventRef.current = null
+      return
+    }
+
+    if (lastAccessEventRef.current === eventName) return
+    lastAccessEventRef.current = eventName
+
+    const config = accessEventMessages[eventName]
+    if (config && typeof toast[config.variant] === 'function') {
+      toast[config.variant](config.message)
+    }
+  }, [access?.event])
+
   // Apply Telegram-specific tweaks when running inside the WebApp container.
   useEffect(() => {
     const tg = window.Telegram?.WebApp
@@ -139,7 +177,12 @@ export default function AppShell() {
   // Manual refresh triggered by the user after completing payment.
   const refreshAccess = useCallback(async () => {
     try {
-      const user = (typeof window !== 'undefined' && window.localStorage.getItem('rs_tg_user_id')) || '176483490'
+      const user = (typeof window !== 'undefined' && window.localStorage.getItem('rs_tg_user_id')) || null
+
+      if (!user) {
+        toast.warning('Не удалось определить пользователя. Откройте приложение из Telegram и попробуйте снова.')
+        return
+      }
       const response = await fetch(`${API_BASE}/me`, {
         headers: {
           'Authorization': `Bearer ${user}`
@@ -151,20 +194,22 @@ export default function AppShell() {
       }
 
       const me = await response.json()
+      const derivedEvent = me?.event ?? me?.status ?? (!me?.ok ? 'subscription_error' : null)
       const detail = {
         ok: me?.ok ?? true,
         isActive: Boolean(me?.isActive),
-        expiresAt: me?.expiresAt ?? null
+        expiresAt: me?.expiresAt ?? null,
+        event: derivedEvent
       }
 
       handleAccessUpdate(detail)
 
-      if (!detail.isActive) {
-        alert('Подписка пока не активна. Попробуйте повторить проверку позже.')
+      if (!detail.isActive && !detail.event) {
+        toast.info('Подписка пока не активна. Попробуйте повторить проверку позже.')
       }
     } catch (err) {
       console.error('Failed to refresh access', err)
-      alert('Не удалось проверить доступ. Попробуйте позже.')
+      toast.error('Не удалось проверить доступ. Попробуйте позже.')
     }
   }, [handleAccessUpdate])
 
