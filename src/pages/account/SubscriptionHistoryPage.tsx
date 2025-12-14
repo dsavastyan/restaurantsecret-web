@@ -19,7 +19,6 @@ type NormalizedHistoryItem = {
   status: string;
   started_at: string | null;
   expires_at: string | null;
-  source: string;
 };
 
 type FetchState = {
@@ -27,6 +26,17 @@ type FetchState = {
   loading: boolean;
   error: string | null;
 };
+
+const PLAN_LABELS: Record<string, string> = {
+  monthly: "Месячный",
+  annual: "Годовая",
+  mock: "Бесплатный период",
+};
+
+function formatPlanName(plan: string): string {
+  const normalized = plan.trim().toLowerCase();
+  return PLAN_LABELS[normalized] ?? plan;
+}
 
 function normalizeHistoryResponse(response: RawHistoryResponse): NormalizedHistoryItem[] {
   const extractArray = (value: RawHistoryResponse): SubscriptionHistoryItem[] => {
@@ -56,7 +66,6 @@ function normalizeHistoryResponse(response: RawHistoryResponse): NormalizedHisto
   const normalized: NormalizedHistoryItem[] = rawItems.map((item) => {
     const plan = typeof item.plan === "string" && item.plan.trim() ? item.plan.trim() : "—";
     const status = typeof item.status === "string" && item.status.trim() ? item.status.trim() : "—";
-    const source = typeof item.source === "string" && item.source.trim() ? item.source.trim() : "—";
 
     const startedAt =
       typeof item.started_at === "string" && item.started_at.trim() ? item.started_at.trim() : null;
@@ -64,11 +73,10 @@ function normalizeHistoryResponse(response: RawHistoryResponse): NormalizedHisto
       typeof item.expires_at === "string" && item.expires_at.trim() ? item.expires_at.trim() : null;
 
     return {
-      plan,
+      plan: plan !== "—" ? formatPlanName(plan) : plan,
       status,
       started_at: startedAt,
       expires_at: expiresAt,
-      source,
     };
   });
 
@@ -174,7 +182,6 @@ export default function SubscriptionHistoryPage() {
                 <div className="account-history__item-header">
                   <div className="account-history__plan-group">
                     <p className="account-history__plan">{item.plan}</p>
-                    <p className="account-history__source">Источник: {item.source || "—"}</p>
                   </div>
                   <span className={`account-history__status account-history__status--${tone}`}>
                     {item.status}
@@ -215,9 +222,6 @@ export default function SubscriptionHistoryPage() {
           <h2 id="account-subscription-history-heading" className="account-panel__title">
             История подписки
           </h2>
-          <p className="account-panel__lead">
-            Отслеживайте прошлые периоды подписки, статусы и способ оформления.
-          </p>
         </div>
         <div className="account-panel__actions">
           <Link to="/account/subscription" className="account-button account-button--outline">
