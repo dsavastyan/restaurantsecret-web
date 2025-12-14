@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { apiGet } from '@/lib/requests'
 import { flattenMenuDishes, formatNumeric } from '@/lib/nutrition'
+import { formatDescription } from '@/lib/text'
 import { useAuth } from '@/store/auth'
 import { useSubscriptionStore } from '@/store/subscription'
 
@@ -183,7 +184,7 @@ export default function Menu() {
                           {Number.isFinite(dish.weight) && <span className="tag">{formatNumeric(dish.weight)} г</span>}
                           {dish.category && <span className="tag">{dish.category}</span>}
                         </div>
-                        {dish.ingredients && <div className="muted">{dish.ingredients}</div>}
+                        <div className="muted">{formatDescription(dish.ingredients ?? dish.description)}</div>
                       </>
                     ) : (
                       <div className="menu-paywall">
