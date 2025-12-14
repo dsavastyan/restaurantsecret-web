@@ -2,6 +2,7 @@ import { useSyncExternalStore } from "react";
 
 import { apiGet } from "@/lib/requests";
 import { flattenMenuDishes } from "@/lib/nutrition";
+import { formatDescription } from "@/lib/text";
 
 type DishCardDraft = {
   id?: number;
@@ -216,12 +217,12 @@ const deriveCardData = (
   const fats = pickNumber(dish, ["fat", "fats", "fat_g", "fats_g"]);
   const carbs = pickNumber(dish, ["carb", "carbs", "carbohydrates", "carbs_g"]);
 
-  const composition =
+  const composition = formatDescription(
     (dish?.composition_text as string) ||
-    (dish?.composition as string) ||
-    (dish?.ingredients as string) ||
-    (dish?.description as string) ||
-    null;
+      (dish?.composition as string) ||
+      (dish?.ingredients as string) ||
+      (dish?.description as string),
+  );
 
   return {
     id: (dish?.id as number | string) ?? draft.id,

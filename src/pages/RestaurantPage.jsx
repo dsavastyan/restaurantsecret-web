@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiGet } from '@/lib/requests';
 import { flattenMenuDishes, formatNumeric } from '@/lib/nutrition';
+import { formatDescription } from '@/lib/text';
 import { useAuth } from '@/store/auth';
 import { useSubscriptionStore } from '@/store/subscription';
 
@@ -209,6 +210,8 @@ function MacroRange({ label, value, onChange }) {
 }
 
 function DishCard({ dish, hasActiveSub, onSubscribe }) {
+  const description = formatDescription(dish.ingredients ?? dish.description);
+
   return (
     <div className="dish">
       <div className="dish__top">
@@ -225,7 +228,7 @@ function DishCard({ dish, hasActiveSub, onSubscribe }) {
             {Number.isFinite(dish.weight) && <span className="pill">{formatNumeric(dish.weight)} г</span>}
           </div>
           {dish.category && <div className="dish__category">{dish.category}</div>}
-          {dish.ingredients && <div className="dish__ing">{dish.ingredients}</div>}
+          <div className="dish__ing">{description}</div>
         </>
       ) : (
         <div className="dish__paywall">
