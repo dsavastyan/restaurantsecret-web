@@ -58,16 +58,12 @@ export default function AccountOverview() {
     <section
       className="account-panel"
       aria-labelledby="account-profile-heading"
-      aria-describedby="account-profile-lead"
     >
       <div className="account-panel__header">
         <div className="account-panel__intro">
           <h2 id="account-profile-heading" className="account-panel__title">
             Профиль
           </h2>
-          <p id="account-profile-lead" className="account-panel__lead">
-            Здесь хранится основная информация о вашем аккаунте.
-          </p>
         </div>
         <div className="account-panel__actions">
           <button

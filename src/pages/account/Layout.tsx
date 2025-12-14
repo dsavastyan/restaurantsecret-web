@@ -95,7 +95,7 @@ export default function AccountLayout() {
         <header className="account__header">
           <h1 className="account__title">Личный кабинет</h1>
           <p className="account__subtitle">
-            Управляйте профилем и подпиской в едином пространстве.
+            Управляйте профилем и подпиской в едином пространстве
           </p>
         </header>
         <div className="account__layout">
