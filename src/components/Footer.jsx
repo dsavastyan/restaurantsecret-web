@@ -2,6 +2,8 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 
 export default function Footer() {
+  const year = new Date().getFullYear()
+
   return (
     <footer className="site-footer" role="contentinfo">
       <div className="container site-footer__inner">
@@ -28,7 +30,7 @@ export default function Footer() {
           </a>
         </nav>
 
-        <div className="site-footer__copy">© 2025 RestaurantSecret</div>
+        <div className="site-footer__copy">© {year} RestaurantSecret</div>
         <div className="site-footer__legal">
           Самозанятое лицо (НПД), Савастьян Дарья, ИНН 771007750946
         </div>
