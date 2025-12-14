@@ -1,36 +1,9 @@
-// Paywall overlay that simulates subscription activation in the MVP. Buttons
-// simply grant access locally and notify the rest of the app via an event.
+// Paywall overlay that showcases available plans and routes users into the
+// payment flow.
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
-import { API_BASE } from '@/config/api'
+import { Link } from 'react-router-dom'
 
-export default function Paywall({ onRefresh, returnTo = '/' }) {
-  const nav = useNavigate()
-
-  // Temporary helper used while the real payment flow is not wired. It grants
-  // access for the requested number of months and redirects back to the page
-  // the user came from.
-  async function grantAccess(months = 1) {
-    const expires = new Date()
-    expires.setMonth(expires.getMonth() + months)
-    const detail = {
-      ok: true,
-      isActive: true,
-      expiresAt: expires.toISOString(),
-    }
-
-    try {
-      window.localStorage.setItem('rs_access_state', JSON.stringify(detail))
-    } catch {}
-
-    // Notify the rest of the app that access state changed. AppShell listens to
-    // this event and updates local state immediately.
-    window.dispatchEvent(new CustomEvent('rs-access-update', { detail }))
-
-    if (returnTo && window.location.pathname !== returnTo) {
-      nav(returnTo, { replace: true })
-    }
-  }
+export default function Paywall({ onRefresh }) {
 
   return (
     <section className="rs-paywall" role="dialog" aria-modal="true" aria-labelledby="rs-paywall-title">
@@ -48,9 +21,9 @@ export default function Paywall({ onRefresh, returnTo = '/' }) {
               <span className="rs-price-value">99</span>
               <span className="rs-price-rub">руб.</span>
             </div>
-            <button className="rs-btn" onClick={() => grantAccess(1)}>
+            <Link className="rs-btn" to="/account/subscription">
               Оформить подписку
-            </button>
+            </Link>
           </div>
         </article>
 
@@ -64,9 +37,9 @@ export default function Paywall({ onRefresh, returnTo = '/' }) {
               <span className="rs-price-rub">руб.</span>
             </div>
             <div className="rs-save">Выгоднее на 16&nbsp;%</div>
-            <button className="rs-btn" onClick={() => grantAccess(12)}>
+            <Link className="rs-btn" to="/account/subscription">
               Оформить подписку
-            </button>
+            </Link>
           </div>
         </article>
       </div>
@@ -81,20 +54,3 @@ export default function Paywall({ onRefresh, returnTo = '/' }) {
     </section>
   )
 }
-
-/* Оставляем старый helper закомментированным — пригодится, когда включишь YooKassa
-async function startCheckout(plan) {
-  const uid = localStorage.getItem('rs_tg_user_id') || '176483490'
-  const r = await fetch(`${API_BASE}/subscribe/session`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${uid}` },
-    body: JSON.stringify({ plan })
-  })
-  const { ok, redirect_url: redirectUrl } = await r.json()
-  if (ok && redirectUrl) {
-    window.Telegram?.WebApp?.openLink(redirectUrl)
-  } else {
-    alert('Не удалось создать платеж. Попробуйте позже.')
-  }
-}
-*/
