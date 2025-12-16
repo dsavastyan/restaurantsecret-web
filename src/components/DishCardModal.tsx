@@ -1,10 +1,12 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useDishCardStore } from "@/store/dishCard";
 import { useAuth } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
+import { postSuggest } from "@/lib/api";
+import { toast } from "@/lib/toast";
 
 const root = typeof document !== "undefined" ? document.body : null;
 
@@ -49,6 +51,13 @@ export default function DishCardModal() {
     hasActiveSub: state.hasActiveSub,
     fetchStatus: state.fetchStatus,
   }));
+  const [isOutdatedOpen, setIsOutdatedOpen] = useState(false);
+  const [reason, setReason] = useState<
+    "wrong_kbju" | "missing_from_menu" | "other"
+  >("wrong_kbju");
+  const [comment, setComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
 
   useEffect(() => {
     if (!isOpen || !root) return undefined;
@@ -70,6 +79,42 @@ export default function DishCardModal() {
       return;
     }
     navigate("/login", { state: { from: "/account/subscription" } });
+  };
+
+  const resetOutdatedForm = () => {
+    setReason("wrong_kbju");
+    setComment("");
+    setFormError("");
+  };
+
+  const handleOutdatedSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!data) return;
+
+    if (reason === "other" && !comment.trim()) {
+      setFormError("Добавьте комментарий");
+      return;
+    }
+
+    setFormError("");
+    setIsSubmitting(true);
+    try {
+      await postSuggest({
+        kind: "dish_outdated",
+        reason,
+        restaurant_name: data.restaurantName || "Ресторан",
+        dish_name: data.name,
+        comment: comment.trim() || undefined,
+      });
+      toast.success("Спасибо, мы проверим");
+      setIsOutdatedOpen(false);
+      resetOutdatedForm();
+    } catch (err) {
+      console.error("Failed to submit outdated dish", err);
+      toast.error("Не удалось отправить сообщение. Попробуйте позже.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const anchorId = useMemo(() => {
@@ -186,9 +231,125 @@ export default function DishCardModal() {
                 Меню добавлено: {data.menuCapturedAtLabel}
               </div>
             )}
+
+            <button
+              type="button"
+              className="btn btn--ghost dish-card__outdated-btn"
+              onClick={() => setIsOutdatedOpen(true)}
+            >
+              Меню устарело
+            </button>
           </div>
         )}
       </div>
+
+      {isOutdatedOpen && (
+        <div
+          className="feedback-modal__backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Сообщить об устаревшем меню"
+          onClick={(event) => {
+            event.stopPropagation();
+            setIsOutdatedOpen(false);
+            resetOutdatedForm();
+          }}
+        >
+          <div
+            className="feedback-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="feedback-modal__header">
+              <h4 className="feedback-modal__title">Меню устарело</h4>
+              <button
+                type="button"
+                className="feedback-modal__close"
+                aria-label="Закрыть"
+                onClick={() => {
+                  setIsOutdatedOpen(false);
+                  resetOutdatedForm();
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            <form className="feedback-modal__form" onSubmit={handleOutdatedSubmit}>
+              <fieldset className="feedback-modal__fieldset">
+                <legend className="feedback-modal__legend">Причина</legend>
+                <label className="feedback-modal__option">
+                  <input
+                    type="radio"
+                    name="outdated-reason"
+                    value="wrong_kbju"
+                    checked={reason === "wrong_kbju"}
+                    onChange={() => setReason("wrong_kbju")}
+                  />
+                  <span>Неверное КБЖУ</span>
+                </label>
+                <label className="feedback-modal__option">
+                  <input
+                    type="radio"
+                    name="outdated-reason"
+                    value="missing_from_menu"
+                    checked={reason === "missing_from_menu"}
+                    onChange={() => setReason("missing_from_menu")}
+                  />
+                  <span>Блюда нет в меню</span>
+                </label>
+                <label className="feedback-modal__option">
+                  <input
+                    type="radio"
+                    name="outdated-reason"
+                    value="other"
+                    checked={reason === "other"}
+                    onChange={() => setReason("other")}
+                  />
+                  <span>Другое</span>
+                </label>
+              </fieldset>
+
+              {reason === "other" && (
+                <label className="feedback-modal__field">
+                  <span>Комментарий</span>
+                  <textarea
+                    value={comment}
+                    onChange={(event) => setComment(event.target.value)}
+                    placeholder="Опишите проблему"
+                    rows={3}
+                  />
+                </label>
+              )}
+
+              {formError && (
+                <p className="feedback-modal__error" role="status">
+                  {formError}
+                </p>
+              )}
+
+              <div className="feedback-modal__actions">
+                <button
+                  type="button"
+                  className="btn btn--ghost"
+                  onClick={() => {
+                    setIsOutdatedOpen(false);
+                    resetOutdatedForm();
+                  }}
+                >
+                  Отмена
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn--primary"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Отправляем…" : "Отправить"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 
