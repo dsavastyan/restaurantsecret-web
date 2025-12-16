@@ -7,6 +7,7 @@ import { formatDescription } from '@/lib/text';
 import { formatMenuCapturedAt } from '@/lib/dates';
 import { useAuth } from '@/store/auth';
 import { useSubscriptionStore } from '@/store/subscription';
+import { MenuOutdatedModal } from '@/components/MenuOutdatedModal';
 
 // Assumption: subscription is active when you render this page
 // If you still keep useSubscription, you can gate this page by redirecting beforehand.
@@ -22,6 +23,7 @@ export default function RestaurantPage() {
     hasActiveSub: state.hasActiveSub,
     fetchStatus: state.fetchStatus,
   }));
+  const [isOutdatedOpen, setIsOutdatedOpen] = useState(false);
 
   // UI state
   const [q, setQ] = useState('');                 // поиск по названию блюда
@@ -107,8 +109,17 @@ export default function RestaurantPage() {
       <header className="rp__header">
         <h1 className="rp__title">{menu?.name || slug}</h1>
         <div className="rp__meta">
-          {menu?.cuisine && <span className="rp__cuisine">{menu.cuisine}</span>}
-          {menu?.address && <span className="rp__address">{menu.address}</span>}
+          <div className="rp__meta-items">
+            {menu?.cuisine && <span className="rp__cuisine">{menu.cuisine}</span>}
+            {menu?.address && <span className="rp__address">{menu.address}</span>}
+          </div>
+          <button
+            type="button"
+            className="btn btn--ghost rp__outdated"
+            onClick={() => setIsOutdatedOpen(true)}
+          >
+            Меню устарело
+          </button>
         </div>
       </header>
 
@@ -162,6 +173,11 @@ export default function RestaurantPage() {
 
       {/* minimal styles for MVP */}
       <style>{styles}</style>
+      <MenuOutdatedModal
+        restaurantName={menu?.name || slug}
+        isOpen={isOutdatedOpen}
+        onClose={() => setIsOutdatedOpen(false)}
+      />
     </main>
   );
 }
@@ -259,7 +275,9 @@ const styles = `
 .restaurant-page { padding: 16px 16px 24px; }
 .rp__header { margin-bottom: 12px; }
 .rp__title { font-size: 22px; margin: 0 0 6px; }
-.rp__meta { color:#64748b; display:flex; gap:10px; flex-wrap:wrap; }
+.rp__meta { color:#64748b; display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
+.rp__meta-items { display:flex; gap:10px; flex-wrap:wrap; }
+.rp__outdated { white-space: nowrap; }
 
 .rp__filters { background:#f8fafc; border:1px solid #e5e7eb; border-radius:14px; padding:12px; margin: 10px 0 14px; }
 .rp__row { display:flex; gap:8px; align-items:center; }

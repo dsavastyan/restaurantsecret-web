@@ -7,6 +7,7 @@ import { formatDescription } from '@/lib/text'
 import { formatMenuCapturedAt } from '@/lib/dates'
 import { useAuth } from '@/store/auth'
 import { useSubscriptionStore } from '@/store/subscription'
+import { MenuOutdatedModal } from '@/components/MenuOutdatedModal'
 
 const createDefaultPresets = () => ({ highProtein: false, lowFat: false, lowKcal: false })
 const createDefaultRange = () => ({
@@ -28,6 +29,7 @@ export default function Menu() {
   const [menu, setMenu] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [isOutdatedOpen, setIsOutdatedOpen] = useState(false)
 
   const [query, setQuery] = useState('')
   const [presets, setPresets] = useState(createDefaultPresets)
@@ -119,7 +121,16 @@ export default function Menu() {
 
   return (
     <div className="stack">
-      <h1>{menu?.name || 'Меню'}</h1>
+      <div className="menu__header">
+        <h1>{menu?.name || 'Меню'}</h1>
+        <button
+          type="button"
+          className="subscribe-btn menu__outdated"
+          onClick={() => setIsOutdatedOpen(true)}
+        >
+          Меню устарело
+        </button>
+      </div>
       {!!capturedAt && <div className="muted menu__captured-at">Меню добавлено: {capturedAt}</div>}
 
       <section className="filters" aria-label="Фильтры блюд">
@@ -213,6 +224,11 @@ export default function Menu() {
           )
         )}
       </section>
+      <MenuOutdatedModal
+        restaurantName={menu?.name || slug}
+        isOpen={isOutdatedOpen}
+        onClose={() => setIsOutdatedOpen(false)}
+      />
     </div>
   )
 }
