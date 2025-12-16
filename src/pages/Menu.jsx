@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { apiGet } from '@/lib/requests'
 import { flattenMenuDishes, formatNumeric } from '@/lib/nutrition'
 import { formatDescription } from '@/lib/text'
+import { formatMenuCapturedAt } from '@/lib/dates'
 import { useAuth } from '@/store/auth'
 import { useSubscriptionStore } from '@/store/subscription'
 
@@ -49,7 +50,7 @@ export default function Menu() {
         setLoading(true)
         setError('')
         const raw = await apiGet(`/restaurants/${slug}/menu`)
-        const data = raw?.categories ? raw : { name: raw?.name || slug, categories: [] }
+        const data = raw?.categories ? raw : { ...(raw || {}), name: raw?.name || slug, categories: [] }
         if (!aborted) setMenu(normalizeMenu(data))
       } catch (err) {
         if (!aborted) {
@@ -67,6 +68,7 @@ export default function Menu() {
   }, [accessToken, fetchStatus, slug])
 
   const dishes = useMemo(() => flattenMenuDishes(menu), [menu])
+  const capturedAt = useMemo(() => formatMenuCapturedAt(menu?.menuCapturedAt), [menu?.menuCapturedAt])
 
   // Apply search and macro filters locally to keep the UI responsive.
   const filtered = useMemo(() => {
@@ -194,6 +196,7 @@ export default function Menu() {
                         </button>
                       </div>
                     )}
+                    {!!capturedAt && <div className="muted">Меню добавлено: {capturedAt}</div>}
                   </div>
                   <div className="row-aside">
                     {Number.isFinite(dish.price) && <div className="price">{Math.round(dish.price)} ₽</div>}
