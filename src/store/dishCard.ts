@@ -3,6 +3,7 @@ import { useSyncExternalStore } from "react";
 import { apiGet } from "@/lib/requests";
 import { flattenMenuDishes } from "@/lib/nutrition";
 import { formatDescription } from "@/lib/text";
+import { formatMenuCapturedAt } from "@/lib/dates";
 
 type DishCardDraft = {
   id?: number;
@@ -23,6 +24,7 @@ type DishCardData = {
   carbs_g?: number | null;
   composition_text?: string | null;
   allergensList: string[];
+  menuCapturedAtLabel?: string;
 };
 
 type DishCardState = {
@@ -206,6 +208,7 @@ const deriveCardData = (
   dish: Record<string, unknown>,
   draft: DishCardDraft,
   restaurantName?: string,
+  capturedAt?: string | null,
 ): DishCardData => {
   const name =
     (dish?.name as string) ||
@@ -236,6 +239,7 @@ const deriveCardData = (
     carbs_g: carbs,
     composition_text: composition,
     allergensList: normalizeAllergens(dish),
+    menuCapturedAtLabel: formatMenuCapturedAt(capturedAt),
   };
 };
 
@@ -254,6 +258,7 @@ async function openDishCard(draft: DishCardDraft) {
       match as Record<string, unknown>,
       draft,
       resolveRestaurantName(menu, draft),
+      (menu as any)?.menuCapturedAt as string | null,
     );
     updateState({
       ...state,

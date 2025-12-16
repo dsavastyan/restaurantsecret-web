@@ -120,6 +120,7 @@ export default function Menu() {
   return (
     <div className="stack">
       <h1>{menu?.name || 'Меню'}</h1>
+      {!!capturedAt && <div className="muted menu__captured-at">Меню добавлено: {capturedAt}</div>}
 
       <section className="filters" aria-label="Фильтры блюд">
         <div className="filters-row">
@@ -196,7 +197,6 @@ export default function Menu() {
                         </button>
                       </div>
                     )}
-                    {!!capturedAt && <div className="muted">Меню добавлено: {capturedAt}</div>}
                   </div>
                   <div className="row-aside">
                     {Number.isFinite(dish.price) && <div className="price">{Math.round(dish.price)} ₽</div>}
