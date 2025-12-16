@@ -123,9 +123,6 @@ export default function DishCardModal() {
                 >
                   {data.restaurantName || "Ресторан"}
                 </Link>
-                {data.menuCapturedAtLabel && (
-                  <div className="dish-card__meta">Меню добавлено: {data.menuCapturedAtLabel}</div>
-                )}
               </div>
             </div>
 
@@ -182,6 +179,12 @@ export default function DishCardModal() {
                   Оформить подписку
                 </button>
               </section>
+            )}
+
+            {data.menuCapturedAtLabel && (
+              <div className="dish-card__meta dish-card__meta--footer">
+                Меню добавлено: {data.menuCapturedAtLabel}
+              </div>
             )}
           </div>
         )}
