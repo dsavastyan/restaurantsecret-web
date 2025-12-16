@@ -530,6 +530,10 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
   font-size: 14px;
 }
 
+.dish-card__meta--footer {
+  margin-top: 24px;
+}
+
 .dish-card__restaurant {
   display: inline-flex;
   align-items: center;
