@@ -102,7 +102,7 @@ export default function DishCardModal() {
       await postSuggest({
         kind: "dish_outdated",
         reason,
-        restaurant_name: data.restaurantName || "Ресторан",
+        name: data.restaurantName || "Ресторан",
         dish_name: data.name,
         comment: comment.trim() || undefined,
       });
@@ -237,6 +237,7 @@ export default function DishCardModal() {
               className="btn btn--ghost dish-card__outdated-btn"
               onClick={() => setIsOutdatedOpen(true)}
             >
+              <span className="dish-card__outdated-icon" aria-hidden>⟳</span>
               Меню устарело
             </button>
           </div>

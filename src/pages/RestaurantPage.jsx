@@ -118,6 +118,7 @@ export default function RestaurantPage() {
             className="btn btn--ghost rp__outdated"
             onClick={() => setIsOutdatedOpen(true)}
           >
+            <span className="rp__outdated-icon" aria-hidden>⟳</span>
             Меню устарело
           </button>
         </div>
@@ -277,7 +278,32 @@ const styles = `
 .rp__title { font-size: 22px; margin: 0 0 6px; }
 .rp__meta { color:#64748b; display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
 .rp__meta-items { display:flex; gap:10px; flex-wrap:wrap; }
-.rp__outdated { white-space: nowrap; }
+.rp__outdated {
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border-color: rgba(47, 143, 91, 0.28);
+  background: linear-gradient(120deg, rgba(47, 143, 91, 0.12), rgba(15, 23, 42, 0.04));
+  color: #0f172a;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+}
+.rp__outdated:hover {
+  border-color: rgba(47, 143, 91, 0.4);
+  background: linear-gradient(120deg, rgba(47, 143, 91, 0.16), rgba(15, 23, 42, 0.06));
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+}
+.rp__outdated-icon {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #27774c;
+  font-size: 15px;
+}
 
 .rp__filters { background:#f8fafc; border:1px solid #e5e7eb; border-radius:14px; padding:12px; margin: 10px 0 14px; }
 .rp__row { display:flex; gap:8px; align-items:center; }
