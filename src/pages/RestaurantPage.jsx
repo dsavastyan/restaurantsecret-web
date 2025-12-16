@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { apiGet } from '@/lib/requests';
 import { flattenMenuDishes, formatNumeric } from '@/lib/nutrition';
 import { formatDescription } from '@/lib/text';
+import { formatMenuCapturedAt } from '@/lib/dates';
 import { useAuth } from '@/store/auth';
 import { useSubscriptionStore } from '@/store/subscription';
 
@@ -84,6 +85,11 @@ export default function RestaurantPage() {
     });
   }, [menu, q, presets, range]);
 
+  const menuCapturedAtLabel = useMemo(
+    () => formatMenuCapturedAt(menu?.menuCapturedAt),
+    [menu?.menuCapturedAt]
+  );
+
   function togglePreset(key) {
     setPresets(p => ({ ...p, [key]: !p[key] }));
   }
@@ -138,7 +144,15 @@ export default function RestaurantPage() {
         {!loading && !err && (
           filtered.length ? (
             <div className="rp__list">
-              {filtered.map(d => <DishCard key={d.id || d.name} dish={d} hasActiveSub={hasActiveSub} onSubscribe={handleSubscribeClick} />)}
+              {filtered.map(d => (
+                <DishCard
+                  key={d.id || d.name}
+                  dish={d}
+                  hasActiveSub={hasActiveSub}
+                  onSubscribe={handleSubscribeClick}
+                  menuCapturedAt={menuCapturedAtLabel}
+                />
+              ))}
             </div>
           ) : (
             <p className="rp__empty">Под эти параметры сейчас ничего нет. Измени фильтры.</p>
@@ -209,7 +223,7 @@ function MacroRange({ label, value, onChange }) {
   );
 }
 
-function DishCard({ dish, hasActiveSub, onSubscribe }) {
+function DishCard({ dish, hasActiveSub, onSubscribe, menuCapturedAt }) {
   const description = formatDescription(dish.ingredients ?? dish.description);
 
   return (
@@ -236,6 +250,7 @@ function DishCard({ dish, hasActiveSub, onSubscribe }) {
           <button type="button" className="btn" onClick={onSubscribe}>Оформить подписку</button>
         </div>
       )}
+      {menuCapturedAt && <div className="dish__captured">Меню добавлено: {menuCapturedAt}</div>}
     </div>
   );
 }
@@ -280,4 +295,5 @@ const styles = `
 .dish__ing { font-size:13px; color:#334155; margin-top:4px; }
 .dish__paywall { display:flex; align-items:center; gap:10px; margin-top:8px; flex-wrap:wrap; }
 .dish__paywall-text { margin:0; color:#475569; }
+.dish__captured { margin-top:8px; font-size:12px; color:#475569; }
 `;
