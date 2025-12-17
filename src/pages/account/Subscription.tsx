@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import Button from "@/components/ui/Button";
-import { ApiError, apiGet, apiPost, isUnauthorizedError } from "@/lib/api";
+import { ApiError, apiGet, apiPost, applyPromo, isUnauthorizedError } from "@/lib/api";
 import { useAuth } from "@/store/auth";
 import {
   selectHasActiveSub,
@@ -24,6 +24,12 @@ type SubscriptionStatusResponse = {
 
 type UiPlan = "month" | "year";
 type ApiPlan = "monthly" | "annual";
+
+const ERROR_LABELS: Record<string, string> = {
+  invalid_code: "Промокод не найден",
+  expired_code: "Срок действия промокода истёк",
+  already_used: "Вы уже использовали этот промокод",
+};
 
 function mapUiPlanToApi(plan: UiPlan): ApiPlan {
   if (plan === "month") return "monthly";
@@ -98,6 +104,9 @@ export default function AccountSubscription() {
   const [cancelSuccess, setCancelSuccess] = useState<string | null>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentPlan, setPaymentPlan] = useState<UiPlan | null>(null);
+  const [promoCode, setPromoCode] = useState("");
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoLoading, setPromoLoading] = useState(false);
 
   const fetchStatus = useCallback(async () => {
     if (!accessToken) {
@@ -208,6 +217,11 @@ export default function AccountSubscription() {
     return status;
   }, [statusData?.status_label, status]);
 
+  const promoErrorLabel = useMemo(() => {
+    if (!promoError) return null;
+    return ERROR_LABELS[promoError] ?? "Не удалось применить промокод";
+  }, [promoError]);
+
   const handleCancel = useCallback(async () => {
     if (!accessToken || cancelLoading) return;
     const confirmCancel = window.confirm("Вы уверены что хотите отменить подписку?");
@@ -238,6 +252,30 @@ export default function AccountSubscription() {
       setCancelLoading(false);
     }
   }, [accessToken, cancelLoading, fetchStatus, reload, logout]);
+
+  const handleApplyPromo = useCallback(async () => {
+    if (!accessToken || !promoCode.trim() || promoLoading) return;
+
+    setPromoLoading(true);
+    setPromoError(null);
+
+    try {
+      const res = await applyPromo(promoCode.trim(), accessToken);
+
+      if (!res?.ok) {
+        setPromoError(res?.error ?? "unknown_error");
+        return;
+      }
+
+      await fetchStatus();
+      setPromoCode("");
+    } catch (err) {
+      console.error("Failed to apply promo", err);
+      setPromoError("network_error");
+    } finally {
+      setPromoLoading(false);
+    }
+  }, [accessToken, fetchStatus, promoCode, promoLoading]);
 
   const showHistory = (isActive || isCanceled || isExpired) && !loading;
 
@@ -336,6 +374,31 @@ export default function AccountSubscription() {
           <div className="account-subscription__empty" role="status">
             <h3>Оформите подписку</h3>
             <p>Подписка открывает доступ к полной карточке блюд, включая КБЖУ и составы блюд</p>
+          </div>
+
+          <div className="account-panel__box">
+            <label htmlFor="promo-code">Промокод</label>
+            <div className="account-subscription__promo-form">
+              <input
+                id="promo-code"
+                value={promoCode}
+                onChange={(event) => setPromoCode(event.target.value)}
+                placeholder="Промокод"
+                disabled={promoLoading}
+              />
+              <Button
+                className="account-button account-button--primary"
+                onClick={handleApplyPromo}
+                disabled={promoLoading || !promoCode.trim() || !accessToken}
+              >
+                {promoLoading ? "Применяем…" : "Применить"}
+              </Button>
+            </div>
+            {promoErrorLabel && (
+              <p className="account-panel__error-text" role="alert">
+                {promoErrorLabel}
+              </p>
+            )}
           </div>
 
           <div className="account-subscription__grid" role="list">

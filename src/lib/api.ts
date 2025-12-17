@@ -205,6 +205,14 @@ export async function apiPost<T = unknown>(path: string, body?: unknown, token?:
   return handleResponse<T>(res);
 }
 
+export async function applyPromo(code: string, token: string) {
+  return apiPost<{ ok: boolean; expires_at?: string; free_days?: number; error?: string }>(
+    "/api/subscriptions/apply-promo",
+    { code },
+    token,
+  );
+}
+
 export function postSuggest(body: SuggestRequest, token?: string) {
   return apiPost("/suggest", body, token);
 }
