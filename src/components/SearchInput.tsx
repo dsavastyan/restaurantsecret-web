@@ -120,7 +120,7 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
       setSuggestions(null);
       setHighlightedIndex(null);
       onChange("");
-      navigate(`/restaurants/${item.slug}`);
+      navigate(`/r/${item.slug}/menu`);
     } else {
       handleDishOpen(item);
     }
@@ -134,13 +134,14 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
     ? `search-suggestion-${activeItem.kind}-${activeItem.id}`
     : undefined;
 
-  const buildCatalogUrl = (q: string) => `/catalog?query=${encodeURIComponent(q)}`;
+  const buildSearchUrl = (q: string) =>
+    `/search?q=${encodeURIComponent(q)}&type=dish`;
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !hasHighlightedSuggestion) {
       const q = value.trim();
       if (!q) return;
-      navigate(buildCatalogUrl(q));
+      navigate(buildSearchUrl(q));
       return;
     }
 
