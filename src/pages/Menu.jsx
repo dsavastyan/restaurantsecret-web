@@ -17,6 +17,22 @@ const createDefaultRange = () => ({
   carbs: { min: '', max: '' }
 })
 
+const formatPositionCount = (count) => {
+  const absCount = Math.abs(count)
+  const mod10 = absCount % 10
+  const mod100 = absCount % 100
+
+  let suffix = 'позиций'
+
+  if (mod10 === 1 && mod100 !== 11) {
+    suffix = 'позиция'
+  } else if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+    suffix = 'позиции'
+  }
+
+  return `${count} ${suffix}`
+}
+
 export default function Menu() {
   const { slug } = useParams()
   const navigate = useNavigate()
@@ -153,10 +169,6 @@ export default function Menu() {
         <div className="menu-hero__header">
           <div>
             <h1 className="menu-hero__title">{menu?.name || 'Меню'}</h1>
-            <p className="menu-hero__subtitle">
-              Живое меню с нутрицентикой и ценами в одной ленте. Фильтры помогают найти блюда под
-              тренировку, баланс или семейный ужин.
-            </p>
             {!!capturedAt && <div className="menu__captured-at">Меню добавлено: {capturedAt}</div>}
           </div>
           <div className="menu-hero__actions">
@@ -168,7 +180,7 @@ export default function Menu() {
               Меню устарело
             </button>
             <div className="menu-hero__badge">
-              {filtered.length ? `${filtered.length} блюд по фильтрам` : 'Ничего не найдено'}
+              {filtered.length ? `${filtered.length} блюд` : 'Ничего не найдено'}
             </div>
           </div>
         </div>
@@ -229,10 +241,9 @@ export default function Menu() {
               <article key={section.name} className="menu-section">
                 <header className="menu-section__header">
                   <div>
-                    <p className="menu-section__eyebrow">Категория</p>
                     <h2 className="menu-section__title">{section.name}</h2>
                   </div>
-                  <div className="menu-section__count">{section.dishes.length} позиций</div>
+                  <div className="menu-section__count">{formatPositionCount(section.dishes.length)}</div>
                 </header>
                 <ul className="menu-grid">
                   {section.dishes.map((dish) => (
