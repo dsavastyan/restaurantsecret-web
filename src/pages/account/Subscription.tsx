@@ -231,7 +231,7 @@ export default function AccountSubscription() {
     setCancelSuccess(null);
     setCancelLoading(true);
     try {
-      const res = await apiPost("/subscriptions/cancel", undefined, accessToken);
+      const res = await apiPost("/api/subscriptions/cancel", undefined, accessToken);
       if (res?.ok) {
         setCancelSuccess("Подписка успешна отменена");
         await fetchStatus();

@@ -132,7 +132,7 @@ export default function SubscriptionHistoryPage() {
     setState((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
-      const response = await apiGet("/subscriptions/list", accessToken);
+      const response = await apiGet("/api/subscriptions/list", accessToken);
       const normalized = normalizeHistoryResponse(response);
       setState({ data: normalized, loading: false, error: null });
     } catch (error) {
