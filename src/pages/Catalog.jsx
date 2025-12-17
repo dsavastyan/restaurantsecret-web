@@ -10,6 +10,8 @@ export default function Catalog() {
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [page, setPage] = useState(1)
+  const [pagesData, setPagesData] = useState([])
+  const [hasMore, setHasMore] = useState(false)
   const navigate = useNavigate()
   const { access, requireAccess, requestPaywall } = useOutletContext() || {}
 
@@ -63,16 +65,28 @@ export default function Catalog() {
   const cuisineKey = useMemo(() => selectedCuisines.join('|'), [selectedCuisines])
 
   useEffect(() => {
-    setPage(1)
+    setPagesData([])
+    setHasMore(false)
   }, [debouncedQuery, cuisineKey])
 
-  const sourceItems = useMemo(() => {
-    if (isSearching) return data?.restaurants ?? data?.items ?? []
-    return data?.items ?? []
-  }, [data?.items, data?.restaurants, isSearching])
+  useEffect(() => {
+    if (!data?.items) return
 
-  const normalizedQuery = debouncedQuery.toLowerCase()
-  const cuisineFilters = selectedCuisines.map((c) => c?.toLowerCase())
+    setPagesData(prev => {
+      const next = [...prev]
+      next[page - 1] = data.items
+      return next
+    })
+    setHasMore(Boolean(data?.has_more))
+  }, [data, page])
+
+  const items = useMemo(() => pagesData.flat().filter(Boolean), [pagesData])
+  const isInitialLoading = loading && !items.length
+  const visibleItems = useMemo(() => {
+    if (!items.length) return []
+
+    const normalizedQuery = debouncedQuery.toLowerCase()
+    const cuisines = selectedCuisines.map((c) => c?.toLowerCase())
 
   const filteredItems = useMemo(() => {
     if (!sourceItems.length) return []
@@ -80,13 +94,8 @@ export default function Catalog() {
     return sourceItems.filter((item) => {
       const name = item?.name?.toLowerCase() || ''
       const cuisine = item?.cuisine?.toLowerCase() || ''
-      const matchesCuisine = !cuisineFilters.length || cuisineFilters.includes(cuisine)
-
-      if (!isSearching) {
-        // /restaurants may ignore the query parameter, so also filter locally.
-        const matchesQuery = !normalizedQuery || name.includes(normalizedQuery)
-        return matchesQuery && matchesCuisine
-      }
+      const matchesQuery = !normalizedQuery || name.includes(normalizedQuery)
+      const matchesCuisine = !cuisines.length || cuisines.includes(cuisine)
 
       return matchesCuisine
     })
@@ -310,46 +319,7 @@ export default function Catalog() {
           })}
         </ul>
 
-        {totalPages > 1 && (
-          <div className="catalog-pagination" role="navigation" aria-label="Пагинация ресторанов">
-            <button
-              type="button"
-              className="btn btn--ghost"
-              onClick={() => goToPage(page - 1)}
-              disabled={page <= 1}
-            >
-              Назад
-            </button>
-
-            <div className="catalog-pagination__pages">
-              {pageNumbers.map((pNum) => (
-                <button
-                  key={pNum}
-                  type="button"
-                  className={`pill-chip${pNum === page ? ' is-active' : ''}`}
-                  onClick={() => goToPage(pNum)}
-                  aria-current={pNum === page ? 'page' : undefined}
-                >
-                  {pNum}
-                </button>
-              ))}
-              {pageNumbers.length > 0 && pageNumbers[pageNumbers.length - 1] < totalPages && (
-                <span className="catalog-pagination__ellipsis" aria-hidden="true">…</span>
-              )}
-            </div>
-
-            <button
-              type="button"
-              className="btn btn--ghost"
-              onClick={() => goToPage(page + 1)}
-              disabled={!hasMore}
-            >
-              Вперёд
-            </button>
-          </div>
-        )}
-
-        {!totalPages && hasMore && (
+        {hasMore && (
           <div className="catalog-actions">
             <button onClick={() => goToPage(page + 1)} className="btn btn--primary">Загрузить ещё</button>
           </div>
