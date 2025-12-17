@@ -167,8 +167,13 @@ export default function Menu() {
       <header className="menu-hero">
         <div className="menu-hero__pill">Меню ресторана</div>
         <div className="menu-hero__header">
-          <div>
-            <h1 className="menu-hero__title">{menu?.name || 'Меню'}</h1>
+          <div className="menu-hero__title-block">
+            <div className="menu-hero__title-row">
+              <h1 className="menu-hero__title">{menu?.name || 'Меню'}</h1>
+              <div className="menu-hero__badge">
+                {filtered.length ? `${filtered.length} блюд` : 'Ничего не найдено'}
+              </div>
+            </div>
             {!!capturedAt && <div className="menu__captured-at">Меню добавлено: {capturedAt}</div>}
           </div>
           <div className="menu-hero__actions">
@@ -177,11 +182,8 @@ export default function Menu() {
               className="menu-outdated"
               onClick={() => setIsOutdatedOpen(true)}
             >
-              Меню устарело
+              Меню устарело?
             </button>
-            <div className="menu-hero__badge">
-              {filtered.length ? `${filtered.length} блюд` : 'Ничего не найдено'}
-            </div>
           </div>
         </div>
       </header>

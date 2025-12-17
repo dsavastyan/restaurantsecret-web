@@ -228,9 +228,11 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
   font-weight: 800;
 }
 .menu-hero__header { display: grid; gap: 14px; grid-template-columns: 1fr; }
+.menu-hero__title-block { display: flex; flex-direction: column; gap: 6px; }
+.menu-hero__title-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .menu-hero__title { margin: 4px 0 6px; font-size: clamp(26px, 4vw, 32px); line-height: 1.2; color: #0f172a; }
 .menu-hero__subtitle { margin: 0; color: #4b5563; max-width: 720px; }
-.menu-hero__actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: flex-start; }
+.menu-hero__actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: flex-end; }
 .menu-hero__badge {
   padding: 10px 14px;
   border-radius: 14px;
