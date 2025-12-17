@@ -100,7 +100,7 @@ export default function AccountOverview() {
               Вы уверены, что хотите выйти?
             </h3>
             <p id="logout-modal-description" className="logout-modal__description">
-              После выхода вы всегда сможете снова войти, используя свою почту и пароль.
+              Вы всегда сможете вернуться, используя свою почту.
             </p>
             <div className="logout-modal__actions">
               <button
