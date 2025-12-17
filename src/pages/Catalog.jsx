@@ -13,6 +13,9 @@ export default function Catalog() {
   const navigate = useNavigate()
   const { access, requireAccess, requestPaywall } = useOutletContext() || {}
 
+  const PAGE_SIZE = 20
+  const isSearching = Boolean(debouncedQuery)
+
   useEffect(() => {
     const handle = setTimeout(() => {
       setDebouncedQuery(query.trim())
@@ -41,30 +44,118 @@ export default function Catalog() {
   }, [ensureAccess, navigate])
 
   const { data, loading, error } = useSWRLite(
-    `restaurants-${page}-${selectedCuisines.join(',')}-${debouncedQuery}`,
-    () => api.restaurants({
-      limit: 20,
-      page,
-      cuisine: selectedCuisines,
-      query: debouncedQuery || undefined
-    })
+    isSearching
+      ? `restaurants-search-${debouncedQuery}-${selectedCuisines.join(',')}`
+      : `restaurants-${page}-${selectedCuisines.join(',')}`,
+    () => {
+      if (isSearching) {
+        return api.search(debouncedQuery, { type: 'restaurant' })
+      }
+
+      return api.restaurants({
+        limit: PAGE_SIZE,
+        page,
+        cuisine: selectedCuisines,
+      })
+    }
   )
 
-  const items = data?.items ?? []
-  const visibleItems = useMemo(() => {
-    const normalizedQuery = debouncedQuery.toLowerCase()
+  const cuisineKey = useMemo(() => selectedCuisines.join('|'), [selectedCuisines])
 
-    return items.filter((item) => {
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedQuery, cuisineKey])
+
+  const sourceItems = useMemo(() => {
+    if (isSearching) return data?.restaurants ?? data?.items ?? []
+    return data?.items ?? []
+  }, [data?.items, data?.restaurants, isSearching])
+
+  const normalizedQuery = debouncedQuery.toLowerCase()
+  const cuisineFilters = selectedCuisines.map((c) => c?.toLowerCase())
+
+  const filteredItems = useMemo(() => {
+    if (!sourceItems.length) return []
+
+    return sourceItems.filter((item) => {
       const name = item?.name?.toLowerCase() || ''
       const cuisine = item?.cuisine?.toLowerCase() || ''
-      const matchesQuery = !normalizedQuery || name.includes(normalizedQuery)
-      const matchesCuisine = !selectedCuisines.length || selectedCuisines
-        .map((c) => c?.toLowerCase())
-        .includes(cuisine)
+      const matchesCuisine = !cuisineFilters.length || cuisineFilters.includes(cuisine)
 
-      return matchesQuery && matchesCuisine
+      if (!isSearching) {
+        // /restaurants may ignore the query parameter, so also filter locally.
+        const matchesQuery = !normalizedQuery || name.includes(normalizedQuery)
+        return matchesQuery && matchesCuisine
+      }
+
+      return matchesCuisine
     })
-  }, [debouncedQuery, items, selectedCuisines])
+  }, [cuisineFilters, isSearching, normalizedQuery, sourceItems])
+
+  const totalFromApi = useMemo(() => {
+    if (isSearching) return filteredItems.length
+
+    return (
+      data?.total ??
+      data?.total_count ??
+      data?.count ??
+      data?.meta?.total ??
+      null
+    )
+  }, [data?.count, data?.meta?.total, data?.total, data?.total_count, filteredItems.length, isSearching])
+
+  const totalPages = useMemo(() => {
+    if (isSearching) {
+      return Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE))
+    }
+
+    const metaPages = data?.total_pages ?? data?.pages ?? data?.page_count ?? data?.meta?.pages
+    if (metaPages) return metaPages
+    if (totalFromApi) return Math.max(1, Math.ceil(totalFromApi / PAGE_SIZE))
+    return null
+  }, [PAGE_SIZE, data?.meta?.pages, data?.page_count, data?.pages, data?.total_pages, filteredItems.length, isSearching, totalFromApi])
+
+  const hasMore = useMemo(() => {
+    if (isSearching) return page < totalPages
+
+    if (typeof data?.has_more === 'boolean') return data.has_more
+    if (typeof data?.hasMore === 'boolean') return data.hasMore
+    if (totalPages) return page < totalPages
+    return Boolean(data?.items?.length === PAGE_SIZE)
+  }, [PAGE_SIZE, data?.hasMore, data?.has_more, data?.items?.length, isSearching, page, totalPages])
+
+  const visibleItems = useMemo(() => {
+    if (isSearching) {
+      const start = (page - 1) * PAGE_SIZE
+      return filteredItems.slice(start, start + PAGE_SIZE)
+    }
+
+    return filteredItems
+  }, [PAGE_SIZE, filteredItems, isSearching, page])
+
+  const isInitialLoading = loading && !visibleItems.length
+
+  const pageNumbers = useMemo(() => {
+    if (!totalPages || totalPages <= 1) return []
+
+    const range = []
+    const start = Math.max(1, page - 2)
+    const end = Math.min(totalPages, page + 2)
+
+    for (let i = start; i <= end; i += 1) {
+      range.push(i)
+    }
+
+    return range
+  }, [page, totalPages])
+
+  const goToPage = useCallback((next) => {
+    const capped = totalPages ? Math.min(totalPages, Math.max(1, next)) : Math.max(1, next)
+    setPage(capped)
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [totalPages])
 
   // Options are memoized so the filter chips do not re-render unnecessarily.
   const cuisineOptions = useMemo(() => filters?.cuisines ?? [], [filters?.cuisines])
@@ -171,7 +262,7 @@ export default function Catalog() {
       </section>
 
       <section className="catalog-results">
-        {loading && !items.length && <div className="catalog-state">Загружаем рестораны…</div>}
+        {isInitialLoading && <div className="catalog-state">Загружаем рестораны…</div>}
         {error && <p className="err">Ошибка: {String(error.message || error)}</p>}
         {!loading && !visibleItems.length && !error && (
           <div className="catalog-state catalog-state--empty">
@@ -219,9 +310,48 @@ export default function Catalog() {
           })}
         </ul>
 
-        {data?.has_more && (
+        {totalPages > 1 && (
+          <div className="catalog-pagination" role="navigation" aria-label="Пагинация ресторанов">
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() => goToPage(page - 1)}
+              disabled={page <= 1}
+            >
+              Назад
+            </button>
+
+            <div className="catalog-pagination__pages">
+              {pageNumbers.map((pNum) => (
+                <button
+                  key={pNum}
+                  type="button"
+                  className={`pill-chip${pNum === page ? ' is-active' : ''}`}
+                  onClick={() => goToPage(pNum)}
+                  aria-current={pNum === page ? 'page' : undefined}
+                >
+                  {pNum}
+                </button>
+              ))}
+              {pageNumbers.length > 0 && pageNumbers[pageNumbers.length - 1] < totalPages && (
+                <span className="catalog-pagination__ellipsis" aria-hidden="true">…</span>
+              )}
+            </div>
+
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() => goToPage(page + 1)}
+              disabled={!hasMore}
+            >
+              Вперёд
+            </button>
+          </div>
+        )}
+
+        {!totalPages && hasMore && (
           <div className="catalog-actions">
-            <button onClick={() => setPage(p => p + 1)} className="btn btn--primary">Загрузить ещё</button>
+            <button onClick={() => goToPage(page + 1)} className="btn btn--primary">Загрузить ещё</button>
           </div>
         )}
       </section>
