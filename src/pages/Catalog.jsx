@@ -10,6 +10,8 @@ export default function Catalog() {
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [page, setPage] = useState(1)
+  const [pagesData, setPagesData] = useState([])
+  const [hasMore, setHasMore] = useState(false)
   const navigate = useNavigate()
   const { access, requireAccess, requestPaywall } = useOutletContext() || {}
 
@@ -50,17 +52,37 @@ export default function Catalog() {
     })
   )
 
-  const items = data?.items ?? []
+  const cuisineKey = useMemo(() => selectedCuisines.join('|'), [selectedCuisines])
+
+  useEffect(() => {
+    setPagesData([])
+    setHasMore(false)
+  }, [debouncedQuery, cuisineKey])
+
+  useEffect(() => {
+    if (!data?.items) return
+
+    setPagesData(prev => {
+      const next = [...prev]
+      next[page - 1] = data.items
+      return next
+    })
+    setHasMore(Boolean(data?.has_more))
+  }, [data, page])
+
+  const items = useMemo(() => pagesData.flat().filter(Boolean), [pagesData])
+  const isInitialLoading = loading && !items.length
   const visibleItems = useMemo(() => {
+    if (!items.length) return []
+
     const normalizedQuery = debouncedQuery.toLowerCase()
+    const cuisines = selectedCuisines.map((c) => c?.toLowerCase())
 
     return items.filter((item) => {
       const name = item?.name?.toLowerCase() || ''
       const cuisine = item?.cuisine?.toLowerCase() || ''
       const matchesQuery = !normalizedQuery || name.includes(normalizedQuery)
-      const matchesCuisine = !selectedCuisines.length || selectedCuisines
-        .map((c) => c?.toLowerCase())
-        .includes(cuisine)
+      const matchesCuisine = !cuisines.length || cuisines.includes(cuisine)
 
       return matchesQuery && matchesCuisine
     })
@@ -171,7 +193,7 @@ export default function Catalog() {
       </section>
 
       <section className="catalog-results">
-        {loading && !items.length && <div className="catalog-state">Загружаем рестораны…</div>}
+        {isInitialLoading && <div className="catalog-state">Загружаем рестораны…</div>}
         {error && <p className="err">Ошибка: {String(error.message || error)}</p>}
         {!loading && !visibleItems.length && !error && (
           <div className="catalog-state catalog-state--empty">
@@ -219,7 +241,7 @@ export default function Catalog() {
           })}
         </ul>
 
-        {data?.has_more && (
+        {hasMore && (
           <div className="catalog-actions">
             <button onClick={() => setPage(p => p + 1)} className="btn btn--primary">Загрузить ещё</button>
           </div>
