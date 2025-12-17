@@ -88,6 +88,33 @@ export default function Menu() {
     })
   }, [dishes, query, presets, range])
 
+  const groupedDishes = useMemo(() => {
+    if (!menu?.categories?.length) {
+      return filtered.length ? [{ name: 'Меню', dishes: filtered }] : []
+    }
+
+    const ordered = menu.categories.map((category) => ({
+      name: category?.name || 'Без категории',
+      dishes: [],
+    }))
+    const lookup = new Map(ordered.map((item) => [item.name, item]))
+    const known = new Set(lookup.keys())
+
+    for (const dish of filtered) {
+      const bucketName = dish.category && known.has(dish.category) ? dish.category : null
+      if (bucketName) {
+        lookup.get(bucketName)?.dishes.push(dish)
+      }
+    }
+
+    const leftovers = filtered.filter((dish) => !dish.category || !known.has(dish.category))
+    if (leftovers.length) {
+      ordered.push({ name: 'Другое', dishes: leftovers })
+    }
+
+    return ordered.filter((section) => section.dishes.length)
+  }, [filtered, menu?.categories])
+
   // Toggle a preset chip and re-run memoized filtering.
   const togglePreset = (key) => {
     setPresets((prev) => ({ ...prev, [key]: !prev[key] }))
@@ -99,8 +126,8 @@ export default function Menu() {
       ...prev,
       [macro]: {
         ...prev[macro],
-        [edge]: clean
-      }
+        [edge]: clean,
+      },
     }))
   }
 
@@ -120,54 +147,69 @@ export default function Menu() {
   }
 
   return (
-    <div className="stack">
-      <div className="menu__header">
-        <h1>{menu?.name || 'Меню'}</h1>
-        <button
-          type="button"
-          className="subscribe-btn menu__outdated"
-          onClick={() => setIsOutdatedOpen(true)}
-        >
-          Меню устарело
-        </button>
-      </div>
-      {!!capturedAt && <div className="muted menu__captured-at">Меню добавлено: {capturedAt}</div>}
+    <div className="menu-page">
+      <header className="menu-hero">
+        <div className="menu-hero__pill">Меню ресторана</div>
+        <div className="menu-hero__header">
+          <div>
+            <h1 className="menu-hero__title">{menu?.name || 'Меню'}</h1>
+            <p className="menu-hero__subtitle">
+              Живое меню с нутрицентикой и ценами в одной ленте. Фильтры помогают найти блюда под
+              тренировку, баланс или семейный ужин.
+            </p>
+            {!!capturedAt && <div className="menu__captured-at">Меню добавлено: {capturedAt}</div>}
+          </div>
+          <div className="menu-hero__actions">
+            <button
+              type="button"
+              className="menu-outdated"
+              onClick={() => setIsOutdatedOpen(true)}
+            >
+              Меню устарело
+            </button>
+            <div className="menu-hero__badge">
+              {filtered.length ? `${filtered.length} блюд по фильтрам` : 'Ничего не найдено'}
+            </div>
+          </div>
+        </div>
+      </header>
 
-      <section className="filters" aria-label="Фильтры блюд">
-        <div className="filters-row">
-          <input
-            className="filter-search"
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Поиск по названию блюда"
-            aria-label="Поиск блюда"
-          />
-          <button type="button" className="filter-reset" onClick={resetFilters}>Сбросить</button>
+      <section className="menu-filters" aria-label="Фильтры блюд">
+        <div className="menu-filters__bar">
+          <div className="menu-filters__search">
+            <label className="sr-only" htmlFor="menu-search">Поиск по названию блюда</label>
+            <input
+              id="menu-search"
+              className="menu-filters__input"
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Поиск по названию или ингредиентам"
+              aria-label="Поиск блюда"
+            />
+          </div>
+          <button type="button" className="menu-filters__reset" onClick={resetFilters}>Сбросить всё</button>
         </div>
 
-        <div className="chips">
-          <button
-            type="button"
-            className={`chip ${presets.highProtein ? 'active' : ''}`}
+        <div className="menu-filters__chips" role="group" aria-label="Быстрые фильтры">
+          <FilterChip
+            active={presets.highProtein}
+            label="💪 Много белка"
+            description=">= 25 г"
             onClick={() => togglePreset('highProtein')}
-          >
-            💪 Много белка
-          </button>
-          <button
-            type="button"
-            className={`chip ${presets.lowFat ? 'active' : ''}`}
+          />
+          <FilterChip
+            active={presets.lowFat}
+            label="🥗 Мало жиров"
+            description="<= 10 г"
             onClick={() => togglePreset('lowFat')}
-          >
-            🥗 Мало жиров
-          </button>
-          <button
-            type="button"
-            className={`chip ${presets.lowKcal ? 'active' : ''}`}
+          />
+          <FilterChip
+            active={presets.lowKcal}
+            label="🔥 Мало калорий"
+            description="<= 400 ккал"
             onClick={() => togglePreset('lowKcal')}
-          >
-            🔥 Мало калорий
-          </button>
+          />
         </div>
 
         <div className="filter-grid">
@@ -178,43 +220,55 @@ export default function Menu() {
         </div>
       </section>
 
-      <section>
+      <section className="menu-content" aria-live="polite">
         {loading && <p>Загружаем меню…</p>}
         {!!error && !loading && <p className="err">{error}</p>}
         {!loading && !error && (
-          filtered.length ? (
-            <ul className="list" aria-live="polite">
-              {filtered.map((dish) => (
-                <li key={`${dish.category || 'dish'}-${dish.name}`} className="row">
-                  <div className="row-main">
-                    <strong>{dish.name}</strong>
-                    {hasActiveSub ? (
-                      <>
-                        <div className="tags">
-                          <span className="tag">{formatNumeric(dish.kcal)} ккал</span>
-                          <span className="tag">Б {formatNumeric(dish.protein)}</span>
-                          <span className="tag">Ж {formatNumeric(dish.fat)}</span>
-                          <span className="tag">У {formatNumeric(dish.carbs)}</span>
-                          {Number.isFinite(dish.weight) && <span className="tag">{formatNumeric(dish.weight)} г</span>}
-                          {dish.category && <span className="tag">{dish.category}</span>}
+          groupedDishes.length ? (
+            groupedDishes.map((section) => (
+              <article key={section.name} className="menu-section">
+                <header className="menu-section__header">
+                  <div>
+                    <p className="menu-section__eyebrow">Категория</p>
+                    <h2 className="menu-section__title">{section.name}</h2>
+                  </div>
+                  <div className="menu-section__count">{section.dishes.length} позиций</div>
+                </header>
+                <ul className="menu-grid">
+                  {section.dishes.map((dish) => (
+                    <li key={`${section.name}-${dish.name}`} className="menu-card">
+                      <div className="menu-card__top">
+                        <div className="menu-card__title-row">
+                          <h3 className="menu-card__title">{dish.name}</h3>
+                          {Number.isFinite(dish.price) && <div className="menu-card__price">{Math.round(dish.price)} ₽</div>}
                         </div>
-                        <div className="muted">{formatDescription(dish.ingredients ?? dish.description)}</div>
-                      </>
-                    ) : (
-                      <div className="menu-paywall">
-                        <p className="muted">Эта информация доступна только по подписке.</p>
-                        <button type="button" className="subscribe-btn" onClick={handleSubscribe}>
-                          Оформить подписку
-                        </button>
+                        {hasActiveSub ? (
+                          <>
+                            <div className="menu-card__tags">
+                              <span className="menu-tag">{formatNumeric(dish.kcal)} ккал</span>
+                              <span className="menu-tag">Б {formatNumeric(dish.protein)}</span>
+                              <span className="menu-tag">Ж {formatNumeric(dish.fat)}</span>
+                              <span className="menu-tag">У {formatNumeric(dish.carbs)}</span>
+                              {Number.isFinite(dish.weight) && <span className="menu-tag">{formatNumeric(dish.weight)} г</span>}
+                            </div>
+                            <p className="menu-card__description">
+                              {formatDescription(dish.ingredients ?? dish.description) || 'Описание скоро появится'}
+                            </p>
+                          </>
+                        ) : (
+                          <div className="menu-paywall">
+                            <p className="menu-paywall__text">Эта информация доступна только по подписке.</p>
+                            <button type="button" className="subscribe-btn" onClick={handleSubscribe}>
+                              Оформить подписку
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  <div className="row-aside">
-                    {Number.isFinite(dish.price) && <div className="price">{Math.round(dish.price)} ₽</div>}
-                  </div>
-                </li>
-              ))}
-            </ul>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            ))
           ) : (
             menu?.categories?.length ? (
               <p className="muted">Под эти параметры сейчас ничего нет. Измени фильтры.</p>
@@ -230,6 +284,19 @@ export default function Menu() {
         onClose={() => setIsOutdatedOpen(false)}
       />
     </div>
+  )
+}
+
+function FilterChip({ active, label, description, onClick }) {
+  return (
+    <button
+      type="button"
+      className={`menu-chip ${active ? 'is-active' : ''}`}
+      onClick={onClick}
+    >
+      <span className="menu-chip__label">{label}</span>
+      <span className="menu-chip__description">{description}</span>
+    </button>
   )
 }
 
