@@ -400,11 +400,7 @@ export default function AccountSubscription() {
             <div className="account-subscription__promo-header">
               <div>
                 <p id="promo-heading" className="account-subscription__promo-label">Есть промокод?</p>
-                <p className="account-subscription__promo-hint">
-                  Активируйте скидку или подарок — промокод можно ввести один раз за оформление
-                </p>
               </div>
-              <span className="account-subscription__promo-pill">до 50% скидка</span>
             </div>
 
             <div className="account-subscription__promo-form">
