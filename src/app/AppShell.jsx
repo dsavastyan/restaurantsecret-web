@@ -133,17 +133,6 @@ export default function AppShell() {
     tg.ready()
     tg.expand()
     tg.setHeaderColor('bg_color')
-
-    const handleThemeChange = () => {
-      document.body.classList.toggle('tg-dark', tg.colorScheme === 'dark')
-    }
-
-    handleThemeChange()
-    tg.onEvent('themeChanged', handleThemeChange)
-
-    return () => {
-      tg.offEvent('themeChanged', handleThemeChange)
-    }
   }, [])
 
   // Whenever access becomes active we close the paywall.
