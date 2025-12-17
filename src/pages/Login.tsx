@@ -143,7 +143,7 @@ export default function LoginPage() {
                 {timer > 0 ? `Отправить код ещё раз — через ${timer} сек` : "Отправить код ещё раз"}
               </button>
 
-              <p className="login__hint">Код придёт с адреса <b>no-reply@restaurantsecret.ru</b>.</p>
+              <p className="login__hint">Код придёт с адреса <b>noreply@restaurantsecret.ru</b>.</p>
             </div>
           )}
 
