@@ -376,31 +376,6 @@ export default function AccountSubscription() {
             <p>Подписка открывает доступ к полной карточке блюд, включая КБЖУ и составы блюд</p>
           </div>
 
-          <div className="account-panel__box">
-            <label htmlFor="promo-code">Промокод</label>
-            <div className="account-subscription__promo-form">
-              <input
-                id="promo-code"
-                value={promoCode}
-                onChange={(event) => setPromoCode(event.target.value)}
-                placeholder="Промокод"
-                disabled={promoLoading}
-              />
-              <Button
-                className="account-button account-button--primary"
-                onClick={handleApplyPromo}
-                disabled={promoLoading || !promoCode.trim() || !accessToken}
-              >
-                {promoLoading ? "Применяем…" : "Применить"}
-              </Button>
-            </div>
-            {promoErrorLabel && (
-              <p className="account-panel__error-text" role="alert">
-                {promoErrorLabel}
-              </p>
-            )}
-          </div>
-
           <div className="account-subscription__grid" role="list">
             <TariffCard
               title="Месяц"
@@ -420,6 +395,42 @@ export default function AccountSubscription() {
           </div>
 
           <p className="account-subscription__note">* Подписка продлевается автоматически до отмены</p>
+
+          <div className="account-subscription__promo" role="group" aria-labelledby="promo-heading">
+            <div className="account-subscription__promo-header">
+              <div>
+                <p id="promo-heading" className="account-subscription__promo-label">Есть промокод?</p>
+                <p className="account-subscription__promo-hint">
+                  Активируйте скидку или подарок — промокод можно ввести один раз за оформление
+                </p>
+              </div>
+              <span className="account-subscription__promo-pill">до 50% скидка</span>
+            </div>
+
+            <div className="account-subscription__promo-form">
+              <input
+                id="promo-code"
+                className="account-subscription__promo-input"
+                value={promoCode}
+                onChange={(event) => setPromoCode(event.target.value)}
+                placeholder="Введите промокод"
+                disabled={promoLoading}
+                aria-label="Промокод"
+              />
+              <Button
+                className="account-button account-button--primary account-subscription__promo-button"
+                onClick={handleApplyPromo}
+                disabled={promoLoading || !promoCode.trim() || !accessToken}
+              >
+                {promoLoading ? "Применяем…" : "Применить"}
+              </Button>
+            </div>
+            {promoErrorLabel && (
+              <p className="account-panel__error-text" role="alert">
+                {promoErrorLabel}
+              </p>
+            )}
+          </div>
 
           {paymentPlan && (
             <p className="account-subscription__status" role="status">

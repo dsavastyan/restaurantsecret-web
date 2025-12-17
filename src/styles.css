@@ -1299,6 +1299,92 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
   margin-top: 12px;
 }
 
+.account-subscription__promo {
+  margin-top: 10px;
+  padding: 20px 22px;
+  border-radius: 24px;
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  background:
+    radial-gradient(circle at 12% 20%, rgba(59, 130, 246, 0.16) 0, rgba(59, 130, 246, 0) 36%),
+    radial-gradient(circle at 82% 28%, rgba(16, 185, 129, 0.16) 0, rgba(16, 185, 129, 0) 35%),
+    rgba(17, 24, 39, 0.02);
+  box-shadow: 0 20px 45px rgba(17, 24, 39, 0.09);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.account-subscription__promo-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.account-subscription__promo-label {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--rs-text);
+}
+
+.account-subscription__promo-hint {
+  margin: 4px 0 0;
+  color: var(--rs-muted);
+  line-height: 1.55;
+}
+
+.account-subscription__promo-pill {
+  align-self: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #0f766e;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.account-subscription__promo-form {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.account-subscription__promo-input {
+  flex: 1;
+  min-width: 220px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(17, 24, 39, 0.12);
+  background: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--rs-text);
+  outline: none;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.12s ease;
+}
+
+.account-subscription__promo-input:focus-visible {
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
+  transform: translateY(-1px);
+}
+
+.account-subscription__promo-input:disabled {
+  background: rgba(17, 24, 39, 0.04);
+  cursor: not-allowed;
+}
+
+.account-subscription__promo-button {
+  padding-inline: 18px;
+  min-height: 50px;
+  font-weight: 800;
+}
+
 .account-subscription__error {
   margin: 0;
   font-size: 14px;
@@ -1749,6 +1835,38 @@ body.tg-dark .account-panel__description {
 
 body.tg-dark .account-subscription__note {
   color: rgba(229, 231, 235, 0.78);
+}
+
+body.tg-dark .account-subscription__promo {
+  background:
+    radial-gradient(circle at 12% 20%, rgba(96, 165, 250, 0.22) 0, rgba(96, 165, 250, 0) 36%),
+    radial-gradient(circle at 82% 28%, rgba(52, 211, 153, 0.22) 0, rgba(52, 211, 153, 0) 35%),
+    rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
+}
+
+body.tg-dark .account-subscription__promo-label {
+  color: #f9fafb;
+}
+
+body.tg-dark .account-subscription__promo-hint {
+  color: rgba(229, 231, 235, 0.8);
+}
+
+body.tg-dark .account-subscription__promo-pill {
+  background: rgba(52, 211, 153, 0.22);
+  color: #99f6e4;
+}
+
+body.tg-dark .account-subscription__promo-input {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f9fafb;
+}
+
+body.tg-dark .account-subscription__promo-input:disabled {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 body.tg-dark .logout-modal {
