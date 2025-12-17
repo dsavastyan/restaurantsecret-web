@@ -214,7 +214,7 @@ export default function AppShell() {
 
   const isContact = location.pathname.startsWith('/contact')
   const showGlobalSearch = useMemo(() => {
-    const allowedPrefixes = ['/catalog', '/search', '/app']
+    const allowedPrefixes = ['/catalog', '/app']
     const matchesPrefix = allowedPrefixes.some((prefix) =>
       location.pathname === prefix || location.pathname.startsWith(`${prefix}/`)
     )
