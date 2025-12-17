@@ -112,7 +112,7 @@ export default function AccountSubscription() {
     setError(null);
     try {
       const response = await apiGet<SubscriptionStatusResponse>(
-        "/subscriptions/status",
+        "/api/subscriptions/status",
         accessToken,
       );
 
