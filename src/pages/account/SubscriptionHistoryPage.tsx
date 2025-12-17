@@ -114,6 +114,9 @@ function getStatusTone(status: string): "active" | "cancelled" | "expired" | "pe
   if (normalized.includes("expire") || normalized.includes("истек")) {
     return "expired";
   }
+  if (normalized.includes("pending") || normalized.includes("ожида")) {
+    return "pending";
+  }
   return "pending";
 }
 
@@ -122,6 +125,7 @@ function formatStatusLabel(status: string): string {
   if (tone === "active") return "Активна";
   if (tone === "cancelled") return "Отменена";
   if (tone === "expired") return "Истекла";
+  if (tone === "pending") return "Ожидаем ответ";
   return status;
 }
 
