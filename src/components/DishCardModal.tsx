@@ -228,18 +228,18 @@ export default function DishCardModal() {
 
             {data.menuCapturedAtLabel && (
               <div className="dish-card__meta dish-card__meta--footer">
-                Меню добавлено: {data.menuCapturedAtLabel}
+                <span>Меню добавлено: {data.menuCapturedAtLabel}</span>
+
+                <button
+                  type="button"
+                  className="btn btn--ghost dish-card__outdated-btn"
+                  onClick={() => setIsOutdatedOpen(true)}
+                >
+                  <span className="dish-card__outdated-icon" aria-hidden>⟳</span>
+                  Меню устарело?
+                </button>
               </div>
             )}
-
-            <button
-              type="button"
-              className="btn btn--ghost dish-card__outdated-btn"
-              onClick={() => setIsOutdatedOpen(true)}
-            >
-              <span className="dish-card__outdated-icon" aria-hidden>⟳</span>
-              Меню устарело
-            </button>
           </div>
         )}
       </div>
