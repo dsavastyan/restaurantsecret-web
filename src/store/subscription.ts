@@ -47,7 +47,7 @@ const fetchStatus = async (token?: string | null) => {
 
   try {
     const response = await apiGet<{ status?: string | null; statusNorm?: string | null }>(
-      "/subscriptions/status",
+      "/api/subscriptions/status",
       token,
     );
     const statusNorm = normalizeStatus(response?.statusNorm || response?.status);
