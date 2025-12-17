@@ -36,7 +36,7 @@ export function MenuOutdatedModal({ restaurantName, isOpen, onClose }) {
       await postSuggest({
         kind: 'menu_outdated',
         reason,
-        restaurant_name: restaurantName,
+        name: restaurantName,
         comment: trimmedComment || undefined,
       })
       toast.success('Спасибо, мы проверим')
