@@ -206,11 +206,8 @@ export default function SubscriptionHistoryPage() {
 
     return (
       <div className="account-history__empty" role="status">
-        <h3>История пуста</h3>
-        <p>
-          Как только вы оформите подписку, здесь появится информация о каждом периоде доступа и способах
-          оплаты.
-        </p>
+        <h3>История отстуствует</h3>
+        <p>Как только вы оформите подписку, здесь появится информация о каждом периоде доступа</p>
       </div>
     );
   }, [state.loading, state.data, hasData]);
