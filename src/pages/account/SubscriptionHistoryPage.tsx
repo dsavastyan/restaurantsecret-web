@@ -114,7 +114,19 @@ function getStatusTone(status: string): "active" | "cancelled" | "expired" | "pe
   if (normalized.includes("expire") || normalized.includes("истек")) {
     return "expired";
   }
+  if (normalized.includes("pending") || normalized.includes("ожида")) {
+    return "pending";
+  }
   return "pending";
+}
+
+function formatStatusLabel(status: string): string {
+  const tone = getStatusTone(status);
+  if (tone === "active") return "Активна";
+  if (tone === "cancelled") return "Отменена";
+  if (tone === "expired") return "Истекла";
+  if (tone === "pending") return "Ожидаем ответ";
+  return status;
 }
 
 export default function SubscriptionHistoryPage() {
@@ -184,7 +196,7 @@ export default function SubscriptionHistoryPage() {
                     <p className="account-history__plan">{item.plan}</p>
                   </div>
                   <span className={`account-history__status account-history__status--${tone}`}>
-                    {item.status}
+                    {formatStatusLabel(item.status)}
                   </span>
                 </div>
                 <dl className="account-history__meta">
