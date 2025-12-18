@@ -76,7 +76,12 @@ function AppRoutes() {
 // AppRoutes component.
 export default function Router() {
   const inTelegram = typeof window !== 'undefined' && Boolean(window.Telegram?.WebApp)
-  const RouterImpl = inTelegram ? HashRouter : BrowserRouter
+  const hashNavigation =
+    typeof window !== 'undefined' && typeof window.location?.hash === 'string'
+      ? window.location.hash.startsWith('#/')
+      : false
+
+  const RouterImpl = inTelegram || hashNavigation ? HashRouter : BrowserRouter
 
   return (
     <RouterImpl>
