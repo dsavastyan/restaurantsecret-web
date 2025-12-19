@@ -142,7 +142,7 @@ async function tryRefresh(): Promise<string | null> {
       // сохранить новый токен
       try {
         localStorage.setItem("rs_access", data.access_token);
-      } catch {}
+      } catch { }
       return data.access_token as string;
     }
     return null;
@@ -199,6 +199,19 @@ export async function apiPost<T = unknown>(path: string, body?: unknown, token?:
         },
         newToken
       ); // ретрай 1 раз
+    }
+  }
+
+  return handleResponse<T>(res);
+}
+
+export async function apiDelete<T = unknown>(path: string, token?: string): Promise<T> {
+  // 1-й заход
+  let res = await doFetch(path, { method: "DELETE" }, token);
+  if (res.status === 401) {
+    const newToken = await tryRefresh();
+    if (newToken) {
+      res = await doFetch(path, { method: "DELETE" }, newToken); // ретрай 1 раз
     }
   }
 
