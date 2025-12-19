@@ -1,19 +1,27 @@
 // Catalog page showing the full list of restaurants with lightweight filters.
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { useSWRLite } from '../hooks/useSWRLite.js'
+
+// Fetch a large number to emulate "all" items since backend pagination seems flaky
+const FETCH_LIMIT = 1000;
+const VISIBLE_CHUNK_SIZE = 20;
 
 export default function Catalog() {
   const { data: filters } = useSWRLite('filters', () => api.filters())
   const [selectedCuisines, setSelectedCuisines] = useState([])
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
-  const [page, setPage] = useState(1)
-  const [pagesData, setPagesData] = useState([])
-  const [hasMore, setHasMore] = useState(false)
+
+  // Client-side pagination state
+  const [visibleCount, setVisibleCount] = useState(VISIBLE_CHUNK_SIZE)
+
   const navigate = useNavigate()
   const { access, requireAccess, requestPaywall } = useOutletContext() || {}
+
+  // Infinite scroll observer target
+  const loaderRef = useRef(null)
 
   useEffect(() => {
     const handle = setTimeout(() => {
@@ -42,43 +50,39 @@ export default function Catalog() {
     }
   }, [ensureAccess, navigate])
 
-  const { data, loading, error } = useSWRLite(
-    `restaurants-${page}-${selectedCuisines.join(',')}-${debouncedQuery}`,
+  // Fetch ALL restaurants once (or as many as limit allows)
+  // We remove 'query' from here because we want to filter locally to ensure search works reliably
+  // We remove 'page' because we want to fetch everything upfront
+  const { data: rawData, loading, error } = useSWRLite(
+    'restaurants-all',
     () => api.restaurants({
-      limit: 20,
-      page,
-      cuisine: selectedCuisines,
-      query: debouncedQuery || undefined
+      limit: FETCH_LIMIT,
     })
   )
 
-  const cuisineKey = useMemo(() => selectedCuisines.join('|'), [selectedCuisines])
-
-  useEffect(() => {
-    setPagesData([])
-    setHasMore(false)
-  }, [debouncedQuery, cuisineKey])
-
-  useEffect(() => {
-    if (!data?.items) return
-
-    setPagesData(prev => {
-      const next = [...prev]
-      next[page - 1] = data.items
-      return next
+  // Normalize data
+  const allItems = useMemo(() => {
+    if (!rawData) return []
+    // Handle { items: [...] } or [...]
+    const list = Array.isArray(rawData?.items) ? rawData.items : (Array.isArray(rawData) ? rawData : [])
+    // De-duplicate just in case
+    const seen = new Set()
+    return list.filter(item => {
+      const key = item.slug || item.id || item.name
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
     })
-    setHasMore(Boolean(data?.has_more))
-  }, [data, page])
+  }, [rawData])
 
-  const items = useMemo(() => pagesData.flat().filter(Boolean), [pagesData])
-  const isInitialLoading = loading && !items.length
-  const visibleItems = useMemo(() => {
-    if (!items.length) return []
+  // Filter items based on SEARCH and CUISINE
+  const filteredItems = useMemo(() => {
+    if (!allItems.length) return []
 
     const normalizedQuery = debouncedQuery.toLowerCase()
     const cuisines = selectedCuisines.map((c) => c?.toLowerCase())
 
-    return items.filter((item) => {
+    return allItems.filter((item) => {
       const name = item?.name?.toLowerCase() || ''
       const cuisine = item?.cuisine?.toLowerCase() || ''
       const matchesQuery = !normalizedQuery || name.includes(normalizedQuery)
@@ -86,7 +90,42 @@ export default function Catalog() {
 
       return matchesQuery && matchesCuisine
     })
-  }, [debouncedQuery, items, selectedCuisines])
+  }, [debouncedQuery, allItems, selectedCuisines])
+
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisibleCount(VISIBLE_CHUNK_SIZE)
+  }, [debouncedQuery, selectedCuisines])
+
+  // Slice for display
+  const visibleItems = useMemo(() => {
+    return filteredItems.slice(0, visibleCount)
+  }, [filteredItems, visibleCount])
+
+  const hasMore = visibleCount < filteredItems.length
+  const isInitialLoading = loading && !allItems.length
+
+  // Infinite Scroll Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      const first = entries[0]
+      if (first.isIntersecting && hasMore) {
+        setVisibleCount(prev => prev + VISIBLE_CHUNK_SIZE)
+      }
+    }, {
+      root: null,
+      rootMargin: '200px',
+      threshold: 0.1
+    })
+
+    const el = loaderRef.current
+    if (el) observer.observe(el)
+
+    return () => {
+      if (el) observer.unobserve(el)
+    }
+  }, [hasMore])
+
 
   // Options are memoized so the filter chips do not re-render unnecessarily.
   const cuisineOptions = useMemo(() => filters?.cuisines ?? [], [filters?.cuisines])
@@ -123,9 +162,9 @@ export default function Catalog() {
 
   const handleSubmit = useCallback((event) => {
     event.preventDefault()
-    setPage(1)
-    setDebouncedQuery(query.trim())
-  }, [query])
+    // Trigger reset via debounce (already handled) or immediate if needed, 
+    // but here we just ensure keyboard dismiss or similar
+  }, [])
 
   return (
     <div className="catalog-page">
@@ -144,7 +183,7 @@ export default function Catalog() {
                 className="catalog-search__input"
                 type="search"
                 value={query}
-                onChange={(e) => { setQuery(e.target.value); setPage(1) }}
+                onChange={(e) => setQuery(e.target.value)}
                 placeholder="Например, Chaikhona, BB&Burgers, Додо"
                 autoComplete="off"
               />
@@ -152,13 +191,14 @@ export default function Catalog() {
                 <button
                   type="button"
                   className="catalog-search__clear"
-                  onClick={() => { setQuery(''); setPage(1) }}
+                  onClick={() => setQuery('')}
                   aria-label="Очистить поиск"
                 >
                   ×
                 </button>
               )}
             </div>
+            {/* Submit button is visually there but search is instant */}
             <button type="submit" className="btn btn--primary catalog-search__submit">Искать</button>
           </form>
 
@@ -169,7 +209,7 @@ export default function Catalog() {
                 <button
                   type="button"
                   className={`pill-chip${selectedCuisines.length === 0 ? ' is-active' : ''}`}
-                  onClick={() => { setSelectedCuisines([]); setPage(1) }}
+                  onClick={() => setSelectedCuisines([])}
                 >
                   Все кухни
                 </button>
@@ -179,7 +219,6 @@ export default function Catalog() {
                     type="button"
                     className={`pill-chip${selectedCuisines.includes(c) ? ' is-active' : ''}`}
                     onClick={() => {
-                      setPage(1)
                       setSelectedCuisines(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c])
                     }}
                   >
@@ -203,14 +242,14 @@ export default function Catalog() {
         )}
 
         <ul className="catalog-grid">
-          {visibleItems.map(r => {
+          {visibleItems.map((r, i) => {
             const allDishes = extractDishes(r)
             const dishes = allDishes.slice(0, 8)
             const dishesCount = typeof r?.dishesCount === 'number'
               ? r.dishesCount
               : allDishes.length
             return (
-              <li key={r.slug || r.name} className="catalog-card" role="group" aria-label={r?.name ?? 'Ресторан'}>
+              <li key={`${r.slug || r.name}-${i}`} className="catalog-card" role="group" aria-label={r?.name ?? 'Ресторан'}>
                 <div className="catalog-card__header">
                   <div className="catalog-card__badge" aria-hidden="true">{getInitials(r?.name)}</div>
                   <div className="catalog-card__title-block">
@@ -241,11 +280,10 @@ export default function Catalog() {
           })}
         </ul>
 
-        {hasMore && (
-          <div className="catalog-actions">
-            <button onClick={() => setPage(p => p + 1)} className="btn btn--primary">Загрузить ещё</button>
-          </div>
-        )}
+        {/* Sentinel for Infinite Scroll */}
+        <div ref={loaderRef} className="catalog-loader" style={{ height: '50px', display: 'flex', justifyContent: 'center', alignItems: 'center', opacity: 1, visibility: hasMore ? 'visible' : 'hidden' }}>
+          {hasMore && <span>Загрузка...</span>}
+        </div>
       </section>
     </div>
   )
