@@ -22,6 +22,7 @@ import AccountSubscription from '../pages/account/Subscription.tsx'
 
 import SubscriptionHistoryPage from '../pages/account/SubscriptionHistoryPage.tsx'
 import Favorites from '../pages/account/Favorites.tsx'
+import Goals from '../pages/account/Goals.tsx'
 
 // Defines the route tree shared between BrowserRouter and HashRouter. Keeping
 // this as a separate component makes it easier to unit test in isolation.
@@ -41,6 +42,7 @@ function AppRoutes() {
           <Route path="subscription" element={<AccountSubscription />} />
           <Route path="subscription/history" element={<SubscriptionHistoryPage />} />
           <Route path="favorites" element={<Favorites />} />
+          <Route path="goals" element={<Goals />} />
         </Route>
 
         {/* Основной контент */}

@@ -2703,3 +2703,134 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
 }
 
 /* AppShell Favorites Route placeholder override if needed, but handled by Account now */
+
+/* Goals Page */
+.account-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+.goals-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.btn-link-sm {
+  background: none;
+  border: none;
+  color: #db2777;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.btn-secondary-sm {
+  padding: 4px 12px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.macro-card {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+.macro-card.highlight {
+  background: #fff1f2; /* Rose tint */
+}
+.macro-label {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.macro-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+}
+.macro-unit {
+  font-size: 14px;
+  font-weight: 400;
+  color: #9ca3af;
+}
+.macros-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+.goals-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+.input-sm {
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 18px;
+  width: 80px;
+  text-align: center;
+}
+.badge--success {
+  background: #dcfce7;
+  color: #166534;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Profile Form */
+.account-divider {
+  height: 1px;
+  background: #f3f4f6;
+  margin: 24px 0;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.form-group.full {
+  grid-column: 1 / -1;
+}
+.form-group label {
+  font-size: 13px;
+  color: #6b7280;
+}
+.form-group input, .form-group select {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 15px;
+}
+.account-button--primary {
+  background: #db2777;
+  color: white;
+  border: none;
+}
+.account-button--primary:hover {
+  background: #be185d;
+}
+.text-success {
+  color: #166534;
+  font-size: 13px;
+  margin-right: 8px;
+}

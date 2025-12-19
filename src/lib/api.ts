@@ -241,3 +241,47 @@ export async function searchFull(query: string): Promise<SearchResult> {
     `/search?query=${encodeURIComponent(query)}`
   );
 }
+// Goals
+export type UserGoalData = {
+  user_id?: string;
+  gender: 'male' | 'female' | null;
+  age: number | null;
+  weight: number | null;
+  height: number | null;
+  activity_level: 'min' | 'light' | 'avg' | 'high' | null;
+  goal_type: 'lose' | 'maintain' | 'gain' | null;
+  target_calories: number | null;
+  target_protein: number | null;
+  target_fat: number | null;
+  target_carbs: number | null;
+  is_auto_calculated: boolean;
+  updated_at?: string;
+};
+
+export async function fetchUserGoals(token: string) {
+  return apiGet<{ ok: boolean; goals: UserGoalData | null }>("/api/goals", token);
+}
+
+export async function updateUserGoals(data: Partial<UserGoalData>, token: string) {
+  return apiPut("/api/goals", data, token);
+}
+
+export async function apiPut<T = unknown>(path: string, body?: unknown, token?: string): Promise<T> {
+  let res = await doFetch(path, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined
+  }, token);
+
+  if (res.status === 401) {
+    const newToken = await tryRefresh();
+    if (newToken) {
+      res = await doFetch(path, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: body ? JSON.stringify(body) : undefined
+      }, newToken);
+    }
+  }
+  return handleResponse<T>(res);
+}
