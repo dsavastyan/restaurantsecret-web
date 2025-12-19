@@ -8,6 +8,8 @@ import { formatMenuCapturedAt } from '@/lib/dates'
 import { useAuth } from '@/store/auth'
 import { useSubscriptionStore } from '@/store/subscription'
 import { MenuOutdatedModal } from '@/components/MenuOutdatedModal'
+import DishCard from '@/components/DishCard/DishCard'
+import { useDishCardStore } from '@/store/dishCard'
 
 const createDefaultPresets = () => ({ highProtein: false, lowFat: false, lowKcal: false })
 const createDefaultRange = () => ({
@@ -41,6 +43,7 @@ export default function Menu() {
     hasActiveSub: state.hasActiveSub,
     fetchStatus: state.fetchStatus,
   }))
+  const open = useDishCardStore((state) => state.open)
 
   const [menu, setMenu] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -62,23 +65,23 @@ export default function Menu() {
   useEffect(() => {
     let aborted = false
 
-    ;(async () => {
-      try {
-        await fetchStatus(accessToken)
-        setLoading(true)
-        setError('')
-        const raw = await apiGet(`/restaurants/${slug}/menu`)
-        const data = raw?.categories ? raw : { ...(raw || {}), name: raw?.name || slug, categories: [] }
-        if (!aborted) setMenu(normalizeMenu(data))
-      } catch (err) {
-        if (!aborted) {
-          console.error('Failed to load menu', err)
-          setError('Не удалось загрузить меню. Попробуйте обновить страницу позже.')
+      ; (async () => {
+        try {
+          await fetchStatus(accessToken)
+          setLoading(true)
+          setError('')
+          const raw = await apiGet(`/restaurants/${slug}/menu`)
+          const data = raw?.categories ? raw : { ...(raw || {}), name: raw?.name || slug, categories: [] }
+          if (!aborted) setMenu(normalizeMenu(data))
+        } catch (err) {
+          if (!aborted) {
+            console.error('Failed to load menu', err)
+            setError('Не удалось загрузить меню. Попробуйте обновить страницу позже.')
+          }
+        } finally {
+          if (!aborted) setLoading(false)
         }
-      } finally {
-        if (!aborted) setLoading(false)
-      }
-    })()
+      })()
 
     return () => {
       aborted = true
@@ -249,35 +252,18 @@ export default function Menu() {
                 </header>
                 <ul className="menu-grid">
                   {section.dishes.map((dish) => (
-                    <li key={`${section.name}-${dish.name}`} className="menu-card">
-                      <div className="menu-card__top">
-                        <div className="menu-card__title-row">
-                          <h3 className="menu-card__title">{dish.name}</h3>
-                          {Number.isFinite(dish.price) && <div className="menu-card__price">{Math.round(dish.price)} ₽</div>}
-                        </div>
-                        {hasActiveSub ? (
-                          <>
-                            <div className="menu-card__tags">
-                              <span className="menu-tag">{formatNumeric(dish.kcal)} ккал</span>
-                              <span className="menu-tag">Б {formatNumeric(dish.protein)}</span>
-                              <span className="menu-tag">Ж {formatNumeric(dish.fat)}</span>
-                              <span className="menu-tag">У {formatNumeric(dish.carbs)}</span>
-                              {Number.isFinite(dish.weight) && <span className="menu-tag">{formatNumeric(dish.weight)} г</span>}
-                            </div>
-                            <p className="menu-card__description">
-                              {formatDescription(dish.ingredients ?? dish.description) || 'Описание скоро появится'}
-                            </p>
-                          </>
-                        ) : (
-                          <div className="menu-paywall">
-                            <p className="menu-paywall__text">Эта информация доступна только по подписке.</p>
-                            <button type="button" className="subscribe-btn" onClick={handleSubscribe}>
-                              Оформить подписку
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </li>
+                    <DishCard
+                      key={`${section.name}-${dish.name}`}
+                      dish={dish}
+                      restaurantSlug={slug}
+                      restaurantName={menu?.name || slug}
+                      onClick={() => open({
+                        id: dish.id,
+                        dishName: dish.name,
+                        restaurantSlug: slug,
+                        restaurantName: menu?.name || slug,
+                      })}
+                    />
                   ))}
                 </ul>
               </article>

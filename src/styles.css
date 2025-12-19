@@ -2646,3 +2646,60 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
     margin-bottom: 24px;
   }
 }
+
+/* Favorites Button */
+.menu-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.menu-card__fav-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #9ca3af;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.menu-card__fav-btn:hover {
+  background: rgba(243, 244, 246, 0.8);
+  color: #db2777;
+  transform: scale(1.1);
+}
+.menu-card__fav-btn.is-active {
+  color: #db2777; /* Rose-600 */
+}
+.menu-card__fav-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Favorites Page */
+.favorites-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.favorites-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.favorites-empty {
+  padding: 40px;
+  text-align: center;
+  background: #f9fafb;
+  border-radius: 16px;
+  color: #4b5563;
+}
+
+/* AppShell Favorites Route placeholder override if needed, but handled by Account now */
