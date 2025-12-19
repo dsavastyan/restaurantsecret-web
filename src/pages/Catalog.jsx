@@ -4,17 +4,19 @@ import { useNavigate, useOutletContext } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { useSWRLite } from '../hooks/useSWRLite.js'
 
-const LIMIT = 20;
+// Fetch a large number to emulate "all" items since backend pagination seems flaky
+const FETCH_LIMIT = 1000;
+const VISIBLE_CHUNK_SIZE = 20;
 
 export default function Catalog() {
   const { data: filters } = useSWRLite('filters', () => api.filters())
   const [selectedCuisines, setSelectedCuisines] = useState([])
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
-  // page is 1-based
-  const [page, setPage] = useState(1)
-  const [pagesData, setPagesData] = useState([])
-  const [hasMore, setHasMore] = useState(false)
+
+  // Client-side pagination state
+  const [visibleCount, setVisibleCount] = useState(VISIBLE_CHUNK_SIZE)
+
   const navigate = useNavigate()
   const { access, requireAccess, requestPaywall } = useOutletContext() || {}
 
@@ -48,84 +50,71 @@ export default function Catalog() {
     }
   }, [ensureAccess, navigate])
 
-  const { data, loading, error } = useSWRLite(
-    `restaurants-${page}-${selectedCuisines.join(',')}-${debouncedQuery}`,
+  // Fetch ALL restaurants once (or as many as limit allows)
+  // We remove 'query' from here because we want to filter locally to ensure search works reliably
+  // We remove 'page' because we want to fetch everything upfront
+  const { data: rawData, loading, error } = useSWRLite(
+    'restaurants-all',
     () => api.restaurants({
-      limit: LIMIT,
-      page,
-      cuisine: selectedCuisines,
-      query: debouncedQuery || undefined
+      limit: FETCH_LIMIT,
     })
   )
 
-  const cuisineKey = useMemo(() => selectedCuisines.join('|'), [selectedCuisines])
-
-  // Reset pagination when filters change
-  useEffect(() => {
-    setPagesData([])
-    setHasMore(false)
-    setPage(1)
-  }, [debouncedQuery, cuisineKey])
-
-  // Process incoming data
-  useEffect(() => {
-    if (!data) return
-
-    // Handle flexible response formats:
-    // 1. { items: [...], has_more: boolean }
-    // 2. [...] (just an array)
-    const newItems = Array.isArray(data?.items) ? data.items : (Array.isArray(data) ? data : [])
-    const serverHasMore = data?.has_more
-
-    // If server tells us explicitly, use it. Otherwise guess based on count.
-    const calculatedHasMore = typeof serverHasMore === 'boolean'
-      ? serverHasMore
-      : newItems.length === LIMIT
-
-    setPagesData(prev => {
-      // Avoid duplicates if re-fetching same page
-      // Note: simple index-based replacement for pages
-      const next = [...prev]
-      next[page - 1] = newItems
-      return next
+  // Normalize data
+  const allItems = useMemo(() => {
+    if (!rawData) return []
+    // Handle { items: [...] } or [...]
+    const list = Array.isArray(rawData?.items) ? rawData.items : (Array.isArray(rawData) ? rawData : [])
+    // De-duplicate just in case
+    const seen = new Set()
+    return list.filter(item => {
+      const key = item.slug || item.id || item.name
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
     })
-    setHasMore(calculatedHasMore)
-  }, [data, page])
+  }, [rawData])
 
-  const items = useMemo(() => pagesData.flat().filter(Boolean), [pagesData])
-  const isInitialLoading = loading && !items.length
-  
-  // Filter visible items (client-side search acts as a secondary filter or if search was done locally)
-  // However, since we pass query to API, this might be redundant but keeps existing logic safe
-  const visibleItems = useMemo(() => {
-    if (!items.length) return []
+  // Filter items based on SEARCH and CUISINE
+  const filteredItems = useMemo(() => {
+    if (!allItems.length) return []
 
     const normalizedQuery = debouncedQuery.toLowerCase()
     const cuisines = selectedCuisines.map((c) => c?.toLowerCase())
 
-    return items.filter((item) => {
+    return allItems.filter((item) => {
       const name = item?.name?.toLowerCase() || ''
       const cuisine = item?.cuisine?.toLowerCase() || ''
-      // If query was sent to server, we trust server results, but if needed we can double check
-      // For basic fuzzy match consistency:
       const matchesQuery = !normalizedQuery || name.includes(normalizedQuery)
-      // Check cuisine only if it wasn't filtered by server (but it is)
       const matchesCuisine = !cuisines.length || cuisines.includes(cuisine)
 
-      return true // Trusting server side filtering mostly, but keeping this structure if needed
+      return matchesQuery && matchesCuisine
     })
-  }, [debouncedQuery, items, selectedCuisines])
+  }, [debouncedQuery, allItems, selectedCuisines])
+
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisibleCount(VISIBLE_CHUNK_SIZE)
+  }, [debouncedQuery, selectedCuisines])
+
+  // Slice for display
+  const visibleItems = useMemo(() => {
+    return filteredItems.slice(0, visibleCount)
+  }, [filteredItems, visibleCount])
+
+  const hasMore = visibleCount < filteredItems.length
+  const isInitialLoading = loading && !allItems.length
 
   // Infinite Scroll Observer
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       const first = entries[0]
-      if (first.isIntersecting && hasMore && !loading) {
-        setPage(prev => prev + 1)
+      if (first.isIntersecting && hasMore) {
+        setVisibleCount(prev => prev + VISIBLE_CHUNK_SIZE)
       }
     }, {
       root: null,
-      rootMargin: '100px', // load a bit before reaching bottom
+      rootMargin: '200px',
       threshold: 0.1
     })
 
@@ -135,7 +124,7 @@ export default function Catalog() {
     return () => {
       if (el) observer.unobserve(el)
     }
-  }, [hasMore, loading])
+  }, [hasMore])
 
 
   // Options are memoized so the filter chips do not re-render unnecessarily.
@@ -173,9 +162,9 @@ export default function Catalog() {
 
   const handleSubmit = useCallback((event) => {
     event.preventDefault()
-    setPage(1)
-    setDebouncedQuery(query.trim())
-  }, [query])
+    // Trigger reset via debounce (already handled) or immediate if needed, 
+    // but here we just ensure keyboard dismiss or similar
+  }, [])
 
   return (
     <div className="catalog-page">
@@ -194,7 +183,7 @@ export default function Catalog() {
                 className="catalog-search__input"
                 type="search"
                 value={query}
-                onChange={(e) => { setQuery(e.target.value); if(page !== 1) setPage(1) }}
+                onChange={(e) => setQuery(e.target.value)}
                 placeholder="Например, Chaikhona, BB&Burgers, Додо"
                 autoComplete="off"
               />
@@ -202,13 +191,14 @@ export default function Catalog() {
                 <button
                   type="button"
                   className="catalog-search__clear"
-                  onClick={() => { setQuery(''); setPage(1) }}
+                  onClick={() => setQuery('')}
                   aria-label="Очистить поиск"
                 >
                   ×
                 </button>
               )}
             </div>
+            {/* Submit button is visually there but search is instant */}
             <button type="submit" className="btn btn--primary catalog-search__submit">Искать</button>
           </form>
 
@@ -219,7 +209,7 @@ export default function Catalog() {
                 <button
                   type="button"
                   className={`pill-chip${selectedCuisines.length === 0 ? ' is-active' : ''}`}
-                  onClick={() => { setSelectedCuisines([]); setPage(1) }}
+                  onClick={() => setSelectedCuisines([])}
                 >
                   Все кухни
                 </button>
@@ -229,7 +219,6 @@ export default function Catalog() {
                     type="button"
                     className={`pill-chip${selectedCuisines.includes(c) ? ' is-active' : ''}`}
                     onClick={() => {
-                      setPage(1)
                       setSelectedCuisines(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c])
                     }}
                   >
@@ -292,8 +281,8 @@ export default function Catalog() {
         </ul>
 
         {/* Sentinel for Infinite Scroll */}
-        <div ref={loaderRef} className="catalog-loader" style={{ height: '50px', display: 'flex', justifyContent: 'center', alignItems: 'center', opacity: hasMore ? 1 : 0 }}>
-           {hasMore && loading && <span>Загрузка...</span>}
+        <div ref={loaderRef} className="catalog-loader" style={{ height: '50px', display: 'flex', justifyContent: 'center', alignItems: 'center', opacity: 1, visibility: hasMore ? 'visible' : 'hidden' }}>
+          {hasMore && <span>Загрузка...</span>}
         </div>
       </section>
     </div>
