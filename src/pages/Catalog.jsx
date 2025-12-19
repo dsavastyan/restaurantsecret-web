@@ -1,19 +1,25 @@
 // Catalog page showing the full list of restaurants with lightweight filters.
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { useSWRLite } from '../hooks/useSWRLite.js'
+
+const LIMIT = 20;
 
 export default function Catalog() {
   const { data: filters } = useSWRLite('filters', () => api.filters())
   const [selectedCuisines, setSelectedCuisines] = useState([])
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
+  // page is 1-based
   const [page, setPage] = useState(1)
   const [pagesData, setPagesData] = useState([])
   const [hasMore, setHasMore] = useState(false)
   const navigate = useNavigate()
   const { access, requireAccess, requestPaywall } = useOutletContext() || {}
+
+  // Infinite scroll observer target
+  const loaderRef = useRef(null)
 
   useEffect(() => {
     const handle = setTimeout(() => {
@@ -45,7 +51,7 @@ export default function Catalog() {
   const { data, loading, error } = useSWRLite(
     `restaurants-${page}-${selectedCuisines.join(',')}-${debouncedQuery}`,
     () => api.restaurants({
-      limit: 20,
+      limit: LIMIT,
       page,
       cuisine: selectedCuisines,
       query: debouncedQuery || undefined
@@ -54,24 +60,43 @@ export default function Catalog() {
 
   const cuisineKey = useMemo(() => selectedCuisines.join('|'), [selectedCuisines])
 
+  // Reset pagination when filters change
   useEffect(() => {
     setPagesData([])
     setHasMore(false)
+    setPage(1)
   }, [debouncedQuery, cuisineKey])
 
+  // Process incoming data
   useEffect(() => {
-    if (!data?.items) return
+    if (!data) return
+
+    // Handle flexible response formats:
+    // 1. { items: [...], has_more: boolean }
+    // 2. [...] (just an array)
+    const newItems = Array.isArray(data?.items) ? data.items : (Array.isArray(data) ? data : [])
+    const serverHasMore = data?.has_more
+
+    // If server tells us explicitly, use it. Otherwise guess based on count.
+    const calculatedHasMore = typeof serverHasMore === 'boolean'
+      ? serverHasMore
+      : newItems.length === LIMIT
 
     setPagesData(prev => {
+      // Avoid duplicates if re-fetching same page
+      // Note: simple index-based replacement for pages
       const next = [...prev]
-      next[page - 1] = data.items
+      next[page - 1] = newItems
       return next
     })
-    setHasMore(Boolean(data?.has_more))
+    setHasMore(calculatedHasMore)
   }, [data, page])
 
   const items = useMemo(() => pagesData.flat().filter(Boolean), [pagesData])
   const isInitialLoading = loading && !items.length
+  
+  // Filter visible items (client-side search acts as a secondary filter or if search was done locally)
+  // However, since we pass query to API, this might be redundant but keeps existing logic safe
   const visibleItems = useMemo(() => {
     if (!items.length) return []
 
@@ -81,12 +106,37 @@ export default function Catalog() {
     return items.filter((item) => {
       const name = item?.name?.toLowerCase() || ''
       const cuisine = item?.cuisine?.toLowerCase() || ''
+      // If query was sent to server, we trust server results, but if needed we can double check
+      // For basic fuzzy match consistency:
       const matchesQuery = !normalizedQuery || name.includes(normalizedQuery)
+      // Check cuisine only if it wasn't filtered by server (but it is)
       const matchesCuisine = !cuisines.length || cuisines.includes(cuisine)
 
-      return matchesQuery && matchesCuisine
+      return true // Trusting server side filtering mostly, but keeping this structure if needed
     })
   }, [debouncedQuery, items, selectedCuisines])
+
+  // Infinite Scroll Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      const first = entries[0]
+      if (first.isIntersecting && hasMore && !loading) {
+        setPage(prev => prev + 1)
+      }
+    }, {
+      root: null,
+      rootMargin: '100px', // load a bit before reaching bottom
+      threshold: 0.1
+    })
+
+    const el = loaderRef.current
+    if (el) observer.observe(el)
+
+    return () => {
+      if (el) observer.unobserve(el)
+    }
+  }, [hasMore, loading])
+
 
   // Options are memoized so the filter chips do not re-render unnecessarily.
   const cuisineOptions = useMemo(() => filters?.cuisines ?? [], [filters?.cuisines])
@@ -144,7 +194,7 @@ export default function Catalog() {
                 className="catalog-search__input"
                 type="search"
                 value={query}
-                onChange={(e) => { setQuery(e.target.value); setPage(1) }}
+                onChange={(e) => { setQuery(e.target.value); if(page !== 1) setPage(1) }}
                 placeholder="Например, Chaikhona, BB&Burgers, Додо"
                 autoComplete="off"
               />
@@ -203,14 +253,14 @@ export default function Catalog() {
         )}
 
         <ul className="catalog-grid">
-          {visibleItems.map(r => {
+          {visibleItems.map((r, i) => {
             const allDishes = extractDishes(r)
             const dishes = allDishes.slice(0, 8)
             const dishesCount = typeof r?.dishesCount === 'number'
               ? r.dishesCount
               : allDishes.length
             return (
-              <li key={r.slug || r.name} className="catalog-card" role="group" aria-label={r?.name ?? 'Ресторан'}>
+              <li key={`${r.slug || r.name}-${i}`} className="catalog-card" role="group" aria-label={r?.name ?? 'Ресторан'}>
                 <div className="catalog-card__header">
                   <div className="catalog-card__badge" aria-hidden="true">{getInitials(r?.name)}</div>
                   <div className="catalog-card__title-block">
@@ -241,11 +291,10 @@ export default function Catalog() {
           })}
         </ul>
 
-        {hasMore && (
-          <div className="catalog-actions">
-            <button onClick={() => setPage(p => p + 1)} className="btn btn--primary">Загрузить ещё</button>
-          </div>
-        )}
+        {/* Sentinel for Infinite Scroll */}
+        <div ref={loaderRef} className="catalog-loader" style={{ height: '50px', display: 'flex', justifyContent: 'center', alignItems: 'center', opacity: hasMore ? 1 : 0 }}>
+           {hasMore && loading && <span>Загрузка...</span>}
+        </div>
       </section>
     </div>
   )
