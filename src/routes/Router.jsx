@@ -19,7 +19,7 @@ import Tariffs from '../pages/Tariffs.jsx'
 import AccountLayout from '../pages/account/Layout.tsx'
 import AccountOverview from '../pages/account/Overview.tsx'
 import AccountSubscription from '../pages/account/Subscription.tsx'
-import AccountSubscription from '../pages/account/Subscription.tsx'
+
 import SubscriptionHistoryPage from '../pages/account/SubscriptionHistoryPage.tsx'
 import Favorites from '../pages/account/Favorites.tsx'
 
