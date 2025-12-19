@@ -5,6 +5,7 @@ import { useDishCardStore } from '@/store/dishCard';
 import DishCard from '@/components/DishCard/DishCard';
 import { apiGet } from '@/lib/requests';
 import { flattenMenuDishes } from '@/lib/nutrition';
+import { useSubscriptionStore } from '@/store/subscription';
 
 type HydratedDish = {
     dish: any;
@@ -20,10 +21,18 @@ export default function Favorites() {
         isLoading: s.isLoading,
         load: s.load,
     }));
+    const fetchSubscriptionStatus = useSubscriptionStore((s) => s.fetchStatus);
     const openModal = useDishCardStore((s) => s.open);
 
     const [dishes, setDishes] = useState<HydratedDish[]>([]);
     const [isContentLoading, setIsContentLoading] = useState(false);
+
+    // Refresh subscription status on mount (like Menu.jsx does) covers Bug 2
+    useEffect(() => {
+        if (token) {
+            fetchSubscriptionStatus(token);
+        }
+    }, [token, fetchSubscriptionStatus]);
 
     // Load favorites list IDs on mount
     useEffect(() => {
