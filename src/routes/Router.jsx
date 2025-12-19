@@ -19,7 +19,9 @@ import Tariffs from '../pages/Tariffs.jsx'
 import AccountLayout from '../pages/account/Layout.tsx'
 import AccountOverview from '../pages/account/Overview.tsx'
 import AccountSubscription from '../pages/account/Subscription.tsx'
+
 import SubscriptionHistoryPage from '../pages/account/SubscriptionHistoryPage.tsx'
+import Favorites from '../pages/account/Favorites.tsx'
 
 // Defines the route tree shared between BrowserRouter and HashRouter. Keeping
 // this as a separate component makes it easier to unit test in isolation.
@@ -34,10 +36,11 @@ function AppRoutes() {
         <Route path="tariffs" element={<Tariffs />} />
         <Route path="privacy" element={<Privacy />} />
         <Route path="contact" element={<Contact />} />
-        <Route path="account" element={<AccountLayout />}> 
+        <Route path="account" element={<AccountLayout />}>
           <Route index element={<AccountOverview />} />
           <Route path="subscription" element={<AccountSubscription />} />
           <Route path="subscription/history" element={<SubscriptionHistoryPage />} />
+          <Route path="favorites" element={<Favorites />} />
         </Route>
 
         {/* Основной контент */}
