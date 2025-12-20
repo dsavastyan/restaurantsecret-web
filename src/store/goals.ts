@@ -74,10 +74,12 @@ export const useGoalsStore = create<GoalsState>((set, get) => ({
         // Optimistic update
         set({ data: next });
         try {
-            await apiPut('/api/goals', next, token);
+            const res = await apiPut('/api/goals', next, token);
+            console.log('[Goals] Saved:', res);
         } catch (err) {
-            console.error(err);
+            console.error('[Goals] Save Failed:', err);
             get().fetch(token); // rollback
+            throw err;
         }
     },
 
@@ -85,16 +87,15 @@ export const useGoalsStore = create<GoalsState>((set, get) => ({
         const current = get().data;
         if (!current) return;
 
-        // If updating targets, we might want to set is_auto_calculated = false unless explicitly told otherwise
-        // But the caller should handle that logic. Usually manual edit = auto false.
-
         const next = { ...current, ...targets };
         set({ data: next });
         try {
-            await apiPut('/api/goals', next, token);
+            const res = await apiPut('/api/goals', next, token);
+            console.log('[Goals] Targets Saved:', res);
         } catch (err) {
-            console.error(err);
+            console.error('[Goals] Targets Save Failed:', err);
             get().fetch(token);
+            throw err;
         }
     },
 
