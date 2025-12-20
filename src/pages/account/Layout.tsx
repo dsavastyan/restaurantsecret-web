@@ -118,20 +118,20 @@ export default function AccountLayout() {
               <span className="account-nav__label">Управлять подпиской</span>
             </NavLink>
             <NavLink
+              to="/account/goals"
+              className={({ isActive }) =>
+                `account-nav__link${isActive ? " account-nav__link--active" : ""}`
+              }
+            >
+              <span className="account-nav__label">Мои цели</span>
+            </NavLink>
+            <NavLink
               to="/account/favorites"
               className={({ isActive }) =>
                 `account-nav__link${isActive ? " account-nav__link--active" : ""}`
               }
             >
               <span className="account-nav__label">Избранное</span>
-            </NavLink>
-            <NavLink
-              to="/account/goals"
-              className={({ isActive }) =>
-                `account-nav__link${isActive ? " account-nav__link--active" : ""}`
-              }
-            >
-              <span className="account-nav__label">Мои Цели</span>
             </NavLink>
           </nav>
           <div className="account__content">
