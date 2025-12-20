@@ -47,15 +47,23 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, interac
             navigate('/login');
             return;
         }
+
+        const safeNum = (val: any) => {
+            const n = Number(val);
+            return Number.isFinite(n) ? n : 0;
+        };
+
+        const dishId = Number(dish.id);
+
         await addDiaryEntry(accessToken, {
-            dish_id: Number(dish.id),
+            dish_id: Number.isFinite(dishId) ? dishId : undefined,
             restaurant_slug: restaurantSlug,
-            name: dish.name,
-            calories: Number(dish.kcal) || 0,
-            protein: Number(dish.protein) || 0,
-            fat: Number(dish.fat) || 0,
-            carbs: Number(dish.carbs) || 0,
-            weight: Number(dish.weight) || null
+            name: dish.name || 'Блюдо',
+            calories: safeNum(dish.kcal),
+            protein: safeNum(dish.protein),
+            fat: safeNum(dish.fat),
+            carbs: safeNum(dish.carbs),
+            weight: safeNum(dish.weight) || null
         });
     };
 
