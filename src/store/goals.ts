@@ -51,8 +51,12 @@ export const useGoalsStore = create<GoalsState>((set, get) => ({
 
         const next = { ...current, ...stats };
 
-        // Auto-calculate if flag is true
-        if (next.is_auto_calculated) {
+        // Auto-calculate if flag is true OR if it's undefined (default behavior)
+        // treating undefined as true allows first-time setup to auto-calc
+        const shouldAutoCalc = next.is_auto_calculated !== false;
+
+        if (shouldAutoCalc) {
+            next.is_auto_calculated = true;
             // Check if we have all validation fields
             if (next.gender && next.age && next.weight && next.height && next.activity_level && next.goal_type) {
                 const calculated = calculateTargets({
