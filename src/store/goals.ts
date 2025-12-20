@@ -47,8 +47,7 @@ export const useGoalsStore = create<GoalsState>((set, get) => ({
     },
 
     updateStats: async (token, stats) => {
-        const current = get().data;
-        if (!current) return;
+        const current = get().data || {} as UserGoalData;
 
         const next = { ...current, ...stats };
 
@@ -85,8 +84,7 @@ export const useGoalsStore = create<GoalsState>((set, get) => ({
     },
 
     updateTargets: async (token, targets) => {
-        const current = get().data;
-        if (!current) return;
+        const current = get().data || {} as UserGoalData;
 
         const next = { ...current, ...targets };
         set({ data: next });
@@ -102,7 +100,7 @@ export const useGoalsStore = create<GoalsState>((set, get) => ({
 
     recalculate: async (token) => {
         const current = get().data;
-        if (!current) return;
+        if (!current) return; // Recalculate needs existing data to make sense (or at least valid fields)
 
         if (current.gender && current.age && current.weight && current.height && current.activity_level && current.goal_type) {
             const calculated = calculateTargets({
