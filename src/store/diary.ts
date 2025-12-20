@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { apiGet, apiDelete, doFetch } from '@/lib/api';
+import { apiGet, apiDelete, apiPost } from '@/lib/api';
 import { toast } from '@/lib/toast';
 
 export type DiaryEntry = {
@@ -65,23 +65,18 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
     addEntry: async (token, entry) => {
         const currentDate = get().selectedDate;
         try {
-            const res = await doFetch('/api/diary', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...entry, date: currentDate })
-            }, token);
+            const res = await apiPost<{ ok: boolean, entry?: any }>(
+                '/api/diary',
+                { ...entry, date: currentDate },
+                token
+            );
 
-            if (res.ok) {
-                const data = await res.json();
-                if (data.ok) {
-                    toast.success('Блюдо добавлено в дневник');
-                    // Refresh data
-                    get().fetchDay(token, currentDate);
-                } else {
-                    toast.error('Ошибка добавления');
-                }
+            if (res?.ok) {
+                toast.success('Блюдо добавлено в дневник');
+                // Refresh data
+                get().fetchDay(token, currentDate);
             } else {
-                toast.error('Не удалось добавить блюдо');
+                toast.error('Ошибка добавления');
             }
         } catch (e) {
             console.error(e);
