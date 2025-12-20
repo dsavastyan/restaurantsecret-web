@@ -35,6 +35,7 @@ export const useGoalsStore = create<GoalsState>((set, get) => ({
         try {
             const res = await fetchUserGoals(token);
             if (res?.ok) {
+                console.log('[Goals] Fetched:', res);
                 set({ data: res.goals, isLoading: false });
             } else {
                 set({ isLoading: false, error: 'Failed' });
