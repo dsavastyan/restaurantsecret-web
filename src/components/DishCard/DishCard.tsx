@@ -63,7 +63,7 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, interac
             protein: safeNum(dish.protein),
             fat: safeNum(dish.fat),
             carbs: safeNum(dish.carbs),
-            weight: safeNum(dish.weight) || null
+            weight: safeNum(dish.weight) || undefined
         });
     };
 

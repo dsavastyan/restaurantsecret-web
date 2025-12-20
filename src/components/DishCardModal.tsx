@@ -159,7 +159,7 @@ export default function DishCardModal() {
       protein: safeNum(data.proteins_g),
       fat: safeNum(data.fats_g),
       carbs: safeNum(data.carbs_g),
-      weight: safeNum(data.weight) || null
+      weight: safeNum(data.weight) || undefined
     });
   };
 
