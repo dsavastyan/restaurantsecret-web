@@ -24,6 +24,7 @@ type DishCardData = {
   carbs_g?: number | null;
   composition_text?: string | null;
   allergensList: string[];
+  weight?: number | null;
   menuCapturedAtLabel?: string;
 };
 
@@ -222,9 +223,9 @@ const deriveCardData = (
 
   const composition = formatDescription(
     (dish?.composition_text as string) ||
-      (dish?.composition as string) ||
-      (dish?.ingredients as string) ||
-      (dish?.description as string),
+    (dish?.composition as string) ||
+    (dish?.ingredients as string) ||
+    (dish?.description as string),
   );
 
   return {
@@ -239,6 +240,7 @@ const deriveCardData = (
     carbs_g: carbs,
     composition_text: composition,
     allergensList: normalizeAllergens(dish),
+    weight: pickNumber(dish, ["weight", "weight_g", "weightGrams", "portion_weight", "serving_weight", "grammage", "portion_size", "portionSize"]),
     menuCapturedAtLabel: formatMenuCapturedAt(capturedAt),
   };
 };

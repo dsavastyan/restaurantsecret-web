@@ -1922,6 +1922,50 @@ body {
   gap: 16px;
 }
 
+.dish-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dish-card__fav-btn,
+.dish-card__add-btn {
+  background: transparent;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  color: #9ca3af;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.dish-card__fav-btn:hover,
+.dish-card__add-btn:hover {
+  background: rgba(243, 244, 246, 0.8);
+  transform: scale(1.1);
+}
+
+.dish-card__fav-btn:hover {
+  color: #db2777;
+}
+
+.dish-card__add-btn:hover {
+  color: var(--rs-accent);
+}
+
+.dish-card__fav-btn.is-active {
+  color: #db2777;
+}
+
+.dish-card__fav-btn svg,
+.dish-card__add-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
 .dish-card__eyebrow {
   font-size: 13px;
   letter-spacing: 0.08em;

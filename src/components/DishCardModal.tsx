@@ -7,6 +7,9 @@ import { useAuth } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
 import { postSuggest } from "@/lib/api";
 import { toast } from "@/lib/toast";
+import { useFavoritesStore } from "@/store/favorites";
+import { useDiaryStore } from "@/store/diary";
+import { formatNumeric } from "@/lib/nutrition";
 
 const root = typeof document !== "undefined" ? document.body : null;
 
@@ -51,6 +54,12 @@ export default function DishCardModal() {
     hasActiveSub: state.hasActiveSub,
     fetchStatus: state.fetchStatus,
   }));
+  const { isFavorite, toggleFavorite } = useFavoritesStore((state) => ({
+    isFavorite: state.isFavorite(Number(data?.id)),
+    toggleFavorite: state.toggle,
+  }));
+  const addDiaryEntry = useDiaryStore((s) => s.addEntry);
+
   const [isOutdatedOpen, setIsOutdatedOpen] = useState(false);
   const [reason, setReason] = useState<
     "wrong_kbju" | "missing_from_menu" | "other"
@@ -117,6 +126,43 @@ export default function DishCardModal() {
     }
   };
 
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!data) return;
+    if (!accessToken) {
+      navigate("/login");
+      return;
+    }
+    await toggleFavorite(accessToken, Number(data.id), data.restaurantSlug);
+  };
+
+  const handleDiaryAdd = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!data) return;
+    if (!accessToken) {
+      navigate("/login");
+      return;
+    }
+
+    const safeNum = (val: any) => {
+      const n = Number(val);
+      return Number.isFinite(n) ? n : 0;
+    };
+
+    const dishId = Number(data.id);
+
+    await addDiaryEntry(accessToken, {
+      dish_id: Number.isFinite(dishId) ? dishId : undefined,
+      restaurant_slug: data.restaurantSlug,
+      name: data.name || "Блюдо",
+      calories: safeNum(data.kcal),
+      protein: safeNum(data.proteins_g),
+      fat: safeNum(data.fats_g),
+      carbs: safeNum(data.carbs_g),
+      weight: safeNum(data.weight) || null
+    });
+  };
+
   const anchorId = useMemo(() => {
     if (!data) return "";
     if (data.id) return `dish-${data.id}`;
@@ -168,6 +214,50 @@ export default function DishCardModal() {
                 >
                   {data.restaurantName || "Ресторан"}
                 </Link>
+              </div>
+              <div className="dish-card__actions">
+                <button
+                  type="button"
+                  className="dish-card__add-btn"
+                  onClick={handleDiaryAdd}
+                  title="Добавить в съеденное сегодня"
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  className={`dish-card__fav-btn ${isFavorite ? "is-active" : ""}`}
+                  onClick={handleFavoriteClick}
+                  aria-label={isFavorite ? "Удалить из избранного" : "Добавить в избранное"}
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z"
+                      fill={isFavorite ? "#E11D48" : "none"}
+                      stroke={isFavorite ? "#E11D48" : "currentColor"}
+                      strokeWidth="2"
+                    />
+                  </svg>
+                </button>
               </div>
             </div>
 
