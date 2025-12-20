@@ -3011,4 +3011,137 @@ body { margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, san
     display: inline-flex;
     align-items: center;
     border: 1px solid #bbf7d0;
+}/* Add to Diary Button */
+.menu-card__add-btn {
+    background: transparent;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: #9ca3af;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    margin-right: 4px;
+}
+
+.menu-card__add-btn:hover {
+    background: rgba(243, 244, 246, 0.8);
+    color: var(--rs-primary);
+    /* Green or Primary */
+    transform: scale(1.1);
+}
+
+.menu-card__add-btn svg {
+    width: 24px;
+    height: 24px;
+}/* Statistics Page Styles */
+
+.stats-date-picker .date-input {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-family: inherit;
+    color: var(--rs-text-primary);
+    background: white;
+}
+
+.progress-bar {
+    height: 6px;
+    background: #f1f5f9;
+    border-radius: 3px;
+    margin: 8px 0;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--rs-primary);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.macro-subtext {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+.manual-entry-form {
+    background: #f8fafc;
+    padding: 16px;
+    border-radius: 12px;
+    margin: 24px 0;
+    border: 1px solid #e2e8f0;
+}
+
+.manual-entry-form .form-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.diary-list {
+    margin-top: 32px;
+}
+
+.diary-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.diary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.diary-item:last-child {
+    border-bottom: none;
+}
+
+.diary-item-name {
+    font-weight: 500;
+    color: var(--rs-text-primary);
+}
+
+.diary-item-meta {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.badge-restaurant {
+    background: #e0f2fe;
+    color: #0369a1;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.btn-icon-danger {
+    background: none;
+    border: none;
+    color: #ef4444;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.btn-icon-danger:hover {
+    opacity: 1;
+}
+
+.w-full {
+    width: 100%;
 }
