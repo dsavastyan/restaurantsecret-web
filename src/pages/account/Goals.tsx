@@ -75,12 +75,12 @@ export default function Goals() {
                 </div>
                 {!isEditing && data && (
                     <div className="goals-actions">
+                        <button className="btn-secondary-sm" onClick={handleEditStart}>Изменить вручную</button>
                         {data.is_auto_calculated ? (
                             <span className="badge badge--success">Авто</span>
                         ) : (
                             <button className="btn-link-sm" onClick={handleReset}>Сбросить на авто</button>
                         )}
-                        <button className="btn-secondary-sm" onClick={handleEditStart}>Изменить вручную</button>
                     </div>
                 )}
             </div>
