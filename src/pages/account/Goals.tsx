@@ -70,7 +70,7 @@ export default function Goals() {
         <div className="account-section">
             <div className="account-section-header">
                 <div>
-                    <h2 className="account-section-title">Мои Цели</h2>
+                    <h2 className="account-section-title">Мои цели</h2>
                     <p className="account-section-subtitle">Суточная норма КБЖУ</p>
                 </div>
                 {!isEditing && data && (
