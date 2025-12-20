@@ -1920,6 +1920,7 @@ body {
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+  padding-right: 52px;
 }
 
 .dish-card__actions {

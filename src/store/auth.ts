@@ -41,7 +41,7 @@ const persistToken = (token: string | null) => {
   }
 };
 
-const setToken = (token: string | null) => {
+export const setToken = (token: string | null) => {
   persistToken(token);
   state = { ...state, accessToken: token };
   notify();
@@ -56,6 +56,8 @@ state = {
   setToken,
   logout,
 };
+
+export const getAuthState = () => state;
 
 const subscribe = (listener: () => void) => {
   listeners.add(listener);

@@ -1,4 +1,6 @@
 // src/lib/api.ts
+import { setToken } from "@/store/auth";
+
 export const API_BASE =
   import.meta.env.VITE_PD_API_BASE || "https://pd.restaurantsecret.ru";
 
@@ -141,7 +143,7 @@ async function tryRefresh(): Promise<string | null> {
     if (data?.ok && data.access_token) {
       // сохранить новый токен
       try {
-        localStorage.setItem("rs_access", data.access_token);
+        setToken(data.access_token);
       } catch { }
       return data.access_token as string;
     }
