@@ -62,18 +62,24 @@ export default function AccountOverview() {
     if (!accessToken) return;
     setSaveStatus('saving');
 
-    await updateStats(accessToken, {
-      gender: form.gender as any,
-      age: parseInt(form.age) || null,
-      weight: parseFloat(form.weight) || null,
-      height: parseFloat(form.height) || null,
-      activity_level: form.activity as any,
-      goal_type: form.goal as any
-    });
+    try {
+      await updateStats(accessToken, {
+        gender: form.gender as any,
+        age: parseInt(form.age) || null,
+        weight: parseFloat(form.weight) || null,
+        height: parseFloat(form.height) || null,
+        activity_level: form.activity as any,
+        goal_type: form.goal as any
+      });
 
-    setSaveStatus('saved');
-    setIsFormDirty(false);
-    setTimeout(() => setSaveStatus(''), 2000);
+      setSaveStatus('saved');
+      setIsFormDirty(false);
+      setTimeout(() => setSaveStatus(''), 2000);
+    } catch (err: any) {
+      console.error(err);
+      setSaveStatus('');
+      alert('Ошибка при сохранении: ' + (err.message || 'Unknown error'));
+    }
   };
 
   const createdAt = useMemo(() => {
