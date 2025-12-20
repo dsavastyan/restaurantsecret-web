@@ -126,6 +126,14 @@ export default function AccountLayout() {
               <span className="account-nav__label">Мои цели</span>
             </NavLink>
             <NavLink
+              to="/account/statistics"
+              className={({ isActive }) =>
+                `account-nav__link${isActive ? " account-nav__link--active" : ""}`
+              }
+            >
+              <span className="account-nav__label">Статистика</span>
+            </NavLink>
+            <NavLink
               to="/account/favorites"
               className={({ isActive }) =>
                 `account-nav__link${isActive ? " account-nav__link--active" : ""}`

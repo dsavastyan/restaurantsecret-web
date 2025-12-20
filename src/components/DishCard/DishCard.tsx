@@ -4,6 +4,7 @@ import { formatDescription } from '@/lib/text';
 import { useAuth } from '@/store/auth';
 import { useSubscriptionStore } from '@/store/subscription';
 import { useFavoritesStore } from '@/store/favorites';
+import { useDiaryStore } from '@/store/diary';
 import { useNavigate } from 'react-router-dom';
 
 type DishCardProps = {
@@ -38,6 +39,26 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, interac
         await toggle(accessToken, Number(dish.id), restaurantSlug);
     };
 
+    const addDiaryEntry = useDiaryStore(s => s.addEntry);
+
+    const handleDiaryAdd = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!accessToken) {
+            navigate('/login');
+            return;
+        }
+        await addDiaryEntry(accessToken, {
+            dish_id: Number(dish.id),
+            restaurant_slug: restaurantSlug,
+            name: dish.name,
+            calories: Number(dish.kcal) || 0,
+            protein: Number(dish.protein) || 0,
+            fat: Number(dish.fat) || 0,
+            carbs: Number(dish.carbs) || 0,
+            weight: Number(dish.weight) || null
+        });
+    };
+
     const handleSubscribe = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (accessToken) {
@@ -54,6 +75,18 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, interac
                     <h3 className="menu-card__title">{dish.name}</h3>
                     <div className="menu-card__actions">
                         {Number.isFinite(dish.price) && <div className="menu-card__price">{Math.round(dish.price)} ₽</div>}
+                        <button
+                            type="button"
+                            className="menu-card__add-btn"
+                            onClick={handleDiaryAdd}
+                            title="Добавить в съеденное сегодня"
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="16"></line>
+                                <line x1="8" y1="12" x2="16" y2="12"></line>
+                            </svg>
+                        </button>
                         <button
                             type="button"
                             className={`menu-card__fav-btn ${favorited ? 'is-active' : ''}`}
