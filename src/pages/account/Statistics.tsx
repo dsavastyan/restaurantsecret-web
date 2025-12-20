@@ -73,7 +73,6 @@ export default function Statistics() {
             <div className="account-section-header">
                 <div>
                     <h2 className="account-section-title">Статистика</h2>
-                    <p className="account-section-subtitle">Контроль питания</p>
                 </div>
                 <div className="stats-date-picker">
                     <input
@@ -88,7 +87,7 @@ export default function Statistics() {
             {/* Summary Cards */}
             <div className="goals-grid">
                 <div className="macro-card highlight">
-                    <div className="macro-label">Калории (Остаток)</div>
+                    <div className="macro-label">Калории</div>
                     <div className="macro-value">
                         {goalData ? Math.round(Math.max(0, remaining.calories)) : '—'}
                         <span className="macro-unit">ккал</span>
@@ -126,8 +125,9 @@ export default function Statistics() {
 
             {/* Manual Entry Button */}
             {!isAdding && (
-                <button className="btn-secondary w-full" onClick={() => setIsAdding(true)}>
-                    + Добавить продукт вручную
+                <button className="btn-add-product w-full" onClick={() => setIsAdding(true)}>
+                    <span className="btn-add-product__icon">+</span>
+                    <span>Добавить продукт вручную</span>
                 </button>
             )}
 
