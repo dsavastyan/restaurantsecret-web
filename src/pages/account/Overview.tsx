@@ -152,10 +152,9 @@ export default function AccountOverview() {
 
       <div className="account-divider"></div>
 
-      <div className="account-panel__header" style={{ marginTop: 32 }}>
+      <div className="account-panel__header" style={{ marginTop: 12 }}>
         <div className="account-panel__intro">
-          <h3 className="account-panel__title">Физические данные</h3>
-          <p className="account-panel__subtitle">Нужны для расчета нормы калорий</p>
+          <h3 className="account-panel__title">О Вас</h3>
         </div>
         <div className="account-panel__actions">
           {saveStatus === 'saved' && <span className="text-success">Сохранено</span>}
