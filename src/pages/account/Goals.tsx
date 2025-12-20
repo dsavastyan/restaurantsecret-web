@@ -22,10 +22,10 @@ export default function Goals() {
     });
 
     useEffect(() => {
-        if (token && !data && !isLoading) {
+        if (token) {
             fetch(token);
         }
-    }, [token, data, isLoading, fetch]);
+    }, [token, fetch]);
 
     const handleEditStart = () => {
         if (!data) return;
