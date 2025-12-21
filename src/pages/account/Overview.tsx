@@ -158,7 +158,7 @@ export default function AccountOverview() {
 
       <div className="account-divider"></div>
 
-      <div className="account-panel__header" style={{ marginTop: 12 }}>
+      <div className="account-panel__header">
         <div className="account-panel__intro">
           <h3 className="account-panel__title">О Вас</h3>
         </div>
