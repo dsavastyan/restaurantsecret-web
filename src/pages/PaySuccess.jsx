@@ -2,7 +2,7 @@
 // re-validate access from the API.
 import React, { useEffect, useMemo, useState } from 'react'
 import { Link, useOutletContext, useSearchParams } from 'react-router-dom'
-import { API_BASE } from '@/config/api'
+import { PD_API_BASE } from '@/config/api'
 import { useAuth } from '@/store/auth'
 
 const queryErrors = {
@@ -59,7 +59,7 @@ export default function PaySuccess() {
         setMessage('Войдите в аккаунт, чтобы подтвердить подписку.')
         return
       }
-      const response = await fetch(`${API_BASE}/me`, {
+      const response = await fetch(`${PD_API_BASE}/me`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`
         }

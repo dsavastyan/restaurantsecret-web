@@ -1,13 +1,6 @@
 // src/lib/api.ts
-import { API_BASE } from "@/config/api";
+import { PD_API_BASE, PUBLIC_API_BASE } from "@/config/api";
 import { setToken } from "@/store/auth";
-
-const PUBLIC_API_BASE =
-  import.meta.env.VITE_PUBLIC_API_BASE || "https://api.restaurantsecret.ru/cf";
-const normalizedPublicApiBase = PUBLIC_API_BASE.replace(/\/+$/, "");
-const publicApiBase = normalizedPublicApiBase.endsWith("/cf")
-  ? normalizedPublicApiBase
-  : `${normalizedPublicApiBase}/cf`;
 
 export type SearchSuggestionRestaurant = {
   id: number;
@@ -97,7 +90,7 @@ const toApiError = async (response: Response) => {
 };
 
 async function doFetch(path: string, init: RequestInit = {}, token?: string) {
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await fetch(`${PD_API_BASE}${path}`, {
     ...init,
     headers: {
       ...(init.headers || {}),
@@ -109,7 +102,7 @@ async function doFetch(path: string, init: RequestInit = {}, token?: string) {
 }
 
 async function publicGet<T>(path: string): Promise<T> {
-  const res = await fetch(`${publicApiBase}${path}`, {
+  const res = await fetch(`${PUBLIC_API_BASE}${path}`, {
     method: "GET",
     credentials: "omit",
   });
@@ -124,7 +117,7 @@ export const isUnauthorizedError = (error: unknown): error is ApiError => {
 };
 
 export function apiPostAuth(path: string, body?: unknown, token?: string) {
-  return fetch(`${API_BASE}${path}`, {
+  return fetch(`${PD_API_BASE}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -137,7 +130,7 @@ export function apiPostAuth(path: string, body?: unknown, token?: string) {
 
 async function tryRefresh(): Promise<string | null> {
   try {
-    const res = await fetch(`${API_BASE}/auth/refresh`, {
+    const res = await fetch(`${PD_API_BASE}/auth/refresh`, {
       method: "POST",
       credentials: "include",
     });

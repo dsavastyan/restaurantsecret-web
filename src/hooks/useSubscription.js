@@ -1,7 +1,7 @@
 // Hook for checking if the current user has an active subscription. It performs
 // the fetch on mount and exposes loading + boolean state.
 import { useEffect, useState } from 'react'
-import { API_BASE } from '@/config/api'
+import { PD_API_BASE } from '@/config/api'
 
 export function useSubscription() {
   const [loading, setLoading] = useState(true)
@@ -14,7 +14,7 @@ export function useSubscription() {
     async function load() {
       try {
         setLoading(true)
-        const res = await fetch(`${API_BASE}/me`, {
+        const res = await fetch(`${PD_API_BASE}/me`, {
           headers: {
             'Content-Type': 'application/json'
           }
