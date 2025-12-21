@@ -1,13 +1,11 @@
 // Shared layout for authenticated areas. Manages subscription state and toggles
 // the paywall overlay when required.
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { Outlet, useLocation } from 'react-router-dom'
 import NavBar from '@/components/NavBar'
 import SearchInput from '@/components/SearchInput'
 import DishCardModal from '@/components/DishCardModal'
 import Footer from '@/components/Footer.jsx'
-import Paywall from '../components/Paywall.jsx'
 import { PD_API_BASE } from '@/config/api'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
@@ -49,7 +47,6 @@ export default function AppShell() {
       return defaultAccess
     }
   })
-  const [paywallVisible, setPaywallVisible] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const lastAccessEventRef = useRef(null)
 
@@ -135,35 +132,20 @@ export default function AppShell() {
     tg.setHeaderColor('bg_color')
   }, [])
 
-  // Whenever access becomes active we close the paywall.
-  useEffect(() => {
-    if (access?.isActive) {
-      setPaywallVisible(false)
-    }
-  }, [access?.isActive])
-
   // Expose helpers to descendants through React Router outlet context.
   const requestPaywall = useCallback(() => {
-    setPaywallVisible(true)
+    // Paywall functionality disabled.
   }, [])
 
   const closePaywall = useCallback(() => {
-    setPaywallVisible(false)
+    // Paywall functionality disabled.
   }, [])
 
   const requireAccess = useCallback(() => {
-    if (access?.isActive) return true
-    setPaywallVisible(true)
-    return false
-  }, [access?.isActive])
+    return true
+  }, [])
 
-  // Determine when to show the paywall. We hide it on payment routes to avoid
-  // trapping the user in a loop while confirming purchase.
-  const showPaywall = useMemo(() => {
-    if (access?.isActive) return false
-    if (location.pathname.startsWith('/pay')) return false
-    return paywallVisible
-  }, [access?.isActive, location.pathname, paywallVisible])
+  const showPaywall = false
 
   // Manual refresh triggered by the user after completing payment.
   const refreshAccess = useCallback(async () => {
@@ -250,37 +232,7 @@ export default function AppShell() {
           </div>
         )}
       </main>
-      {showPaywall && (
-        <PaywallPortal>
-          <div className="rs-paywall-overlay">
-            <Paywall onRefresh={refreshAccess} returnTo={location.pathname} />
-          </div>
-        </PaywallPortal>
-      )}
       <Footer />
     </div>
   )
-}
-
-function PaywallPortal({ children }) {
-  const [mounted, setMounted] = useState(false)
-
-  // Delay rendering until after the component has mounted to avoid SSR issues
-  // and toggle a body class while the paywall overlay is visible.
-  useEffect(() => {
-    if (typeof document === 'undefined') return undefined
-
-    setMounted(true)
-    document.body.classList.add('rs-paywall-open')
-
-    return () => {
-      document.body.classList.remove('rs-paywall-open')
-    }
-  }, [])
-
-  if (!mounted || typeof document === 'undefined') return null
-
-  // Render the paywall overlay straight into the body element to bypass any
-  // parent stacking-context limitations.
-  return createPortal(children, document.body)
 }
