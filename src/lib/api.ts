@@ -2,6 +2,13 @@
 import { API_BASE } from "@/config/api";
 import { setToken } from "@/store/auth";
 
+const PUBLIC_API_BASE =
+  import.meta.env.VITE_PUBLIC_API_BASE || "https://api.restaurantsecret.ru/cf";
+const normalizedPublicApiBase = PUBLIC_API_BASE.replace(/\/+$/, "");
+const publicApiBase = normalizedPublicApiBase.endsWith("/cf")
+  ? normalizedPublicApiBase
+  : `${normalizedPublicApiBase}/cf`;
+
 export type SearchSuggestionRestaurant = {
   id: number;
   slug: string;
@@ -102,7 +109,7 @@ async function doFetch(path: string, init: RequestInit = {}, token?: string) {
 }
 
 async function publicGet<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await fetch(`${publicApiBase}${path}`, {
     method: "GET",
     credentials: "omit",
   });
