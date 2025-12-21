@@ -8,7 +8,7 @@ import SearchInput from '@/components/SearchInput'
 import DishCardModal from '@/components/DishCardModal'
 import Footer from '@/components/Footer.jsx'
 import Paywall from '../components/Paywall.jsx'
-import { API_BASE } from '@/config/api'
+import { PD_API_BASE } from '@/config/api'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
 
@@ -172,7 +172,7 @@ export default function AppShell() {
         toast.info('Войдите в аккаунт, чтобы проверить доступ')
         return
       }
-      const response = await fetch(`${API_BASE}/me`, {
+      const response = await fetch(`${PD_API_BASE}/me`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`
         }

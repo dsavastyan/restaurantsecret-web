@@ -2,7 +2,7 @@
 // Assumptions:
 // - React + Vite SPA already set up
 // - Global stylesheet (styles.css) exists; this file adds semantic classNames
-// - API base: https://api.restaurantsecret.ru
+// - API base: https://api.restaurantsecret.ru/cf
 // - No payment/subscription flows here (frozen by product decision)
 // - Блок преимуществ под hero показывает три ключевые выгоды (без отдельного заголовка)
 // - SEO meta tags to be placed in index.html (not here)
