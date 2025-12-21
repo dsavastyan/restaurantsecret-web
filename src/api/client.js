@@ -77,10 +77,10 @@ async function post(path, body, options = {}) {
 
 // Export a small client surface the rest of the app can use.
 export const api = {
-  filters: () => get('/filters'),
-  restaurants: (opts) => get('/restaurants', opts),
-  restaurant: (slug) => get(`/restaurants/${encodeURIComponent(slug)}`),
-  menu: (slug) => get(`/restaurants/${encodeURIComponent(slug)}/menu`),
-  search: (query, opts) => get('/search', { query, ...opts }),
+  filters: () => get('filters'),
+  restaurants: (opts) => get('restaurants', opts),
+  restaurant: (slug) => get(`restaurants/${encodeURIComponent(slug)}`),
+  menu: (slug) => get(`restaurants/${encodeURIComponent(slug)}/menu`),
+  search: (query, opts) => get('search', { query, ...opts }),
   post
 };
