@@ -113,20 +113,24 @@ export default function Menu() {
     }
 
     const ordered = menu.categories.map((category) => ({
-      name: category?.name || 'Без категории',
+      name: formatDescription(category?.name, '') || 'Без категории',
       dishes: [],
     }))
     const lookup = new Map(ordered.map((item) => [item.name, item]))
     const known = new Set(lookup.keys())
 
     for (const dish of filtered) {
-      const bucketName = dish.category && known.has(dish.category) ? dish.category : null
+      const categoryName = formatDescription(dish.category, '')
+      const bucketName = categoryName && known.has(categoryName) ? categoryName : null
       if (bucketName) {
         lookup.get(bucketName)?.dishes.push(dish)
       }
     }
 
-    const leftovers = filtered.filter((dish) => !dish.category || !known.has(dish.category))
+    const leftovers = filtered.filter((dish) => {
+      const categoryName = formatDescription(dish.category, '')
+      return !categoryName || !known.has(categoryName)
+    })
     if (leftovers.length) {
       ordered.push({ name: 'Другое', dishes: leftovers })
     }
