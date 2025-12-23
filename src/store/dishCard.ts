@@ -226,6 +226,7 @@ const deriveCardData = (
     (dish?.composition as string) ||
     (dish?.ingredients as string) ||
     (dish?.description as string),
+    "",
   );
 
   return {
