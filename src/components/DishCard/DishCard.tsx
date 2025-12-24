@@ -123,7 +123,7 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, interac
                             {Number.isFinite(dish.weight) && <span className="menu-tag">{formatNumeric(dish.weight)} г</span>}
                         </div>
                         <p className="menu-card__description">
-                            {formatDescription(dish.ingredients ?? dish.description) || 'Описание скоро появится'}
+                            {formatDescription(dish.ingredients ?? dish.description) || ''}
                         </p>
                     </>
                 ) : (
