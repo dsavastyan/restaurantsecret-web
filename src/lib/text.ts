@@ -1,4 +1,4 @@
-export function formatDescription(text: unknown, fallback = "отсутсвует") {
+export function formatDescription(text: unknown, fallback = "") {
   if (typeof text !== "string") return fallback;
   const normalized = text.trim();
   if (!normalized) return fallback;
