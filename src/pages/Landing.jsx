@@ -125,76 +125,26 @@ function WhyImportant() {
 
 // Fetch and display a small preview grid of restaurants directly on the
 // landing page.
+// Replaced marquee with RestaurantMap
+import RestaurantMap from '@/components/RestaurantMap';
+
 function RestaurantsSection() {
-  const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-
-  useEffect(() => {
-    let aborted = false
-    async function load() {
-      try {
-        setLoading(true)
-        setError(null)
-        const res = await fetch(`${API_BASE}/restaurants?limit=24`)
-        if (!res.ok) {
-          const t = await res.text().catch(() => '')
-          throw new Error(`HTTP ${res.status} ${res.statusText} — ${t}`)
-        }
-        const data = await res.json()
-        if (!aborted) {
-          const list = Array.isArray(data?.items) ? data.items : (Array.isArray(data) ? data : [])
-          setItems(list)
-        }
-      } catch (e) {
-        console.error('Restaurants load failed:', e)
-        if (!aborted) setError('Не удалось загрузить рестораны')
-      } finally {
-        if (!aborted) setLoading(false)
-      }
-    }
-    load()
-    return () => { aborted = true }
-  }, [])
-
-  const hasData = items.length > 0
-  const marqueeItems = hasData
-    ? [...items, ...items]
-    : Array.from({ length: 12 }).map((_, i) => ({ id: `placeholder-${i}` }))
-
   return (
-    <section className="restaurants" aria-label="Список ресторанов">
+    <section className="restaurants" aria-label="Карта ресторанов">
       <div className="container">
         <div className="section-heading">
           <h2 id="restaurants-title" className="section-title">Мы уже собрали меню этих ресторанов</h2>
+          <p className="section-subtitle">Найдите любимое заведение на карте</p>
         </div>
 
-        {error ? (
-          <div className="error">{error}</div>
-        ) : (
-          <div
-            className={`restaurants-marquee${loading ? ' is-loading' : ''}`}
-            role="presentation"
-            aria-hidden={loading && !hasData}
-          >
-            <div className="restaurants-marquee__track" aria-live={loading ? 'polite' : 'off'}>
-              {marqueeItems.map((r, index) => (
-                <div className="restaurant-item" key={`${r.id || r.slug || r.name || 'item'}-${index}`}>
-                  <RestaurantCard item={r} skeleton={!hasData} />
-                </div>
-              ))}
-            </div>
-            <div className="restaurants-marquee__fade restaurants-marquee__fade--left" aria-hidden="true" />
-            <div className="restaurants-marquee__fade restaurants-marquee__fade--right" aria-hidden="true" />
-          </div>
-        )}
+        <RestaurantMap />
 
         <div className="center">
-          <Link className="btn btn--outline" to="/restaurants">Показать все рестораны</Link>
+          <Link className="btn btn--outline" to="/restaurants">Показать все списком</Link>
         </div>
       </div>
     </section>
-  )
+  );
 }
 
 // A single restaurant card used in the preview grid.
