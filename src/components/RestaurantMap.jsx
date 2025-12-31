@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
@@ -22,6 +22,7 @@ const defaultCenter = [55.751244, 37.618423]; // Moscow
 function ClusterLayer({ restaurants }) {
     const map = useMap();
     const clusterGroupRef = useRef(null);
+    const navigate = useNavigate(); // Hook for navigation
 
     useEffect(() => {
         // Initialize cluster group if not exists
@@ -39,12 +40,6 @@ function ClusterLayer({ restaurants }) {
             .map(r => {
                 const marker = L.marker([r.lat, r.lon]);
 
-                // Build popup content string or DOM element
-                // Note: Since we are using pure Leaflet for markers, we can't easily use React Link components inside popup string.
-                // We use simple HTML. For navigation we might need a global handler or regular boolean href.
-                // But standard <a href> causes full reload for single page apps usually.
-                // To support SPA navigation, we can add a click handler to the button/link in the popup.
-
                 const popupContent = document.createElement('div');
                 popupContent.className = 'map-popup';
                 popupContent.innerHTML = `
@@ -58,14 +53,9 @@ function ClusterLayer({ restaurants }) {
                 if (link) {
                     link.addEventListener('click', (e) => {
                         e.preventDefault();
-                        // We need access to router navigation or just rely on standard navigation if acceptable.
-                        // For now, let's use window.location if we don't pass 'navigate' function.
-                        // BETTER: dispatch a custom event or use window.location.hash logic if hash router.
-                        // But we are in a component. We can just use standard href if we don't mind refresh,
-                        // OR we can try to use React Portal for Popup but that requires <Marker> components.
-                        // Since user asked for "pure leaflet.markercluster without React wrapper", 
-                        // this implies imperative marker creation.
-                        window.location.href = link.getAttribute('href');
+                        // Use React Router navigation
+                        const targetPath = `/r/${r.slug}/menu`;
+                        navigate(targetPath);
                     });
                 }
 
@@ -75,13 +65,11 @@ function ClusterLayer({ restaurants }) {
 
         group.addLayers(markers);
 
-        // Cleanup on unmount (optional, but good practice if component unmounts)
         return () => {
-            // We generally keep the group if we just update data, but if component dies, remove it.
-            // Actually, for this useEffect dependent on 'restaurants', we act like it's a fresh render of markers.
+            // Cleanup on unmount or update
         };
 
-    }, [map, restaurants]);
+    }, [map, restaurants, navigate]);
 
     // Cleanup entirely on unmount
     useEffect(() => {
