@@ -4949,23 +4949,60 @@ body {
   justify-content: space-between;
   margin-bottom: 12px;
 }
+
 .catalog-filter__label {
   margin-bottom: 0;
 }
+
 .catalog-filter__search {
   flex: 1;
   margin-left: 16px;
   max-width: 200px;
 }
+
 .catalog-filter__search-input {
   width: 100%;
   padding: 6px 12px;
   border-radius: 8px;
   border: 1px solid var(--line);
   font-size: 14px;
-  background: var(--bg-card);
+  background: #fff;
+  /* White background */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
+
 .catalog-filter__search-input:focus {
   outline: none;
   border-color: var(--brand);
+  background: #fff;
+}
+
+.catalog-filter__chips-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.catalog-filter__chips {
+  max-height: 84px;
+  /* Roughly 2 lines of chips */
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.catalog-filter__chips.is-expanded {
+  max-height: 1000px;
+}
+
+.catalog-filter__more {
+  background: none;
+  border: none;
+  color: var(--brand);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 0;
+  align-self: flex-start;
+  text-decoration: underline;
 }

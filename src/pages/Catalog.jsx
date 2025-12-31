@@ -131,6 +131,7 @@ export default function Catalog() {
   const cuisineOptions = useMemo(() => filters?.cuisines ?? [], [filters?.cuisines])
 
   const [cuisineSearch, setCuisineSearch] = useState('')
+  const [isExpanded, setIsExpanded] = useState(false)
 
   const filteredCuisineOptions = useMemo(() => {
     if (!cuisineSearch.trim()) return cuisineOptions
@@ -224,26 +225,38 @@ export default function Catalog() {
                   />
                 </div>
               </div>
-              <div className="catalog-filter__chips">
-                <button
-                  type="button"
-                  className={`pill-chip${selectedCuisines.length === 0 ? ' is-active' : ''}`}
-                  onClick={() => setSelectedCuisines([])}
-                >
-                  Все кухни
-                </button>
-                {filteredCuisineOptions.map(c => (
+              <div className="catalog-filter__chips-wrapper">
+                <div className={`catalog-filter__chips${isExpanded ? ' is-expanded' : ''}`}>
                   <button
-                    key={c}
                     type="button"
-                    className={`pill-chip${selectedCuisines.includes(c) ? ' is-active' : ''}`}
-                    onClick={() => {
-                      setSelectedCuisines(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c])
-                    }}
+                    className={`pill-chip${selectedCuisines.length === 0 ? ' is-active' : ''}`}
+                    onClick={() => setSelectedCuisines([])}
                   >
-                    {c}
+                    Все кухни
                   </button>
-                ))}
+                  {filteredCuisineOptions.map(c => (
+                    <button
+                      key={c}
+                      type="button"
+                      className={`pill-chip${selectedCuisines.includes(c) ? ' is-active' : ''}`}
+                      onClick={() => {
+                        setSelectedCuisines(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c])
+                      }}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+                {/* Expand toggle */}
+                {filteredCuisineOptions.length > 8 && (
+                  <button
+                    type="button"
+                    className="catalog-filter__more"
+                    onClick={() => setIsExpanded(!isExpanded)}
+                  >
+                    {isExpanded ? 'Скрыть' : 'Ещё'}
+                  </button>
+                )}
               </div>
             </div>
           </div>
