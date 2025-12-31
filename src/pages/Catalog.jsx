@@ -130,6 +130,13 @@ export default function Catalog() {
   // Options are memoized so the filter chips do not re-render unnecessarily.
   const cuisineOptions = useMemo(() => filters?.cuisines ?? [], [filters?.cuisines])
 
+  const [cuisineSearch, setCuisineSearch] = useState('')
+
+  const filteredCuisineOptions = useMemo(() => {
+    if (!cuisineSearch.trim()) return cuisineOptions
+    return cuisineOptions.filter(c => c.toLowerCase().includes(cuisineSearch.toLowerCase()))
+  }, [cuisineOptions, cuisineSearch])
+
   const extractDishes = useCallback((restaurant) => {
     const candidates = [
       restaurant?.dishes,
@@ -204,7 +211,19 @@ export default function Catalog() {
 
           <div className="catalog-filters">
             <div className="catalog-filter">
-              <div className="catalog-filter__label">Кухня</div>
+              <div className="catalog-filter__header">
+                <div className="catalog-filter__label">Кухня</div>
+                {/* Search for cuisines */}
+                <div className="catalog-filter__search">
+                  <input
+                    type="text"
+                    placeholder="Найти кухню..."
+                    value={cuisineSearch}
+                    onChange={(e) => setCuisineSearch(e.target.value)}
+                    className="catalog-filter__search-input"
+                  />
+                </div>
+              </div>
               <div className="catalog-filter__chips">
                 <button
                   type="button"
@@ -213,7 +232,7 @@ export default function Catalog() {
                 >
                   Все кухни
                 </button>
-                {cuisineOptions.map(c => (
+                {filteredCuisineOptions.map(c => (
                   <button
                     key={c}
                     type="button"

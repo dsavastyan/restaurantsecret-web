@@ -4941,3 +4941,31 @@ body {
     padding: 28px 20px;
   }
 }
+
+/* Catalog Filter Search Styles */
+.catalog-filter__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.catalog-filter__label {
+  margin-bottom: 0;
+}
+.catalog-filter__search {
+  flex: 1;
+  margin-left: 16px;
+  max-width: 200px;
+}
+.catalog-filter__search-input {
+  width: 100%;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  font-size: 14px;
+  background: var(--bg-card);
+}
+.catalog-filter__search-input:focus {
+  outline: none;
+  border-color: var(--brand);
+}
