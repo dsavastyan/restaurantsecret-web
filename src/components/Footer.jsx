@@ -14,26 +14,36 @@ export default function Footer() {
             <Link to="/legal" className="site-footer__link">
               Пользовательское соглашение
             </Link>
+
             <Link to="/tariffs" className="site-footer__link">
               Тарифы
             </Link>
+
             <Link to="/privacy" className="site-footer__link">
               Политика конфиденциальности
             </Link>
+
+            <Link to="/licenses" className="site-footer__link">
+              Лицензии / Open source
+            </Link>
+
             <button
+              type="button"
               onClick={() => setIsCookieModalOpen(true)}
               className="site-footer__link bg-transparent border-0 p-0 cursor-pointer"
             >
               Настройки cookies
             </button>
+
             <Link to="/contact" className="site-footer__link">
               Контакты
             </Link>
+
             <a
               href="https://t.me/restaurantsecret"
               className="site-footer__link"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
               Telegram-бот
             </a>
@@ -45,6 +55,7 @@ export default function Footer() {
           </div>
         </div>
       </footer>
+
       <CookieSettingsModal
         isOpen={isCookieModalOpen}
         onClose={() => setIsCookieModalOpen(false)}
