@@ -7,6 +7,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import L from 'leaflet';
 import 'leaflet.markercluster'; // Attaches L.markerClusterGroup
 import { API_BASE } from '@/config/api';
+import MetroFilter from './MetroFilter';
 
 // Fix for default marker icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -86,11 +87,34 @@ function ClusterLayer({ restaurants }) {
 export default function RestaurantMap() {
     const [restaurants, setRestaurants] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [metroData, setMetroData] = useState({ lines: [], stations: [] });
+    const [filters, setFilters] = useState({ lineId: '', stationId: '' });
+
+    useEffect(() => {
+        // Fetch metro data once
+        async function fetchMetro() {
+            try {
+                const res = await fetch(`${API_BASE}/metro`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setMetroData(data);
+                }
+            } catch (err) {
+                console.error("Failed to load metro data", err);
+            }
+        }
+        fetchMetro();
+    }, []);
 
     useEffect(() => {
         async function fetchRestaurants() {
+            setLoading(true);
             try {
-                const res = await fetch(`${API_BASE}/restaurants/map`);
+                const params = new URLSearchParams();
+                if (filters.lineId) params.append('line_id', filters.lineId);
+                if (filters.stationId) params.append('station_id', filters.stationId);
+
+                const res = await fetch(`${API_BASE}/restaurants/map?${params.toString()}`);
                 if (res.ok) {
                     const data = await res.json();
                     setRestaurants(data.items || []);
@@ -102,7 +126,11 @@ export default function RestaurantMap() {
             }
         }
         fetchRestaurants();
-    }, []);
+    }, [filters]);
+
+    const handleFilterChange = (newFilters) => {
+        setFilters(newFilters);
+    };
 
     if (loading) return <div className="map-placeholder is-loading">Загрузка карты...</div>;
 
@@ -112,6 +140,7 @@ export default function RestaurantMap() {
                 <h3>Карта ресторанов</h3>
                 <span className="badge">{restaurants.length} ресторанов</span>
             </div>
+            <MetroFilter metroData={metroData} onChange={handleFilterChange} />
             <MapContainer
                 center={defaultCenter}
                 zoom={10}
