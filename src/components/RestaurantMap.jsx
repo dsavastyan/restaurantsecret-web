@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+import { AttributionControl, MapContainer, TileLayer, useMap } from 'react-leaflet';
 import { Link, useNavigate } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
@@ -117,11 +117,13 @@ export default function RestaurantMap() {
                 zoom={10}
                 scrollWheelZoom={false}
                 className="restaurant-map"
+                attributionControl={false}
             >
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
+                <AttributionControl prefix={false} />
                 <ClusterLayer restaurants={restaurants} />
             </MapContainer>
 
