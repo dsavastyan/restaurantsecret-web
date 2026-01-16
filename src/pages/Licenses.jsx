@@ -5,7 +5,7 @@ export default function Licenses() {
     <main className="legal-page">
       <div className="container legal-container">
         <header className="legal-header">
-          <p className="legal-eyebrow">Лицензии / Open source</p>
+          <p className="legal-eyebrow">Лицензии</p>
           <h1 className="legal-title">Открытые лицензии</h1>
           <p className="legal-updated">Перечень используемых open source компонентов.</p>
         </header>
