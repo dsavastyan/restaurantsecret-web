@@ -3949,19 +3949,23 @@ body {
 
 .site-footer__inner {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-direction: row;
+  gap: 24px;
   align-items: center;
+  justify-content: space-between;
 }
 
 .site-footer__nav {
-  display: grid;
+  display: flex;
   width: 100%;
   max-width: 960px;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 12px 24px;
-  justify-items: center;
-  text-align: center;
+  justify-content: flex-start;
+  align-items: center;
+  text-align: left;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
 }
 
 .site-footer__link {
@@ -3983,10 +3987,17 @@ body {
   font-size: 13px;
 }
 
+.site-footer__meta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  white-space: nowrap;
+}
+
 .site-footer__legal {
   color: var(--muted);
   font-size: 13px;
-  text-align: center;
+  text-align: left;
 }
 
 /* Legal page */

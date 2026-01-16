@@ -24,7 +24,7 @@ export default function Footer() {
             </Link>
 
             <Link to="/licenses" className="site-footer__link">
-              Лицензии / Open source
+              Лицензии
             </Link>
 
             <button
@@ -50,9 +50,11 @@ export default function Footer() {
             </a>
           </nav>
 
-          <div className="site-footer__copy">© {year} RestaurantSecret</div>
-          <div className="site-footer__legal">
-            Самозанятое лицо (НПД), Савастьян Дарья, ИНН 771007750946
+          <div className="site-footer__meta">
+            <div className="site-footer__copy">© {year} RestaurantSecret</div>
+            <div className="site-footer__legal">
+              Самозанятое лицо (НПД), Савастьян Дарья, ИНН 771007750946
+            </div>
           </div>
         </div>
       </footer>
