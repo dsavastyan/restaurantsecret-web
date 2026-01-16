@@ -22,7 +22,8 @@ export default function Footer() {
             </Link>
             <button
               onClick={() => setIsCookieModalOpen(true)}
-              className="site-footer__link bg-transparent border-0 p-0 cursor-pointer"
+              className="site-footer__link"
+              style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}
             >
               Настройки cookies
             </button>
