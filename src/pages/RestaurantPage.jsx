@@ -8,6 +8,7 @@ import { formatMenuCapturedAt } from '@/lib/dates';
 import { useAuth } from '@/store/auth';
 import { useSubscriptionStore } from '@/store/subscription';
 import { MenuOutdatedModal } from '@/components/MenuOutdatedModal';
+import { analytics } from '@/services/analytics';
 
 // Assumption: subscription is active when you render this page
 // If you still keep useSubscription, you can gate this page by redirecting beforehand.
@@ -47,7 +48,11 @@ export default function RestaurantPage() {
         setLoading(true);
         setErr(null);
         const data = await apiGet(`/restaurants/${slug}/menu`);
-        if (!aborted) setMenu(normalizeMenu(data));
+        if (!aborted) {
+          const m = normalizeMenu(data);
+          setMenu(m);
+          analytics.track("restaurant_open", { slug, name: m.name });
+        }
       } catch (e) {
         if (!aborted) setErr('Не удалось загрузить меню');
       } finally {
@@ -78,10 +83,10 @@ export default function RestaurantPage() {
       if (presets.lowKcal && !(d.kcal <= 400)) return false;       // мало калорий
 
       // 3) точные диапазоны
-      if (!inRange(d.kcal,   range.kcal.min,   range.kcal.max))   return false;
-      if (!inRange(d.protein,range.protein.min,range.protein.max))return false;
-      if (!inRange(d.fat,    range.fat.min,    range.fat.max))    return false;
-      if (!inRange(d.carbs,  range.carbs.min,  range.carbs.max))  return false;
+      if (!inRange(d.kcal, range.kcal.min, range.kcal.max)) return false;
+      if (!inRange(d.protein, range.protein.min, range.protein.max)) return false;
+      if (!inRange(d.fat, range.fat.min, range.fat.max)) return false;
+      if (!inRange(d.carbs, range.carbs.min, range.carbs.max)) return false;
 
       return true;
     });
@@ -96,12 +101,12 @@ export default function RestaurantPage() {
     setPresets(p => ({ ...p, [key]: !p[key] }));
   }
   function setField(group, edge, val) {
-    setRange(r => ({ ...r, [group]: { ...r[group], [edge]: val.replace(/[^\d]/g,'') } }));
+    setRange(r => ({ ...r, [group]: { ...r[group], [edge]: val.replace(/[^\d]/g, '') } }));
   }
   function resetFilters() {
     setQ('');
-    setPresets({ highProtein:false, lowFat:false, lowKcal:false });
-    setRange({ kcal:{min:'',max:''}, protein:{min:'',max:''}, fat:{min:'',max:''}, carbs:{min:'',max:''} });
+    setPresets({ highProtein: false, lowFat: false, lowKcal: false });
+    setRange({ kcal: { min: '', max: '' }, protein: { min: '', max: '' }, fat: { min: '', max: '' }, carbs: { min: '', max: '' } });
   }
 
   return (
@@ -143,10 +148,10 @@ export default function RestaurantPage() {
         </div>
 
         <div className="rp__grid">
-          <MacroRange label="Калории" value={range.kcal} onChange={(edge,v)=>setField('kcal',edge,v)} />
-          <MacroRange label="Белки (г)" value={range.protein} onChange={(edge,v)=>setField('protein',edge,v)} />
-          <MacroRange label="Жиры (г)"  value={range.fat} onChange={(edge,v)=>setField('fat',edge,v)} />
-          <MacroRange label="Углеводы (г)" value={range.carbs} onChange={(edge,v)=>setField('carbs',edge,v)} />
+          <MacroRange label="Калории" value={range.kcal} onChange={(edge, v) => setField('kcal', edge, v)} />
+          <MacroRange label="Белки (г)" value={range.protein} onChange={(edge, v) => setField('protein', edge, v)} />
+          <MacroRange label="Жиры (г)" value={range.fat} onChange={(edge, v) => setField('fat', edge, v)} />
+          <MacroRange label="Углеводы (г)" value={range.carbs} onChange={(edge, v) => setField('carbs', edge, v)} />
         </div>
       </section>
 
@@ -204,7 +209,7 @@ function Chip({ active, onClick, children }) {
   return (
     <button
       type="button"
-      className={`chip ${active ? 'chip--on': ''}`}
+      className={`chip ${active ? 'chip--on' : ''}`}
       onClick={onClick}
       aria-pressed={active}
     >

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { apiPost } from "@/lib/api";
 import { useAuth, selectSetToken } from "@/store/auth"; // <— меняем импорт
+import { analytics } from "@/services/analytics";
 
 export default function LoginPage() {
   const setToken = useAuth(selectSetToken); // <— берём сеттер из стора
@@ -11,7 +12,7 @@ export default function LoginPage() {
   const [searchParams] = useSearchParams();
 
   const [email, setEmail] = useState("");
-  const [step, setStep] = useState<"enter"|"code"|"done">("enter");
+  const [step, setStep] = useState<"enter" | "code" | "done">("enter");
   const [code, setCode] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -46,6 +47,7 @@ export default function LoginPage() {
       if (res?.ok) {
         setStep("code");
         setTimer(60);
+        analytics.track("otp_request");
       } else {
         setErr(res?.message || "Не удалось отправить код");
       }
@@ -67,6 +69,7 @@ export default function LoginPage() {
       const res = await apiPost("/auth/verify-otp", { email, code });
       if (res?.ok && res?.access_token) {
         setToken(res.access_token);       // <— сохраняем токен в твой стор (rs_access)
+        analytics.track("otp_success");
         navigate(redirectTo, { replace: true });
       } else {
         setErr(res?.message || "Неверный код");
