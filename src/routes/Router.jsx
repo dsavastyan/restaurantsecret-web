@@ -83,13 +83,14 @@ function AppRoutes() {
 
 // Chooses the router implementation based on the environment and mounts the
 // AppRoutes component.
-export default function Router() {
+export default function Router({ children }) {
   const inTelegram = typeof window !== 'undefined' && Boolean(window.Telegram?.WebApp)
   const RouterImpl = inTelegram ? HashRouter : BrowserRouter
 
   return (
     <RouterImpl>
       <AppRoutes />
+      {children}
     </RouterImpl>
   )
 }

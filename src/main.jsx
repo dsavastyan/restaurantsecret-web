@@ -61,11 +61,10 @@ function Root() {
   }
 
   return (
-    <>
-      <Router />
+    <Router>
       <ToastViewport />
       <ConsentBanner />
-    </>
+    </Router>
   )
 }
 
