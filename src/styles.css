@@ -3955,11 +3955,19 @@ body {
 }
 
 .site-footer__nav {
-  display: flex;
-  gap: 12px;
+  display: grid;
+  width: 100%;
+  max-width: 960px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px 24px;
+  justify-items: center;
+  text-align: center;
 }
 
 .site-footer__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: #0f172a;
   opacity: 0.8;
   text-decoration: none;
