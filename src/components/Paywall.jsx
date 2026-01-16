@@ -1,9 +1,13 @@
 // Paywall overlay that showcases available plans and routes users into the
 // payment flow.
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { analytics } from '@/services/analytics'
 
 export default function Paywall({ onRefresh }) {
+  useEffect(() => {
+    analytics.track("paywall_show");
+  }, []);
 
   return (
     <section className="rs-paywall" role="dialog" aria-modal="true" aria-labelledby="rs-paywall-title">

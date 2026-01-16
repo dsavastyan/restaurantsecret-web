@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client'
 import Router from './routes/Router.jsx'
 import ToastViewport from './components/ui/ToastViewport.tsx'
 import MaintenanceScreen from './components/MaintenanceScreen.jsx'
+import { ConsentBanner } from './components/ConsentBanner.jsx'
 import './styles.css'
 
 // Register the service worker (if supported) once the page has fully loaded so
@@ -63,6 +64,7 @@ function Root() {
     <>
       <Router />
       <ToastViewport />
+      <ConsentBanner />
     </>
   )
 }

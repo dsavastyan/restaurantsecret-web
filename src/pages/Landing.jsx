@@ -15,6 +15,7 @@ import { API_BASE } from '@/config/api'
 import { postSuggest } from '@/lib/api'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
+import { analytics } from '@/services/analytics'
 
 export default function Landing() {
   return (
@@ -31,6 +32,10 @@ function Hero() {
   const [query, setQuery] = useState('')
   const [suggestOpen, setSuggestOpen] = useState(false)
   const searchZoneRef = useRef(null)
+
+  useEffect(() => {
+    analytics.track('landing_open')
+  }, [])
 
   useEffect(() => {
     if (!suggestOpen) return

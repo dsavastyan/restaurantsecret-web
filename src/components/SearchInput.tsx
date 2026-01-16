@@ -14,6 +14,7 @@ import {
   type SearchSuggestions,
 } from "@/lib/api";
 import { useDishCardStore } from "@/store/dishCard";
+import { analytics } from "@/services/analytics";
 
 export type SearchInputProps = {
   value: string;
@@ -120,6 +121,7 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
       setSuggestions(null);
       setHighlightedIndex(null);
       onChange("");
+      analytics.track("search_submit", { type: "restaurant", slug: item.slug, name: item.name });
       navigate(`/r/${item.slug}/menu`);
     } else {
       handleDishOpen(item);
@@ -141,6 +143,7 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
     if (e.key === "Enter" && !hasHighlightedSuggestion) {
       const q = value.trim();
       if (!q) return;
+      analytics.track("search_submit", { type: "query", ie: q });
       navigate(buildSearchUrl(q));
       return;
     }
@@ -194,6 +197,7 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => {
+          analytics.track("search_open");
           if (suggestions && (suggestions.restaurants.length || suggestions.dishes.length)) {
             setIsOpen(true);
           }

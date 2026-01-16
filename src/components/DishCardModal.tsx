@@ -10,6 +10,7 @@ import { toast } from "@/lib/toast";
 import { useFavoritesStore } from "@/store/favorites";
 import { useDiaryStore } from "@/store/diary";
 import { formatNumeric } from "@/lib/nutrition";
+import { analytics } from "@/services/analytics";
 
 const root = typeof document !== "undefined" ? document.body : null;
 
@@ -80,7 +81,10 @@ export default function DishCardModal() {
   useEffect(() => {
     if (!isOpen) return;
     fetchStatus(accessToken);
-  }, [accessToken, fetchStatus, isOpen]);
+    if (data) {
+      analytics.track("dish_open", { dish_id: data.id, name: data.name, restaurant: data.restaurantSlug });
+    }
+  }, [accessToken, fetchStatus, isOpen, data]);
 
   const handleSubscribeClick = () => {
     if (accessToken) {
