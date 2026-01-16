@@ -65,3 +65,28 @@ This repository contains the user interface and client-side logic for Restaurant
 - **Routing**: React Router 6
 - **Maps**: Leaflet & React Leaflet
 - **Styling**: Vanilla CSS
+
+## Maintenance Mode
+
+The application includes a built-in maintenance mode that can be toggled without code changes or deployments, perfect for GitHub Pages environments.
+
+### How to Enable
+1. Locate `public/maintenance.json` in the GitHub repository.
+2. Edit the file directly in the GitHub UI:
+   - Set `"enabled": true`.
+   - Update `from`, `to`, `title`, and `message` as needed.
+3. Commit the changes to the `main` branch.
+4. The site will automatically show the maintenance screen to all users once the GitHub Pages action finishes deploying.
+
+### How to Disable
+1. Edit `public/maintenance.json` and set `"enabled": false`.
+2. Commit the changes.
+
+## Developer Bypass
+
+If you need to access the application while maintenance mode is enabled, you can use the secret bypass key.
+
+1. Find the `bypassKey` in `public/maintenance.json`.
+2. Access the site with the following URL parameter:
+   `https://restaurantsecret.ru/?bypass=YOUR_SECRET_KEY`
+3. The bypass key will be saved in your browser's `localStorage` (`rs_maint_bypass`), so you can continue to browse the site without the URL parameter until the maintenance mode is disabled or the key is changed.
