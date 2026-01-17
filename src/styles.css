@@ -3949,18 +3949,18 @@ body {
 
 .site-footer__inner {
   display: flex;
-  flex-direction: row;
-  gap: 24px;
+  flex-direction: column;
+  gap: 18px;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 }
 
 .site-footer__nav {
   display: flex;
   width: 100%;
-  max-width: 960px;
-  gap: 12px 24px;
-  justify-content: flex-start;
+  max-width: 1100px;
+  gap: 12px 20px;
+  justify-content: center;
   align-items: center;
   text-align: left;
   flex-wrap: nowrap;
@@ -3989,15 +3989,16 @@ body {
 
 .site-footer__meta {
   display: flex;
-  gap: 12px;
+  flex-direction: column;
+  gap: 6px;
   align-items: center;
-  white-space: nowrap;
+  text-align: center;
 }
 
 .site-footer__legal {
   color: var(--muted);
   font-size: 13px;
-  text-align: left;
+  text-align: center;
 }
 
 /* Legal page */

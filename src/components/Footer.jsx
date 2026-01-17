@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { CookieSettingsModal } from './CookieSettingsModal'
 
 export default function Footer() {
-  const year = new Date().getFullYear()
+  const year = 2026
   const [isCookieModalOpen, setIsCookieModalOpen] = useState(false)
 
   return (
