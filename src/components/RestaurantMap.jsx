@@ -1,12 +1,13 @@
 import { useEffect, useState, useRef } from 'react';
 import { AttributionControl, MapContainer, TileLayer, useMap } from 'react-leaflet';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import L from 'leaflet';
 import 'leaflet.markercluster'; // Attaches L.markerClusterGroup
 import { API_BASE } from '@/config/api';
+import MetroFilter from './MetroFilter';
 
 // Fix for default marker icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -65,10 +66,6 @@ function ClusterLayer({ restaurants }) {
 
         group.addLayers(markers);
 
-        return () => {
-            // Cleanup on unmount or update
-        };
-
     }, [map, restaurants, navigate]);
 
     // Cleanup entirely on unmount
@@ -86,8 +83,6 @@ function ClusterLayer({ restaurants }) {
 export default function RestaurantMap() {
     const [restaurants, setRestaurants] = useState([]);
     const [loading, setLoading] = useState(true);
-<<<<<<< Updated upstream
-=======
     const [metroData, setMetroData] = useState({ lines: [], stations: [] });
     const [filters, setFilters] = useState({ stationId: '' });
 
@@ -106,19 +101,15 @@ export default function RestaurantMap() {
         }
         fetchMetro();
     }, []);
->>>>>>> Stashed changes
 
     useEffect(() => {
         async function fetchRestaurants() {
+            setLoading(true);
             try {
-<<<<<<< Updated upstream
-                const res = await fetch(`${API_BASE}/restaurants/map`);
-=======
                 const params = new URLSearchParams();
                 if (filters.stationId) params.append('station_id', filters.stationId);
 
                 const res = await fetch(`${API_BASE}/restaurants/map?${params.toString()}`);
->>>>>>> Stashed changes
                 if (res.ok) {
                     const data = await res.json();
                     setRestaurants(data.items || []);
@@ -130,30 +121,39 @@ export default function RestaurantMap() {
             }
         }
         fetchRestaurants();
-    }, []);
-
-    if (loading) return <div className="map-placeholder is-loading">Загрузка карты...</div>;
+    }, [filters]);
 
     return (
         <div className="restaurant-map-container">
             <div className="map-header">
-                <h3>Карта ресторанов</h3>
-                <span className="badge">{restaurants.length} ресторанов</span>
+                <div className="header-left">
+                    <h3>Карта ресторанов</h3>
+                    <span className="badge">{restaurants.length} ресторанов</span>
+                </div>
             </div>
-            <MapContainer
-                center={defaultCenter}
-                zoom={10}
-                scrollWheelZoom={false}
-                className="restaurant-map"
-                attributionControl={false}
-            >
-                <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <AttributionControl prefix={false} />
-                <ClusterLayer restaurants={restaurants} />
-            </MapContainer>
+
+            <MetroFilter
+                metroData={metroData}
+                onChange={(f) => setFilters(f)}
+            />
+
+            <div className="map-wrapper">
+                {loading && <div className="map-overlay">Загрузка...</div>}
+                <MapContainer
+                    center={defaultCenter}
+                    zoom={10}
+                    scrollWheelZoom={false}
+                    className="restaurant-map"
+                    attributionControl={false}
+                >
+                    <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <AttributionControl prefix={false} />
+                    <ClusterLayer restaurants={restaurants} />
+                </MapContainer>
+            </div>
 
             <style>{`
         .restaurant-map-container {
@@ -168,7 +168,11 @@ export default function RestaurantMap() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          border-bottom: 1px solid var(--line);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
         .map-header h3 { margin: 0; font-size: 18px; }
         .badge {
@@ -179,18 +183,24 @@ export default function RestaurantMap() {
           font-size: 12px;
           font-weight: 600;
         }
+        .map-wrapper {
+            position: relative;
+            border-top: 1px solid var(--line);
+        }
+        .map-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.7);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
         .restaurant-map {
           height: 500px;
           width: 100%;
           z-index: 1; 
-        }
-        .map-placeholder {
-          height: 500px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #f7faf7;
-          border-radius: 16px;
         }
         .map-popup {
             font-size: 14px;
