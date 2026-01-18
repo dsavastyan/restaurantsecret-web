@@ -57,10 +57,44 @@ body {
   justify-content: space-between;
 }
 
+.navbar__brand-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .navbar__brand {
   font-size: 18px;
   font-weight: 600;
   letter-spacing: 0.2px;
+}
+
+.navbar__home {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(17, 24, 39, 0.12);
+  background: #fff;
+  color: #111827;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+  transition: background .2s ease, box-shadow .2s ease, transform .04s ease;
+}
+
+.navbar__home svg {
+  width: 18px;
+  height: 18px;
+}
+
+.navbar__home:hover {
+  background: #f8fafc;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.1);
+}
+
+.navbar__home:active {
+  transform: translateY(1px);
 }
 
 .btn {
@@ -4858,6 +4892,10 @@ body {
   }
 
   .navbar__brand {
+    flex: 1 1 100%;
+  }
+
+  .navbar__brand-group {
     flex: 1 1 100%;
   }
 
