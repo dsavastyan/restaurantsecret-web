@@ -165,7 +165,7 @@ export function parseNumber(value, depth = 0) {
   if (typeof value === 'number') return Number.isFinite(value) ? value : NaN
   if (typeof value === 'string') {
     const normalized = value.replace(',', '.').replace(/\s+/g, '')
-    const match = normalized.match(/-?\d+(?:\.\d+)?/)
+    const match = normalized.match(/^-?\d+(?:\.\d+)?$/)
     return match ? Number(match[0]) : NaN
   }
   if (typeof value === 'boolean') {
