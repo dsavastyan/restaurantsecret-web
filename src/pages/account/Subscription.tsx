@@ -107,6 +107,7 @@ export default function AccountSubscription() {
   const [promoCode, setPromoCode] = useState("");
   const [promoError, setPromoError] = useState<string | null>(null);
   const [promoLoading, setPromoLoading] = useState(false);
+  const [autopayConsent, setAutopayConsent] = useState(true);
 
   const fetchStatus = useCallback(async () => {
     if (!accessToken) {
@@ -283,6 +284,11 @@ export default function AccountSubscription() {
     async (plan: UiPlan) => {
       if (!accessToken || paymentPlan) return;
 
+      if (!autopayConsent) {
+        setPaymentError("Необходимо согласие на автоматические списания");
+        return;
+      }
+
       setPaymentError(null);
       setPaymentPlan(plan);
       const apiPlan = mapUiPlanToApi(plan);
@@ -290,7 +296,7 @@ export default function AccountSubscription() {
       try {
         const res = await apiPost<{ confirmation_url?: string; error?: string }>(
           "/api/payments/create",
-          { plan: apiPlan },
+          { plan: apiPlan, autopay_consent: true },
           accessToken,
         );
 
@@ -392,6 +398,24 @@ export default function AccountSubscription() {
               onSelect={() => createPayment("year")}
               disabled={Boolean(paymentPlan)}
             />
+          </div>
+
+          <div className="account-subscription__consent" style={{ marginTop: '1.5rem', marginBottom: '1rem' }}>
+            <label className="account-subscription__consent-label" style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={autopayConsent}
+                onChange={(e) => setAutopayConsent(e.target.checked)}
+                className="account-subscription__consent-checkbox"
+                style={{ marginTop: '0.25rem' }}
+              />
+              <span className="account-subscription__consent-text" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                Согласен на ежемесячные автосписания в соответствии с{" "}
+                <a href="https://restaurantsecret.ru/#/legal" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)', textDecoration: 'underline' }}>
+                  пользовательским соглашением
+                </a>
+              </span>
+            </label>
           </div>
 
           <p className="account-subscription__note">* Подписка продлевается автоматически до отмены</p>
