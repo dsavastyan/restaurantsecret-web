@@ -224,7 +224,7 @@ export async function applyPromo(code: string, token: string) {
 }
 
 export function postSuggest(body: SuggestRequest, token?: string) {
-  return apiPost("/suggest", body, token);
+  return apiPost("/api/suggest", body, token);
 }
 
 export async function searchSuggest(query: string): Promise<SearchSuggestions> {
