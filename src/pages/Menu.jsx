@@ -172,7 +172,16 @@ export default function Menu() {
   return (
     <div className="menu-page">
       <header className="menu-hero">
-        <div className="menu-hero__pill">Меню ресторана</div>
+        <div className="menu-hero__top-row">
+          <div className="menu-hero__pill">Меню ресторана</div>
+          <button
+            type="button"
+            className="menu-outdated"
+            onClick={() => setIsOutdatedOpen(true)}
+          >
+            Меню устарело?
+          </button>
+        </div>
         <div className="menu-hero__header">
           <div className="menu-hero__title-block">
             <div className="menu-hero__title-row">
@@ -182,15 +191,6 @@ export default function Menu() {
               </div>
             </div>
             {!!capturedAt && <div className="menu__captured-at">Меню добавлено: {capturedAt}</div>}
-          </div>
-          <div className="menu-hero__actions">
-            <button
-              type="button"
-              className="menu-outdated"
-              onClick={() => setIsOutdatedOpen(true)}
-            >
-              Меню устарело?
-            </button>
           </div>
         </div>
       </header>
@@ -205,7 +205,7 @@ export default function Menu() {
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Поиск по названию или ингредиентам"
+              placeholder="Поиск по блюду или составу"
               aria-label="Поиск блюда"
             />
           </div>
@@ -274,7 +274,7 @@ export default function Menu() {
             ))
           ) : (
             menu?.categories?.length ? (
-              <p className="muted">Под эти параметры сейчас ничего нет. Измени фильтры.</p>
+              <p className="muted">Нет блюд по заданным параметрам</p>
             ) : (
               <p className="muted">Меню этого ресторана пока не добавлено. Мы работаем над этим.</p>
             )
