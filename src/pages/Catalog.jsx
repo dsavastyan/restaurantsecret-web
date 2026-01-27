@@ -2,6 +2,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { api } from '../api/client.js'
+import CuisineFilter from '../components/CuisineFilter.jsx'
 import { useSWRLite } from '../hooks/useSWRLite.js'
 
 // Fetch a large number to emulate "all" items since backend pagination seems flaky
@@ -128,15 +129,14 @@ export default function Catalog() {
 
 
   // Options are memoized so the filter chips do not re-render unnecessarily.
-  const cuisineOptions = useMemo(() => filters?.cuisines ?? [], [filters?.cuisines])
-
-  const [cuisineSearch, setCuisineSearch] = useState('')
-  const [isExpanded, setIsExpanded] = useState(false)
-
-  const filteredCuisineOptions = useMemo(() => {
-    if (!cuisineSearch.trim()) return cuisineOptions
-    return cuisineOptions.filter(c => c.toLowerCase().includes(cuisineSearch.toLowerCase()))
-  }, [cuisineOptions, cuisineSearch])
+  const cuisineOptions = useMemo(() => {
+    const raw = filters?.cuisines ?? []
+    return Array.from(new Set(raw.map(c => {
+      let val = String(c).trim()
+      if (val.toLowerCase() === 'nan') return 'Другое'
+      return val.charAt(0).toUpperCase() + val.slice(1).toLowerCase()
+    }))).sort((a, b) => a.localeCompare(b, 'ru'))
+  }, [filters?.cuisines])
 
   const extractDishes = useCallback((restaurant) => {
     const candidates = [
@@ -212,52 +212,12 @@ export default function Catalog() {
 
           <div className="catalog-filters">
             <div className="catalog-filter">
-              <div className="catalog-filter__header">
-                <div className="catalog-filter__label">Кухня</div>
-                {/* Search for cuisines */}
-                <div className="catalog-filter__search">
-                  <input
-                    type="text"
-                    placeholder="Найти кухню..."
-                    value={cuisineSearch}
-                    onChange={(e) => setCuisineSearch(e.target.value)}
-                    className="catalog-filter__search-input"
-                  />
-                </div>
-              </div>
-              <div className="catalog-filter__chips-wrapper">
-                <div className={`catalog-filter__chips${isExpanded ? ' is-expanded' : ''}`}>
-                  <button
-                    type="button"
-                    className={`pill-chip${selectedCuisines.length === 0 ? ' is-active' : ''}`}
-                    onClick={() => setSelectedCuisines([])}
-                  >
-                    Все кухни
-                  </button>
-                  {filteredCuisineOptions.map(c => (
-                    <button
-                      key={c}
-                      type="button"
-                      className={`pill-chip${selectedCuisines.includes(c) ? ' is-active' : ''}`}
-                      onClick={() => {
-                        setSelectedCuisines(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c])
-                      }}
-                    >
-                      {c}
-                    </button>
-                  ))}
-                </div>
-                {/* Expand toggle */}
-                {filteredCuisineOptions.length > 8 && (
-                  <button
-                    type="button"
-                    className="catalog-filter__more"
-                    onClick={() => setIsExpanded(!isExpanded)}
-                  >
-                    {isExpanded ? 'Скрыть' : 'Ещё'}
-                  </button>
-                )}
-              </div>
+              <div className="catalog-filter__label">Кухня</div>
+              <CuisineFilter
+                cuisines={cuisineOptions}
+                selectedCuisines={selectedCuisines}
+                onChange={setSelectedCuisines}
+              />
             </div>
           </div>
         </div>
