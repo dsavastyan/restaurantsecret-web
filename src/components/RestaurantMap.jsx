@@ -84,7 +84,7 @@ export default function RestaurantMap() {
     const [restaurants, setRestaurants] = useState([]);
     const [loading, setLoading] = useState(true);
     const [metroData, setMetroData] = useState({ lines: [], stations: [] });
-    const [filters, setFilters] = useState({ stationId: '' });
+    const [filters, setFilters] = useState({ stationIds: [] });
 
     useEffect(() => {
         // Fetch metro data once
@@ -107,7 +107,9 @@ export default function RestaurantMap() {
             setLoading(true);
             try {
                 const params = new URLSearchParams();
-                if (filters.stationId) params.append('station_id', filters.stationId);
+                if (filters.stationIds && filters.stationIds.length > 0) {
+                    filters.stationIds.forEach(id => params.append('station_id', id));
+                }
 
                 const res = await fetch(`${API_BASE}/restaurants/map?${params.toString()}`);
                 if (res.ok) {
@@ -134,6 +136,7 @@ export default function RestaurantMap() {
 
             <MetroFilter
                 metroData={metroData}
+                selectedStationIds={filters.stationIds}
                 onChange={(f) => setFilters(f)}
             />
 
