@@ -1,3 +1,5 @@
+import { PD_API_BASE } from "@/config/api";
+
 export const COOKIE_POLICY_VERSION = "cookies_v1_2026-01-16";
 const CONSENT_KEY = "rs_consent_v1";
 const ANON_ID_KEY = "rs_anon_id";
@@ -14,7 +16,7 @@ function uuidv4() {
 
 class AnalyticsService {
     constructor() {
-        this.apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
+        this.apiUrl = PD_API_BASE;
     }
 
     getConsentStatus() {
