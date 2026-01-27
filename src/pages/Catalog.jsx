@@ -66,6 +66,7 @@ export default function Catalog() {
     if (!rawData) return []
     // Handle { items: [...] } or [...]
     const list = Array.isArray(rawData?.items) ? rawData.items : (Array.isArray(rawData) ? rawData : [])
+    const seen = new Set()
     return list.map(item => {
       // Normalize cuisine field for display consistency
       let cuisine = item.cuisine;
