@@ -66,14 +66,23 @@ export default function Catalog() {
     if (!rawData) return []
     // Handle { items: [...] } or [...]
     const list = Array.isArray(rawData?.items) ? rawData.items : (Array.isArray(rawData) ? rawData : [])
-    // De-duplicate just in case
-    const seen = new Set()
-    return list.filter(item => {
+    return list.map(item => {
+      // Normalize cuisine field for display consistency
+      let cuisine = item.cuisine;
+      if (cuisine) {
+        const parts = String(cuisine).split(',').map(s => s.trim()).filter(Boolean);
+        const normalized = Array.from(new Set(parts.map(p => {
+          if (p.toLowerCase() === 'nan') return 'Другое';
+          return p.charAt(0).toUpperCase() + p.slice(1).toLowerCase();
+        })));
+        cuisine = normalized.join(', ');
+      }
+
       const key = item.slug || item.id || item.name
-      if (seen.has(key)) return false
+      if (seen.has(key)) return null
       seen.add(key)
-      return true
-    })
+      return { ...item, cuisine }
+    }).filter(Boolean)
   }, [rawData])
 
   // Filter items based on SEARCH and CUISINE
