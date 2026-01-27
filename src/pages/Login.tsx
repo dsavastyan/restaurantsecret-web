@@ -155,13 +155,13 @@ export default function LoginPage() {
             <a href="/legal/pdn-consent.pdf" target="_blank" rel="noopener noreferrer">
               обработку персональных данных
             </a>
-            , а также соглашаетесь с{" "}
+            , а также с{" "}
             <a href="https://restaurantsecret.ru/#/privacy" target="_blank" rel="noopener noreferrer">
               политикой конфиденциальности
             </a>{" "}
             и{" "}
             <a href="https://restaurantsecret.ru/#/legal" target="_blank" rel="noopener noreferrer">
-              пользовательским соглашением (офертой)
+              пользовательским соглашением
             </a>
             .
           </p>
