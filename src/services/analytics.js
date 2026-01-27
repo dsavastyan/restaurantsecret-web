@@ -89,7 +89,7 @@ class AnalyticsService {
                 headers["Authorization"] = `Bearer ${token}`;
             }
 
-            await fetch(`${this.apiUrl}/consent/analytics`, {
+            await fetch(`${this.apiUrl}/api/consent/analytics`, {
                 method: "POST",
                 headers,
                 body: JSON.stringify(payload),
@@ -131,7 +131,7 @@ class AnalyticsService {
             // Use sendBeacon if available for strictly better reliability on navigation, 
             // but standardized JSON POST is required by our backend.
             // fetch with keepalive is good.
-            await fetch(`${this.apiUrl}/analytics/event`, {
+            await fetch(`${this.apiUrl}/api/analytics/event`, {
                 method: "POST",
                 headers,
                 body: JSON.stringify(payload),
