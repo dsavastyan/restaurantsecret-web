@@ -172,7 +172,7 @@ export default function RestaurantPage() {
               ))}
             </div>
           ) : (
-            <p className="rp__empty">Под эти параметры сейчас ничего нет. Измени фильтры.</p>
+            <p className="rp__empty">Нет блюд по заданным параметрам</p>
           )
         )}
       </section>
