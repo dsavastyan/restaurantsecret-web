@@ -19,13 +19,16 @@ export default function LoginPage() {
   const [timer, setTimer] = useState(0);
 
   const redirectTo = useMemo(() => {
-    const stateFrom =
-      location.state && typeof (location.state as any).from === "string"
-        ? (location.state as any).from
-        : null;
+    let from = location.state?.from;
+
+    // Handle case where 'from' is a Location object (from <Navigate />)
+    if (from && typeof from === "object" && from.pathname) {
+      from = from.pathname + (from.search || "");
+    }
+
     const queryNext = searchParams.get("next");
     if (queryNext && queryNext.startsWith("/")) return queryNext;
-    if (stateFrom && stateFrom.startsWith("/")) return stateFrom;
+    if (typeof from === "string" && from.startsWith("/")) return from;
     return "/account";
   }, [location.state, searchParams]);
 

@@ -54,7 +54,11 @@ export default function Tariffs() {
 
         <section className="tariffs-cta" aria-label="Оформление подписки">
           <p className="tariffs-cta__lead">Оформление подписки доступно после входа в личный кабинет.</p>
-          <Link className="btn btn--primary tariffs-cta__button" to="/login">
+          <Link
+            className="btn btn--primary tariffs-cta__button"
+            to="/login"
+            state={{ from: "/account/subscription" }}
+          >
             Войти
           </Link>
           <p className="tariffs-cta__legal">

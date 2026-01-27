@@ -5,7 +5,7 @@ import { useAuth } from '@/store/auth';
 import { useSubscriptionStore } from '@/store/subscription';
 import { useFavoritesStore } from '@/store/favorites';
 import { useDiaryStore } from '@/store/diary';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 type DishCardProps = {
     dish: any;
@@ -19,6 +19,7 @@ type DishCardProps = {
 
 export default function DishCard({ dish, restaurantSlug, restaurantName, interactive = true, onClick }: DishCardProps) {
     const navigate = useNavigate();
+    const location = useLocation();
     const accessToken = useAuth((state) => state.accessToken);
     const { hasActiveSub } = useSubscriptionStore((state) => ({
         hasActiveSub: state.hasActiveSub,
@@ -33,7 +34,7 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, interac
     const handleFavoriteClick = async (e: React.MouseEvent) => {
         e.stopPropagation();
         if (!accessToken) {
-            navigate('/login');
+            navigate('/login', { state: { from: location.pathname + location.search } });
             return;
         }
         await toggle(accessToken, Number(dish.id), restaurantSlug);
@@ -44,7 +45,7 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, interac
     const handleDiaryAdd = async (e: React.MouseEvent) => {
         e.stopPropagation();
         if (!accessToken) {
-            navigate('/login');
+            navigate('/login', { state: { from: location.pathname + location.search } });
             return;
         }
 
