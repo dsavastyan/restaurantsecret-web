@@ -185,7 +185,10 @@ export default function DishCardModal() {
     >
       <div className="dish-card" onClick={(event) => event.stopPropagation()}>
         <button className="dish-card__close" type="button" aria-label="Закрыть" onClick={close}>
-          ×
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
         </button>
 
         {isLoading && (
@@ -215,6 +218,7 @@ export default function DishCardModal() {
                 <Link
                   to={`/restaurants/${data.restaurantSlug}/menu#${anchorId}`}
                   className="dish-card__restaurant"
+                  onClick={close}
                 >
                   {data.restaurantName || "Ресторан"}
                 </Link>
@@ -288,25 +292,7 @@ export default function DishCardModal() {
                   </section>
                 )}
 
-                <section className="dish-card__section">
-                  <div className="dish-card__section-title">Аллергены и нежелательные продукты</div>
-                  {data.allergensList.length ? (
-                    <div className="dish-card__allergens">
-                      <div className="dish-card__warning">⚠️ Проверьте состав: в блюде отмечены потенциальные аллергены.</div>
-                      <div className="dish-card__chips">
-                        {data.allergensList.map((item) => (
-                          <span key={item} className="dish-card__chip">
-                            {item}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="dish-card__text dish-card__text--muted">
-                      Аллергенов в карточке блюда не указано.
-                    </p>
-                  )}
-                </section>
+
               </>
             ) : (
               <section className="dish-card__section">
@@ -365,7 +351,10 @@ export default function DishCardModal() {
                   resetOutdatedForm();
                 }}
               >
-                ×
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
             </div>
 
