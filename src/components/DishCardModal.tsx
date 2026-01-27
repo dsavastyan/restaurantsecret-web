@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 import { useDishCardStore } from "@/store/dishCard";
 import { useAuth } from "@/store/auth";
@@ -43,6 +43,7 @@ function MacroCell({
 
 export default function DishCardModal() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isOpen, isLoading, data, error, close } = useDishCardStore((s) => ({
     isOpen: s.isOpen,
     isLoading: s.isLoading,
@@ -134,7 +135,7 @@ export default function DishCardModal() {
     e.stopPropagation();
     if (!data) return;
     if (!accessToken) {
-      navigate("/login");
+      navigate("/login", { state: { from: location.pathname + location.search } });
       return;
     }
     await toggleFavorite(accessToken, Number(data.id), data.restaurantSlug);
@@ -144,7 +145,7 @@ export default function DishCardModal() {
     e.stopPropagation();
     if (!data) return;
     if (!accessToken) {
-      navigate("/login");
+      navigate("/login", { state: { from: location.pathname + location.search } });
       return;
     }
 

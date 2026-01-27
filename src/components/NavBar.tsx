@@ -1,8 +1,9 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/store/auth";
 
 export default function NavBar() {
   const token = useAuth((state) => state.accessToken);
+  const location = useLocation();
 
   return (
     <header className="navbar">
@@ -26,7 +27,11 @@ export default function NavBar() {
             Личный кабинет
           </Link>
         ) : (
-          <Link to="/login" className="btn btn--primary">
+          <Link
+            to="/login"
+            state={{ from: location.pathname + location.search }}
+            className="btn btn--primary"
+          >
             Войти
           </Link>
         )}
