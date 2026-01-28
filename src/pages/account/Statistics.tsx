@@ -4,6 +4,13 @@ import { useDiaryStore } from '@/store/diary';
 import { useGoalsStore } from '@/store/goals';
 import { formatNumeric } from '@/lib/nutrition';
 
+const formatDateCompact = (dateStr: string) => {
+    const d = new Date(dateStr);
+    const day = d.getDate();
+    const month = d.toLocaleDateString('ru-RU', { month: 'short' }).replace('.', '');
+    return `${day} ${month}`;
+};
+
 export default function Statistics() {
     const token = useAuth(s => s.accessToken);
     const {
@@ -72,15 +79,24 @@ export default function Statistics() {
         <div className="account-section">
             <div className="account-section-header">
                 <div>
-                    <h2 className="account-section-title">Статистика</h2>
+                    <h2 className="account-section-title">Дневник питания</h2>
                 </div>
                 <div className="stats-date-picker">
-                    <input
-                        type="date"
-                        value={selectedDate}
-                        onChange={handleDateChange}
-                        className="date-input"
-                    />
+                    <div className="stats-date-compact">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <span>{formatDateCompact(selectedDate)}</span>
+                        <input
+                            type="date"
+                            value={selectedDate}
+                            onChange={handleDateChange}
+                            className="date-input-hidden"
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -98,10 +114,14 @@ export default function Statistics() {
                             style={{ width: `${Math.min(100, (dayStats.calories / (goalData?.target_calories || 1)) * 100)}%` }}
                         ></div>
                     </div>
-                    <div className="macro-subtext">Съедено: {Math.round(dayStats.calories)} / {goalData?.target_calories || '—'}</div>
+                    {/* Desktop subtext */}
+                    <div className="macro-subtext desktop-only">Съедено: {Math.round(dayStats.calories)} / {goalData?.target_calories || '—'}</div>
+                    {/* Mobile subtext */}
+                    <div className="macro-subtext mobile-only">{Math.round(dayStats.calories)} / {goalData?.target_calories || '—'}</div>
                 </div>
 
-                <div className="macros-row">
+                {/* Desktop Macros */}
+                <div className="macros-row desktop-only">
                     {/* Protein */}
                     <div className="macro-card">
                         <div className="macro-label">Белки</div>
@@ -119,6 +139,31 @@ export default function Statistics() {
                         <div className="macro-label">Углеводы</div>
                         <div className="macro-value">{Math.round(Math.max(0, remaining.carbs))} г</div>
                         <div className="macro-subtext">Съедено: {Math.round(dayStats.carbs)} / {goalData?.target_carbs || '—'}</div>
+                    </div>
+                </div>
+
+                {/* Mobile Macros */}
+                <div className="macro-tiles-grid mobile-only">
+                    <div className="macro-tile">
+                        <div className="macro-tile-label">Б</div>
+                        <div className="macro-tile-value">{Math.round(dayStats.protein)} / {goalData?.target_protein || '—'}</div>
+                        <div className="mini-progress-bar">
+                            <div className="mini-progress-fill" style={{ width: `${Math.min(100, (dayStats.protein / (goalData?.target_protein || 1)) * 100)}%` }}></div>
+                        </div>
+                    </div>
+                    <div className="macro-tile">
+                        <div className="macro-tile-label">Ж</div>
+                        <div className="macro-tile-value">{Math.round(dayStats.fat)} / {goalData?.target_fat || '—'}</div>
+                        <div className="mini-progress-bar">
+                            <div className="mini-progress-fill" style={{ width: `${Math.min(100, (dayStats.fat / (goalData?.target_fat || 1)) * 100)}%` }}></div>
+                        </div>
+                    </div>
+                    <div className="macro-tile">
+                        <div className="macro-tile-label">У</div>
+                        <div className="macro-tile-value">{Math.round(dayStats.carbs)} / {goalData?.target_carbs || '—'}</div>
+                        <div className="mini-progress-bar">
+                            <div className="mini-progress-fill" style={{ width: `${Math.min(100, (dayStats.carbs / (goalData?.target_carbs || 1)) * 100)}%` }}></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -177,9 +222,8 @@ export default function Statistics() {
 
             {/* Diary List */}
             <div className="diary-list">
-                <h3 className="diary-title">Дневник питания</h3>
                 {isLoading && <p>Загрузка...</p>}
-                {!isLoading && entries.length === 0 && <p className="text-muted">Пока ничего не добавлено.</p>}
+                {!isLoading && entries.length === 0 && <p className="text-muted">Добавляйте блюда на страницах ресторанов или введите вручную</p>}
 
                 {entries.map(entry => (
                     <div key={entry.id} className="diary-item">

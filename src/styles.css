@@ -5345,6 +5345,126 @@ body:has(.account--sheet-open) {
   animation: shimmer 2s infinite;
 }
 
+/* Compact Date Picker */
+.stats-date-compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.stats-date-compact:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.stats-date-compact svg {
+  width: 16px;
+  height: 16px;
+  color: #64748b;
+}
+
+.stats-date-compact .date-input-hidden {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Macro Mini Cards for Mobile */
+.macro-tiles-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.macro-tile {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 10px 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.macro-tile-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.macro-tile-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.mini-progress-bar {
+  height: 4px;
+  background: #e2e8f0;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.mini-progress-fill {
+  height: 100%;
+  background: #22c55e;
+  border-radius: 2px;
+}
+
+/* Visibility helpers */
+.mobile-only {
+  display: none;
+}
+
+.desktop-only {
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .mobile-only {
+    display: block;
+  }
+
+  .desktop-only {
+    display: none;
+  }
+
+  .macro-card.highlight {
+    padding: 20px 16px;
+  }
+
+  .macro-card.highlight .macro-label {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .macro-card.highlight .macro-value {
+    font-size: 28px;
+  }
+
+  .macro-card.highlight .macro-subtext {
+    font-size: 15px;
+    margin-top: 8px;
+  }
+}
+
 @keyframes shimmer {
   0% {
     transform: translateX(-100%);
