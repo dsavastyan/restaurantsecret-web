@@ -41,35 +41,46 @@ function TariffCard({
   price,
   hint,
   description,
-  accent,
+  badge,
   onSelect,
   disabled,
+  accent,
 }: {
   title: string;
   price: string;
   hint: string;
   description?: string;
-  accent?: boolean;
+  badge?: string;
   onSelect?: () => void;
   disabled?: boolean;
+  accent?: boolean;
 }) {
   return (
     <button
       type="button"
-      className={`account-subscription__tile account-subscription__tile-button${accent ? " account-subscription__tile--accent" : ""}`}
-      role="listitem"
+      className={`account-subscription__tile-v2${accent ? " account-subscription__tile-v2--accent" : ""}`}
       onClick={onSelect}
       disabled={disabled}
     >
-      <div className="account-subscription__tile-header">
-        <p className="account-subscription__tariff-name">{title}</p>
-        <span className={`account-subscription__badge${accent ? " account-subscription__badge--success" : ""}`}>
-          {accent ? "выгодно" : "попробовать"}
+      <div className="account-subscription__tile-v2-header">
+        <p className="account-subscription__tile-v2-name">{title}</p>
+        {badge && (
+          <span className="account-subscription__tile-v2-badge">{badge}</span>
+        )}
+      </div>
+      <p className="account-subscription__tile-v2-price">{price}</p>
+      <p className="account-subscription__tile-v2-hint">{hint}</p>
+      {description && <p className="account-subscription__tile-v2-desc">{description}</p>}
+      <div className="account-subscription__tile-v2-footer">
+        <span className="account-subscription__tile-v2-button">
+          {accent ? "Оформить" : (
+            <>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
+              Попробовать
+            </>
+          )}
         </span>
       </div>
-      <p className="account-subscription__tile-value">{price}</p>
-      <p className="account-subscription__tile-hint">{hint}</p>
-      {description && <p className="account-subscription__tile-description">{description}</p>}
     </button>
   );
 }
@@ -218,6 +229,11 @@ export default function AccountSubscription() {
     return status;
   }, [statusData?.status_label, status]);
 
+  const showHistory = (isActive || isCanceled || isExpired) && !loading;
+  const isNeverSubscribed = status === "none" && !showHistory;
+
+  const pageTitle = isNeverSubscribed ? "Оформить подписку" : "Управление подпиской";
+
   const promoErrorLabel = useMemo(() => {
     if (!promoError) return null;
     return ERROR_LABELS[promoError] ?? "Не удалось применить промокод";
@@ -232,7 +248,7 @@ export default function AccountSubscription() {
     setCancelSuccess(null);
     setCancelLoading(true);
     try {
-      const res = await apiPost("/api/subscriptions/cancel", undefined, accessToken);
+      const res = await apiPost<{ ok?: boolean }>("/api/subscriptions/cancel", undefined, accessToken);
       if (res?.ok) {
         setCancelSuccess("Подписка успешна отменена");
         await fetchStatus();
@@ -261,7 +277,7 @@ export default function AccountSubscription() {
     setPromoError(null);
 
     try {
-      const res = await applyPromo(promoCode.trim(), accessToken);
+      const res = await applyPromo(promoCode.trim(), accessToken) as { ok?: boolean; error?: string };
 
       if (!res?.ok) {
         setPromoError(res?.error ?? "unknown_error");
@@ -277,8 +293,6 @@ export default function AccountSubscription() {
       setPromoLoading(false);
     }
   }, [accessToken, fetchStatus, promoCode, promoLoading]);
-
-  const showHistory = (isActive || isCanceled || isExpired) && !loading;
 
   const createPayment = useCallback(
     async (plan: UiPlan) => {
@@ -332,142 +346,186 @@ export default function AccountSubscription() {
   );
 
   return (
-    <section className="account-panel" aria-labelledby="account-subscription-heading">
-      <header className="account-panel__header">
-        <div>
-          <h2 id="account-subscription-heading" className="account-panel__title">
-            Управление подпиской
-          </h2>
-        </div>
-        {isActive && (
-          <Button
-            className="account-button account-button--danger"
-            disabled={cancelLoading}
-            onClick={handleCancel}
-          >
-            {cancelLoading ? "Отменяем…" : "Отменить подписку"}
-          </Button>
-        )}
+    <section className="account-panel-v2" aria-labelledby="account-subscription-heading">
+      <header className="account-panel-v2__header">
+        <h2 id="account-subscription-heading" className="account-panel-v2__title">
+          {pageTitle}
+        </h2>
       </header>
-
-      {statusMessage && <p className="account-subscription__status" role="status">{statusMessage}</p>}
-      {statusLabel && !statusMessage && (
-        <p className="account-subscription__status" role="status">{statusLabel}</p>
-      )}
-
-      {cancelSuccess && (
-        <div className="account-panel__box account-panel__box--success" role="status">
-          <p className="account-panel__description">{cancelSuccess}</p>
-        </div>
-      )}
-
-      {cancelError && (
-        <div className="account-panel__box account-panel__box--error" role="alert">
-          <p className="account-panel__error-text">{cancelError}</p>
-        </div>
-      )}
-
-      {error && (
-        <div className="account-panel__box account-panel__box--error" role="alert">
-          <p className="account-panel__error-text">{error}</p>
-        </div>
-      )}
 
       {loading && <SubscriptionSkeleton />}
 
-      {!loading && !isActive && (
-        <div className="account-subscription__plans">
-          <div className="account-subscription__empty" role="status">
-            <h3>Оформите подписку</h3>
-            <p>Подписка открывает доступ к полной карточке блюд, включая КБЖУ и составы блюд</p>
-          </div>
+      {!loading && (
+        <div className="account-subscription-v2">
+          {(isActive || isExpired || isCanceled) && (
+            <div className={`account-subscription-v2__card ${isActive ? 'is-active' : 'is-expired'}`}>
+              <div className="account-subscription-v2__card-content">
+                <div className="account-subscription-v2__card-header">
+                  <div className="account-subscription-v2__card-icon">
+                    {isActive ? (
+                      <span role="img" aria-label="party">🎉</span>
+                    ) : (
+                      <span className="account-subscription-v2__card-warning">!</span>
+                    )}
+                  </div>
+                  <h3 className="account-subscription-v2__card-title">
+                    {isActive ? "Подписка активна" : "Подписка завершена"}
+                  </h3>
+                </div>
 
-          <div className="account-subscription__grid" role="list">
-            <TariffCard
-              title="Месяц"
-              price="99 ₽ в месяц*"
-              hint="Подходит чтобы оценить удобство сервиса"
-              onSelect={() => createPayment("month")}
-              disabled={Boolean(paymentPlan)}
-            />
-            <TariffCard
-              title="Год"
-              price="999 ₽*"
-              hint="12 месяцев по цене 10. Лучший выбор для тех, кто регулярно следует цели"
-              accent
-              onSelect={() => createPayment("year")}
-              disabled={Boolean(paymentPlan)}
-            />
-          </div>
+                <p className="account-subscription-v2__card-text">
+                  {statusMessage}
+                </p>
 
-          <div className="account-subscription__consent" style={{ marginTop: '1.5rem', marginBottom: '1rem' }}>
-            <label className="account-subscription__consent-label" style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                checked={autopayConsent}
-                onChange={(e) => setAutopayConsent(e.target.checked)}
-                className="account-subscription__consent-checkbox"
-                style={{ marginTop: '0.25rem' }}
-              />
-              <span className="account-subscription__consent-text" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                Согласен на ежемесячные автосписания в соответствии с{" "}
-                <a href="https://restaurantsecret.ru/#/legal" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)', textDecoration: 'underline' }}>
-                  пользовательским соглашением
-                </a>
-              </span>
-            </label>
-          </div>
+                <div className="account-subscription-v2__card-date-box">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><path d="M16 2v4" /><path d="M8 2v4" /><path d="M3 10h18" /></svg>
+                  <span>{expiresLabel}</span>
+                </div>
 
-          <p className="account-subscription__note">* Подписка продлевается автоматически до отмены</p>
+                <div className="account-subscription-v2__card-actions">
+                  {isActive ? (
+                    <button
+                      className="account-subscription-v2__btn-cancel"
+                      disabled={cancelLoading}
+                      onClick={handleCancel}
+                    >
+                      <span className="close-icon">×</span>
+                      {cancelLoading ? "Отменяем…" : "Отменить подписку"}
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        className="account-subscription-v2__btn-renew"
+                        onClick={() => createPayment("month")}
+                        disabled={Boolean(paymentPlan)}
+                      >
+                        Продлить подписку <span className="arrow-next">→</span>
+                      </button>
+                      <button
+                        className="account-subscription-v2__link-cancel"
+                        onClick={handleCancel}
+                        disabled={cancelLoading}
+                      >
+                        Отменить подписку
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
 
-          <div className="account-subscription__promo" role="group" aria-labelledby="promo-heading">
-            <div className="account-subscription__promo-header">
-              <div>
-                <p id="promo-heading" className="account-subscription__promo-label">Есть промокод?</p>
+              <div className="account-subscription-v2__card-illus">
+                <img
+                  src={isActive ? "/assets/subscription/subscription-active.webp" : "/assets/subscription/subscription-expired.webp"}
+                  alt=""
+                />
               </div>
             </div>
-
-            <div className="account-subscription__promo-form">
-              <input
-                id="promo-code"
-                className="account-subscription__promo-input"
-                value={promoCode}
-                onChange={(event) => setPromoCode(event.target.value)}
-                placeholder="Введите промокод"
-                disabled={promoLoading}
-                aria-label="Промокод"
-              />
-              <Button
-                className="account-button account-button--primary account-subscription__promo-button"
-                onClick={handleApplyPromo}
-                disabled={promoLoading || !promoCode.trim() || !accessToken}
-              >
-                {promoLoading ? "Применяем…" : "Применить"}
-              </Button>
-            </div>
-            {promoErrorLabel && (
-              <p className="account-panel__error-text" role="alert">
-                {promoErrorLabel}
-              </p>
-            )}
-          </div>
-
-          {paymentPlan && (
-            <p className="account-subscription__status" role="status">
-              Перенаправляем на оплату…
-            </p>
           )}
-          {paymentError && (
-            <div className="account-panel__box account-panel__box--error" role="alert">
-              <p className="account-panel__error-text">{paymentError}</p>
+
+          {isNeverSubscribed && (
+            <div className="account-subscription-v2__intro">
+              <p>Подписка открывает доступ к полной карточке блюд</p>
+            </div>
+          )}
+
+          {!isActive && (
+            <div className="account-subscription-v2__plans">
+              <div className="account-subscription-v2__plans-grid">
+                <TariffCard
+                  title="Год"
+                  price="999 ₽ в год"
+                  hint="12 месяцев по цене 10. Выгодный выбор для тех, кто регулярно следует цели"
+                  badge="ВЫГОДНО"
+                  accent
+                  onSelect={() => createPayment("year")}
+                  disabled={Boolean(paymentPlan)}
+                />
+                <TariffCard
+                  title="Месяц"
+                  price="99 ₽ в месяц*"
+                  hint="Отличный вариант для оценки удобства сервиса"
+                  onSelect={() => createPayment("month")}
+                  disabled={Boolean(paymentPlan)}
+                />
+              </div>
+
+              <p className="account-subscription-v2__plans-note">* Подписка продлевается автоматически до отмены</p>
+
+              <div className="account-subscription-v2__promo-box">
+                <div className="account-subscription-v2__promo-inner">
+                  <p className="account-subscription-v2__promo-title">Есть промокод?</p>
+                  <div className="account-subscription-v2__promo-form">
+                    <input
+                      id="promo-code"
+                      className="account-subscription-v2__promo-input"
+                      value={promoCode}
+                      onChange={(event) => setPromoCode(event.target.value)}
+                      placeholder="Введите промокод"
+                      disabled={promoLoading}
+                    />
+                    <button
+                      className="account-subscription-v2__promo-btn"
+                      onClick={handleApplyPromo}
+                      disabled={promoLoading || !promoCode.trim() || !accessToken}
+                    >
+                      {promoLoading ? "..." : "Применить"}
+                    </button>
+                  </div>
+                </div>
+                {promoErrorLabel && (
+                  <p className="account-subscription-v2__error" role="alert">
+                    {promoErrorLabel}
+                  </p>
+                )}
+              </div>
+
+              <div className="account-subscription-v2__consent">
+                <label className="account-subscription-v2__consent-label">
+                  <input
+                    type="checkbox"
+                    checked={autopayConsent}
+                    onChange={(e) => setAutopayConsent(e.target.checked)}
+                  />
+                  <span>
+                    Согласен на ежемесячные автосписания в соответствии с{" "}
+                    <a href="https://restaurantsecret.ru/#/legal" target="_blank" rel="noopener noreferrer">
+                      пользовательским соглашением
+                    </a>
+                  </span>
+                </label>
+              </div>
+
+              {paymentError && (
+                <div className="account-subscription-v2__error-box" role="alert">
+                  <p>{paymentError}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {cancelSuccess && (
+            <div className="account-subscription-v2__success-box" role="status">
+              <p>{cancelSuccess}</p>
+            </div>
+          )}
+
+          {cancelError && (
+            <div className="account-subscription-v2__error-box" role="alert">
+              <p>{cancelError}</p>
+            </div>
+          )}
+
+          {error && (
+            <div className="account-subscription-v2__error-box" role="alert">
+              <p>{error}</p>
             </div>
           )}
         </div>
       )}
 
       {showHistory && (
-        <footer className="account-subscription__footer account-subscription__footer--spaced">
-          <Link to="/account/subscription/history" className="account-subscription__history">
+        <footer className="account-subscription-v2__footer">
+          <Link to="/account/subscription/history" className="account-subscription-v2__history-link">
             История подписок
           </Link>
         </footer>
