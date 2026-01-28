@@ -119,7 +119,6 @@ export default function LoginPage() {
 
             {step === "enter" && (
               <div className="login__form">
-                <label className="login__label" htmlFor="email">E-mail</label>
                 <div className="login__input-wrap">
                   <span className="login__input-icon" aria-hidden="true">
                     <svg width="18" height="14" viewBox="0 0 24 18" fill="none">
