@@ -7,6 +7,7 @@ import {
   selectSetHasActiveSub,
   useSubscriptionStore,
 } from "@/store/subscription";
+import SubscriptionPlansModal from "@/components/subscription/SubscriptionPlansModal";
 
 type SubscriptionStatusResponse = {
   ok?: boolean;
@@ -32,55 +33,6 @@ const ERROR_LABELS: Record<string, string> = {
 function mapUiPlanToApi(plan: UiPlan): ApiPlan {
   if (plan === "month") return "monthly";
   return "annual";
-}
-
-function TariffCard({
-  title,
-  price,
-  hint,
-  description,
-  badge,
-  onSelect,
-  disabled,
-  accent,
-}: {
-  title: string;
-  price: string;
-  hint: string;
-  description?: string;
-  badge?: string;
-  onSelect?: () => void;
-  disabled?: boolean;
-  accent?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      className={`account-subscription__tile-v2${accent ? " account-subscription__tile-v2--accent" : ""}`}
-      onClick={onSelect}
-      disabled={disabled}
-    >
-      <div className="account-subscription__tile-v2-header">
-        <p className="account-subscription__tile-v2-name">{title}</p>
-        {badge && (
-          <span className="account-subscription__tile-v2-badge">{badge}</span>
-        )}
-      </div>
-      <p className="account-subscription__tile-v2-price">{price}</p>
-      <p className="account-subscription__tile-v2-hint">{hint}</p>
-      {description && <p className="account-subscription__tile-v2-desc">{description}</p>}
-      <div className="account-subscription__tile-v2-footer">
-        <span className="account-subscription__tile-v2-button">
-          {accent ? "Оформить" : (
-            <>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
-              Попробовать
-            </>
-          )}
-        </span>
-      </div>
-    </button>
-  );
 }
 
 function SubscriptionSkeleton() {
@@ -109,10 +61,9 @@ export default function AccountSubscription() {
   const [error, setError] = useState<string | null>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentPlan, setPaymentPlan] = useState<UiPlan | null>(null);
-  const [promoCode, setPromoCode] = useState("");
   const [promoError, setPromoError] = useState<string | null>(null);
   const [promoLoading, setPromoLoading] = useState(false);
-  const [showPlans, setShowPlans] = useState(false);
+  const [plansOpen, setPlansOpen] = useState(false);
 
   const fetchStatus = useCallback(async () => {
     if (!accessToken) {
@@ -218,33 +169,23 @@ export default function AccountSubscription() {
 
   const showHistory = (isActive || isCanceled || isExpired) && !loading;
   const isNeverSubscribed = status === "none" && !showHistory;
-  const shouldShowPlans = isNeverSubscribed || showPlans;
 
   const pageTitle = isNeverSubscribed ? "Оформить подписку" : "Управление подпиской";
-
-  useEffect(() => {
-    if (isNeverSubscribed) {
-      setShowPlans(true);
-      return;
-    }
-    if (isActive) {
-      setShowPlans(false);
-    }
-  }, [isActive, isNeverSubscribed]);
 
   const promoErrorLabel = useMemo(() => {
     if (!promoError) return null;
     return ERROR_LABELS[promoError] ?? "Не удалось применить промокод";
   }, [promoError]);
 
-  const handleApplyPromo = useCallback(async () => {
-    if (!accessToken || !promoCode.trim() || promoLoading) return;
+  const handleApplyPromo = useCallback(async (code: string) => {
+    const trimmedCode = code.trim();
+    if (!accessToken || !trimmedCode || promoLoading) return;
 
     setPromoLoading(true);
     setPromoError(null);
 
     try {
-      const res = await applyPromo(promoCode.trim(), accessToken) as { ok?: boolean; error?: string };
+      const res = await applyPromo(trimmedCode, accessToken) as { ok?: boolean; error?: string };
 
       if (!res?.ok) {
         setPromoError(res?.error ?? "unknown_error");
@@ -252,14 +193,13 @@ export default function AccountSubscription() {
       }
 
       await fetchStatus();
-      setPromoCode("");
     } catch (err) {
       console.error("Failed to apply promo", err);
       setPromoError("network_error");
     } finally {
       setPromoLoading(false);
     }
-  }, [accessToken, fetchStatus, promoCode, promoLoading]);
+  }, [accessToken, fetchStatus, promoLoading]);
 
   const createPayment = useCallback(
     async (plan: UiPlan) => {
@@ -307,6 +247,10 @@ export default function AccountSubscription() {
     [accessToken, logout, paymentPlan],
   );
 
+  const handleChoosePlan = useCallback((plan: UiPlan) => {
+    createPayment(plan);
+  }, [createPayment]);
+
   return (
     <section className="account-panel-v2" aria-labelledby="account-subscription-heading">
       <header className="account-panel-v2__header">
@@ -348,7 +292,7 @@ export default function AccountSubscription() {
                   {!isActive && (
                     <button
                       className="account-subscription-v2__btn-renew"
-                      onClick={() => setShowPlans(true)}
+                      onClick={() => setPlansOpen(true)}
                       disabled={Boolean(paymentPlan)}
                     >
                       Продлить подписку <span className="arrow-next">→</span>
@@ -374,71 +318,40 @@ export default function AccountSubscription() {
           {isNeverSubscribed && (
             <div className="account-subscription-v2__intro">
               <p>Подписка открывает доступ к полной карточке блюд</p>
+              <button
+                className="account-subscription-v2__btn-renew"
+                type="button"
+                onClick={() => setPlansOpen(true)}
+                disabled={Boolean(paymentPlan)}
+              >
+                Оформить подписку <span className="arrow-next">→</span>
+              </button>
             </div>
           )}
 
-          {!isActive && shouldShowPlans && (
-            <div className="account-subscription-v2__plans">
-              <div className="account-subscription-v2__plans-grid">
-                <TariffCard
-                  title="Год"
-                  price="999 ₽ в год"
-                  hint="12 месяцев по цене 10. Выгодный выбор для тех, кто регулярно следует цели"
-                  badge="ВЫГОДНО"
-                  accent
-                  onSelect={() => createPayment("year")}
-                  disabled={Boolean(paymentPlan)}
-                />
-                <TariffCard
-                  title="Месяц"
-                  price="99 ₽ в месяц*"
-                  hint="Отличный вариант для оценки удобства сервиса"
-                  onSelect={() => createPayment("month")}
-                  disabled={Boolean(paymentPlan)}
-                />
-              </div>
-
-              <p className="account-subscription-v2__plans-note">* Подписка продлевается автоматически до отмены</p>
-
-              <div className="account-subscription-v2__promo-box">
-                <div className="account-subscription-v2__promo-inner">
-                  <p className="account-subscription-v2__promo-title">Есть промокод?</p>
-                  <div className="account-subscription-v2__promo-form">
-                    <input
-                      id="promo-code"
-                      className="account-subscription-v2__promo-input"
-                      value={promoCode}
-                      onChange={(event) => setPromoCode(event.target.value)}
-                      placeholder="Введите промокод"
-                      disabled={promoLoading}
-                    />
-                    <button
-                      className="account-subscription-v2__promo-btn"
-                      onClick={handleApplyPromo}
-                      disabled={promoLoading || !promoCode.trim() || !accessToken}
-                    >
-                      {promoLoading ? "..." : "Применить"}
-                    </button>
-                  </div>
-                </div>
-                {promoErrorLabel && (
-                  <p className="account-subscription-v2__error" role="alert">
-                    {promoErrorLabel}
-                  </p>
-                )}
-              </div>
-
-              {paymentError && (
-                <div className="account-subscription-v2__error-box" role="alert">
-                  <p>{paymentError}</p>
-                </div>
-              )}
-            </div>
-          )}
+          <SubscriptionPlansModal
+            open={plansOpen}
+            onClose={() => setPlansOpen(false)}
+            onChoosePlan={handleChoosePlan}
+            onApplyPromo={handleApplyPromo}
+            loading={promoLoading || Boolean(paymentPlan)}
+          />
 
           {error && (
             <div className="account-subscription-v2__error-box" role="alert">
               <p>{error}</p>
+            </div>
+          )}
+
+          {promoErrorLabel && (
+            <div className="account-subscription-v2__error-box" role="alert">
+              <p>{promoErrorLabel}</p>
+            </div>
+          )}
+
+          {paymentError && (
+            <div className="account-subscription-v2__error-box" role="alert">
+              <p>{paymentError}</p>
             </div>
           )}
         </div>
