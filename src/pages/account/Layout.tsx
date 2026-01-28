@@ -78,7 +78,7 @@ export default function AccountLayout() {
     { to: "/account", label: "Профиль", end: true },
     { to: "/account/subscription", label: "Управлять подпиской" },
     { to: "/account/goals", label: "Мои цели" },
-    { to: "/account/statistics", label: "Статистика" },
+    { to: "/account/statistics", label: "Дневник питания" },
     { to: "/account/favorites", label: "Избранное" },
   ];
 
