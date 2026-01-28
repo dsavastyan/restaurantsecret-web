@@ -4943,7 +4943,8 @@ body:has(.account--sheet-open) {
 .account-section-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  /* Changed from flex-start to center */
   margin-bottom: 24px;
 }
 
@@ -5462,6 +5463,31 @@ body:has(.account--sheet-open) {
   .macro-card.highlight .macro-subtext {
     font-size: 15px;
     margin-top: 8px;
+  }
+
+  .account-section-header {
+    margin-bottom: 16px;
+    gap: 12px;
+  }
+
+  .account-section-title {
+    font-size: 20px !important;
+    margin: 0;
+  }
+
+  .macro-tile {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    padding: 12px 8px;
+  }
+
+  .macro-tile-label {
+    font-size: 12px;
+  }
+
+  .macro-tile-value {
+    font-size: 14px;
   }
 }
 
