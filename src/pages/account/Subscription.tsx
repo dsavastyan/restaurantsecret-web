@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useOutletContext } from "react-router-dom";
-import Button from "@/components/ui/Button";
+import { Link } from "react-router-dom";
 import { ApiError, apiGet, apiPost, applyPromo, isUnauthorizedError } from "@/lib/api";
 import { useAuth } from "@/store/auth";
 import {
@@ -8,7 +7,6 @@ import {
   selectSetHasActiveSub,
   useSubscriptionStore,
 } from "@/store/subscription";
-import type { AccountOutletContext } from "./Layout";
 
 type SubscriptionStatusResponse = {
   ok?: boolean;
@@ -100,7 +98,6 @@ function SubscriptionSkeleton() {
 }
 
 export default function AccountSubscription() {
-  const { reload } = useOutletContext<AccountOutletContext>();
   const { accessToken, logout } = useAuth((state) => ({
     accessToken: state.accessToken || undefined,
     logout: state.logout,
@@ -110,15 +107,12 @@ export default function AccountSubscription() {
   const [statusData, setStatusData] = useState<SubscriptionStatusResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [cancelLoading, setCancelLoading] = useState(false);
-  const [cancelError, setCancelError] = useState<string | null>(null);
-  const [cancelSuccess, setCancelSuccess] = useState<string | null>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentPlan, setPaymentPlan] = useState<UiPlan | null>(null);
   const [promoCode, setPromoCode] = useState("");
   const [promoError, setPromoError] = useState<string | null>(null);
   const [promoLoading, setPromoLoading] = useState(false);
-  const [autopayConsent, setAutopayConsent] = useState(true);
+  const [showPlans, setShowPlans] = useState(false);
 
   const fetchStatus = useCallback(async () => {
     if (!accessToken) {
@@ -214,6 +208,7 @@ export default function AccountSubscription() {
   const isCanceled = status === "canceled";
   const isExpired = status === "expired";
   const expiresLabel = useMemo(() => formatDate(statusData?.expires_at), [statusData?.expires_at, formatDate]);
+  const illustrationSrc = `${import.meta.env.BASE_URL}assets/subscription/${isActive ? "subscription-active.webp" : "subscription-expired.webp"}`;
 
   const statusMessage = useMemo(() => {
     if (isActive) return `Подписка активна до ${expiresLabel ?? "—"}`;
@@ -221,54 +216,26 @@ export default function AccountSubscription() {
     return null;
   }, [isActive, isCanceled, isExpired, expiresLabel]);
 
-  const statusLabel = useMemo(() => {
-    if (typeof statusData?.status_label === "string" && statusData.status_label.trim()) {
-      return statusData.status_label;
-    }
-    if (status === "none") return null;
-    return status;
-  }, [statusData?.status_label, status]);
-
   const showHistory = (isActive || isCanceled || isExpired) && !loading;
   const isNeverSubscribed = status === "none" && !showHistory;
+  const shouldShowPlans = isNeverSubscribed || showPlans;
 
   const pageTitle = isNeverSubscribed ? "Оформить подписку" : "Управление подпиской";
+
+  useEffect(() => {
+    if (isNeverSubscribed) {
+      setShowPlans(true);
+      return;
+    }
+    if (isActive) {
+      setShowPlans(false);
+    }
+  }, [isActive, isNeverSubscribed]);
 
   const promoErrorLabel = useMemo(() => {
     if (!promoError) return null;
     return ERROR_LABELS[promoError] ?? "Не удалось применить промокод";
   }, [promoError]);
-
-  const handleCancel = useCallback(async () => {
-    if (!accessToken || cancelLoading) return;
-    const confirmCancel = window.confirm("Вы уверены что хотите отменить подписку?");
-    if (!confirmCancel) return;
-
-    setCancelError(null);
-    setCancelSuccess(null);
-    setCancelLoading(true);
-    try {
-      const res = await apiPost<{ ok?: boolean }>("/api/subscriptions/cancel", undefined, accessToken);
-      if (res?.ok) {
-        setCancelSuccess("Подписка успешна отменена");
-        await fetchStatus();
-        await reload();
-      } else {
-        setCancelError("Не удалось отменить подписку. Попробуйте позже.");
-      }
-    } catch (err) {
-      if (isUnauthorizedError(err)) {
-        logout();
-        setCancelError(null);
-        setCancelLoading(false);
-        return;
-      }
-      console.error("Failed to cancel subscription", err);
-      setCancelError("Не удалось отменить подписку. Попробуйте позже.");
-    } finally {
-      setCancelLoading(false);
-    }
-  }, [accessToken, cancelLoading, fetchStatus, reload, logout]);
 
   const handleApplyPromo = useCallback(async () => {
     if (!accessToken || !promoCode.trim() || promoLoading) return;
@@ -297,11 +264,6 @@ export default function AccountSubscription() {
   const createPayment = useCallback(
     async (plan: UiPlan) => {
       if (!accessToken || paymentPlan) return;
-
-      if (!autopayConsent) {
-        setPaymentError("Необходимо согласие на автоматические списания");
-        return;
-      }
 
       setPaymentError(null);
       setPaymentPlan(plan);
@@ -383,39 +345,26 @@ export default function AccountSubscription() {
                 </div>
 
                 <div className="account-subscription-v2__card-actions">
-                  {isActive ? (
+                  {!isActive && (
                     <button
-                      className="account-subscription-v2__btn-cancel"
-                      disabled={cancelLoading}
-                      onClick={handleCancel}
+                      className="account-subscription-v2__btn-renew"
+                      onClick={() => setShowPlans(true)}
+                      disabled={Boolean(paymentPlan)}
                     >
-                      <span className="close-icon">×</span>
-                      {cancelLoading ? "Отменяем…" : "Отменить подписку"}
+                      Продлить подписку <span className="arrow-next">→</span>
                     </button>
-                  ) : (
-                    <>
-                      <button
-                        className="account-subscription-v2__btn-renew"
-                        onClick={() => createPayment("month")}
-                        disabled={Boolean(paymentPlan)}
-                      >
-                        Продлить подписку <span className="arrow-next">→</span>
-                      </button>
-                      <button
-                        className="account-subscription-v2__link-cancel"
-                        onClick={handleCancel}
-                        disabled={cancelLoading}
-                      >
-                        Отменить подписку
-                      </button>
-                    </>
+                  )}
+                  {showHistory && (
+                    <Link to="/account/subscription/history" className="account-subscription-v2__btn-history">
+                      История подписок
+                    </Link>
                   )}
                 </div>
               </div>
 
               <div className="account-subscription-v2__card-illus">
                 <img
-                  src={isActive ? "/assets/subscription/subscription-active.webp" : "/assets/subscription/subscription-expired.webp"}
+                  src={illustrationSrc}
                   alt=""
                 />
               </div>
@@ -428,7 +377,7 @@ export default function AccountSubscription() {
             </div>
           )}
 
-          {!isActive && (
+          {!isActive && shouldShowPlans && (
             <div className="account-subscription-v2__plans">
               <div className="account-subscription-v2__plans-grid">
                 <TariffCard
@@ -479,39 +428,11 @@ export default function AccountSubscription() {
                 )}
               </div>
 
-              <div className="account-subscription-v2__consent">
-                <label className="account-subscription-v2__consent-label">
-                  <input
-                    type="checkbox"
-                    checked={autopayConsent}
-                    onChange={(e) => setAutopayConsent(e.target.checked)}
-                  />
-                  <span>
-                    Согласен на ежемесячные автосписания в соответствии с{" "}
-                    <a href="https://restaurantsecret.ru/#/legal" target="_blank" rel="noopener noreferrer">
-                      пользовательским соглашением
-                    </a>
-                  </span>
-                </label>
-              </div>
-
               {paymentError && (
                 <div className="account-subscription-v2__error-box" role="alert">
                   <p>{paymentError}</p>
                 </div>
               )}
-            </div>
-          )}
-
-          {cancelSuccess && (
-            <div className="account-subscription-v2__success-box" role="status">
-              <p>{cancelSuccess}</p>
-            </div>
-          )}
-
-          {cancelError && (
-            <div className="account-subscription-v2__error-box" role="alert">
-              <p>{cancelError}</p>
             </div>
           )}
 
@@ -523,13 +444,6 @@ export default function AccountSubscription() {
         </div>
       )}
 
-      {showHistory && (
-        <footer className="account-subscription-v2__footer">
-          <Link to="/account/subscription/history" className="account-subscription-v2__history-link">
-            История подписок
-          </Link>
-        </footer>
-      )}
     </section>
   );
 }

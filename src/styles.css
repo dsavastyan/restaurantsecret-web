@@ -3247,9 +3247,8 @@ body:has(.account--sheet-open) {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  background-image: url('/assets/subscription/subscription-plans-bg.webp');
-  background-size: cover;
-  background-position: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border: 1px solid #e2e8f0;
   padding: 40px;
   border-radius: 24px;
 }
@@ -3345,10 +3344,10 @@ body:has(.account--sheet-open) {
 }
 
 .account-subscription-v2__promo-box {
-  background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+  background: #f8fafc;
   border-radius: 16px;
   padding: 24px;
-  border: 1px solid #bae6fd;
+  border: 1px solid #e2e8f0;
 }
 
 .account-subscription-v2__promo-inner {
@@ -3362,7 +3361,7 @@ body:has(.account--sheet-open) {
   font-weight: 700;
   font-size: 18px;
   margin: 0;
-  color: #0369a1;
+  color: #0f172a;
 }
 
 .account-subscription-v2__promo-form {
@@ -3382,7 +3381,7 @@ body:has(.account--sheet-open) {
 }
 
 .account-subscription-v2__promo-btn {
-  background: #ec4899;
+  background: #0f172a;
   color: #fff;
   border: none;
   padding: 10px 20px;
@@ -3391,48 +3390,23 @@ body:has(.account--sheet-open) {
   cursor: pointer;
 }
 
-.account-subscription-v2__consent {
-  margin-top: 8px;
-}
-
-.account-subscription-v2__consent-label {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  cursor: pointer;
-}
-
-.account-subscription-v2__consent-label input {
-  margin-top: 4px;
-}
-
-.account-subscription-v2__consent-label span {
-  font-size: 14px;
-  color: #64748b;
-  line-height: 1.4;
-}
-
-.account-subscription-v2__consent-label a {
-  color: #3b82f6;
-  text-decoration: underline;
-}
-
-.account-subscription-v2__footer {
-  margin-top: 32px;
-  text-align: center;
-}
-
-.account-subscription-v2__history-link {
+.account-subscription-v2__btn-history {
   color: #1e293b;
   font-weight: 600;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  transition: border-color 0.2s, color 0.2s;
 }
 
-.account-subscription-v2__history-link:hover {
-  text-decoration: underline;
+.account-subscription-v2__btn-history:hover {
+  border-color: #cbd5f5;
+  color: #0f172a;
 }
 
 .account-subscription-v2__error-box {
