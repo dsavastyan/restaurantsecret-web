@@ -91,25 +91,6 @@ export default function LoginPage() {
 
   return (
     <div className="login">
-      <header className="login__topbar">
-        <div className="login__brand">
-          <button className="login__home" aria-label="На главную" type="button">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v7H4a1 1 0 0 1-1-1V10.5Z"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <span className="login__brand-text">RestaurantSecret</span>
-        </div>
-        <button className="login__topbar-cta" type="button">
-          Войти
-        </button>
-      </header>
-
       <div className="login__stage">
         <div className="login__wrap">
           <div className="login__card">
