@@ -8,8 +8,11 @@ import {
   useSubscriptionStore,
 } from "@/store/subscription";
 import SubscriptionPlansModal from "@/components/subscription/SubscriptionPlansModal";
-const subscriptionActive = "/assets/subscription/subscription-active.webp";
-const subscriptionExpired = "/assets/subscription/subscription-expired.webp";
+import SubscriptionPlans from "@/components/subscription/SubscriptionPlans";
+
+// Import assets from src/assets to ensure they are bundled correctly
+import subscriptionActive from "@/assets/subscription/subscription-active.webp";
+import subscriptionExpired from "@/assets/subscription/subscription-expired.webp";
 
 type SubscriptionStatusResponse = {
   ok?: boolean;
@@ -319,15 +322,12 @@ export default function AccountSubscription() {
 
           {isNeverSubscribed && (
             <div className="account-subscription-v2__intro">
-              <p>Подписка открывает доступ к полной карточке блюд</p>
-              <button
-                className="account-subscription-v2__btn-renew"
-                type="button"
-                onClick={() => setPlansOpen(true)}
-                disabled={Boolean(paymentPlan)}
-              >
-                Оформить подписку <span className="arrow-next">→</span>
-              </button>
+              <SubscriptionPlans
+                onChoosePlan={handleChoosePlan}
+                onApplyPromo={handleApplyPromo}
+                loading={promoLoading || Boolean(paymentPlan)}
+                promoError={promoErrorLabel}
+              />
             </div>
           )}
 
@@ -337,6 +337,7 @@ export default function AccountSubscription() {
             onChoosePlan={handleChoosePlan}
             onApplyPromo={handleApplyPromo}
             loading={promoLoading || Boolean(paymentPlan)}
+            promoError={promoErrorLabel}
           />
 
           {error && (
@@ -345,12 +346,7 @@ export default function AccountSubscription() {
             </div>
           )}
 
-          {promoErrorLabel && (
-            <div className="account-subscription-v2__error-box" role="alert">
-              <p>{promoErrorLabel}</p>
-            </div>
-          )}
-
+          {/* Note: promoErrorLabel is now passed into components, but if we need a global error box we can keep it here or remove if redundant */}
           {paymentError && (
             <div className="account-subscription-v2__error-box" role="alert">
               <p>{paymentError}</p>

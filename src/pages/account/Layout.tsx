@@ -74,9 +74,16 @@ export default function AccountLayout() {
 
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
+  const sub = me?.user?.subscription || null;
+  const isNeverSubscribed = !sub || (sub.status === 'none' && !sub.expired); // Crude check, but checking if there is ANY sub info usually means they had one using 'sub' object existence usually. 
+  // Let's refine: if sub is null, they definitely never subscribed (or data not loaded). 
+  // If sub exists but status is 'none' and no expired... 
+  // Actually, checking Layout logic: `sub` comes from `me.user.subscription`.
+  // If user never subscribed, `subscription` might be null.
+
   const navItems = [
     { to: "/account", label: "Профиль", end: true },
-    { to: "/account/subscription", label: "Управлять подпиской" },
+    { to: "/account/subscription", label: (!sub || sub.status === "none") ? "Оформить подписку" : "Управлять подпиской" },
     { to: "/account/goals", label: "Мои цели" },
     { to: "/account/statistics", label: "Дневник питания" },
     { to: "/account/favorites", label: "Избранное" },
@@ -86,7 +93,7 @@ export default function AccountLayout() {
     item.end ? location.pathname === item.to : location.pathname.startsWith(item.to)
   ) || navItems[0];
 
-  const sub = me?.user?.subscription || null;
+  /* sub is already declared above */
   const daysLeft = useMemo(() => {
     if (!sub?.expires_at) return null;
     const expiresAt = new Date(sub.expires_at).getTime();
