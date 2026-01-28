@@ -44,23 +44,24 @@ export default function SubscriptionPlansModal({
   return (
     <div className="rsModalOverlay" onMouseDown={onClose} role="dialog" aria-modal="true">
       <div className="rsModal" onMouseDown={stop}>
-        <button className="rsModalClose" onClick={onClose} aria-label="Закрыть">
-          ✕
-        </button>
-
         <div className="rsModalHeader">
           <div className="rsModalTitle">Оформить подписку</div>
           <div className="rsModalSubtitle">
             Подписка открывает доступ к полной карточке блюд
           </div>
+          <button className="rsModalClose" onClick={onClose} aria-label="Закрыть">
+            ✕
+          </button>
         </div>
 
-        <SubscriptionPlans
-          onChoosePlan={onChoosePlan}
-          onApplyPromo={onApplyPromo}
-          loading={loading}
-          promoError={promoError}
-        />
+        <div className="rsModalContent">
+          <SubscriptionPlans
+            onChoosePlan={onChoosePlan}
+            onApplyPromo={onApplyPromo}
+            loading={loading}
+            promoError={promoError}
+          />
+        </div>
       </div>
     </div>
   );
