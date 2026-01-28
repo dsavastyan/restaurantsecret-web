@@ -91,83 +91,121 @@ export default function LoginPage() {
 
   return (
     <div className="login">
-      <div className="login__wrap">
-        <div className="login__card">
-          <h1 className="login__title">Вход по e-mail</h1>
-          <p className="login__subtitle">Без пароля. Отправим одноразовый код на вашу почту.</p>
-
-          {err && <div className="login__alert">{err}</div>}
-
-          {step === "enter" && (
-            <div className="login__form">
-              <label className="login__label" htmlFor="email">E-mail</label>
-              <input
-                id="email"
-                type="email"
-                className="login__input"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-                autoFocus
-                disabled={loading}
-                aria-invalid={!!err}
-              />
-              <button className="btn btn--primary login__submit" onClick={sendCode} disabled={loading}>
-                {loading ? "Отправляем…" : "Получить код"}
-              </button>
+      <div className="login__stage">
+        <div className="login__wrap">
+          <div className="login__card">
+            <div className="login__hero" aria-hidden="true">
+              <div className="login__hero-badge">
+                <svg width="28" height="22" viewBox="0 0 24 18" fill="none">
+                  <path
+                    d="M2.5 4.5 12 10.5l9.5-6"
+                    stroke="white"
+                    strokeWidth="1.8"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M3.5 2.5h17a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-17a2 2 0 0 1-2-2v-11a2 2 0 0 1 2-2Z"
+                    stroke="white"
+                    strokeWidth="1.8"
+                  />
+                </svg>
+              </div>
             </div>
-          )}
 
-          {step === "code" && (
-            <div className="login__form">
-              <label className="login__label" htmlFor="code">Код из письма</label>
-              <input
-                id="code"
-                type="text"
-                inputMode="numeric"
-                className="login__input"
-                placeholder="123456"
-                value={code}
-                onChange={(e) => setCode(e.target.value.trim())}
-                autoFocus
-                disabled={loading}
-                aria-invalid={!!err}
-              />
-              <button className="btn btn--primary login__submit" onClick={verifyCode} disabled={loading}>
-                {loading ? "Проверяем…" : "Войти"}
-              </button>
+            <h1 className="login__title">Вход по e-mail</h1>
+            <p className="login__subtitle">Без пароля. Отправим одноразовый код на вашу почту.</p>
 
-              <button
-                type="button"
-                className="login__resend"
-                onClick={resend}
-                disabled={loading || timer > 0}
-                aria-disabled={loading || timer > 0}
-                title={timer > 0 ? `Повторно через ${timer} сек` : "Отправить код ещё раз"}
-              >
-                {timer > 0 ? `Отправить код ещё раз — через ${timer} сек` : "Отправить код ещё раз"}
-              </button>
+            {err && <div className="login__alert">{err}</div>}
 
-              <p className="login__hint">Код придёт с адреса <b>noreply@restaurantsecret.ru</b>.</p>
-            </div>
-          )}
+            {step === "enter" && (
+              <div className="login__form">
+                <div className="login__input-wrap">
+                  <span className="login__input-icon" aria-hidden="true">
+                    <svg width="18" height="14" viewBox="0 0 24 18" fill="none">
+                      <path
+                        d="M2.5 4.5 12 10.5l9.5-6"
+                        stroke="#8AA3A0"
+                        strokeWidth="1.8"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M3.5 2.5h17a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-17a2 2 0 0 1-2-2v-11a2 2 0 0 1 2-2Z"
+                        stroke="#8AA3A0"
+                        strokeWidth="1.8"
+                      />
+                    </svg>
+                  </span>
+                  <input
+                    id="email"
+                    type="email"
+                    className="login__input"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
+                    autoFocus
+                    disabled={loading}
+                    aria-invalid={!!err}
+                  />
+                </div>
+                <button className="btn btn--primary login__submit" onClick={sendCode} disabled={loading}>
+                  {loading ? "Отправляем…" : "Получить код"}
+                </button>
+              </div>
+            )}
 
-          <p className="login__legal">
-            Продолжая, вы соглашаетесь на{" "}
-            <a href="/legal/pdn-consent.pdf" target="_blank" rel="noopener noreferrer">
-              обработку персональных данных
-            </a>
-            , а также с{" "}
-            <a href="https://restaurantsecret.ru/#/privacy" target="_blank" rel="noopener noreferrer">
-              политикой конфиденциальности
-            </a>{" "}
-            и{" "}
-            <a href="https://restaurantsecret.ru/#/legal" target="_blank" rel="noopener noreferrer">
-              пользовательским соглашением
-            </a>
-            .
-          </p>
+            {step === "code" && (
+              <div className="login__form">
+                <label className="login__label" htmlFor="code">Код из письма</label>
+                <div className="login__input-wrap login__input-wrap--plain">
+                  <input
+                    id="code"
+                    type="text"
+                    inputMode="numeric"
+                    className="login__input"
+                    placeholder="123456"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.trim())}
+                    autoFocus
+                    disabled={loading}
+                    aria-invalid={!!err}
+                  />
+                </div>
+                <button className="btn btn--primary login__submit" onClick={verifyCode} disabled={loading}>
+                  {loading ? "Проверяем…" : "Войти"}
+                </button>
+
+                <button
+                  type="button"
+                  className="login__resend"
+                  onClick={resend}
+                  disabled={loading || timer > 0}
+                  aria-disabled={loading || timer > 0}
+                  title={timer > 0 ? `Повторно через ${timer} сек` : "Отправить код ещё раз"}
+                >
+                  {timer > 0 ? `Отправить код ещё раз — через ${timer} сек` : "Отправить код ещё раз"}
+                </button>
+
+                <p className="login__hint">Код придёт с адреса <b>noreply@restaurantsecret.ru</b>.</p>
+              </div>
+            )}
+
+            <p className="login__legal">
+              Продолжая, вы соглашаетесь на{" "}
+              <a href="/legal/pdn-consent.pdf" target="_blank" rel="noopener noreferrer">
+                обработку персональных данных
+              </a>
+              , а также с{" "}
+              <a href="https://restaurantsecret.ru/#/privacy" target="_blank" rel="noopener noreferrer">
+                политикой конфиденциальности
+              </a>{" "}
+              и{" "}
+              <a href="https://restaurantsecret.ru/#/legal" target="_blank" rel="noopener noreferrer">
+                пользовательским соглашением
+              </a>
+              .
+            </p>
+          </div>
         </div>
       </div>
     </div>
