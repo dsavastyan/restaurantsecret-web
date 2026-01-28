@@ -8,6 +8,8 @@ import {
   useSubscriptionStore,
 } from "@/store/subscription";
 import SubscriptionPlansModal from "@/components/subscription/SubscriptionPlansModal";
+import subscriptionActive from "@/assets/subscription/subscription-active.webp";
+import subscriptionExpired from "@/assets/subscription/subscription-expired.webp";
 
 type SubscriptionStatusResponse = {
   ok?: boolean;
@@ -159,7 +161,7 @@ export default function AccountSubscription() {
   const isCanceled = status === "canceled";
   const isExpired = status === "expired";
   const expiresLabel = useMemo(() => formatDate(statusData?.expires_at), [statusData?.expires_at, formatDate]);
-  const illustrationSrc = `${import.meta.env.BASE_URL}assets/subscription/${isActive ? "subscription-active.webp" : "subscription-expired.webp"}`;
+  const illustrationSrc = isActive ? subscriptionActive : subscriptionExpired;
 
   const statusMessage = useMemo(() => {
     if (isActive) return `Подписка активна до ${expiresLabel ?? "—"}`;
