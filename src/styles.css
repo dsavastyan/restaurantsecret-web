@@ -3298,6 +3298,104 @@ body:has(.account--sheet-open) {
   text-align: left;
 }
 
+.account-subscription__ended {
+  margin-top: 24px;
+  padding: clamp(28px, 4vw, 42px);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(248, 220, 188, 0.5) 0%, rgba(248, 220, 188, 0) 48%),
+    radial-gradient(circle at 78% 20%, rgba(217, 232, 210, 0.7) 0%, rgba(217, 232, 210, 0) 55%),
+    linear-gradient(140deg, rgba(255, 255, 255, 0.7) 0%, rgba(232, 240, 227, 0.55) 100%);
+  box-shadow: 0 24px 60px rgba(17, 24, 39, 0.12);
+  display: flex;
+  gap: clamp(24px, 4vw, 40px);
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.account-subscription__ended-body {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  flex: 1 1 320px;
+  min-width: 260px;
+}
+
+.account-subscription__ended-alert {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #f2a46a;
+  color: #fff;
+  font-weight: 800;
+  font-size: 28px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 12px 24px rgba(242, 164, 106, 0.35);
+  flex-shrink: 0;
+}
+
+.account-subscription__ended-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.account-subscription__ended-content h3 {
+  margin: 0;
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 700;
+  color: #314b3a;
+}
+
+.account-subscription__ended-content p {
+  margin: 0;
+  color: #42594a;
+  font-size: 16px;
+}
+
+.account-subscription__ended-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  color: #445a44;
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1px rgba(79, 99, 75, 0.15);
+  width: fit-content;
+}
+
+.account-subscription__ended-date-icon {
+  width: 20px;
+  height: 20px;
+  color: #7a946b;
+  display: inline-flex;
+}
+
+.account-subscription__ended-date-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.account-subscription__ended-button {
+  align-self: flex-start;
+}
+
+.account-subscription__ended-art {
+  flex: 0 1 260px;
+  max-width: 300px;
+  min-width: 180px;
+}
+
+.account-subscription__ended-art svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 .account-subscription__empty h3 {
   margin: 0;
   font-size: clamp(22px, 3vw, 28px);
