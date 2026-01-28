@@ -5346,6 +5346,222 @@ body:has(.account--sheet-open) {
 
 /* Statistics Page Styles */
 
+.nds {
+  width: 100%;
+  max-width: 980px;
+}
+
+.ndsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.ndsTitle {
+  margin: 0;
+  font-size: clamp(28px, 3.2vw, 44px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: #101828;
+}
+
+.ndsDateWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ndsDateBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(16, 24, 40, 0.1);
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 10px 24px rgba(16, 24, 40, 0.06);
+  color: #475467;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.ndsDateBtn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.ndsDateBtn:hover {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.ndsDatePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  padding: 0 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(16, 24, 40, 0.1);
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 12px 28px rgba(16, 24, 40, 0.06);
+  color: #101828;
+  cursor: pointer;
+  position: relative;
+}
+
+.ndsDatePill:hover {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.ndsCalIcon {
+  color: #667085;
+  display: grid;
+  place-items: center;
+}
+
+.ndsCalIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.ndsDateText {
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+
+.ndsDateInput {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.ndsCard {
+  border-radius: 22px;
+  border: 1px solid rgba(23, 178, 106, 0.22);
+  background: linear-gradient(180deg, rgba(224, 255, 241, 0.78) 0%, rgba(244, 255, 251, 0.55) 100%);
+  box-shadow: 0 18px 44px rgba(16, 24, 40, 0.08);
+}
+
+.ndsCardMain {
+  padding: 22px 24px;
+  margin-bottom: 18px;
+}
+
+.ndsCardTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.ndsCardLabel {
+  font-size: 18px;
+  font-weight: 700;
+  color: #344054;
+}
+
+.ndsCardValue {
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #101828;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.ndsStrong {
+  font-weight: 800;
+  color: #101828;
+}
+
+.ndsMuted {
+  color: #98a2b3;
+  font-weight: 700;
+}
+
+.ndsBar {
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(16, 24, 40, 0.08);
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.ndsBarSmall {
+  height: 12px;
+}
+
+.ndsBarFill {
+  height: 100%;
+  border-radius: 999px;
+  filter: saturate(1.05);
+}
+
+.ndsBarFillGreen,
+.toneGreen {
+  background: linear-gradient(90deg, #8ed3a5 0%, #2fb37c 100%);
+}
+
+.toneAmber {
+  background: linear-gradient(90deg, #f4c07b 0%, #e59a3a 100%);
+}
+
+.toneBlue {
+  background: linear-gradient(90deg, #9bd3e8 0%, #4aa6c7 100%);
+}
+
+.ndsTiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.ndsTile {
+  border-radius: 22px;
+  border: 1px solid rgba(16, 24, 40, 0.08);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 16px 40px rgba(16, 24, 40, 0.08);
+  padding: 22px 22px 18px;
+}
+
+.ndsTileHead {
+  font-size: 22px;
+  font-weight: 800;
+  color: #475467;
+  margin-bottom: 6px;
+}
+
+.ndsTileNums {
+  font-size: 34px;
+  letter-spacing: -0.03em;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+@media (max-width: 860px) {
+  .ndsHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .ndsCardValue {
+    font-size: 34px;
+  }
+
+  .ndsTiles {
+    grid-template-columns: 1fr;
+  }
+}
+
 .stats-date-picker .date-input {
   padding: 8px 12px;
   border: 1px solid #e2e8f0;
