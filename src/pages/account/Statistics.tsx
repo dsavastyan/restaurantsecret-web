@@ -121,7 +121,7 @@ export default function Statistics() {
 
                 <div className="ndsCard ndsCardMain">
                     <div className="ndsCardTop">
-                        <div className="ndsCardLabel">Сводка дня</div>
+
                         <div className="ndsCardValue">
                             {Math.round(dayStats.calories)}
                             <span className="ndsMuted">/ {goalData?.target_calories || '—'}</span>
