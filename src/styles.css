@@ -3096,8 +3096,9 @@ body:has(.account--sheet-open) {
   border-radius: 24px;
   padding: 32px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 24px;
   overflow: hidden;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
@@ -3121,7 +3122,7 @@ body:has(.account--sheet-open) {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .account-subscription-v2__card-icon {
@@ -3147,17 +3148,28 @@ body:has(.account--sheet-open) {
   font-weight: 800;
 }
 
+.account-subscription-v2__card-label {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.account-subscription-v2__card-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .account-subscription-v2__card-title {
   font-size: 22px;
   font-weight: 700;
   margin: 0;
   color: #1e293b;
-}
-
-.account-subscription-v2__card-text {
-  color: #64748b;
-  font-size: 15px;
-  margin: 0 0 16px;
 }
 
 .account-subscription-v2__card-date-box {
@@ -3171,17 +3183,17 @@ body:has(.account--sheet-open) {
   width: fit-content;
   color: #1e293b;
   font-weight: 600;
-  margin-bottom: 24px;
 }
 
 .account-subscription-v2__card-actions {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .account-subscription-v2__btn-renew {
-  background: #84a273;
+  background: linear-gradient(135deg, #7aa86f 0%, #4f8a6a 100%);
   color: #fff;
   border: none;
   padding: 12px 24px;
@@ -3191,11 +3203,13 @@ body:has(.account--sheet-open) {
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: background 0.2s;
+  box-shadow: 0 8px 20px rgba(79, 138, 106, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .account-subscription-v2__btn-renew:hover {
-  background: #708a61;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(79, 138, 106, 0.4);
 }
 
 .account-subscription-v2__btn-cancel {
@@ -3223,7 +3237,8 @@ body:has(.account--sheet-open) {
 
 .account-subscription-v2__card-illus {
   display: block;
-  max-width: 280px;
+  max-width: 360px;
+  margin-top: 8px;
 }
 
 .account-subscription-v2__card-illus img {
@@ -3431,10 +3446,11 @@ body:has(.account--sheet-open) {
 
 /* Mobile responsive */
 @media (max-width: 768px) {
+  .account-subscription-panel .account-panel-v2__header {
+    display: none;
+  }
+
   .account-subscription-v2__card {
-    /* flex-direction: column;  <-- Changed to keep layout or use relative positioning */
-    display: block;
-    /* Use block to allow absolute positioning of image relative to container easily */
     position: relative;
     padding: 24px 20px 24px;
     overflow: hidden;
@@ -3447,27 +3463,13 @@ body:has(.account--sheet-open) {
   }
 
   .account-subscription-v2__card-actions {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: center;
+    justify-content: center;
   }
 
-  /* Position image on the right side "beautifully" */
   .account-subscription-v2__card-illus {
-    position: absolute;
-    right: -30px;
-    bottom: -10px;
-    width: 160px;
-    opacity: 1;
-    z-index: 1;
-    transform: rotate(-10deg);
-    pointer-events: none;
-    /* Let clicks pass through */
-  }
-
-  /* Ensure text doesn't hit the image too hard, or just let it overlap slightly with z-index */
-  .account-subscription-v2__card-text {
-    max-width: 70%;
+    margin: 0 auto;
+    max-width: 280px;
   }
 
   .account-subscription-v2__plans {

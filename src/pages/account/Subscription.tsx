@@ -166,12 +166,6 @@ export default function AccountSubscription() {
   const expiresLabel = useMemo(() => formatDate(statusData?.expires_at), [statusData?.expires_at, formatDate]);
   const illustrationSrc = isActive ? subscriptionActive : subscriptionExpired;
 
-  const statusMessage = useMemo(() => {
-    if (isActive) return `Подписка активна до ${expiresLabel ?? "—"}`;
-    if (isCanceled || isExpired) return `Подписка завершилась ${expiresLabel ?? ""}`.trim();
-    return null;
-  }, [isActive, isCanceled, isExpired, expiresLabel]);
-
   const showHistory = (isActive || isCanceled || isExpired) && !loading;
   const isNeverSubscribed = status === "none" && !showHistory;
 
@@ -257,7 +251,7 @@ export default function AccountSubscription() {
   }, [createPayment]);
 
   return (
-    <section className="account-panel-v2" aria-labelledby="account-subscription-heading">
+    <section className="account-panel-v2 account-subscription-panel" aria-labelledby="account-subscription-heading">
       <header className="account-panel-v2__header">
         <h2 id="account-subscription-heading" className="account-panel-v2__title">
           {pageTitle}
@@ -279,18 +273,17 @@ export default function AccountSubscription() {
                       <span className="account-subscription-v2__card-warning">!</span>
                     )}
                   </div>
+                  <p className="account-subscription-v2__card-label">Статус подписки</p>
+                </div>
+
+                <div className="account-subscription-v2__card-status-row">
                   <h3 className="account-subscription-v2__card-title">
                     {isActive ? "Подписка активна" : "Подписка завершена"}
                   </h3>
-                </div>
-
-                <p className="account-subscription-v2__card-text">
-                  {statusMessage}
-                </p>
-
-                <div className="account-subscription-v2__card-date-box">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><path d="M16 2v4" /><path d="M8 2v4" /><path d="M3 10h18" /></svg>
-                  <span>{expiresLabel}</span>
+                  <div className="account-subscription-v2__card-date-box">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><path d="M16 2v4" /><path d="M8 2v4" /><path d="M3 10h18" /></svg>
+                    <span>{expiresLabel ?? "—"}</span>
+                  </div>
                 </div>
 
                 <div className="account-subscription-v2__card-actions">
@@ -309,13 +302,13 @@ export default function AccountSubscription() {
                     </Link>
                   )}
                 </div>
-              </div>
 
-              <div className="account-subscription-v2__card-illus">
-                <img
-                  src={illustrationSrc}
-                  alt=""
-                />
+                <div className="account-subscription-v2__card-illus">
+                  <img
+                    src={illustrationSrc}
+                    alt=""
+                  />
+                </div>
               </div>
             </div>
           )}
