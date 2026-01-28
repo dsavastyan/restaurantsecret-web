@@ -5469,23 +5469,25 @@ body:has(.account--sheet-open) {
 }
 
 .ndsCard {
-  border-radius: 22px;
-  border: 1px solid rgba(23, 178, 106, 0.22);
-  background: linear-gradient(180deg, rgba(224, 255, 241, 0.78) 0%, rgba(244, 255, 251, 0.55) 100%);
-  box-shadow: 0 18px 44px rgba(16, 24, 40, 0.08);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(240, 253, 244, 0.4) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
 }
 
 .ndsCardMain {
-  padding: 22px 24px;
-  margin-bottom: 18px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
 }
 
 .ndsCardTop {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 14px;
+  margin-bottom: 8px;
 }
 
 .ndsCardLabel {
@@ -5495,7 +5497,7 @@ body:has(.account--sheet-open) {
 }
 
 .ndsCardValue {
-  font-size: 40px;
+  font-size: 32px;
   font-weight: 800;
   letter-spacing: -0.03em;
   color: #101828;
@@ -5515,15 +5517,15 @@ body:has(.account--sheet-open) {
 }
 
 .ndsBar {
-  height: 14px;
+  height: 10px;
   border-radius: 999px;
   background: rgba(16, 24, 40, 0.08);
   overflow: hidden;
-  margin-top: 12px;
+  margin-top: 8px;
 }
 
 .ndsBarSmall {
-  height: 12px;
+  height: 8px;
 }
 
 .ndsBarFill {
@@ -5548,31 +5550,36 @@ body:has(.account--sheet-open) {
 .ndsTiles {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
+  gap: 12px;
 }
 
 .ndsTile {
-  border-radius: 22px;
-  border: 1px solid rgba(16, 24, 40, 0.08);
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 16px 40px rgba(16, 24, 40, 0.08);
-  padding: 22px 22px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .ndsTileHead {
-  font-size: 22px;
-  font-weight: 800;
+  font-size: 16px;
+  font-weight: 700;
   color: #475467;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .ndsTileNums {
-  font-size: 34px;
-  letter-spacing: -0.03em;
-  margin-bottom: 14px;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 4px;
 }
 
 @media (max-width: 860px) {
@@ -5583,11 +5590,35 @@ body:has(.account--sheet-open) {
   }
 
   .ndsCardValue {
-    font-size: 34px;
+    font-size: 28px;
   }
 
+  /* Compact grid for mobile */
   .ndsTiles {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .ndsTile {
+    padding: 10px 8px;
+    border-radius: 14px;
+  }
+
+  .ndsTileHead {
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 2px;
+  }
+
+  .ndsTileNums {
+    font-size: 16px;
+    justify-content: center;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+
+  .ndsTileNums .ndsMuted {
+    display: none;
   }
 }
 
