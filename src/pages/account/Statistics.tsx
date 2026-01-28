@@ -2,13 +2,17 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/store/auth';
 import { useDiaryStore } from '@/store/diary';
 import { useGoalsStore } from '@/store/goals';
-import { formatNumeric } from '@/lib/nutrition';
-
 const formatDateCompact = (dateStr: string) => {
     const d = new Date(dateStr);
     const day = d.getDate();
     const month = d.toLocaleDateString('ru-RU', { month: 'short' }).replace('.', '');
     return `${day} ${month}`;
+};
+
+const shiftDateByDays = (dateStr: string, delta: number) => {
+    const date = new Date(dateStr);
+    date.setDate(date.getDate() + delta);
+    return date.toISOString().slice(0, 10);
 };
 
 export default function Statistics() {
@@ -45,6 +49,10 @@ export default function Statistics() {
         setDate(e.target.value);
     };
 
+    const handleShiftDate = (delta: number) => {
+        setDate(shiftDateByDays(selectedDate, delta));
+    };
+
     const handleDelete = async (id: string) => {
         if (confirm('Удалить запись?')) {
             if (token) await removeEntry(token, id);
@@ -77,92 +85,95 @@ export default function Statistics() {
 
     return (
         <div className="account-section">
-            <div className="account-section-header">
-                <div>
-                    <h2 className="account-section-title">Дневник питания</h2>
-                </div>
-                <div className="stats-date-picker">
-                    <div className="stats-date-compact">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                            <line x1="8" y1="2" x2="8" y2="6"></line>
-                            <line x1="3" y1="10" x2="21" y2="10"></line>
-                        </svg>
-                        <span>{formatDateCompact(selectedDate)}</span>
-                        <input
-                            type="date"
-                            value={selectedDate}
-                            onChange={handleDateChange}
-                            className="date-input-hidden"
-                        />
+            <div className="nds">
+                <div className="ndsHeader">
+                    <h2 className="ndsTitle">Дневник питания</h2>
+                    <div className="ndsDateWrap">
+                        <button className="ndsDateBtn" type="button" onClick={() => handleShiftDate(-1)} aria-label="Предыдущий день">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <polyline points="15 18 9 12 15 6" />
+                            </svg>
+                        </button>
+                        <div className="ndsDatePill">
+                            <span className="ndsCalIcon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                            </span>
+                            <span className="ndsDateText">{formatDateCompact(selectedDate)}</span>
+                            <input
+                                type="date"
+                                value={selectedDate}
+                                onChange={handleDateChange}
+                                className="ndsDateInput"
+                            />
+                        </div>
+                        <button className="ndsDateBtn" type="button" onClick={() => handleShiftDate(1)} aria-label="Следующий день">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
-            </div>
 
-            {/* Summary Cards */}
-            <div className="goals-grid">
-                <div className="macro-card highlight">
-                    <div className="macro-label">Калории</div>
-                    <div className="macro-value">
-                        {goalData ? Math.round(Math.max(0, remaining.calories)) : '—'}
-                        <span className="macro-unit">ккал</span>
+                <div className="ndsCard ndsCardMain">
+                    <div className="ndsCardTop">
+                        <div className="ndsCardLabel">Сводка дня</div>
+                        <div className="ndsCardValue">
+                            {Math.round(dayStats.calories)}
+                            <span className="ndsMuted">/ {goalData?.target_calories || '—'}</span>
+                        </div>
                     </div>
-                    <div className="progress-bar">
+                    <div className="ndsStrong">Калории</div>
+                    <div className="ndsBar">
                         <div
-                            className="progress-fill"
+                            className="ndsBarFill ndsBarFillGreen"
                             style={{ width: `${Math.min(100, (dayStats.calories / (goalData?.target_calories || 1)) * 100)}%` }}
                         ></div>
                     </div>
-                    {/* Desktop subtext */}
-                    <div className="macro-subtext desktop-only">Съедено: {Math.round(dayStats.calories)} / {goalData?.target_calories || '—'}</div>
-                    {/* Mobile subtext */}
-                    <div className="macro-subtext mobile-only">{Math.round(dayStats.calories)} / {goalData?.target_calories || '—'}</div>
                 </div>
 
-                {/* Desktop Macros */}
-                <div className="macros-row desktop-only">
-                    {/* Protein */}
-                    <div className="macro-card">
-                        <div className="macro-label">Белки</div>
-                        <div className="macro-value">{Math.round(Math.max(0, remaining.protein))} г</div>
-                        <div className="macro-subtext">Съедено: {Math.round(dayStats.protein)} / {goalData?.target_protein || '—'}</div>
-                    </div>
-                    {/* Fat */}
-                    <div className="macro-card">
-                        <div className="macro-label">Жиры</div>
-                        <div className="macro-value">{Math.round(Math.max(0, remaining.fat))} г</div>
-                        <div className="macro-subtext">Съедено: {Math.round(dayStats.fat)} / {goalData?.target_fat || '—'}</div>
-                    </div>
-                    {/* Carbs */}
-                    <div className="macro-card">
-                        <div className="macro-label">Углеводы</div>
-                        <div className="macro-value">{Math.round(Math.max(0, remaining.carbs))} г</div>
-                        <div className="macro-subtext">Съедено: {Math.round(dayStats.carbs)} / {goalData?.target_carbs || '—'}</div>
-                    </div>
-                </div>
-
-                {/* Mobile Macros */}
-                <div className="macro-tiles-grid mobile-only">
-                    <div className="macro-tile">
-                        <div className="macro-tile-label">Б</div>
-                        <div className="macro-tile-value">{Math.round(dayStats.protein)} / {goalData?.target_protein || '—'}</div>
-                        <div className="mini-progress-bar">
-                            <div className="mini-progress-fill" style={{ width: `${Math.min(100, (dayStats.protein / (goalData?.target_protein || 1)) * 100)}%` }}></div>
+                <div className="ndsTiles">
+                    <div className="ndsTile">
+                        <div className="ndsTileHead">Б</div>
+                        <div className="ndsTileNums">
+                            <span className="ndsStrong">{Math.round(dayStats.protein)}</span>
+                            <span className="ndsMuted">/ {goalData?.target_protein || '—'} г</span>
+                        </div>
+                        <div className="ndsBar ndsBarSmall">
+                            <div
+                                className="ndsBarFill toneGreen"
+                                style={{ width: `${Math.min(100, (dayStats.protein / (goalData?.target_protein || 1)) * 100)}%` }}
+                            ></div>
                         </div>
                     </div>
-                    <div className="macro-tile">
-                        <div className="macro-tile-label">Ж</div>
-                        <div className="macro-tile-value">{Math.round(dayStats.fat)} / {goalData?.target_fat || '—'}</div>
-                        <div className="mini-progress-bar">
-                            <div className="mini-progress-fill" style={{ width: `${Math.min(100, (dayStats.fat / (goalData?.target_fat || 1)) * 100)}%` }}></div>
+                    <div className="ndsTile">
+                        <div className="ndsTileHead">Ж</div>
+                        <div className="ndsTileNums">
+                            <span className="ndsStrong">{Math.round(dayStats.fat)}</span>
+                            <span className="ndsMuted">/ {goalData?.target_fat || '—'} г</span>
+                        </div>
+                        <div className="ndsBar ndsBarSmall">
+                            <div
+                                className="ndsBarFill toneAmber"
+                                style={{ width: `${Math.min(100, (dayStats.fat / (goalData?.target_fat || 1)) * 100)}%` }}
+                            ></div>
                         </div>
                     </div>
-                    <div className="macro-tile">
-                        <div className="macro-tile-label">У</div>
-                        <div className="macro-tile-value">{Math.round(dayStats.carbs)} / {goalData?.target_carbs || '—'}</div>
-                        <div className="mini-progress-bar">
-                            <div className="mini-progress-fill" style={{ width: `${Math.min(100, (dayStats.carbs / (goalData?.target_carbs || 1)) * 100)}%` }}></div>
+                    <div className="ndsTile">
+                        <div className="ndsTileHead">У</div>
+                        <div className="ndsTileNums">
+                            <span className="ndsStrong">{Math.round(dayStats.carbs)}</span>
+                            <span className="ndsMuted">/ {goalData?.target_carbs || '—'} г</span>
+                        </div>
+                        <div className="ndsBar ndsBarSmall">
+                            <div
+                                className="ndsBarFill toneBlue"
+                                style={{ width: `${Math.min(100, (dayStats.carbs / (goalData?.target_carbs || 1)) * 100)}%` }}
+                            ></div>
                         </div>
                     </div>
                 </div>
