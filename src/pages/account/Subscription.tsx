@@ -8,8 +8,8 @@ import {
   useSubscriptionStore,
 } from "@/store/subscription";
 import SubscriptionPlansModal from "@/components/subscription/SubscriptionPlansModal";
-import subscriptionActive from "@/assets/subscription/subscription-active.webp";
-import subscriptionExpired from "@/assets/subscription/subscription-expired.webp";
+const subscriptionActive = "/assets/subscription/subscription-active.webp";
+const subscriptionExpired = "/assets/subscription/subscription-expired.webp";
 
 type SubscriptionStatusResponse = {
   ok?: boolean;
