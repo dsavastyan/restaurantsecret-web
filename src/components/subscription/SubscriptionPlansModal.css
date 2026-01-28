@@ -86,20 +86,18 @@
 /* --- Mobile Bottom Sheet Styles --- */
 @media (max-width: 720px) {
   .rsModalOverlay {
-    padding: 0;
-    align-items: flex-end;
-    /* Push modal to bottom */
+    padding: 16px;
+    align-items: center;
+    /* Center modal */
   }
 
   .rsModal {
     width: 100%;
     max-width: 100%;
-    /* Bottom sheet look */
-    border-radius: 20px 20px 0 0;
-    border-bottom: none;
-    max-height: calc(100dvh - 16px);
-
-    /* Animation could be added here */
+    /* Centered modal */
+    border-radius: 22px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.7);
+    max-height: calc(100dvh - 32px);
   }
 
   .rsModalHeader {
@@ -132,9 +130,10 @@
     right: 16px;
     width: 32px;
     height: 32px;
-    background: rgba(0, 0, 0, 0.05);
+    background: rgba(255, 255, 255, 0.5);
     border: none;
     font-size: 14px;
+    backdrop-filter: blur(4px);
   }
 
   .rsModalContent {
