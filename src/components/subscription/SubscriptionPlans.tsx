@@ -15,6 +15,7 @@ export default function SubscriptionPlans({
     promoError,
 }: SubscriptionPlansProps) {
     const [promo, setPromo] = useState("");
+    const [showPromo, setShowPromo] = useState(false);
 
     const canApply = useMemo(() => promo.trim().length > 0 && !loading, [promo, loading]);
 
@@ -72,29 +73,41 @@ export default function SubscriptionPlans({
 
             <div className="rsFootnote">* Подписка продлевается автоматически</div>
 
-            <div className="rsPromoBox">
-                <div className="rsPromoTitle">Есть промокод?</div>
-
-                <div className="rsPromoRow">
-                    <input
-                        className="rsPromoInput"
-                        placeholder="Введите промокод"
-                        value={promo}
-                        onChange={(event) => setPromo(event.target.value)}
-                        disabled={loading}
-                    />
-                    <button
-                        className="rsPromoBtn"
-                        onClick={() => onApplyPromo?.(promo.trim())}
-                        disabled={!canApply}
-                    >
-                        Применить
-                    </button>
+            <div className={`rsPromoBox ${showPromo ? "rsPromoBox--open" : ""}`}>
+                <div
+                    className="rsPromoHeader"
+                    onClick={() => setShowPromo(!showPromo)}
+                >
+                    <div className="rsPromoTitle">Есть промокод?</div>
+                    <div className={`rsPromoChevron ${showPromo ? "rsPromoChevron--open" : ""}`}>
+                        ▼
+                    </div>
                 </div>
 
-                {promoError && (
-                    <div className="rsPromoError">
-                        {promoError}
+                {showPromo && (
+                    <div className="rsPromoBody">
+                        <div className="rsPromoRow">
+                            <input
+                                className="rsPromoInput"
+                                placeholder="Введите промокод"
+                                value={promo}
+                                onChange={(event) => setPromo(event.target.value)}
+                                disabled={loading}
+                            />
+                            <button
+                                className="rsPromoBtn"
+                                onClick={() => onApplyPromo?.(promo.trim())}
+                                disabled={!canApply}
+                            >
+                                Применить
+                            </button>
+                        </div>
+
+                        {promoError && (
+                            <div className="rsPromoError">
+                                {promoError}
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
