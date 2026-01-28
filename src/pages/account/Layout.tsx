@@ -72,6 +72,20 @@ export default function AccountLayout() {
     }
   }, [accessToken, load]);
 
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  const navItems = [
+    { to: "/account", label: "Профиль", end: true },
+    { to: "/account/subscription", label: "Управлять подпиской" },
+    { to: "/account/goals", label: "Мои цели" },
+    { to: "/account/statistics", label: "Статистика" },
+    { to: "/account/favorites", label: "Избранное" },
+  ];
+
+  const currentNav = navItems.find((item) =>
+    item.end ? location.pathname === item.to : location.pathname.startsWith(item.to)
+  ) || navItems[0];
+
   const sub = me?.user?.subscription || null;
   const daysLeft = useMemo(() => {
     if (!sub?.expires_at) return null;
@@ -90,61 +104,81 @@ export default function AccountLayout() {
   }
 
   return (
-    <div className="account">
+    <div className={`account${isSheetOpen ? " account--sheet-open" : ""}`}>
       <div className="account__inner">
         <header className="account__header">
-          <h1 className="account__title">Личный кабинет</h1>
-          <p className="account__subtitle">
-            Управляйте профилем и подпиской в едином пространстве
-          </p>
+          <div className="account__header-desktop">
+            <h1 className="account__title">Личный кабинет</h1>
+          </div>
+          <div className="account__header-mobile">
+            <button
+              className="account__mobile-toggle"
+              onClick={() => setIsSheetOpen(true)}
+              aria-label="Открыть меню"
+            >
+              <span className="account__mobile-toggle-label">{currentNav.label}</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M4 6h16M4 12h16m-7 6h7" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>
         </header>
+
         <div className="account__layout">
           <nav className="account-nav" aria-label="Навигация по личному кабинету">
-            <NavLink
-              to="/account"
-              end
-              className={({ isActive }) =>
-                `account-nav__link${isActive ? " account-nav__link--active" : ""}`
-              }
-            >
-              <span className="account-nav__label">Профиль</span>
-            </NavLink>
-            <NavLink
-              to="/account/subscription"
-              className={({ isActive }) =>
-                `account-nav__link${isActive ? " account-nav__link--active" : ""}`
-              }
-            >
-              <span className="account-nav__label">Управлять подпиской</span>
-            </NavLink>
-            <NavLink
-              to="/account/goals"
-              className={({ isActive }) =>
-                `account-nav__link${isActive ? " account-nav__link--active" : ""}`
-              }
-            >
-              <span className="account-nav__label">Мои цели</span>
-            </NavLink>
-            <NavLink
-              to="/account/statistics"
-              className={({ isActive }) =>
-                `account-nav__link${isActive ? " account-nav__link--active" : ""}`
-              }
-            >
-              <span className="account-nav__label">Статистика</span>
-            </NavLink>
-            <NavLink
-              to="/account/favorites"
-              className={({ isActive }) =>
-                `account-nav__link${isActive ? " account-nav__link--active" : ""}`
-              }
-            >
-              <span className="account-nav__label">Избранное</span>
-            </NavLink>
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) =>
+                  `account-nav__link${isActive ? " account-nav__link--active" : ""}`
+                }
+              >
+                <span className="account-nav__label">{item.label}</span>
+              </NavLink>
+            ))}
           </nav>
+
           <div className="account__content">
             <Outlet context={outletContext} />
           </div>
+        </div>
+      </div>
+
+      {/* Bottom Sheet for Mobile */}
+      <div
+        className={`account-sheet-overlay${isSheetOpen ? " is-visible" : ""}`}
+        onClick={() => setIsSheetOpen(false)}
+      />
+      <div className={`account-sheet${isSheetOpen ? " is-open" : ""}`}>
+        <div className="account-sheet__handle" />
+        <div className="account-sheet__content">
+          <div className="account-sheet__header">Навигация</div>
+          <nav className="account-sheet__nav">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) =>
+                  `account-sheet__link${isActive ? " is-active" : ""}`
+                }
+                onClick={() => setIsSheetOpen(false)}
+              >
+                <span className="account-sheet__link-label">{item.label}</span>
+                {location.pathname === item.to || (item.end === false && location.pathname.startsWith(item.to)) ? (
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </NavLink>
+            ))}
+          </nav>
         </div>
       </div>
     </div>

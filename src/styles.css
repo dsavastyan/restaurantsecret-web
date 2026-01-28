@@ -2620,20 +2620,59 @@ body {
   gap: 12px;
 }
 
+.account__header-mobile {
+  display: none;
+}
+
+@media (max-width: 899px) {
+  .account {
+    padding-top: 16px;
+  }
+
+  .account__header-desktop {
+    display: none;
+  }
+
+  .account__header-mobile {
+    display: block;
+    position: sticky;
+    top: 64px;
+    z-index: 20;
+    margin: 0 -16px;
+    padding: 0 16px 16px;
+  }
+
+  .account__mobile-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 22px;
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 24px;
+    box-shadow: 0 8px 26px rgba(15, 23, 42, 0.08);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--rs-text);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .account__mobile-toggle svg {
+    width: 22px;
+    height: 22px;
+    color: var(--rs-accent);
+  }
+}
+
 .account__title {
   margin: 0;
   font-size: clamp(28px, 4vw, 36px);
   font-weight: 800;
   letter-spacing: -0.02em;
   color: var(--rs-text);
-}
-
-.account__subtitle {
-  margin: 0;
-  max-width: 520px;
-  color: var(--rs-muted);
-  line-height: 1.6;
-  font-size: 16px;
 }
 
 .account__layout {
@@ -2661,6 +2700,12 @@ body {
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(12px);
   box-shadow: var(--rs-shadow);
+}
+
+@media (max-width: 899px) {
+  .account-nav {
+    display: none;
+  }
 }
 
 .account-nav__link {
@@ -2698,8 +2743,102 @@ body {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: clamp(18px, 4vw, 28px);
 }
+
+/* Bottom Sheet */
+.account-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.account-sheet-overlay.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.account-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 36px 36px 0 0;
+  z-index: 1001;
+  transform: translateY(100%);
+  transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+  padding: 8px 16px 48px;
+  box-shadow: 0 -20px 60px rgba(15, 23, 42, 0.2);
+}
+
+.account-sheet.is-open {
+  transform: translateY(0);
+}
+
+.account-sheet__handle {
+  width: 36px;
+  height: 5px;
+  background: #e2e8f0;
+  border-radius: 99px;
+  margin: 8px auto 24px;
+}
+
+.account-sheet__header {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--rs-muted);
+  margin-bottom: 20px;
+  padding: 0 12px;
+}
+
+.account-sheet__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.account-sheet__link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-radius: 24px;
+  text-decoration: none;
+  color: var(--rs-text);
+  font-weight: 700;
+  font-size: 17px;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.account-sheet__link svg {
+  width: 20px;
+  height: 20px;
+  color: #cbd5e1;
+}
+
+.account-sheet__link.is-active {
+  background: linear-gradient(135deg, var(--rs-primary) 0%, var(--rs-accent) 100%);
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(242, 95, 58, 0.2);
+}
+
+.account-sheet__link.is-active svg {
+  color: #fff;
+}
+
+body:has(.account--sheet-open) {
+  overflow: hidden;
+}
+
 
 .account-panel {
   background: rgba(255, 255, 255, 0.95);

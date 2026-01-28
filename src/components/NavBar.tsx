@@ -22,11 +22,12 @@ export default function NavBar() {
           </Link>
         </div>
 
-        {token ? (
+        {token && !location.pathname.startsWith("/account") && (
           <Link to="/account" className="btn btn--primary">
             Личный кабинет
           </Link>
-        ) : (
+        )}
+        {!token && (
           <Link
             to="/login"
             state={{ from: location.pathname + location.search }}
