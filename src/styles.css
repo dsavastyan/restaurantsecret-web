@@ -3391,22 +3391,22 @@ body:has(.account--sheet-open) {
 }
 
 .account-subscription-v2__btn-history {
-  color: #1e293b;
-  font-weight: 600;
-  text-decoration: none;
+  color: #94a3b8;
+  font-weight: 500;
+  text-decoration: underline;
+  font-size: 14px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 12px 20px;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
-  transition: border-color 0.2s, color 0.2s;
+  gap: 4px;
+  transition: color 0.2s;
 }
 
 .account-subscription-v2__btn-history:hover {
-  border-color: #cbd5f5;
-  color: #0f172a;
+  color: #64748b;
 }
 
 .account-subscription-v2__error-box {
@@ -3432,15 +3432,42 @@ body:has(.account--sheet-open) {
 /* Mobile responsive */
 @media (max-width: 768px) {
   .account-subscription-v2__card {
-    flex-direction: column;
-    padding: 24px;
-    align-items: flex-start;
+    /* flex-direction: column;  <-- Changed to keep layout or use relative positioning */
+    display: block;
+    /* Use block to allow absolute positioning of image relative to container easily */
+    position: relative;
+    padding: 24px 20px 24px;
+    overflow: hidden;
   }
 
+  .account-subscription-v2__card-content {
+    position: relative;
+    z-index: 2;
+    max-width: 100%;
+  }
+
+  .account-subscription-v2__card-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  /* Position image on the right side "beautifully" */
   .account-subscription-v2__card-illus {
-    order: -1;
-    margin: 0 auto 20px;
-    max-width: 200px;
+    position: absolute;
+    right: -30px;
+    bottom: -10px;
+    width: 160px;
+    opacity: 1;
+    z-index: 1;
+    transform: rotate(-10deg);
+    pointer-events: none;
+    /* Let clicks pass through */
+  }
+
+  /* Ensure text doesn't hit the image too hard, or just let it overlap slightly with z-index */
+  .account-subscription-v2__card-text {
+    max-width: 70%;
   }
 
   .account-subscription-v2__plans {
@@ -3457,9 +3484,11 @@ body:has(.account--sheet-open) {
   }
 
   .account-subscription-v2__promo-form {
-    max-width: none;
+    max-width: 100%;
+    flex-direction: column;
   }
 }
+
 
 .account-subscription__grid {
   display: grid;

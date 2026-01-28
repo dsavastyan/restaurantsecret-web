@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect } from "react";
 import type { MouseEvent } from "react";
+import SubscriptionPlans from "./SubscriptionPlans";
 import "./SubscriptionPlansModal.css";
 
 type SubscriptionPlansModalProps = {
@@ -8,6 +9,7 @@ type SubscriptionPlansModalProps = {
   onChoosePlan?: (plan: "month" | "year") => void;
   onApplyPromo?: (code: string) => void;
   loading?: boolean;
+  promoError?: string | null;
 };
 
 export default function SubscriptionPlansModal({
@@ -16,9 +18,8 @@ export default function SubscriptionPlansModal({
   onChoosePlan,
   onApplyPromo,
   loading = false,
+  promoError,
 }: SubscriptionPlansModalProps) {
-  const [promo, setPromo] = useState("");
-
   useEffect(() => {
     if (!open) return;
 
@@ -35,8 +36,6 @@ export default function SubscriptionPlansModal({
       document.body.style.overflow = prevOverflow;
     };
   }, [open, onClose]);
-
-  const canApply = useMemo(() => promo.trim().length > 0 && !loading, [promo, loading]);
 
   if (!open) return null;
 
@@ -56,76 +55,12 @@ export default function SubscriptionPlansModal({
           </div>
         </div>
 
-        <div className="rsPlanGrid">
-          <div className="rsPlanCard rsPlanMonth">
-            <div className="rsPlanName">Месяц</div>
-            <div className="rsPlanPrice">
-              <span className="rsPlanPriceBig">99 ₽</span>
-              <span className="rsPlanPriceSmall">в месяц*</span>
-            </div>
-            <div className="rsPlanDesc">
-              Подходит чтобы оценить <br /> удобство сервиса
-            </div>
-
-            <button
-              className="rsPlanGhostBtn"
-              onClick={() => onChoosePlan?.("month")}
-              disabled={loading}
-            >
-              <span className="rsIconSquare">▢</span>
-              Попробовать
-            </button>
-          </div>
-
-          <div className="rsPlanCard rsPlanYear">
-            <div className="rsPlanTopRow">
-              <div className="rsPlanName">Год</div>
-              <div className="rsBadge">ВЫГОДНО</div>
-            </div>
-
-            <div className="rsPlanPrice">
-              <span className="rsPlanPriceBig">999 ₽</span>
-              <span className="rsPlanPriceSmall">в год</span>
-            </div>
-
-            <div className="rsPlanDesc">
-              12 месяцев по цене 10. Лучший <br />
-              выбор для тех, кто регулярно <br />
-              следует цели
-            </div>
-
-            <button
-              className="rsPlanPrimaryBtn"
-              onClick={() => onChoosePlan?.("year")}
-              disabled={loading}
-            >
-              Оформить
-            </button>
-          </div>
-        </div>
-
-        <div className="rsFootnote">* Подписка продлевается автоматически</div>
-
-        <div className="rsPromoBox">
-          <div className="rsPromoTitle">Есть промокод?</div>
-
-          <div className="rsPromoRow">
-            <input
-              className="rsPromoInput"
-              placeholder="Введите промокод"
-              value={promo}
-              onChange={(event) => setPromo(event.target.value)}
-              disabled={loading}
-            />
-            <button
-              className="rsPromoBtn"
-              onClick={() => onApplyPromo?.(promo.trim())}
-              disabled={!canApply}
-            >
-              Применить
-            </button>
-          </div>
-        </div>
+        <SubscriptionPlans
+          onChoosePlan={onChoosePlan}
+          onApplyPromo={onApplyPromo}
+          loading={loading}
+          promoError={promoError}
+        />
       </div>
     </div>
   );
