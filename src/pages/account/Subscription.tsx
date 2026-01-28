@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import Button from "@/components/ui/Button";
 import { ApiError, apiGet, apiPost, applyPromo, isUnauthorizedError } from "@/lib/api";
@@ -108,7 +108,6 @@ export default function AccountSubscription() {
   const [promoError, setPromoError] = useState<string | null>(null);
   const [promoLoading, setPromoLoading] = useState(false);
   const [autopayConsent, setAutopayConsent] = useState(true);
-  const plansRef = useRef<HTMLDivElement | null>(null);
 
   const fetchStatus = useCallback(async () => {
     if (!accessToken) {
@@ -218,10 +217,6 @@ export default function AccountSubscription() {
     if (status === "none") return null;
     return status;
   }, [statusData?.status_label, status]);
-
-  const handleRenewClick = useCallback(() => {
-    plansRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
 
   const promoErrorLabel = useMemo(() => {
     if (!promoError) return null;
@@ -355,10 +350,8 @@ export default function AccountSubscription() {
         )}
       </header>
 
-      {statusMessage && !isCanceled && !isExpired && (
-        <p className="account-subscription__status" role="status">{statusMessage}</p>
-      )}
-      {statusLabel && !statusMessage && !isCanceled && !isExpired && (
+      {statusMessage && <p className="account-subscription__status" role="status">{statusMessage}</p>}
+      {statusLabel && !statusMessage && (
         <p className="account-subscription__status" role="status">{statusLabel}</p>
       )}
 
@@ -384,66 +377,12 @@ export default function AccountSubscription() {
 
       {!loading && !isActive && (
         <div className="account-subscription__plans">
-          {(isCanceled || isExpired) ? (
-            <div className="account-subscription__ended" role="status">
-              <div className="account-subscription__ended-body">
-                <div className="account-subscription__ended-alert" aria-hidden="true">!</div>
-                <div className="account-subscription__ended-content">
-                  <h3>Подписка завершена</h3>
-                  <p>
-                    Ваша подписка завершилась <strong>{expiresLabel ?? "—"}</strong>
-                  </p>
-                  <div className="account-subscription__ended-date">
-                    <span className="account-subscription__ended-date-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none">
-                        <rect x="3.5" y="5" width="17" height="15" rx="3" stroke="currentColor" strokeWidth="1.5" />
-                        <path d="M8 3.5V7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                        <path d="M16 3.5V7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                        <path d="M3.5 9.5H20.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                      </svg>
-                    </span>
-                    <span>{expiresLabel ?? "—"}</span>
-                  </div>
-                  <Button
-                    className="account-button account-button--primary account-subscription__ended-button"
-                    onClick={handleRenewClick}
-                  >
-                    Продлить подписку
-                  </Button>
-                </div>
-              </div>
-              <div className="account-subscription__ended-art" aria-hidden="true">
-                <svg viewBox="0 0 260 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M52 156c-24-17-29-46-17-70 13-27 43-41 71-35 7-22 29-38 54-37 29 0 53 19 59 45 25 1 47 18 53 42 8 31-10 64-40 73H52Z"
-                    fill="#EAF2E6"
-                  />
-                  <rect x="92" y="54" width="122" height="122" rx="16" fill="#DCE7D3" />
-                  <rect x="102" y="64" width="102" height="102" rx="12" fill="#F8FAF5" stroke="#C4D4B9" strokeWidth="4" />
-                  <rect x="122" y="88" width="62" height="46" rx="10" fill="#F6E6D8" />
-                  <path
-                    d="M153 98l-9 15a4 4 0 0 0 3 6h18a4 4 0 0 0 3-6l-9-15a4 4 0 0 0-6 0Z"
-                    fill="#F2A46A"
-                  />
-                  <circle cx="142" cy="118" r="3" fill="#F2A46A" />
-                  <rect x="123" y="144" width="60" height="14" rx="7" fill="#C7D6B9" />
-                  <rect x="148" y="146" width="22" height="6" rx="3" fill="#95AA84" />
-                  <rect x="128" y="36" width="50" height="20" rx="8" fill="#DCE7D3" />
-                  <rect x="132" y="32" width="42" height="16" rx="7" fill="#C4D4B9" />
-                  <circle cx="78" cy="116" r="4" fill="#F3D6A6" />
-                  <circle cx="224" cy="96" r="5" fill="#F3D6A6" />
-                  <circle cx="210" cy="130" r="3" fill="#D7E2C9" />
-                </svg>
-              </div>
-            </div>
-          ) : (
-            <div className="account-subscription__empty" role="status">
-              <h3>Оформите подписку</h3>
-              <p>Подписка открывает доступ к полной карточке блюд, включая КБЖУ и составы блюд</p>
-            </div>
-          )}
+          <div className="account-subscription__empty" role="status">
+            <h3>Оформите подписку</h3>
+            <p>Подписка открывает доступ к полной карточке блюд, включая КБЖУ и составы блюд</p>
+          </div>
 
-          <div className="account-subscription__grid" role="list" ref={plansRef}>
+          <div className="account-subscription__grid" role="list">
             <TariffCard
               title="Месяц"
               price="99 ₽ в месяц*"
