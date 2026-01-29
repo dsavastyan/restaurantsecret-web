@@ -7,18 +7,41 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
 
     const stations = metroData.stations || [];
 
+    // Group stations by name to avoid duplicates (different lines)
+    const groupedStations = useMemo(() => {
+        const groups = {};
+        stations.forEach(s => {
+            if (!groups[s.name_ru]) {
+                groups[s.name_ru] = {
+                    name_ru: s.name_ru,
+                    ids: []
+                };
+            }
+            groups[s.name_ru].ids.push(s.id);
+        });
+        return Object.values(groups).sort((a, b) => a.name_ru.localeCompare(b.name_ru));
+    }, [stations]);
+
     // Filter stations based on search
     const filteredStations = useMemo(() => {
-        if (!searchQuery) return stations;
+        if (!searchQuery) return groupedStations;
         const lower = searchQuery.toLowerCase();
-        return stations.filter(s => s.name_ru.toLowerCase().includes(lower));
-    }, [stations, searchQuery]);
+        return groupedStations.filter(s => s.name_ru.toLowerCase().includes(lower));
+    }, [groupedStations, searchQuery]);
 
     // Handle selection toggle
-    const toggleStation = (id) => {
-        const nextIds = selectedStationIds.includes(id)
-            ? selectedStationIds.filter(i => i !== id)
-            : [...selectedStationIds, id];
+    const toggleStation = (ids) => {
+        const allSelected = ids.every(id => selectedStationIds.includes(id));
+
+        let nextIds;
+        if (allSelected) {
+            // Deselect all ids for this station name
+            nextIds = selectedStationIds.filter(id => !ids.includes(id));
+        } else {
+            // Select all ids for this station name
+            const newIds = ids.filter(id => !selectedStationIds.includes(id));
+            nextIds = [...selectedStationIds, ...newIds];
+        }
 
         onChange({ stationIds: nextIds });
     };
@@ -39,7 +62,11 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const selectedCount = selectedStationIds.length;
+    // Calculate selected count based on unique station names
+    const selectedCount = groupedStations.filter(g =>
+        g.ids.length > 0 && g.ids.every(id => selectedStationIds.includes(id))
+    ).length;
+
     const triggerText = selectedCount > 0
         ? `Выбрано: ${selectedCount}`
         : "Выберите станции метро";
@@ -81,18 +108,18 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
                         {filteredStations.length === 0 ? (
                             <div className="no-results">Ничего не найдено</div>
                         ) : (
-                            filteredStations.map(s => {
-                                const isSelected = selectedStationIds.includes(s.id);
+                            filteredStations.map(group => {
+                                const isSelected = group.ids.length > 0 && group.ids.every(id => selectedStationIds.includes(id));
                                 return (
                                     <div
-                                        key={s.id}
+                                        key={group.name_ru}
                                         className={`option-item ${isSelected ? 'selected' : ''}`}
-                                        onClick={() => toggleStation(s.id)}
+                                        onClick={() => toggleStation(group.ids)}
                                     >
                                         <div className="checkbox">
                                             {isSelected && <span className="check">✓</span>}
                                         </div>
-                                        <span className="station-name">{s.name_ru}</span>
+                                        <span className="station-name">{group.name_ru}</span>
                                     </div>
                                 );
                             })
