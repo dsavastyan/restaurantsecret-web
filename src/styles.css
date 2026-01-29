@@ -5096,6 +5096,124 @@ body:has(.account--sheet-open) {
   transform: translateY(1px);
 }
 
+/* Goals Modal */
+.goals-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.goals-modal__dialog {
+  background: white;
+  border-radius: 24px;
+  padding: 32px 28px;
+  width: min(480px, 100%);
+  box-shadow: 0 25px 50px rgba(15, 23, 42, 0.25);
+}
+
+.goals-modal__title {
+  margin: 0 0 24px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  text-align: center;
+}
+
+.goals-modal__form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.goals-modal__form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.goals-modal__form .form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.goals-modal__form .form-group input {
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 15px;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+}
+
+.goals-modal__form .form-group input:focus {
+  outline: none;
+  border-color: var(--rs-accent);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(47, 143, 91, 0.1);
+}
+
+.goals-modal__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.goals-modal__actions .account-button {
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.goals-modal__actions .account-button--outline {
+  background: white;
+  border: 1px solid #e2e8f0;
+  color: #4b5563;
+}
+
+.goals-modal__actions .account-button--outline:hover {
+  background: #f8fafc;
+}
+
+.goals-modal__actions .account-button--primary {
+  background: linear-gradient(180deg, #79b49b 0%, #4f826e 100%);
+  border: none;
+  color: white;
+  box-shadow: 0 10px 20px rgba(79, 130, 110, 0.25);
+}
+
+.goals-modal__actions .account-button--primary:hover {
+  box-shadow: 0 14px 28px rgba(79, 130, 110, 0.35);
+}
+
+.goals-modal__actions .account-button--primary:active {
+  transform: translateY(1px);
+}
+
+@media (max-width: 640px) {
+  .goals-modal__dialog {
+    padding: 24px 20px;
+  }
+
+  .goals-modal__form {
+    grid-template-columns: 1fr;
+  }
+
+  .goals-modal__title {
+    font-size: 20px;
+  }
+}
+
 .input-sm {
   border: 1px solid #d1d5db;
   border-radius: 4px;
