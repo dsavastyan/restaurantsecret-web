@@ -1835,6 +1835,41 @@ body {
   box-shadow: 0 14px 36px rgba(15, 23, 42, 0.25);
 }
 
+.contact-page--feedback .contact-card--accent {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, rgba(214, 245, 228, 0.92) 0%, rgba(245, 252, 248, 0.98) 100%);
+  color: #0f172a;
+  border: 1px solid rgba(34, 197, 94, 0.18);
+  box-shadow:
+    0 18px 40px rgba(15, 23, 42, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(6px);
+}
+
+.contact-page--feedback .contact-card--accent::before {
+  content: "";
+  position: absolute;
+  inset: -30% 40% 50% -40%;
+  background: radial-gradient(circle, rgba(34, 197, 94, 0.18), transparent 70%);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.contact-page--feedback .contact-card--accent::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), transparent 45%);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.contact-page--feedback .contact-card--accent > * {
+  position: relative;
+  z-index: 1;
+}
+
 .contact-card--accent a {
   color: #c7f0d8;
 }
@@ -1857,6 +1892,10 @@ body {
   color: rgba(229, 231, 235, 0.7);
 }
 
+.contact-page--feedback .contact-card--accent .contact-card__eyebrow {
+  color: rgba(22, 101, 52, 0.75);
+}
+
 .contact-card__title {
   margin: 0;
   font-size: clamp(20px, 3vw, 24px);
@@ -1871,6 +1910,10 @@ body {
 
 .contact-card--accent .contact-card__hint {
   color: rgba(229, 231, 235, 0.8);
+}
+
+.contact-page--feedback .contact-card--accent .contact-card__hint {
+  color: rgba(22, 101, 52, 0.7);
 }
 
 .contact-details {
@@ -1999,6 +2042,140 @@ body {
   gap: 8px;
 }
 
+.contact-page--feedback .contact-card:not(.contact-card--accent) .contact-list__item {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.contact-page--feedback .contact-card:not(.contact-card--accent) .contact-list__label {
+  color: #64748b;
+}
+
+.contact-page--feedback .contact-card:not(.contact-card--accent) .contact-list__value {
+  color: #0f172a;
+}
+
+.contact-page--feedback .contact-card:not(.contact-card--accent) .contact-list__cta {
+  background: var(--rs-accent);
+  color: #fff;
+}
+
+.feedback-form {
+  display: grid;
+  gap: 16px;
+}
+
+.feedback-form__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.feedback-form__field {
+  display: grid;
+  gap: 8px;
+  text-align: left;
+}
+
+.feedback-form__label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: rgba(15, 23, 42, 0.7);
+}
+
+.feedback-form__input,
+.feedback-form__select,
+.feedback-form__textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  padding: 12px 14px;
+  font-size: 15px;
+  background: #f8fafc;
+  color: #0f172a;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.feedback-form__textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.feedback-form__input:focus,
+.feedback-form__select:focus,
+.feedback-form__textarea:focus {
+  outline: none;
+  border-color: var(--rs-accent);
+  box-shadow: 0 0 0 3px rgba(47, 143, 91, 0.18);
+  background: #fff;
+}
+
+.feedback-form__input::placeholder,
+.feedback-form__textarea::placeholder {
+  color: #94a3b8;
+}
+
+.feedback-form__textarea.is-invalid {
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
+}
+
+.feedback-form__submit {
+  justify-self: flex-start;
+  min-width: 200px;
+}
+
+.contact-card--accent .feedback-form__label {
+  color: rgba(226, 232, 240, 0.8);
+}
+
+.contact-page--feedback .contact-card--accent .feedback-form__label {
+  color: rgba(15, 23, 42, 0.7);
+}
+
+.contact-card--accent .feedback-form__input,
+.contact-card--accent .feedback-form__select,
+.contact-card--accent .feedback-form__textarea {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(148, 163, 184, 0.4);
+  color: #f8fafc;
+}
+
+.contact-page--feedback .contact-card--accent .feedback-form__input,
+.contact-page--feedback .contact-card--accent .feedback-form__select,
+.contact-page--feedback .contact-card--accent .feedback-form__textarea {
+  background: #fff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.contact-card--accent .feedback-form__input::placeholder,
+.contact-card--accent .feedback-form__textarea::placeholder {
+  color: rgba(226, 232, 240, 0.65);
+}
+
+.contact-page--feedback .contact-card--accent .feedback-form__input::placeholder,
+.contact-page--feedback .contact-card--accent .feedback-form__textarea::placeholder {
+  color: #94a3b8;
+}
+
+.contact-card--accent .feedback-form__input:focus,
+.contact-card--accent .feedback-form__select:focus,
+.contact-card--accent .feedback-form__textarea:focus {
+  border-color: #a7f3d0;
+  box-shadow: 0 0 0 3px rgba(167, 243, 208, 0.25);
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.contact-page--feedback .contact-card--accent .feedback-form__input:focus,
+.contact-page--feedback .contact-card--accent .feedback-form__select:focus,
+.contact-page--feedback .contact-card--accent .feedback-form__textarea:focus {
+  border-color: var(--rs-accent);
+  box-shadow: 0 0 0 3px rgba(47, 143, 91, 0.18);
+  background: #fff;
+}
+
 .contact-cta {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -2052,6 +2229,15 @@ body {
 
   .contact-list__cta {
     align-self: flex-end;
+  }
+
+  .feedback-form__row {
+    grid-template-columns: 1fr;
+  }
+
+  .feedback-form__submit {
+    width: 100%;
+    justify-self: stretch;
   }
 }
 
