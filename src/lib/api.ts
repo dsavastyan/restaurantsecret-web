@@ -55,6 +55,13 @@ export type SuggestRequest = {
   email?: string | null;
 };
 
+export type FeedbackRequest = {
+  name?: string | null;
+  email?: string | null;
+  feedback_type: string;
+  message: string;
+};
+
 export class ApiError extends Error {
   status?: number;
   payload?: unknown;
@@ -225,6 +232,10 @@ export async function applyPromo(code: string, token: string) {
 
 export function postSuggest(body: SuggestRequest, token?: string) {
   return apiPost("/api/suggest", body, token);
+}
+
+export function postFeedback(body: FeedbackRequest, token?: string) {
+  return apiPost("/api/feedback", body, token);
 }
 
 export async function searchSuggest(query: string): Promise<SearchSuggestions> {
