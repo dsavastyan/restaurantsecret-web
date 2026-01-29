@@ -1999,6 +1999,97 @@ body {
   gap: 8px;
 }
 
+.feedback-form {
+  display: grid;
+  gap: 16px;
+}
+
+.feedback-form__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.feedback-form__field {
+  display: grid;
+  gap: 8px;
+  text-align: left;
+}
+
+.feedback-form__label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: rgba(15, 23, 42, 0.7);
+}
+
+.feedback-form__input,
+.feedback-form__select,
+.feedback-form__textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  padding: 12px 14px;
+  font-size: 15px;
+  background: #f8fafc;
+  color: #0f172a;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.feedback-form__textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.feedback-form__input:focus,
+.feedback-form__select:focus,
+.feedback-form__textarea:focus {
+  outline: none;
+  border-color: var(--rs-accent);
+  box-shadow: 0 0 0 3px rgba(47, 143, 91, 0.18);
+  background: #fff;
+}
+
+.feedback-form__input::placeholder,
+.feedback-form__textarea::placeholder {
+  color: #94a3b8;
+}
+
+.feedback-form__textarea.is-invalid {
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
+}
+
+.feedback-form__submit {
+  justify-self: flex-start;
+  min-width: 200px;
+}
+
+.contact-card--accent .feedback-form__label {
+  color: rgba(226, 232, 240, 0.8);
+}
+
+.contact-card--accent .feedback-form__input,
+.contact-card--accent .feedback-form__select,
+.contact-card--accent .feedback-form__textarea {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(148, 163, 184, 0.4);
+  color: #f8fafc;
+}
+
+.contact-card--accent .feedback-form__input::placeholder,
+.contact-card--accent .feedback-form__textarea::placeholder {
+  color: rgba(226, 232, 240, 0.65);
+}
+
+.contact-card--accent .feedback-form__input:focus,
+.contact-card--accent .feedback-form__select:focus,
+.contact-card--accent .feedback-form__textarea:focus {
+  border-color: #a7f3d0;
+  box-shadow: 0 0 0 3px rgba(167, 243, 208, 0.25);
+  background: rgba(15, 23, 42, 0.35);
+}
+
 .contact-cta {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -2052,6 +2143,15 @@ body {
 
   .contact-list__cta {
     align-self: flex-end;
+  }
+
+  .feedback-form__row {
+    grid-template-columns: 1fr;
+  }
+
+  .feedback-form__submit {
+    width: 100%;
+    justify-self: stretch;
   }
 }
 
