@@ -3122,7 +3122,7 @@ body:has(.account--sheet-open) {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .account-subscription-v2__card-icon {
@@ -3148,21 +3148,11 @@ body:has(.account--sheet-open) {
   font-weight: 800;
 }
 
-.account-subscription-v2__card-label {
-  font-size: 14px;
-  font-weight: 600;
-  margin: 0;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
 .account-subscription-v2__card-status-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: 12px;
+  flex-wrap: nowrap;
 }
 
 .account-subscription-v2__card-title {
@@ -3172,16 +3162,20 @@ body:has(.account--sheet-open) {
   color: #1e293b;
 }
 
+.account-subscription-v2__card-status-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
 .account-subscription-v2__card-date-box {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #fff;
-  padding: 12px 16px;
-  border-radius: 12px;
-  border: 1px solid #f1f5f9;
   width: fit-content;
-  color: #1e293b;
+  color: #475569;
   font-weight: 600;
 }
 
@@ -3190,6 +3184,11 @@ body:has(.account--sheet-open) {
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.account-subscription-v2__card-history {
+  margin-top: 12px;
 }
 
 .account-subscription-v2__btn-renew {
