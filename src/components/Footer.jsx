@@ -48,6 +48,10 @@ export default function Footer() {
             >
               Telegram-бот
             </a>
+
+            <Link to="/feedback" className="site-footer__link">
+              Оставить отзыв
+            </Link>
           </nav>
 
           <div className="site-footer__meta">
