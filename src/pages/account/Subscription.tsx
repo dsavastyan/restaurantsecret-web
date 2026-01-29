@@ -264,7 +264,7 @@ export default function AccountSubscription() {
         <div className="account-subscription-v2">
           {(isActive || isExpired || isCanceled) && (
             <div className={`account-subscription-v2__card ${isActive ? 'is-active' : 'is-expired'}`}>
-              <div className="account-subscription-v2__card-content">
+              <div className="account-subscription-v2__card-left">
                 <div className="account-subscription-v2__card-header">
                   <div className="account-subscription-v2__card-icon">
                     {isActive ? (
@@ -307,7 +307,9 @@ export default function AccountSubscription() {
                     </Link>
                   </div>
                 )}
+              </div>
 
+              <div className="account-subscription-v2__card-right">
                 <div className="account-subscription-v2__card-illus">
                   <img
                     src={illustrationSrc}
