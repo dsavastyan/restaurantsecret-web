@@ -273,13 +273,15 @@ export default function AccountSubscription() {
                       <span className="account-subscription-v2__card-warning">!</span>
                     )}
                   </div>
-                  <p className="account-subscription-v2__card-label">Статус подписки</p>
-                </div>
-
-                <div className="account-subscription-v2__card-status-row">
                   <h3 className="account-subscription-v2__card-title">
                     {isActive ? "Подписка активна" : "Подписка завершена"}
                   </h3>
+                </div>
+
+                <div className="account-subscription-v2__card-status-row">
+                  <span className="account-subscription-v2__card-status-label">
+                    {isActive ? "Активна до" : "Завершена до"}
+                  </span>
                   <div className="account-subscription-v2__card-date-box">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><path d="M16 2v4" /><path d="M8 2v4" /><path d="M3 10h18" /></svg>
                     <span>{expiresLabel ?? "—"}</span>
@@ -296,12 +298,15 @@ export default function AccountSubscription() {
                       Продлить подписку <span className="arrow-next">→</span>
                     </button>
                   )}
-                  {showHistory && (
+                </div>
+
+                {showHistory && (
+                  <div className="account-subscription-v2__card-history">
                     <Link to="/account/subscription/history" className="account-subscription-v2__btn-history">
                       История подписок
                     </Link>
-                  )}
-                </div>
+                  </div>
+                )}
 
                 <div className="account-subscription-v2__card-illus">
                   <img
