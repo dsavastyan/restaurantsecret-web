@@ -63,7 +63,7 @@ export default function Feedback() {
     }
 
     return (
-        <main className="contact-page">
+        <main className="contact-page contact-page--feedback">
             <div className="container contact-layout">
                 <section className="contact-card contact-card--accent">
                     <header className="contact-card__header">

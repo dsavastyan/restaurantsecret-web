@@ -1835,6 +1835,13 @@ body {
   box-shadow: 0 14px 36px rgba(15, 23, 42, 0.25);
 }
 
+.contact-page--feedback .contact-card--accent {
+  background: linear-gradient(160deg, #e6f6ee 0%, #f4fbf6 100%);
+  color: #0f172a;
+  border: 1px solid #d5eadf;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12);
+}
+
 .contact-card--accent a {
   color: #c7f0d8;
 }
@@ -1857,6 +1864,10 @@ body {
   color: rgba(229, 231, 235, 0.7);
 }
 
+.contact-page--feedback .contact-card--accent .contact-card__eyebrow {
+  color: rgba(31, 74, 62, 0.75);
+}
+
 .contact-card__title {
   margin: 0;
   font-size: clamp(20px, 3vw, 24px);
@@ -1871,6 +1882,10 @@ body {
 
 .contact-card--accent .contact-card__hint {
   color: rgba(229, 231, 235, 0.8);
+}
+
+.contact-page--feedback .contact-card--accent .contact-card__hint {
+  color: rgba(30, 64, 42, 0.72);
 }
 
 .contact-details {
@@ -1999,6 +2014,24 @@ body {
   gap: 8px;
 }
 
+.contact-page--feedback .contact-card:not(.contact-card--accent) .contact-list__item {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.contact-page--feedback .contact-card:not(.contact-card--accent) .contact-list__label {
+  color: #64748b;
+}
+
+.contact-page--feedback .contact-card:not(.contact-card--accent) .contact-list__value {
+  color: #0f172a;
+}
+
+.contact-page--feedback .contact-card:not(.contact-card--accent) .contact-list__cta {
+  background: var(--rs-accent);
+  color: #fff;
+}
+
 .feedback-form {
   display: grid;
   gap: 16px;
@@ -2069,6 +2102,10 @@ body {
   color: rgba(226, 232, 240, 0.8);
 }
 
+.contact-page--feedback .contact-card--accent .feedback-form__label {
+  color: rgba(15, 23, 42, 0.7);
+}
+
 .contact-card--accent .feedback-form__input,
 .contact-card--accent .feedback-form__select,
 .contact-card--accent .feedback-form__textarea {
@@ -2077,9 +2114,22 @@ body {
   color: #f8fafc;
 }
 
+.contact-page--feedback .contact-card--accent .feedback-form__input,
+.contact-page--feedback .contact-card--accent .feedback-form__select,
+.contact-page--feedback .contact-card--accent .feedback-form__textarea {
+  background: #fff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
 .contact-card--accent .feedback-form__input::placeholder,
 .contact-card--accent .feedback-form__textarea::placeholder {
   color: rgba(226, 232, 240, 0.65);
+}
+
+.contact-page--feedback .contact-card--accent .feedback-form__input::placeholder,
+.contact-page--feedback .contact-card--accent .feedback-form__textarea::placeholder {
+  color: #94a3b8;
 }
 
 .contact-card--accent .feedback-form__input:focus,
@@ -2088,6 +2138,14 @@ body {
   border-color: #a7f3d0;
   box-shadow: 0 0 0 3px rgba(167, 243, 208, 0.25);
   background: rgba(15, 23, 42, 0.35);
+}
+
+.contact-page--feedback .contact-card--accent .feedback-form__input:focus,
+.contact-page--feedback .contact-card--accent .feedback-form__select:focus,
+.contact-page--feedback .contact-card--accent .feedback-form__textarea:focus {
+  border-color: var(--rs-accent);
+  box-shadow: 0 0 0 3px rgba(47, 143, 91, 0.18);
+  background: #fff;
 }
 
 .contact-cta {
