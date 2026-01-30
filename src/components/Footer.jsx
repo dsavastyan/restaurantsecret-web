@@ -14,15 +14,12 @@ export default function Footer() {
             <Link to="/legal" className="site-footer__link">
               Пользовательское соглашение
             </Link>
-
-            <Link to="/tariffs" className="site-footer__link">
-              Тарифы
-            </Link>
-
             <Link to="/privacy" className="site-footer__link">
               Политика конфиденциальности
             </Link>
-
+            <Link to="/tariffs" className="site-footer__link">
+              Тарифы
+            </Link>
             <Link to="/licenses" className="site-footer__link">
               Лицензии
             </Link>
@@ -54,11 +51,9 @@ export default function Footer() {
             </Link>
           </nav>
 
-          <div className="site-footer__meta">
-            <div className="site-footer__copy">© {year} RestaurantSecret</div>
-            <div className="site-footer__legal">
-              Самозанятое лицо (НПД), Савастьян Дарья, ИНН 771007750946
-            </div>
+          <div className="site-footer__copy">© {year} RestaurantSecret</div>
+          <div className="site-footer__legal">
+            Самозанятое лицо (НПД), Савастьян Дарья, ИНН 771007750946
           </div>
         </div>
       </footer>
