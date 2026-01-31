@@ -47,7 +47,7 @@ function AppRoutes() {
           <Route index element={<AccountOverview />} />
           <Route path="subscription" element={<AccountSubscription />} />
           <Route path="subscription/history" element={<SubscriptionHistoryPage />} />
-          <Route path="payment-methods" element={<PaymentMethods />} />
+          <Route path="payment-methods/*" element={<PaymentMethods />} />
           <Route path="favorites" element={<Favorites />} />
           <Route path="goals" element={<Goals />} />
           <Route path="statistics" element={<Statistics />} />
