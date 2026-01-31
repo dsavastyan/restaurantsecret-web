@@ -84,6 +84,7 @@ export default function AccountLayout() {
   const navItems = [
     { to: "/account", label: "Профиль", end: true },
     { to: "/account/subscription", label: (!sub || sub.status === "none") ? "Оформить подписку" : "Управлять подпиской" },
+    { to: "/account/payment-methods", label: "Способы оплаты" },
     { to: "/account/goals", label: "Мои цели" },
     { to: "/account/statistics", label: "Дневник питания" },
     { to: "/account/favorites", label: "Избранное" },
