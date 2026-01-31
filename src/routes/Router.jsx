@@ -62,6 +62,7 @@ function AppRoutes() {
         <Route path="r/:slug" element={<RestaurantPage />} />
         <Route path="r/:slug/menu" element={<Menu />} />
         <Route path="pay/success" element={<PaySuccess />} />
+        <Route path="pay/result" element={<PaymentResult />} />
         <Route path="payments/result" element={<PaymentResult />} />
 
         {/* AppShell зона с табами */}
