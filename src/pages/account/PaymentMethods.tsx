@@ -91,7 +91,8 @@ export default function PaymentMethods() {
         setAttaching(true);
         setError(null);
         try {
-            const res = await apiPost<{ confirmation_url?: string }>("/api/payment-methods/attach", {}, accessToken);
+            const returnUrl = window.location.origin + window.location.pathname + "/return";
+            const res = await apiPost<{ confirmation_url?: string }>("/api/payment-methods/attach", { return_url: returnUrl }, accessToken);
             if (res?.confirmation_url) {
                 window.location.href = res.confirmation_url;
             } else {
