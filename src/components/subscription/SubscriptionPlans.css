@@ -511,3 +511,24 @@
 .rsPlanCard:hover .rsPlanRadio {
     border-color: #10B981;
 }
+
+.rsPlanPriceTrial {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+}
+
+.rsTrialBig {
+    font-size: 18px;
+    font-weight: 800;
+    color: #10B981;
+    line-height: 1.2;
+}
+
+.rsTrialSmall {
+    font-size: 13px;
+    color: rgba(11, 18, 32, 0.6);
+    font-weight: 500;
+}

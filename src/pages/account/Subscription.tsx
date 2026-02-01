@@ -72,7 +72,7 @@ export default function AccountSubscription() {
   const [error, setError] = useState<string | null>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentPlan, setPaymentPlan] = useState<UiPlan | null>(null);
-  const [selectedPlan, setSelectedPlan] = useState<UiPlan | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<UiPlan | null>('year');
   const [promoError, setPromoError] = useState<string | null>(null);
 
 

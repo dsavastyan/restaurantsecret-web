@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./SubscriptionPlans.css";
 import { PromoQuote } from "@/lib/api";
 
@@ -26,10 +26,19 @@ export default function SubscriptionPlans({
     promoQuote,
 }: SubscriptionPlansProps) {
     const [promo, setPromo] = useState("");
-    const [isPromoOpen, setIsPromoOpen] = useState(true); // Default open to make it visible? Or closed? User said "Field always available".
+    const [isPromoOpen, setIsPromoOpen] = useState(false);
 
-    // Determine if we are in a "Free Access (No Payment)" state
-    const isFreeAccess = promoQuote?.type === 'free_days' && !promoQuote.requires_subscribing;
+    useEffect(() => {
+        if (promoQuote) {
+            setIsPromoOpen(true);
+        }
+    }, [promoQuote]);
+
+    // Determine if we are in a "Free Access (No Payment)" state (no card required)
+    const isFreeAccessNoCard = promoQuote?.type === 'free_days' && !promoQuote.requires_subscribing;
+
+    // Determine if we are in "Free Days + Subscription" state
+    const isFreeDaysTrial = promoQuote?.type === 'free_days' && promoQuote.requires_subscribing;
 
     // Prices
     const baseMonthPrice = 99;
@@ -37,6 +46,10 @@ export default function SubscriptionPlans({
 
     const getPrice = (type: 'month' | 'year', base: number) => {
         if (!promoQuote) return { old: null, new: base };
+        // If free days trial, the price AFTER trial is the base price.
+        // We handle the display text specifically for this case.
+        if (isFreeDaysTrial) return { old: null, new: base, isTrial: true };
+
         if (promoQuote.type === 'discount_rub' && (promoQuote.plan === 'any' ||
             (promoQuote.plan === 'monthly' && type === 'month') ||
             (promoQuote.plan === 'annual' && type === 'year'))) {
@@ -63,82 +76,44 @@ export default function SubscriptionPlans({
 
     // Derived CTA text
     const getCtaText = () => {
-        if (isFreeAccess) return "Активировать доступ";
+        if (isFreeAccessNoCard) return "Активировать доступ";
         if (loading) return "Загрузка...";
         if (!selectedPlan) return "Выберите тариф";
 
-        const price = selectedPlan === 'month' ? monthPrice.new : yearPrice.new;
+        const priceObj = selectedPlan === 'month' ? monthPrice : yearPrice;
         const planName = selectedPlan === 'month' ? "месяц" : "год";
 
-        // Use non-breaking space
-        return `Оформить ${planName} за ${price}\u00A0₽`;
+        return `Оформить ${planName} за ${priceObj.new}\u00A0₽`;
+    };
+
+    const renderPrice = (priceObj: any, period: string) => {
+        if (isFreeDaysTrial && promoQuote?.amount) {
+            // "7 дней бесплатно, потом 99 ₽ в месяц"
+            return (
+                <div className="rsPlanPriceTrial">
+                    <span className="rsTrialBig">{promoQuote.amount} дней бесплатно</span>
+                    <div className="rsTrialSmall">потом {priceObj.new} ₽ {period}</div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="rsPlanPrice">
+                {priceObj.old && (
+                    <span className="rsPlanPriceOld">{priceObj.old} ₽</span>
+                )}
+                <span className={`rsPlanPriceBig ${priceObj.old ? 'rsPlanPriceNew' : ''}`}>
+                    {priceObj.new} ₽
+                </span>
+                <span className="rsPlanPriceSmall">{period}</span>
+            </div>
+        );
     };
 
     return (
         <div className="rsPlansContainer">
-            {/* Promo Section at Top */}
-            <div className={`rsPromoBox rsPromoBox--open`} style={{ marginBottom: 24 }}>
-                <div className="rsPromoBody" style={{ paddingTop: 16 }}>
-                    {!promoQuote ? (
-                        <div className="rsPromoRow">
-                            <input
-                                className="rsPromoInput"
-                                placeholder="Введите промокод"
-                                value={promo}
-                                onChange={(e) => setPromo(e.target.value)}
-                                disabled={loading}
-                                onKeyDown={(e) => e.key === 'Enter' && handleApply()}
-                            />
-                            <button
-                                className="rsPromoBtn"
-                                onClick={handleApply}
-                                disabled={!promo.trim() || loading}
-                            >
-                                Применить
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="rsPromoResult">
-                            <div className="rsPromoBadge rsPromoBadge--green">
-                                Промокод применён
-                            </div>
-                            <div className="rsPromoDesc">
-                                {promoQuote.description}
-                                {isFreeAccess && <div className="rsPromoSub">Без привязки карты</div>}
-                            </div>
-
-                            <div className="rsPromoActions">
-                                {/* If free access, we might show Activate button here OR at bottom. 
-                                   User guidelines say: CTA "Activate access" 
-                                   Let's put secondary action here to reset. */}
-                                <button
-                                    className="rsPromoCancel"
-                                    onClick={() => {
-                                        setPromo("");
-                                        onResetPromo?.();
-                                    }}
-                                    disabled={loading}
-                                >
-                                    Сбросить
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {promoError && (
-                        <div className="rsPromoError">
-                            {promoError}
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* Plans Grid - Hide if Free Access (no payment needed) ?? 
-                User said: "Green badge... CTA Activate". 
-                If it is really free without subscription, plans are confusing. 
-                Let's hide them or show specific message.
-            */}
-            {!isFreeAccess && (
+            {/* Plans Grid */}
+            {!isFreeAccessNoCard && (
                 <>
                     <div className="rsPlanGrid">
                         {/* Month Card */}
@@ -151,15 +126,7 @@ export default function SubscriptionPlans({
                                     <div className="rsPlanName">Месяц</div>
                                     <div className="rsPlanRadio" />
                                 </div>
-                                <div className="rsPlanPrice">
-                                    {monthPrice.old && (
-                                        <span className="rsPlanPriceOld">{monthPrice.old} ₽</span>
-                                    )}
-                                    <span className={`rsPlanPriceBig ${monthPrice.old ? 'rsPlanPriceNew' : ''}`}>
-                                        {monthPrice.new} ₽
-                                    </span>
-                                    <span className="rsPlanPriceSmall">/мес</span>
-                                </div>
+                                {renderPrice(monthPrice, "/мес")}
                                 <div className="rsPlanDesc">
                                     Подходит чтобы оценить удобство сервиса
                                 </div>
@@ -177,15 +144,7 @@ export default function SubscriptionPlans({
                                     <div className="rsBadge">ВЫГОДНО</div>
                                     <div className="rsPlanRadio" />
                                 </div>
-                                <div className="rsPlanPrice">
-                                    {yearPrice.old && (
-                                        <span className="rsPlanPriceOld">{yearPrice.old} ₽</span>
-                                    )}
-                                    <span className={`rsPlanPriceBig ${yearPrice.old ? 'rsPlanPriceNew' : ''}`}>
-                                        {yearPrice.new} ₽
-                                    </span>
-                                    <span className="rsPlanPriceSmall">/год</span>
-                                </div>
+                                {renderPrice(yearPrice, "/год")}
                                 <div className="rsPlanDesc">
                                     12 месяцев по цене 10. Лучший выбор
                                 </div>
@@ -196,11 +155,77 @@ export default function SubscriptionPlans({
                 </>
             )}
 
+            {/* Promo Section at Bottom (Collapsible) */}
+            <div className={`rsPromoBox ${isPromoOpen ? "rsPromoBox--open" : ""}`} style={{ marginBottom: 20, marginTop: 10 }}>
+                <div
+                    className="rsPromoHeader"
+                    onClick={() => setIsPromoOpen(!isPromoOpen)}
+                >
+                    <div className="rsPromoTitle">Есть промокод?</div>
+                    <div className={`rsPromoChevron ${isPromoOpen ? "rsPromoChevron--open" : ""}`}>
+                        ▼
+                    </div>
+                </div>
+
+                {isPromoOpen && (
+                    <div className="rsPromoBody">
+                        {!promoQuote ? (
+                            <div className="rsPromoRow">
+                                <input
+                                    className="rsPromoInput"
+                                    placeholder="Введите промокод"
+                                    value={promo}
+                                    onChange={(e) => setPromo(e.target.value)}
+                                    disabled={loading}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleApply()}
+                                />
+                                <button
+                                    className="rsPromoBtn"
+                                    onClick={handleApply}
+                                    disabled={!promo.trim() || loading}
+                                >
+                                    Применить
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="rsPromoResult">
+                                <div className="rsPromoBadge rsPromoBadge--green">
+                                    Промокод применён
+                                </div>
+                                <div className="rsPromoDesc">
+                                    {promoQuote.description}
+                                    {isFreeAccessNoCard && <div className="rsPromoSub">Без привязки карты</div>}
+                                </div>
+
+                                <div className="rsPromoActions">
+                                    <button
+                                        className="rsPromoCancel"
+                                        onClick={() => {
+                                            setPromo("");
+                                            onResetPromo?.();
+                                        }}
+                                        disabled={loading}
+                                    >
+                                        Сбросить
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {promoError && (
+                            <div className="rsPromoError">
+                                {promoError}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+
             {/* Main CTA */}
             <button
-                className={`rsMainCta ${isFreeAccess ? 'rsMainCta--free' : ''}`}
+                className={`rsMainCta ${isFreeAccessNoCard ? 'rsMainCta--free' : ''}`}
                 onClick={onProceed}
-                disabled={loading || (!isFreeAccess && !selectedPlan)}
+                disabled={loading || (!isFreeAccessNoCard && !selectedPlan)}
             >
                 {getCtaText()}
             </button>
