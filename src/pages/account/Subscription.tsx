@@ -31,11 +31,14 @@ type ApiPlan = "monthly" | "annual";
 
 const ERROR_LABELS: Record<string, string> = {
   invalid_code: "Промокод не найден",
+  not_found: "Промокод не найден",
   expired_code: "Срок действия промокода истёк",
+  expired: "Срок действия промокода истёк",
   already_used: "Вы уже использовали этот промокод",
   not_started: "Акция еще не началась",
   global_limit_reached: "Лимит использований исчерпан",
   user_limit_reached: "Вы уже использовали этот промокод",
+  network_error: "Ошибка сети. Попробуйте позже.",
 };
 
 function mapUiPlanToApi(plan: UiPlan): ApiPlan {
@@ -246,7 +249,12 @@ export default function AccountSubscription() {
       }
     } catch (err) {
       console.error("promo quote error", err);
-      setPromoError("network_error");
+      if (err instanceof ApiError && err.payload && typeof err.payload === 'object') {
+        const payload = err.payload as any;
+        setPromoError(payload.error || "network_error");
+      } else {
+        setPromoError("network_error");
+      }
     } finally {
       setPromoLoading(false);
     }
@@ -263,14 +271,9 @@ export default function AccountSubscription() {
       const res = await redeemPromo(trimmedCode, accessToken);
       if (res?.success) {
         if (res.next_step === 'link_card' || res.next_step === 'payment') {
-          // Trigger payment flow
-          // Determine plan: use quote plan if specific, else default to monthly?
-          // Or we should have asked user?
-          // For now defaulting to monthly if 'any'.
           const planToUse: UiPlan = (promoQuote?.plan === 'annual') ? 'year' : 'month';
           createPayment(planToUse, trimmedCode);
         } else {
-          // Done (free days granted immediately)
           setPromoQuote(null);
           await fetchStatus();
         }
@@ -279,7 +282,12 @@ export default function AccountSubscription() {
       }
     } catch (err) {
       console.error("promo redeem error", err);
-      setPromoError("network_error");
+      if (err instanceof ApiError && err.payload && typeof err.payload === 'object') {
+        const payload = err.payload as any;
+        setPromoError(payload.error || "network_error");
+      } else {
+        setPromoError("network_error");
+      }
     } finally {
       setPromoLoading(false);
     }
