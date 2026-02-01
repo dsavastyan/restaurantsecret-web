@@ -1,9 +1,11 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import "./SubscriptionPlans.css";
 import { PromoQuote } from "@/lib/api";
 
 type SubscriptionPlansProps = {
-    onChoosePlan?: (plan: "month" | "year") => void;
+    selectedPlan: "month" | "year" | null;
+    onSelectPlan: (plan: "month" | "year") => void;
+    onProceed: () => void; // Main CTA action
     onQuotePromo?: (code: string) => void;
     onRedeemPromo?: (code: string) => void;
     onResetPromo?: () => void;
@@ -13,7 +15,9 @@ type SubscriptionPlansProps = {
 };
 
 export default function SubscriptionPlans({
-    onChoosePlan,
+    selectedPlan,
+    onSelectPlan,
+    onProceed,
     onQuotePromo,
     onRedeemPromo,
     onResetPromo,
@@ -22,132 +26,184 @@ export default function SubscriptionPlans({
     promoQuote,
 }: SubscriptionPlansProps) {
     const [promo, setPromo] = useState("");
-    const [showPromo, setShowPromo] = useState(false);
+    const [isPromoOpen, setIsPromoOpen] = useState(true); // Default open to make it visible? Or closed? User said "Field always available".
 
-    const canApply = useMemo(() => promo.trim().length > 0 && !loading, [promo, loading]);
+    // Determine if we are in a "Free Access (No Payment)" state
+    const isFreeAccess = promoQuote?.type === 'free_days' && !promoQuote.requires_subscribing;
+
+    // Prices
+    const baseMonthPrice = 99;
+    const baseYearPrice = 999;
+
+    const getPrice = (type: 'month' | 'year', base: number) => {
+        if (!promoQuote) return { old: null, new: base };
+        if (promoQuote.type === 'discount_rub' && (promoQuote.plan === 'any' ||
+            (promoQuote.plan === 'monthly' && type === 'month') ||
+            (promoQuote.plan === 'annual' && type === 'year'))) {
+            const val = Math.max(1, base - promoQuote.amount);
+            return { old: base, new: val };
+        }
+        if (promoQuote.type === 'discount_pct' && (promoQuote.plan === 'any' ||
+            (promoQuote.plan === 'monthly' && type === 'month') ||
+            (promoQuote.plan === 'annual' && type === 'year'))) {
+            const discount = (base * promoQuote.amount) / 100;
+            const val = Math.max(1, base - discount);
+            return { old: base, new: Math.round(val) };
+        }
+        return { old: null, new: base };
+    };
+
+    const monthPrice = getPrice('month', baseMonthPrice);
+    const yearPrice = getPrice('year', baseYearPrice);
+
+    const handleApply = () => {
+        if (!promo.trim()) return;
+        onQuotePromo?.(promo.trim());
+    };
+
+    // Derived CTA text
+    const getCtaText = () => {
+        if (isFreeAccess) return "Активировать доступ";
+        if (loading) return "Загрузка...";
+        if (!selectedPlan) return "Выберите тариф";
+
+        const price = selectedPlan === 'month' ? monthPrice.new : yearPrice.new;
+        const planName = selectedPlan === 'month' ? "месяц" : "год";
+
+        // Use non-breaking space
+        return `Оформить ${planName} за ${price}\u00A0₽`;
+    };
 
     return (
         <div className="rsPlansContainer">
-            <div className="rsPlanGrid">
-                <div className="rsPlanCard rsPlanMonth">
-                    <div className="rsPlanTopRow">
-                        <div className="rsPlanName">Месяц</div>
-                    </div>
-                    <div className="rsPlanPrice">
-                        <span className="rsPlanPriceBig">99 ₽</span>
-                        <span className="rsPlanPriceSmall">в месяц*</span>
-                    </div>
-                    <div className="rsPlanDesc">
-                        Подходит чтобы оценить <br /> удобство сервиса
-                    </div>
+            {/* Promo Section at Top */}
+            <div className={`rsPromoBox rsPromoBox--open`} style={{ marginBottom: 24 }}>
+                <div className="rsPromoBody" style={{ paddingTop: 16 }}>
+                    {!promoQuote ? (
+                        <div className="rsPromoRow">
+                            <input
+                                className="rsPromoInput"
+                                placeholder="Введите промокод"
+                                value={promo}
+                                onChange={(e) => setPromo(e.target.value)}
+                                disabled={loading}
+                                onKeyDown={(e) => e.key === 'Enter' && handleApply()}
+                            />
+                            <button
+                                className="rsPromoBtn"
+                                onClick={handleApply}
+                                disabled={!promo.trim() || loading}
+                            >
+                                Применить
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="rsPromoResult">
+                            <div className="rsPromoBadge rsPromoBadge--green">
+                                Промокод применён
+                            </div>
+                            <div className="rsPromoDesc">
+                                {promoQuote.description}
+                                {isFreeAccess && <div className="rsPromoSub">Без привязки карты</div>}
+                            </div>
 
-                    <button
-                        className="rsPlanGhostBtn"
-                        onClick={() => onChoosePlan?.("month")}
-                        disabled={loading}
-                    >
-                        <span className="rsIconSquare">▢</span>
-                        Попробовать
-                    </button>
-                </div>
-
-                <div className="rsPlanCard rsPlanYear">
-                    <div className="rsPlanTopRow">
-                        <div className="rsPlanName">Год</div>
-                        <div className="rsBadge">ВЫГОДНО</div>
-                    </div>
-
-                    <div className="rsPlanPrice">
-                        <span className="rsPlanPriceBig">999 ₽</span>
-                        <span className="rsPlanPriceSmall">в год*</span>
-                    </div>
-
-                    <div className="rsPlanDesc">
-                        12 месяцев по цене 10. Лучший <br />
-                        выбор для тех, кто регулярно <br />
-                        следует цели
-                    </div>
-
-                    <button
-                        className="rsPlanPrimaryBtn"
-                        onClick={() => onChoosePlan?.("year")}
-                        disabled={loading}
-                    >
-                        Оформить
-                    </button>
-                </div>
-            </div>
-
-            <div className="rsFootnote">* Подписка продлевается автоматически</div>
-
-            <div className={`rsPromoBox ${showPromo ? "rsPromoBox--open" : ""}`}>
-                <div
-                    className="rsPromoHeader"
-                    onClick={() => setShowPromo(!showPromo)}
-                >
-                    <div className="rsPromoTitle">Есть промокод?</div>
-                    <div className={`rsPromoChevron ${showPromo ? "rsPromoChevron--open" : ""}`}>
-                        ▼
-                    </div>
-                </div>
-
-                {showPromo && (
-                    <div className="rsPromoBody">
-                        {!promoQuote ? (
-                            <div className="rsPromoRow">
-                                <input
-                                    className="rsPromoInput"
-                                    placeholder="Введите промокод"
-                                    value={promo}
-                                    onChange={(event) => setPromo(event.target.value)}
-                                    disabled={loading}
-                                />
+                            <div className="rsPromoActions">
+                                {/* If free access, we might show Activate button here OR at bottom. 
+                                   User guidelines say: CTA "Activate access" 
+                                   Let's put secondary action here to reset. */}
                                 <button
-                                    className="rsPromoBtn"
-                                    onClick={() => onQuotePromo?.(promo.trim())}
-                                    disabled={!canApply}
+                                    className="rsPromoCancel"
+                                    onClick={() => {
+                                        setPromo("");
+                                        onResetPromo?.();
+                                    }}
+                                    disabled={loading}
                                 >
-                                    Применить
+                                    Сбросить
                                 </button>
                             </div>
-                        ) : (
-                            <div className="rsPromoResult">
-                                <div className="rsPromoDesc">
-                                    <strong>Промокод активен:</strong> {promoQuote.description}
-                                    {promoQuote.plan !== 'any' && (
-                                        <div className="rsPromoSub">для тарифа {promoQuote.plan === 'monthly' ? 'Месяц' : 'Год'}</div>
-                                    )}
-                                </div>
-                                <div className="rsPromoActions">
-                                    <button
-                                        className="rsPromoBtn"
-                                        onClick={() => onRedeemPromo?.(promo.trim())}
-                                        disabled={loading}
-                                    >
-                                        Активировать
-                                    </button>
-                                    <button
-                                        className="rsPromoCancel"
-                                        onClick={() => {
-                                            setPromo("");
-                                            onResetPromo?.();
-                                        }}
-                                        disabled={loading}
-                                    >
-                                        Отмена
-                                    </button>
-                                </div>
-                            </div>
-                        )}
+                        </div>
+                    )}
 
-                        {promoError && (
-                            <div className="rsPromoError">
-                                {promoError}
-                            </div>
-                        )}
-                    </div>
-                )}
+                    {promoError && (
+                        <div className="rsPromoError">
+                            {promoError}
+                        </div>
+                    )}
+                </div>
             </div>
+
+            {/* Plans Grid - Hide if Free Access (no payment needed) ?? 
+                User said: "Green badge... CTA Activate". 
+                If it is really free without subscription, plans are confusing. 
+                Let's hide them or show specific message.
+            */}
+            {!isFreeAccess && (
+                <>
+                    <div className="rsPlanGrid">
+                        {/* Month Card */}
+                        <div
+                            className={`rsPlanCard rsPlanMonth ${selectedPlan === 'month' ? 'is-selected' : ''}`}
+                            onClick={() => onSelectPlan('month')}
+                        >
+                            <div style={{ flex: 1 }}>
+                                <div className="rsPlanTopRow">
+                                    <div className="rsPlanName">Месяц</div>
+                                    <div className="rsPlanRadio" />
+                                </div>
+                                <div className="rsPlanPrice">
+                                    {monthPrice.old && (
+                                        <span className="rsPlanPriceOld">{monthPrice.old} ₽</span>
+                                    )}
+                                    <span className={`rsPlanPriceBig ${monthPrice.old ? 'rsPlanPriceNew' : ''}`}>
+                                        {monthPrice.new} ₽
+                                    </span>
+                                    <span className="rsPlanPriceSmall">/мес</span>
+                                </div>
+                                <div className="rsPlanDesc">
+                                    Подходит чтобы оценить удобство сервиса
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Year Card */}
+                        <div
+                            className={`rsPlanCard rsPlanYear ${selectedPlan === 'year' ? 'is-selected' : ''}`}
+                            onClick={() => onSelectPlan('year')}
+                        >
+                            <div style={{ flex: 1 }}>
+                                <div className="rsPlanTopRow">
+                                    <div className="rsPlanName">Год</div>
+                                    <div className="rsBadge">ВЫГОДНО</div>
+                                    <div className="rsPlanRadio" />
+                                </div>
+                                <div className="rsPlanPrice">
+                                    {yearPrice.old && (
+                                        <span className="rsPlanPriceOld">{yearPrice.old} ₽</span>
+                                    )}
+                                    <span className={`rsPlanPriceBig ${yearPrice.old ? 'rsPlanPriceNew' : ''}`}>
+                                        {yearPrice.new} ₽
+                                    </span>
+                                    <span className="rsPlanPriceSmall">/год</span>
+                                </div>
+                                <div className="rsPlanDesc">
+                                    12 месяцев по цене 10. Лучший выбор
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="rsFootnote">* Подписка продлевается автоматически</div>
+                </>
+            )}
+
+            {/* Main CTA */}
+            <button
+                className={`rsMainCta ${isFreeAccess ? 'rsMainCta--free' : ''}`}
+                onClick={onProceed}
+                disabled={loading || (!isFreeAccess && !selectedPlan)}
+            >
+                {getCtaText()}
+            </button>
         </div>
     );
 }

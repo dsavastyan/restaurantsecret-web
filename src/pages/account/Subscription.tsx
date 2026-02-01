@@ -72,7 +72,10 @@ export default function AccountSubscription() {
   const [error, setError] = useState<string | null>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentPlan, setPaymentPlan] = useState<UiPlan | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<UiPlan | null>(null);
   const [promoError, setPromoError] = useState<string | null>(null);
+
+
   const [promoLoading, setPromoLoading] = useState(false);
   const [plansOpen, setPlansOpen] = useState(false);
   const [promoQuote, setPromoQuote] = useState<PromoQuote | null>(null);
@@ -232,6 +235,16 @@ export default function AccountSubscription() {
     [accessToken, logout, paymentPlan],
   );
 
+  const handleSelectPlan = useCallback((plan: UiPlan) => {
+    setSelectedPlan(plan);
+  }, []);
+
+  const handleProceed = useCallback(() => {
+    if (selectedPlan) {
+      createPayment(selectedPlan);
+    }
+  }, [selectedPlan, createPayment]);
+
   const handleQuotePromo = useCallback(async (code: string) => {
     const trimmedCode = code.trim();
     if (!accessToken || !trimmedCode || promoLoading) return;
@@ -271,7 +284,16 @@ export default function AccountSubscription() {
       const res = await redeemPromo(trimmedCode, accessToken);
       if (res?.success) {
         if (res.next_step === 'link_card' || res.next_step === 'payment') {
-          const planToUse: UiPlan = (promoQuote?.plan === 'annual') ? 'year' : 'month';
+          // Use selected plan or default
+          let planToUse: UiPlan | null = selectedPlan;
+
+          // If promo forces a plan, use it
+          if (promoQuote?.plan === 'annual') planToUse = 'year';
+          if (promoQuote?.plan === 'monthly') planToUse = 'month';
+
+          // Default fallback
+          if (!planToUse) planToUse = 'month';
+
           createPayment(planToUse, trimmedCode);
         } else {
           setPromoQuote(null);
@@ -291,7 +313,7 @@ export default function AccountSubscription() {
     } finally {
       setPromoLoading(false);
     }
-  }, [accessToken, promoLoading, promoQuote, createPayment, fetchStatus]);
+  }, [accessToken, promoLoading, promoQuote, createPayment, fetchStatus, selectedPlan]);
 
   const handleResetPromo = useCallback(() => {
     setPromoQuote(null);
@@ -375,7 +397,9 @@ export default function AccountSubscription() {
           {isNeverSubscribed && (
             <div className="account-subscription-v2__intro">
               <SubscriptionPlans
-                onChoosePlan={handleChoosePlan}
+                selectedPlan={selectedPlan}
+                onSelectPlan={handleSelectPlan}
+                onProceed={handleProceed}
                 onQuotePromo={handleQuotePromo}
                 onRedeemPromo={handleRedeemPromo}
                 onResetPromo={handleResetPromo}

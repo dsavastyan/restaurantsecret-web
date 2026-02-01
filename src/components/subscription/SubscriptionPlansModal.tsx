@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { MouseEvent } from "react";
 import SubscriptionPlans from "./SubscriptionPlans";
 import "./SubscriptionPlansModal.css";
@@ -27,6 +27,8 @@ export default function SubscriptionPlansModal({
   promoError,
   promoQuote,
 }: SubscriptionPlansModalProps) {
+  const [selectedPlan, setSelectedPlan] = useState<"month" | "year" | null>(null);
+
   useEffect(() => {
     if (!open) return;
 
@@ -43,6 +45,11 @@ export default function SubscriptionPlansModal({
       document.body.style.overflow = prevOverflow;
     };
   }, [open, onClose]);
+
+  // Reset selection when closed/opened?
+  useEffect(() => {
+    if (open) setSelectedPlan(null);
+  }, [open]);
 
   if (!open) return null;
 
@@ -63,7 +70,11 @@ export default function SubscriptionPlansModal({
 
         <div className="rsModalContent">
           <SubscriptionPlans
-            onChoosePlan={onChoosePlan}
+            selectedPlan={selectedPlan}
+            onSelectPlan={setSelectedPlan}
+            onProceed={() => {
+              if (selectedPlan) onChoosePlan?.(selectedPlan);
+            }}
             onQuotePromo={onQuotePromo}
             onRedeemPromo={onRedeemPromo}
             onResetPromo={onResetPromo}
