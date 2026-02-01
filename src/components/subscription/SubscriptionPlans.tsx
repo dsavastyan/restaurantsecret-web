@@ -1,18 +1,25 @@
 import { useMemo, useState } from "react";
 import "./SubscriptionPlans.css";
+import { PromoQuote } from "@/lib/api";
 
 type SubscriptionPlansProps = {
     onChoosePlan?: (plan: "month" | "year") => void;
-    onApplyPromo?: (code: string) => void;
+    onQuotePromo?: (code: string) => void;
+    onRedeemPromo?: (code: string) => void;
+    onResetPromo?: () => void;
     loading?: boolean;
     promoError?: string | null;
+    promoQuote?: PromoQuote | null;
 };
 
 export default function SubscriptionPlans({
     onChoosePlan,
-    onApplyPromo,
+    onQuotePromo,
+    onRedeemPromo,
+    onResetPromo,
     loading = false,
     promoError,
+    promoQuote,
 }: SubscriptionPlansProps) {
     const [promo, setPromo] = useState("");
     const [showPromo, setShowPromo] = useState(false);
@@ -86,22 +93,52 @@ export default function SubscriptionPlans({
 
                 {showPromo && (
                     <div className="rsPromoBody">
-                        <div className="rsPromoRow">
-                            <input
-                                className="rsPromoInput"
-                                placeholder="Введите промокод"
-                                value={promo}
-                                onChange={(event) => setPromo(event.target.value)}
-                                disabled={loading}
-                            />
-                            <button
-                                className="rsPromoBtn"
-                                onClick={() => onApplyPromo?.(promo.trim())}
-                                disabled={!canApply}
-                            >
-                                Применить
-                            </button>
-                        </div>
+                        {!promoQuote ? (
+                            <div className="rsPromoRow">
+                                <input
+                                    className="rsPromoInput"
+                                    placeholder="Введите промокод"
+                                    value={promo}
+                                    onChange={(event) => setPromo(event.target.value)}
+                                    disabled={loading}
+                                />
+                                <button
+                                    className="rsPromoBtn"
+                                    onClick={() => onQuotePromo?.(promo.trim())}
+                                    disabled={!canApply}
+                                >
+                                    Применить
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="rsPromoResult">
+                                <div className="rsPromoDesc">
+                                    <strong>Промокод активен:</strong> {promoQuote.description}
+                                    {promoQuote.plan !== 'any' && (
+                                        <div className="rsPromoSub">для тарифа {promoQuote.plan === 'monthly' ? 'Месяц' : 'Год'}</div>
+                                    )}
+                                </div>
+                                <div className="rsPromoActions">
+                                    <button
+                                        className="rsPromoBtn"
+                                        onClick={() => onRedeemPromo?.(promo.trim())}
+                                        disabled={loading}
+                                    >
+                                        Активировать
+                                    </button>
+                                    <button
+                                        className="rsPromoCancel"
+                                        onClick={() => {
+                                            setPromo("");
+                                            onResetPromo?.();
+                                        }}
+                                        disabled={loading}
+                                    >
+                                        Отмена
+                                    </button>
+                                </div>
+                            </div>
+                        )}
 
                         {promoError && (
                             <div className="rsPromoError">

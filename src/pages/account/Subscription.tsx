@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ApiError, apiGet, apiPost, applyPromo, isUnauthorizedError } from "@/lib/api";
+import { ApiError, apiGet, apiPost, quotePromo, redeemPromo, isUnauthorizedError, PromoQuote } from "@/lib/api";
 import { useAuth } from "@/store/auth";
 import {
   selectHasActiveSub,
@@ -33,6 +33,9 @@ const ERROR_LABELS: Record<string, string> = {
   invalid_code: "Промокод не найден",
   expired_code: "Срок действия промокода истёк",
   already_used: "Вы уже использовали этот промокод",
+  not_started: "Акция еще не началась",
+  global_limit_reached: "Лимит использований исчерпан",
+  user_limit_reached: "Вы уже использовали этот промокод",
 };
 
 function mapUiPlanToApi(plan: UiPlan): ApiPlan {
@@ -69,6 +72,7 @@ export default function AccountSubscription() {
   const [promoError, setPromoError] = useState<string | null>(null);
   const [promoLoading, setPromoLoading] = useState(false);
   const [plansOpen, setPlansOpen] = useState(false);
+  const [promoQuote, setPromoQuote] = useState<PromoQuote | null>(null);
 
   const fetchStatus = useCallback(async () => {
     if (!accessToken) {
@@ -173,35 +177,11 @@ export default function AccountSubscription() {
 
   const promoErrorLabel = useMemo(() => {
     if (!promoError) return null;
-    return ERROR_LABELS[promoError] ?? "Не удалось применить промокод";
+    return ERROR_LABELS[promoError] ?? promoError ?? "Не удалось применить промокод";
   }, [promoError]);
 
-  const handleApplyPromo = useCallback(async (code: string) => {
-    const trimmedCode = code.trim();
-    if (!accessToken || !trimmedCode || promoLoading) return;
-
-    setPromoLoading(true);
-    setPromoError(null);
-
-    try {
-      const res = await applyPromo(trimmedCode, accessToken) as { ok?: boolean; error?: string };
-
-      if (!res?.ok) {
-        setPromoError(res?.error ?? "unknown_error");
-        return;
-      }
-
-      await fetchStatus();
-    } catch (err) {
-      console.error("Failed to apply promo", err);
-      setPromoError("network_error");
-    } finally {
-      setPromoLoading(false);
-    }
-  }, [accessToken, fetchStatus, promoLoading]);
-
   const createPayment = useCallback(
-    async (plan: UiPlan) => {
+    async (plan: UiPlan, code?: string) => {
       if (!accessToken || paymentPlan) return;
 
       setPaymentError(null);
@@ -209,9 +189,12 @@ export default function AccountSubscription() {
       const apiPlan = mapUiPlanToApi(plan);
 
       try {
+        const body: any = { plan: apiPlan, autopay_consent: true };
+        if (code) body.promo_code = code;
+
         const res = await apiPost<{ confirmation_url?: string; error?: string }>(
           "/api/payments/create",
-          { plan: apiPlan, autopay_consent: true },
+          body,
           accessToken,
         );
 
@@ -245,6 +228,67 @@ export default function AccountSubscription() {
     },
     [accessToken, logout, paymentPlan],
   );
+
+  const handleQuotePromo = useCallback(async (code: string) => {
+    const trimmedCode = code.trim();
+    if (!accessToken || !trimmedCode || promoLoading) return;
+
+    setPromoLoading(true);
+    setPromoError(null);
+    setPromoQuote(null);
+
+    try {
+      const res = await quotePromo(trimmedCode, accessToken);
+      if (res?.valid) {
+        setPromoQuote(res);
+      } else {
+        setPromoError(res?.error || "invalid_code");
+      }
+    } catch (err) {
+      console.error("promo quote error", err);
+      setPromoError("network_error");
+    } finally {
+      setPromoLoading(false);
+    }
+  }, [accessToken, promoLoading]);
+
+  const handleRedeemPromo = useCallback(async (code: string) => {
+    const trimmedCode = code.trim();
+    if (!accessToken || !trimmedCode || promoLoading) return;
+
+    setPromoLoading(true);
+    setPromoError(null);
+
+    try {
+      const res = await redeemPromo(trimmedCode, accessToken);
+      if (res?.success) {
+        if (res.next_step === 'link_card' || res.next_step === 'payment') {
+          // Trigger payment flow
+          // Determine plan: use quote plan if specific, else default to monthly?
+          // Or we should have asked user?
+          // For now defaulting to monthly if 'any'.
+          const planToUse: UiPlan = (promoQuote?.plan === 'annual') ? 'year' : 'month';
+          createPayment(planToUse, trimmedCode);
+        } else {
+          // Done (free days granted immediately)
+          setPromoQuote(null);
+          await fetchStatus();
+        }
+      } else {
+        setPromoError(res?.error || "unknown_error");
+      }
+    } catch (err) {
+      console.error("promo redeem error", err);
+      setPromoError("network_error");
+    } finally {
+      setPromoLoading(false);
+    }
+  }, [accessToken, promoLoading, promoQuote, createPayment, fetchStatus]);
+
+  const handleResetPromo = useCallback(() => {
+    setPromoQuote(null);
+    setPromoError(null);
+  }, []);
 
   const handleChoosePlan = useCallback((plan: UiPlan) => {
     createPayment(plan);
@@ -324,9 +368,12 @@ export default function AccountSubscription() {
             <div className="account-subscription-v2__intro">
               <SubscriptionPlans
                 onChoosePlan={handleChoosePlan}
-                onApplyPromo={handleApplyPromo}
+                onQuotePromo={handleQuotePromo}
+                onRedeemPromo={handleRedeemPromo}
+                onResetPromo={handleResetPromo}
                 loading={promoLoading || Boolean(paymentPlan)}
                 promoError={promoErrorLabel}
+                promoQuote={promoQuote}
               />
             </div>
           )}
@@ -335,9 +382,12 @@ export default function AccountSubscription() {
             open={plansOpen}
             onClose={() => setPlansOpen(false)}
             onChoosePlan={handleChoosePlan}
-            onApplyPromo={handleApplyPromo}
+            onQuotePromo={handleQuotePromo}
+            onRedeemPromo={handleRedeemPromo}
+            onResetPromo={handleResetPromo}
             loading={promoLoading || Boolean(paymentPlan)}
             promoError={promoErrorLabel}
+            promoQuote={promoQuote}
           />
 
           {error && (

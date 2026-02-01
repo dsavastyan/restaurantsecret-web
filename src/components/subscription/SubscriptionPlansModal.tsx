@@ -2,23 +2,30 @@ import { useEffect } from "react";
 import type { MouseEvent } from "react";
 import SubscriptionPlans from "./SubscriptionPlans";
 import "./SubscriptionPlansModal.css";
+import { PromoQuote } from "@/lib/api";
 
 type SubscriptionPlansModalProps = {
   open: boolean;
   onClose?: () => void;
   onChoosePlan?: (plan: "month" | "year") => void;
-  onApplyPromo?: (code: string) => void;
+  onQuotePromo?: (code: string) => void;
+  onRedeemPromo?: (code: string) => void;
+  onResetPromo?: () => void;
   loading?: boolean;
   promoError?: string | null;
+  promoQuote?: PromoQuote | null;
 };
 
 export default function SubscriptionPlansModal({
   open,
   onClose,
   onChoosePlan,
-  onApplyPromo,
+  onQuotePromo,
+  onRedeemPromo,
+  onResetPromo,
   loading = false,
   promoError,
+  promoQuote,
 }: SubscriptionPlansModalProps) {
   useEffect(() => {
     if (!open) return;
@@ -57,9 +64,12 @@ export default function SubscriptionPlansModal({
         <div className="rsModalContent">
           <SubscriptionPlans
             onChoosePlan={onChoosePlan}
-            onApplyPromo={onApplyPromo}
+            onQuotePromo={onQuotePromo}
+            onRedeemPromo={onRedeemPromo}
+            onResetPromo={onResetPromo}
             loading={loading}
             promoError={promoError}
+            promoQuote={promoQuote}
           />
         </div>
       </div>

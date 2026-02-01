@@ -222,12 +222,30 @@ export async function apiDelete<T = unknown>(path: string, token?: string): Prom
   return handleResponse<T>(res);
 }
 
-export async function applyPromo(code: string, token: string) {
-  return apiPost<{ ok: boolean; expires_at?: string; free_days?: number; error?: string }>(
-    "/api/subscriptions/apply-promo",
-    { code },
-    token,
-  );
+export type PromoQuote = {
+  valid: boolean;
+  type: 'free_days' | 'discount_rub' | 'discount_pct';
+  amount: number;
+  plan: 'monthly' | 'annual' | 'any';
+  description: string;
+  requires_subscribing: boolean;
+  error?: string;
+};
+
+export type PromoRedeemResponse = {
+  success: boolean;
+  next_step?: 'link_card' | 'payment' | 'done';
+  promo_code?: string;
+  days?: number;
+  error?: string;
+};
+
+export async function quotePromo(code: string, token: string) {
+  return apiPost<PromoQuote>("/api/promo/quote", { code }, token);
+}
+
+export async function redeemPromo(code: string, token: string) {
+  return apiPost<PromoRedeemResponse>("/api/promo/redeem", { code }, token);
 }
 
 export function postSuggest(body: SuggestRequest, token?: string) {
