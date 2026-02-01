@@ -243,8 +243,10 @@
     }
 }
 
-/* Mobile Adjustments */
+/* Mobile Adjustments (existing) ... */
 @media (max-width: 720px) {
+
+    /* ... existing mobile styles ... */
     .rsPlanGrid {
         grid-template-columns: 1fr;
         gap: 12px;
@@ -255,11 +257,9 @@
         padding: 16px;
         flex-direction: row;
         align-items: center;
-        /* Row layout: Name | Price | CTA */
         justify-content: space-between;
         gap: 8px;
         min-height: 72px;
-        /* Force consistent height */
     }
 
     /* Reset margins/paddings from desktop column layout */
@@ -292,7 +292,6 @@
         margin-top: 0;
         margin-right: 0;
         min-width: 60px;
-        /* Prevent jitter */
         text-align: center;
     }
 
@@ -318,11 +317,15 @@
         width: auto;
         min-width: 110px;
         height: 40px;
-        /* Reduced height */
         padding: 0 16px;
         margin-top: 0;
         font-size: 14px;
         border-radius: 12px;
+        /* Hide buttons on mobile if selecting whole card? 
+           Actually design says 'selectable'. 
+           We might want to hide these buttons and use the Card as proper button?
+           For now keeping them but maybe smaller. 
+        */
     }
 
     /* Remove icon in ghost button on mobile */
@@ -342,4 +345,169 @@
     .rsPromoTitle {
         font-size: 16px;
     }
+}
+
+/* --- New Styles for Refactor --- */
+
+.rsPlanCard {
+    cursor: pointer;
+    /* Make entire card clickable */
+}
+
+.rsPlanCard.is-selected {
+    border: 2px solid #10B981;
+    /* Green border */
+    background: rgba(16, 185, 129, 0.05);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(16, 185, 129, 0.15);
+}
+
+.rsPlanPriceOld {
+    text-decoration: line-through;
+    color: #94A3B8;
+    font-size: 0.7em;
+    margin-right: 8px;
+    font-weight: 500;
+}
+
+.rsPlanPriceNew {
+    color: #10B981;
+    /* Green price */
+}
+
+/* Promo Result Area */
+.rsPromoResult {
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.rsPromoDesc {
+    font-size: 15px;
+    color: #1E293B;
+    margin-bottom: 12px;
+}
+
+.rsPromoBadge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.rsPromoBadge--green {
+    background: #DCFCE7;
+    color: #166534;
+}
+
+.rsPromoBadge--neutral {
+    background: #F1F5F9;
+    color: #475569;
+}
+
+.rsPromoSub {
+    font-size: 13px;
+    color: #64748B;
+    margin-top: 2px;
+}
+
+.rsPromoActions {
+    display: flex;
+    gap: 10px;
+}
+
+.rsPromoCancel {
+    background: transparent;
+    border: 1px solid #CBD5E1;
+    color: #64748B;
+    border-radius: 99px;
+    padding: 0 16px;
+    height: 40px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.rsPromoCancel:hover {
+    border-color: #94A3B8;
+    color: #475569;
+}
+
+/* Main Main CTA button (bottom of plans) */
+.rsMainCta {
+    width: 100%;
+    margin-top: 20px;
+    height: 54px;
+    background: #111827;
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-size: 18px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rsMainCta:hover {
+    background: #1F2937;
+    transform: translateY(-1px);
+}
+
+.rsMainCta:disabled {
+    background: #E2E8F0;
+    color: #94A3B8;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.rsMainCta--free {
+    background: linear-gradient(135deg, #34D399 0%, #059669 100%);
+    box-shadow: 0 10px 20px rgba(5, 150, 105, 0.3);
+}
+
+/* Radio button visual for selectable cards */
+.rsPlanRadio {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid #CBD5E1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0;
+    /* Handled by layout */
+    transition: all 0.2s;
+}
+
+.rsPlanCard.is-selected .rsPlanRadio {
+    border-color: #10B981;
+    background: #10B981;
+}
+
+.rsPlanRadio::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.2s;
+}
+
+.rsPlanCard.is-selected .rsPlanRadio::after {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.rsPlanCard:hover .rsPlanRadio {
+    border-color: #10B981;
 }
