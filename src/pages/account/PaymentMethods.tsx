@@ -217,6 +217,12 @@ export default function PaymentMethods() {
             )}
 
             <style>{`
+                .account-panel-v2__header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    gap: 16px;
+                }
                 .payment-methods-list {
                     display: flex;
                     flex-direction: column;
