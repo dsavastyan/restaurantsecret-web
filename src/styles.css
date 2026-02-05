@@ -98,6 +98,36 @@ body {
   transform: translateY(1px);
 }
 
+.navbar__account {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: #fff;
+  color: #111827;
+  transition: all .2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.navbar__account svg {
+  width: 20px;
+  height: 20px;
+}
+
+.navbar__account:hover {
+  background: #f8fafc;
+  border-color: var(--rs-accent);
+  color: var(--rs-accent);
+  box-shadow: 0 8px 16px rgba(47, 143, 91, 0.15);
+}
+
+.navbar__account:active {
+  transform: translateY(1px);
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
