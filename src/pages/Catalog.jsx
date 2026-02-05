@@ -4,6 +4,8 @@ import { useNavigate, useOutletContext } from 'react-router-dom'
 import { api } from '../api/client.js'
 import CuisineFilter from '../components/CuisineFilter.jsx'
 import { useSWRLite } from '../hooks/useSWRLite.js'
+import { useFavoriteRestaurantsStore } from '../store/favoriteRestaurants.ts'
+import { useAuth } from '../store/auth.js'
 
 // Fetch a large number to emulate "all" items since backend pagination seems flaky
 const FETCH_LIMIT = 1000;
@@ -20,6 +22,28 @@ export default function Catalog() {
 
   const navigate = useNavigate()
   const { access, requireAccess, requestPaywall } = useOutletContext() || {}
+
+  const accessToken = useAuth((state) => state.accessToken);
+  const { isFavorite, toggleFavorite, loadFavorites } = useFavoriteRestaurantsStore((state) => ({
+    isFavorite: state.isFavorite,
+    toggleFavorite: state.toggle,
+    loadFavorites: state.load,
+  }));
+
+  useEffect(() => {
+    if (accessToken) {
+      loadFavorites(accessToken);
+    }
+  }, [accessToken, loadFavorites]);
+
+  const handleToggleFavorite = useCallback(async (e, slug) => {
+    e.stopPropagation();
+    if (!accessToken) {
+      navigate('/login', { state: { from: window.location.pathname } });
+      return;
+    }
+    await toggleFavorite(accessToken, slug);
+  }, [accessToken, navigate, toggleFavorite]);
 
   // Infinite scroll observer target
   const loaderRef = useRef(null)
@@ -258,6 +282,20 @@ export default function Catalog() {
                     <h3 className="catalog-card__title">{r.name}</h3>
                     {r.cuisine && <div className="catalog-card__cuisine">{r.cuisine}</div>}
                   </div>
+                  <button
+                    type="button"
+                    className={`catalog-card__fav-btn ${isFavorite(r.slug) ? 'is-active' : ''}`}
+                    onClick={(e) => handleToggleFavorite(e, r.slug)}
+                    aria-label={isFavorite(r.slug) ? "Удалить из избранного" : "Добавить в избранное"}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z"
+                        fill={isFavorite(r.slug) ? "#E11D48" : "none"}
+                        stroke={isFavorite(r.slug) ? "#E11D48" : "currentColor"}
+                        strokeWidth="2"
+                      />
+                    </svg>
+                  </button>
                 </div>
 
                 <div className="catalog-card__body">

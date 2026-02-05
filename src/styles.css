@@ -1865,7 +1865,7 @@ body {
   pointer-events: none;
 }
 
-.contact-page--feedback .contact-card--accent > * {
+.contact-page--feedback .contact-card--accent>* {
   position: relative;
   z-index: 1;
 }
@@ -3360,6 +3360,44 @@ body:has(.account--sheet-open) {
 .account-subscription-v2__card-warning {
   color: #fff;
   font-weight: 800;
+}
+
+.catalog-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 16px 0;
+}
+
+.catalog-card__fav-btn {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, color 0.2s ease;
+  border-radius: 50%;
+  margin: -8px -8px 0 0;
+}
+
+.catalog-card__fav-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  transform: scale(1.1);
+}
+
+.catalog-card__fav-btn.is-active {
+  color: #E11D48;
+}
+
+.catalog-card__title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: #0f172a;
 }
 
 .account-subscription-v2__card-status-row {
@@ -5152,7 +5190,17 @@ body:has(.account--sheet-open) {
 .favorites-header {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 16px;
+}
+
+.favorites-tabs-row {
+  display: flex;
+  justify-content: center;
+}
+
+.favorites-tabs-row .segmented-control {
+  width: 100%;
+  max-width: 400px;
 }
 
 .favorites-grid {

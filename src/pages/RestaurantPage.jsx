@@ -9,6 +9,7 @@ import { useAuth } from '@/store/auth';
 import { useSubscriptionStore } from '@/store/subscription';
 import { MenuOutdatedModal } from '@/components/MenuOutdatedModal';
 import { analytics } from '@/services/analytics';
+import { useFavoriteRestaurantsStore } from '@/store/favoriteRestaurants';
 
 // Assumption: subscription is active when you render this page
 // If you still keep useSubscription, you can gate this page by redirecting beforehand.
@@ -25,6 +26,26 @@ export default function RestaurantPage() {
     fetchStatus: state.fetchStatus,
   }));
   const [isOutdatedOpen, setIsOutdatedOpen] = useState(false);
+
+  const { isFavorite, toggleFavorite, loadFavorites } = useFavoriteRestaurantsStore((state) => ({
+    isFavorite: state.isFavorite(slug),
+    toggleFavorite: state.toggle,
+    loadFavorites: state.load,
+  }));
+
+  useEffect(() => {
+    if (accessToken) {
+      loadFavorites(accessToken);
+    }
+  }, [accessToken, loadFavorites]);
+
+  const handleToggleFavorite = async () => {
+    if (!accessToken) {
+      navigate('/login', { state: { from: window.location.pathname } });
+      return;
+    }
+    await toggleFavorite(accessToken, slug);
+  };
 
   // UI state
   const [q, setQ] = useState('');                 // поиск по названию блюда
@@ -112,7 +133,23 @@ export default function RestaurantPage() {
   return (
     <main className="restaurant-page">
       <header className="rp__header">
-        <h1 className="rp__title">{menu?.name || slug}</h1>
+        <div className="rp__title-row">
+          <h1 className="rp__title">{menu?.name || slug}</h1>
+          <button
+            type="button"
+            className={`rp__fav-btn ${isFavorite ? 'is-active' : ''}`}
+            onClick={handleToggleFavorite}
+            aria-label={isFavorite ? "Удалить из избранного" : "Добавить в избранное"}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z"
+                fill={isFavorite ? "#E11D48" : "none"}
+                stroke={isFavorite ? "#E11D48" : "currentColor"}
+                strokeWidth="2"
+              />
+            </svg>
+          </button>
+        </div>
         <div className="rp__meta">
           <div className="rp__meta-items">
             {menu?.cuisine && <span className="rp__cuisine">{menu.cuisine}</span>}
@@ -280,7 +317,27 @@ function DishCard({ dish, hasActiveSub, onSubscribe, menuCapturedAt }) {
 const styles = `
 .restaurant-page { padding: 16px 16px 24px; }
 .rp__header { margin-bottom: 12px; }
-.rp__title { font-size: 22px; margin: 0 0 6px; }
+.rp__title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+.rp__title { font-size: 22px; margin: 0; }
+.rp__fav-btn {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, color 0.2s ease;
+  border-radius: 50%;
+}
+.rp__fav-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  transform: scale(1.1);
+}
+.rp__fav-btn.is-active {
+  color: #E11D48;
+}
 .rp__meta { color:#64748b; display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
 .rp__meta-items { display:flex; gap:10px; flex-wrap:wrap; }
 .rp__outdated {
