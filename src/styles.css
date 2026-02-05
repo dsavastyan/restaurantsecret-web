@@ -98,35 +98,7 @@ body {
   transform: translateY(1px);
 }
 
-.navbar__account {
-  width: 40px;
-  height: 40px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  background: #fff;
-  color: #111827;
-  transition: all .2s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.navbar__account svg {
-  width: 20px;
-  height: 20px;
-}
-
-.navbar__account:hover {
-  background: #f8fafc;
-  border-color: var(--rs-accent);
-  color: var(--rs-accent);
-  box-shadow: 0 8px 16px rgba(47, 143, 91, 0.15);
-}
-
-.navbar__account:active {
-  transform: translateY(1px);
-}
+/* .navbar__account removed - replaced by .account-button */
 
 .btn {
   display: inline-flex;
@@ -7167,4 +7139,55 @@ body:has(.account--sheet-open) {
   padding: 40px;
   text-align: center;
   color: #64748b;
+}
+
+/* --- Account Button (iOS style) --- */
+.account-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  /* Extra tap zone for mobile compliance (>= 44px) */
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border-radius: 50%;
+  transition: opacity 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  margin-right: -4px;
+  /* Slight adjustment to align with header padding */
+}
+
+.account-button__inner {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Soft green gradient from mock-up */
+  background: linear-gradient(135deg, #E9F3EC 0%, #F6F8F2 100%);
+  color: #2F5D4A;
+  transition: filter 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+@media (min-width: 768px) {
+  .account-button__inner {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.account-button__icon {
+  width: 20px;
+  height: 20px;
+}
+
+.account-button:hover .account-button__inner {
+  filter: brightness(0.97);
+}
+
+.account-button:active .account-button__inner {
+  filter: brightness(0.94);
 }
