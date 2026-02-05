@@ -149,6 +149,11 @@ export default function DishCardModal() {
       return;
     }
 
+    if (!hasActiveSub) {
+      navigate("/account/subscription");
+      return;
+    }
+
     const safeNum = (val: any) => {
       const n = Number(val);
       return Number.isFinite(n) ? n : 0;
