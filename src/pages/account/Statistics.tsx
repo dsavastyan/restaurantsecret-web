@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/store/auth';
 import { useDiaryStore } from '@/store/diary';
 import { useGoalsStore } from '@/store/goals';
+import { useSubscriptionStore } from '@/store/subscription';
 const formatDateCompact = (dateStr: string) => {
     const d = new Date(dateStr);
     const day = d.getDate();
@@ -29,6 +31,9 @@ export default function Statistics() {
         removeEntry: s.removeEntry,
         addEntry: s.addEntry
     }));
+
+    const { hasActiveSub } = useSubscriptionStore(s => ({ hasActiveSub: s.hasActiveSub }));
+    const navigate = useNavigate();
 
     // We need goals to calculate remaining
     const { data: goalData, fetch: fetchGoals } = useGoalsStore(s => ({ data: s.data, fetch: s.fetch }));
@@ -62,6 +67,10 @@ export default function Statistics() {
     const handleManualSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!token) return;
+        if (!hasActiveSub) {
+            navigate('/account/subscription');
+            return;
+        }
 
         await addEntry(token, {
             name: manualForm.name,
@@ -181,7 +190,13 @@ export default function Statistics() {
 
             {/* Manual Entry Button */}
             {!isAdding && (
-                <button className="btn-add-product w-full" onClick={() => setIsAdding(true)}>
+                <button className="btn-add-product w-full" onClick={() => {
+                    if (!hasActiveSub) {
+                        navigate('/account/subscription');
+                        return;
+                    }
+                    setIsAdding(true);
+                }}>
                     <span className="btn-add-product__icon">+</span>
                     <span>Добавить продукт вручную</span>
                 </button>
