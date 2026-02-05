@@ -46,12 +46,20 @@ const fetchStatus = async (token?: string | null) => {
   }
 
   try {
-    const response = await apiGet<{ status?: string | null; statusNorm?: string | null }>(
+    const response = await apiGet<{ status?: string | null; statusNorm?: string | null; expires_at?: string | null }>(
       "/api/subscriptions/status",
       token,
     );
     const statusNorm = normalizeStatus(response?.statusNorm || response?.status);
-    const isActive = statusNorm === "active";
+    let isActive = statusNorm === "active";
+
+    if (isActive && response?.expires_at) {
+      const expiresDate = new Date(response.expires_at);
+      if (!isNaN(expiresDate.getTime()) && expiresDate < new Date()) {
+        isActive = false;
+      }
+    }
+
     setHasActiveSub(isActive);
     return isActive;
   } catch (error) {

@@ -103,9 +103,18 @@ function formatDate(value: string | null): string {
   }
 }
 
-function getStatusTone(status: string): "active" | "cancelled" | "expired" | "pending" {
+function getStatusTone(status: string, expiresAt?: string | null): "active" | "cancelled" | "expired" | "pending" {
   const normalized = status.trim().toLowerCase();
-  if (normalized.includes("active") || normalized.includes("актив")) {
+  const isCurrentlyActive = normalized.includes("active") || normalized.includes("актив");
+
+  if (isCurrentlyActive && expiresAt) {
+    const expiresDate = new Date(expiresAt);
+    if (!isNaN(expiresDate.getTime()) && expiresDate < new Date()) {
+      return "expired";
+    }
+  }
+
+  if (isCurrentlyActive) {
     return "active";
   }
   if (normalized.includes("cancel") || normalized.includes("отмен")) {
@@ -120,8 +129,8 @@ function getStatusTone(status: string): "active" | "cancelled" | "expired" | "pe
   return "pending";
 }
 
-function formatStatusLabel(status: string): string {
-  const tone = getStatusTone(status);
+function formatStatusLabel(status: string, expiresAt?: string | null): string {
+  const tone = getStatusTone(status, expiresAt);
   if (tone === "active") return "Активна";
   if (tone === "cancelled") return "Отменена";
   if (tone === "expired") return "Истекла";
@@ -188,7 +197,7 @@ export default function SubscriptionHistoryPage() {
       return (
         <ul className="account-history__list">
           {state.data.map((item, index) => {
-            const tone = getStatusTone(item.status);
+            const tone = getStatusTone(item.status, item.expires_at);
             return (
               <li key={`${item.plan}-${item.started_at ?? index}`} className="account-history__item">
                 <div className="account-history__item-header">
@@ -196,7 +205,7 @@ export default function SubscriptionHistoryPage() {
                     <p className="account-history__plan">{item.plan}</p>
                   </div>
                   <span className={`account-history__status account-history__status--${tone}`}>
-                    {formatStatusLabel(item.status)}
+                    {formatStatusLabel(item.status, item.expires_at)}
                   </span>
                 </div>
                 <dl className="account-history__meta">

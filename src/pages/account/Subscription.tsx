@@ -107,19 +107,27 @@ export default function AccountSubscription() {
         return;
       }
 
-      const normalizeStatus = (value?: string | null) => {
+      const normalizeStatus = (value?: string | null, expiresAt?: string | null) => {
         if (typeof value !== "string") return "none" as const;
         const trimmed = value.trim().toLowerCase();
+
+        if (trimmed === "active" && expiresAt) {
+          const expiresDate = new Date(expiresAt);
+          if (!isNaN(expiresDate.getTime()) && expiresDate < new Date()) {
+            return "expired";
+          }
+        }
+
         const known = ["active", "expired", "canceled", "none"] as const;
         if (known.includes(trimmed as (typeof known)[number])) {
           return trimmed as (typeof known)[number];
         }
-        return trimmed || "none";
+        return (trimmed || "none") as (typeof known)[number] | string;
       };
 
       const normalized = {
         ...response,
-        status: normalizeStatus(response?.status),
+        status: normalizeStatus(response?.status, response?.expires_at),
         plan: typeof response?.plan === "string" ? response.plan.trim() : response?.plan ?? null,
         payment_method:
           typeof response?.payment_method === "string" && response.payment_method.trim()
