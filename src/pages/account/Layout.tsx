@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
-import { apiGet, isUnauthorizedError } from "@/lib/api";
+import { NavLink, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { apiGet, apiPostAuth, isUnauthorizedError } from "@/lib/api";
 import { useAuth } from "@/store/auth";
 
 export type Sub = {
@@ -26,6 +26,7 @@ export type AccountOutletContext = {
 };
 
 export default function AccountLayout() {
+  const navigate = useNavigate();
   const { accessToken, logout } = useAuth((state) => ({
     accessToken: state.accessToken,
     logout: state.logout,
@@ -34,6 +35,37 @@ export default function AccountLayout() {
   const [me, setMe] = useState<Me | null>(null);
   const [loading, setLoading] = useState<boolean>(Boolean(accessToken));
   const [error, setError] = useState<string | null>(null);
+
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleOpenLogoutModal = useCallback(() => {
+    setIsLogoutModalOpen(true);
+  }, []);
+
+  const handleCloseLogoutModal = useCallback(() => {
+    if (isLoggingOut) return;
+    setIsLogoutModalOpen(false);
+  }, [isLoggingOut]);
+
+  const handleConfirmLogout = useCallback(async () => {
+    setIsLoggingOut(true);
+    try {
+      if (accessToken) {
+        const response = await apiPostAuth("/auth/logout", undefined, accessToken);
+        if (!response.ok) {
+          console.error("Logout request failed", response.status);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to log out", error);
+    } finally {
+      setIsLoggingOut(false);
+      setIsLogoutModalOpen(false);
+      logout();
+      navigate("/login", { replace: true });
+    }
+  }, [accessToken, logout, navigate]);
 
   const load = useCallback(async () => {
     if (!accessToken) {
@@ -75,11 +107,7 @@ export default function AccountLayout() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const sub = me?.user?.subscription || null;
-  const isNeverSubscribed = !sub || (sub.status === 'none' && !sub.expired); // Crude check, but checking if there is ANY sub info usually means they had one using 'sub' object existence usually. 
-  // Let's refine: if sub is null, they definitely never subscribed (or data not loaded). 
-  // If sub exists but status is 'none' and no expired... 
-  // Actually, checking Layout logic: `sub` comes from `me.user.subscription`.
-  // If user never subscribed, `subscription` might be null.
+  const isNeverSubscribed = !sub || (sub.status === 'none' && !sub.expired);
 
   const navItems = [
     { to: "/account", label: "Профиль", end: true },
@@ -94,7 +122,6 @@ export default function AccountLayout() {
     item.end ? location.pathname === item.to : location.pathname.startsWith(item.to)
   ) || navItems[0];
 
-  /* sub is already declared above */
   const daysLeft = useMemo(() => {
     if (!sub?.expires_at) return null;
     const expiresAt = new Date(sub.expires_at).getTime();
@@ -127,6 +154,20 @@ export default function AccountLayout() {
               <span className="account__mobile-toggle-label">{currentNav.label}</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M4 6h16M4 12h16m-7 6h7" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="account__header-actions">
+            <button
+              type="button"
+              className="account-logout-btn"
+              onClick={handleOpenLogoutModal}
+              title="Выйти"
+            >
+              <span className="account-logout-btn__label">Выйти</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
           </div>
@@ -189,6 +230,43 @@ export default function AccountLayout() {
           </nav>
         </div>
       </div>
+
+      {isLogoutModalOpen && (
+        <div
+          className="logout-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="logout-modal-title"
+          aria-describedby="logout-modal-description"
+        >
+          <div className="logout-modal__dialog">
+            <h3 id="logout-modal-title" className="logout-modal__title">
+              Вы уверены, что хотите выйти?
+            </h3>
+            <p id="logout-modal-description" className="logout-modal__description">
+              Вы всегда сможете вернуться, используя свою почту.
+            </p>
+            <div className="logout-modal__actions">
+              <button
+                type="button"
+                className="account-button account-button--outline"
+                onClick={handleCloseLogoutModal}
+                disabled={isLoggingOut}
+              >
+                Отмена
+              </button>
+              <button
+                type="button"
+                className="account-button account-button--danger"
+                onClick={handleConfirmLogout}
+                disabled={isLoggingOut}
+              >
+                Да
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

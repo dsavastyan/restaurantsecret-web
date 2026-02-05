@@ -1409,6 +1409,30 @@ body {
   color: #0f172a;
 }
 
+.catalog-card__fav-btn {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, color 0.2s ease;
+  border-radius: 50%;
+  margin: -8px -8px 0 0;
+}
+
+.catalog-card__fav-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  transform: scale(1.1);
+}
+
+.catalog-card__fav-btn.is-active {
+  color: #E11D48;
+}
+
+
 .catalog-card__cuisine {
   display: inline-flex;
   align-items: center;
@@ -2803,17 +2827,38 @@ body {
 
 .account__header {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.account__header-left {
+  flex: 1;
 }
 
 .account__header-mobile {
   display: none;
 }
 
+.account__header-actions {
+  display: flex;
+  align-items: center;
+}
+
 @media (max-width: 899px) {
   .account {
     padding-top: 16px;
+  }
+
+  .account__header {
+    position: sticky;
+    top: 64px;
+    z-index: 20;
+    margin: 0 -16px;
+    padding: 0 16px 16px;
+    background: #fff;
+    align-items: center;
   }
 
   .account__header-desktop {
@@ -2822,11 +2867,8 @@ body {
 
   .account__header-mobile {
     display: block;
-    position: sticky;
-    top: 64px;
-    z-index: 20;
-    margin: 0 -16px;
-    padding: 0 16px 16px;
+    flex: 1;
+    margin-right: 12px;
   }
 
   .account__mobile-toggle {
@@ -3035,7 +3077,72 @@ body:has(.account--sheet-open) {
   padding: clamp(24px, 5vw, 36px);
   display: flex;
   flex-direction: column;
-  gap: clamp(18px, 3vw, 26px);
+  gap: clamp(12px, 2vw, 20px);
+  /* Reduced gap */
+}
+
+.account-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: rgba(226, 232, 240, 0.5);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 999px;
+  color: #4b5563;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.account-logout-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.08);
+}
+
+.account-logout-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 640px) {
+  .account-logout-btn__label {
+    display: none;
+  }
+
+  .account-logout-btn {
+    padding: 10px;
+  }
+}
+
+.account-profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.account-profile-info__item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 240px;
+}
+
+.account-profile-info__label {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--rs-muted);
+  font-weight: 800;
+}
+
+.account-profile-info__value {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--rs-text);
 }
 
 .account-panel__header {
@@ -5510,8 +5617,9 @@ body:has(.account--sheet-open) {
 /* Profile Form */
 .account-divider {
   height: 1px;
-  background: #f3f4f6;
-  margin: 16px 0;
+  background: #f1f5f9;
+  margin: 8px 0;
+  /* Further reduced margin */
 }
 
 .stats-grid {
@@ -6986,4 +7094,47 @@ body:has(.account--sheet-open) {
 .rs-toggle input:disabled+.rs-toggle__slider {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Favorites Page */
+.favorites-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.favorites-header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.favorites-tabs-row {
+  display: flex;
+  justify-content: center;
+}
+
+.favorites-tabs-row .segmented-control {
+  width: 100%;
+  max-width: 400px;
+}
+
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.favorites-empty {
+  padding: 40px;
+  text-align: center;
+  background: #f9fafb;
+  border-radius: 16px;
+  color: #4b5563;
+}
+
+.favorites-loading {
+  padding: 40px;
+  text-align: center;
+  color: #64748b;
 }

@@ -4,8 +4,8 @@ import { useNavigate, useOutletContext } from 'react-router-dom'
 import { api } from '../api/client.js'
 import CuisineFilter from '../components/CuisineFilter.jsx'
 import { useSWRLite } from '../hooks/useSWRLite.js'
-import { useFavoriteRestaurantsStore } from '../store/favoriteRestaurants.ts'
-import { useAuth } from '../store/auth.js'
+import { useFavoriteRestaurantsStore } from '@/store/favoriteRestaurants'
+import { useAuth } from '@/store/auth'
 
 // Fetch a large number to emulate "all" items since backend pagination seems flaky
 const FETCH_LIMIT = 1000;
