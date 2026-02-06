@@ -8,6 +8,7 @@ import L from 'leaflet';
 import 'leaflet.markercluster'; // Attaches L.markerClusterGroup
 import { API_BASE } from '@/config/api';
 import MetroFilter from './MetroFilter';
+import MapCuisineFilter from './MapCuisineFilter';
 
 // Fix for default marker icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -84,7 +85,8 @@ export default function RestaurantMap() {
     const [restaurants, setRestaurants] = useState([]);
     const [loading, setLoading] = useState(true);
     const [metroData, setMetroData] = useState({ lines: [], stations: [] });
-    const [filters, setFilters] = useState({ stationIds: [] });
+    const [cuisines, setCuisines] = useState([]);
+    const [filters, setFilters] = useState({ stationIds: [], cuisines: [] });
 
     useEffect(() => {
         // Fetch metro data once
@@ -100,6 +102,20 @@ export default function RestaurantMap() {
             }
         }
         fetchMetro();
+
+        // Fetch cuisines once
+        async function fetchCuisines() {
+            try {
+                const res = await fetch(`${API_BASE}/filters`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setCuisines(data.cuisines || []);
+                }
+            } catch (err) {
+                console.error("Failed to load cuisines data", err);
+            }
+        }
+        fetchCuisines();
     }, []);
 
     useEffect(() => {
@@ -109,6 +125,9 @@ export default function RestaurantMap() {
                 const params = new URLSearchParams();
                 if (filters.stationIds && filters.stationIds.length > 0) {
                     filters.stationIds.forEach(id => params.append('station_id', id));
+                }
+                if (filters.cuisines && filters.cuisines.length > 0) {
+                    filters.cuisines.forEach(cuisine => params.append('cuisine', cuisine));
                 }
 
                 const res = await fetch(`${API_BASE}/restaurants/map?${params.toString()}`);
@@ -134,11 +153,18 @@ export default function RestaurantMap() {
                 </div>
             </div>
 
-            <MetroFilter
-                metroData={metroData}
-                selectedStationIds={filters.stationIds}
-                onChange={(f) => setFilters(f)}
-            />
+            <div className="filters-row">
+                <MetroFilter
+                    metroData={metroData}
+                    selectedStationIds={filters.stationIds}
+                    onChange={(f) => setFilters({ ...filters, stationIds: f.stationIds })}
+                />
+                <MapCuisineFilter
+                    cuisines={cuisines}
+                    selectedCuisines={filters.cuisines}
+                    onChange={(f) => setFilters({ ...filters, cuisines: f.cuisines })}
+                />
+            </div>
 
             <div className="map-wrapper">
                 {loading && <div className="map-overlay">Загрузка...</div>}
@@ -178,6 +204,21 @@ export default function RestaurantMap() {
             gap: 12px;
         }
         .map-header h3 { margin: 0; font-size: 18px; }
+        .filters-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+          align-items: flex-start;
+        }
+        @media (max-width: 768px) {
+          .filters-row {
+            flex-direction: column;
+          }
+          .metro-filter-container,
+          .cuisine-filter-container {
+            width: calc(100% - 32px) !important;
+          }
+        }
         .badge {
           background: var(--brand);
           color: #fff;
