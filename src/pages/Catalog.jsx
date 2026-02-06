@@ -121,7 +121,15 @@ export default function Catalog() {
       const name = item?.name?.toLowerCase() || ''
       const cuisine = item?.cuisine?.toLowerCase() || ''
       const matchesQuery = !normalizedQuery || name.includes(normalizedQuery)
-      const matchesCuisine = !cuisines.length || cuisines.includes(cuisine)
+
+      // Split cuisines by comma and check if any selected cuisine is in the list
+      let matchesCuisine = !cuisines.length
+      if (cuisines.length && cuisine) {
+        const itemCuisines = cuisine.split(',').map(c => c.trim())
+        matchesCuisine = cuisines.some(selectedCuisine =>
+          itemCuisines.some(itemCuisine => itemCuisine.includes(selectedCuisine))
+        )
+      }
 
       return matchesQuery && matchesCuisine
     })
