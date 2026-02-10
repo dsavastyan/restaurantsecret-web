@@ -3420,19 +3420,19 @@ body:has(.account--sheet-open) {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 40px;
+  padding: 40px 20px 40px 40px;
   gap: 20px;
   min-width: 0;
 }
 
 /* Right column - illustration */
 .account-subscription-v2__card-right {
-  flex: 0 0 auto;
+  flex: 0 0 300px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px;
-  max-width: 400px;
+  padding: 20px;
+  overflow: hidden;
 }
 
 .account-subscription-v2__card-content {
@@ -3521,6 +3521,7 @@ body:has(.account--sheet-open) {
   font-weight: 700;
   margin: 0;
   color: #1e293b;
+  white-space: nowrap;
 }
 
 .account-subscription-v2__card-status-label {
@@ -3604,10 +3605,11 @@ body:has(.account--sheet-open) {
 }
 
 .account-subscription-v2__card-illus img {
-  width: 100%;
+  width: 140%;
   height: auto;
   object-fit: contain;
   display: block;
+  transform: scale(1.15);
 }
 
 .account-subscription-v2__intro {
@@ -3821,6 +3823,10 @@ body:has(.account--sheet-open) {
   .account-subscription-v2__card-left {
     padding: 28px 24px;
     gap: 16px;
+  }
+
+  .account-subscription-v2__card-title {
+    white-space: normal;
   }
 
   .account-subscription-v2__card-right {
