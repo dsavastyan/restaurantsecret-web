@@ -12,8 +12,8 @@ import { Link } from 'react-router-dom';
  */
 export default function AccountButton() {
     return (
-        <Link to="/account" className="account-button" aria-label="Личный кабинет">
-            <div className="account-button__inner">
+        <Link to="/account" className="nav-account-button" aria-label="Личный кабинет">
+            <div className="nav-account-button__inner">
                 <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -21,7 +21,7 @@ export default function AccountButton() {
                     strokeWidth="1.6"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="account-button__icon"
+                    className="nav-account-button__icon"
                     xmlns="http://www.w3.org/2000/svg"
                 >
                     {/* User head */}
