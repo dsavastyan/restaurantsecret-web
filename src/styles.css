@@ -7142,7 +7142,7 @@ body:has(.account--sheet-open) {
 }
 
 /* --- Account Button (iOS style) --- */
-.account-button {
+.nav-account-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -7154,11 +7154,11 @@ body:has(.account--sheet-open) {
   border-radius: 50%;
   transition: opacity 0.2s ease;
   -webkit-tap-highlight-color: transparent;
-  margin-right: -4px;
-  /* Slight adjustment to align with header padding */
+  margin-right: -6px;
+  /* Adjusted to balance with navbar padding */
 }
 
-.account-button__inner {
+.nav-account-button__inner {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -7170,24 +7170,30 @@ body:has(.account--sheet-open) {
   color: #2F5D4A;
   transition: filter 0.2s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  /* Ensure clipping is gone by explicitly resetting potential inherited padding */
+  padding: 0;
+  border: none;
 }
 
 @media (min-width: 768px) {
-  .account-button__inner {
-    width: 40px;
-    height: 40px;
+  .nav-account-button__inner {
+    width: 36px;
+    /* Keep consistent with home button which is also 36px */
+    height: 36px;
   }
 }
 
-.account-button__icon {
+.nav-account-button__icon {
   width: 20px;
   height: 20px;
+  display: block;
+  /* Avoid line-height issues */
 }
 
-.account-button:hover .account-button__inner {
+.nav-account-button:hover .nav-account-button__inner {
   filter: brightness(0.97);
 }
 
-.account-button:active .account-button__inner {
+.nav-account-button:active .nav-account-button__inner {
   filter: brightness(0.94);
 }
