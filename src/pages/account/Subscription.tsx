@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ApiError, apiGet, apiPost, quotePromo, redeemPromo, isUnauthorizedError, PromoQuote } from "@/lib/api";
+import { ApiError, apiGet, apiPost, quotePromo, redeemPromo, isUnauthorizedError, PromoQuote, attachPaymentMethod } from "@/lib/api";
 import { useAuth } from "@/store/auth";
 import {
   selectHasActiveSub,
@@ -285,7 +285,24 @@ export default function AccountSubscription() {
     try {
       const res = await redeemPromo(trimmedCode, accessToken);
       if (res?.success) {
-        if (res.next_step === 'link_card' || res.next_step === 'payment') {
+        if (res.next_step === 'link_card') {
+          // Zero-Auth attach
+          let planToUse: UiPlan | null = selectedPlan;
+          if (promoQuote?.plan === 'annual') planToUse = 'year';
+          if (promoQuote?.plan === 'monthly') planToUse = 'month';
+          if (!planToUse) planToUse = 'month';
+
+          const attachRes = await attachPaymentMethod(accessToken, {
+            promo_code: trimmedCode,
+            plan: mapUiPlanToApi(planToUse),
+            return_url: window.location.origin + '/account/subscription'
+          });
+
+          if (attachRes?.confirmation_url) {
+            window.location.href = attachRes.confirmation_url;
+            return;
+          }
+        } else if (res.next_step === 'payment') {
           // Use selected plan or default
           let planToUse: UiPlan | null = selectedPlan;
 

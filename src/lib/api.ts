@@ -249,6 +249,10 @@ export async function redeemPromo(code: string, token: string) {
   return apiPost<PromoRedeemResponse>("/api/promo/redeem", { code }, token);
 }
 
+export async function attachPaymentMethod(token: string, data: { promo_code?: string; plan?: string; return_url?: string }) {
+  return apiPost<{ confirmation_url: string }>("/api/payment-methods/attach", data, token);
+}
+
 export function postSuggest(body: SuggestRequest, token?: string) {
   return apiPost("/api/suggest", body, token);
 }
