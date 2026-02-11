@@ -44,10 +44,28 @@ export default function SubscriptionPlans({
     const baseMonthPrice = 99;
     const baseYearPrice = 999;
 
+    // Plan availability/auto-selection logic
+    useEffect(() => {
+        if (promoQuote) {
+            if (promoQuote.plan === 'annual') {
+                onSelectPlan('year');
+            } else if (promoQuote.plan === 'monthly') {
+                onSelectPlan('month');
+            } else if (promoQuote.type === 'free_days' && promoQuote.requires_subscribing) {
+                // RS7FREE -> Auto year
+                onSelectPlan('year');
+            }
+        }
+    }, [promoQuote]);
+
+    const isMonthDisabled = promoQuote?.plan === 'annual';
+    const isYearDisabled = promoQuote?.plan === 'monthly' || (promoQuote?.type === 'discount_rub' && promoQuote?.amount > 0 && promoQuote?.plan === 'monthly');
+    // Actually the requirement says for RS10PERCFREE (annual only) month is disabled. 
+    // And for RS50PERCFREE/RS20RUB (monthly only) year is disabled.
+
     const getPrice = (type: 'month' | 'year', base: number) => {
         if (!promoQuote) return { old: null, new: base };
         // If free days trial, the price AFTER trial is the base price.
-        // We handle the display text specifically for this case.
         if (isFreeDaysTrial) return { old: null, new: base, isTrial: true };
 
         if (promoQuote.type === 'discount_rub' && (promoQuote.plan === 'any' ||
@@ -80,6 +98,12 @@ export default function SubscriptionPlans({
         if (loading) return "Загрузка...";
         if (!selectedPlan) return "Выберите тариф";
 
+        if (isFreeDaysTrial && selectedPlan) {
+            const priceObj = selectedPlan === 'month' ? monthPrice : yearPrice;
+            const period = selectedPlan === 'month' ? 'в месяц' : 'в год';
+            return `0\u00A0₽ сейчас, затем ${priceObj.new}\u00A0₽ ${period}`;
+        }
+
         const priceObj = selectedPlan === 'month' ? monthPrice : yearPrice;
         const planName = selectedPlan === 'month' ? "месяц" : "год";
 
@@ -88,7 +112,6 @@ export default function SubscriptionPlans({
 
     const renderPrice = (priceObj: any, period: string) => {
         if (isFreeDaysTrial && promoQuote?.amount) {
-            // "7 дней бесплатно, потом 99 ₽ в месяц"
             return (
                 <div className="rsPlanPriceTrial">
                     <span className="rsTrialBig">{promoQuote.amount} дней бесплатно</span>
@@ -118,9 +141,10 @@ export default function SubscriptionPlans({
                     <div className="rsPlanGrid">
                         {/* Month Card */}
                         <div
-                            className={`rsPlanCard rsPlanMonth ${selectedPlan === 'month' ? 'is-selected' : ''}`}
-                            onClick={() => onSelectPlan('month')}
+                            className={`rsPlanCard rsPlanMonth ${selectedPlan === 'month' ? 'is-selected' : ''} ${isMonthDisabled ? 'is-disabled' : ''}`}
+                            onClick={() => !isMonthDisabled && onSelectPlan('month')}
                         >
+                            {isMonthDisabled && <div className="rsPlanUnavailableBadge">Недоступно с выбранным промокодом</div>}
                             <div style={{ flex: 1 }}>
                                 <div className="rsPlanTopRow">
                                     <div className="rsPlanName">Месяц</div>
@@ -135,9 +159,10 @@ export default function SubscriptionPlans({
 
                         {/* Year Card */}
                         <div
-                            className={`rsPlanCard rsPlanYear ${selectedPlan === 'year' ? 'is-selected' : ''}`}
-                            onClick={() => onSelectPlan('year')}
+                            className={`rsPlanCard rsPlanYear ${selectedPlan === 'year' ? 'is-selected' : ''} ${isYearDisabled ? 'is-disabled' : ''}`}
+                            onClick={() => !isYearDisabled && onSelectPlan('year')}
                         >
+                            {isYearDisabled && <div className="rsPlanUnavailableBadge">Недоступно с выбранным промокодом</div>}
                             <div style={{ flex: 1 }}>
                                 <div className="rsPlanTopRow">
                                     <div className="rsPlanName">Год</div>
@@ -190,7 +215,7 @@ export default function SubscriptionPlans({
                         ) : (
                             <div className="rsPromoResult">
                                 <div className="rsPromoBadge rsPromoBadge--green">
-                                    Промокод применён
+                                    {promoQuote.code || promo.toUpperCase()}
                                 </div>
                                 <div className="rsPromoDesc">
                                     {promoQuote.description}

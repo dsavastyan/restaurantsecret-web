@@ -247,12 +247,6 @@ export default function AccountSubscription() {
     setSelectedPlan(plan);
   }, []);
 
-  const handleProceed = useCallback(() => {
-    if (selectedPlan) {
-      createPayment(selectedPlan);
-    }
-  }, [selectedPlan, createPayment]);
-
   const handleQuotePromo = useCallback(async (code: string) => {
     const trimmedCode = code.trim();
     if (!accessToken || !trimmedCode || promoLoading) return;
@@ -322,6 +316,16 @@ export default function AccountSubscription() {
       setPromoLoading(false);
     }
   }, [accessToken, promoLoading, promoQuote, createPayment, fetchStatus, selectedPlan]);
+
+  const handleProceed = useCallback(() => {
+    if (selectedPlan) {
+      if (promoQuote?.type === 'free_days') {
+        handleRedeemPromo(promoQuote.code || '');
+      } else {
+        createPayment(selectedPlan, promoQuote?.code);
+      }
+    }
+  }, [selectedPlan, createPayment, promoQuote, handleRedeemPromo]);
 
   const handleResetPromo = useCallback(() => {
     setPromoQuote(null);
