@@ -337,11 +337,13 @@ export default function AccountSubscription() {
   }, [accessToken, promoLoading, promoQuote, createPayment, fetchStatus, selectedPlan]);
 
   const handleProceed = useCallback(() => {
-    if (selectedPlan) {
+    const isFreeAccessNoCard = promoQuote?.type === 'free_days' && !promoQuote.requires_subscribing;
+
+    if (selectedPlan || isFreeAccessNoCard) {
       if (promoQuote?.type === 'free_days') {
         // Use either the code from quote (preferred) or what we might have elsewhere
         handleRedeemPromo(promoQuote.code || '');
-      } else {
+      } else if (selectedPlan) {
         createPayment(selectedPlan, promoQuote?.code);
       }
     }
@@ -407,8 +409,19 @@ export default function AccountSubscription() {
                     )}
                   </div>
                   <h3 className="account-subscription-v2__card-title">
-                    {isActive ? (statusData?.canceled_at ? "Подписка отменена" : "Подписка активна") : "Подписка завершена"}
+                    {isActive ? "Подписка активна" : "Подписка завершена"}
                   </h3>
+                  {isActive && statusData?.can_cancel && (
+                    <button
+                      className="account-subscription-v2__btn-cancel-top"
+                      onClick={handleCancel}
+                      disabled={canceling}
+                      title="Отменить подписку"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                      {canceling ? "..." : "Отменить"}
+                    </button>
+                  )}
                 </div>
 
                 <div className="account-subscription-v2__card-status-row">
@@ -421,16 +434,13 @@ export default function AccountSubscription() {
                   </div>
                 </div>
 
+                {isActive && statusData?.canceled_at && (
+                  <div className="account-subscription-v2__cancel-note">
+                    Автопродление выключено. Доступ сохранится до {expiresLabel}.
+                  </div>
+                )}
+
                 <div className="account-subscription-v2__card-actions">
-                  {isActive && statusData?.can_cancel && (
-                    <button
-                      className="account-subscription-v2__btn-cancel"
-                      onClick={handleCancel}
-                      disabled={canceling}
-                    >
-                      {canceling ? "Отмена..." : "Отменить подписку"}
-                    </button>
-                  )}
                   {!isActive && (
                     <button
                       className="account-subscription-v2__btn-renew"

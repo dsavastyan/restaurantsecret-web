@@ -218,7 +218,6 @@ export default function SubscriptionPlans({
                                     {promoQuote.code || promo.toUpperCase()}
                                 </div>
                                 <div className="rsPromoDesc">
-                                    {promoQuote.description}
                                     {isFreeAccessNoCard && <div className="rsPromoSub">Без привязки карты</div>}
                                 </div>
 
