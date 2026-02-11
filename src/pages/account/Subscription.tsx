@@ -23,6 +23,7 @@ type SubscriptionStatusResponse = {
   expires_at?: string | null;
   payment_method?: string | null;
   can_cancel?: boolean;
+  canceled_at?: string | null;
   error?: string | null;
 };
 
@@ -79,6 +80,7 @@ export default function AccountSubscription() {
   const [promoLoading, setPromoLoading] = useState(false);
   const [plansOpen, setPlansOpen] = useState(false);
   const [promoQuote, setPromoQuote] = useState<PromoQuote | null>(null);
+  const [canceling, setCanceling] = useState(false);
 
   const fetchStatus = useCallback(async () => {
     if (!accessToken) {
@@ -359,6 +361,28 @@ export default function AccountSubscription() {
     }
   }, [createPayment, promoQuote, handleRedeemPromo]);
 
+  const handleCancel = useCallback(async () => {
+    if (!accessToken || canceling) return;
+    if (!window.confirm("Вы уверены, что хотите отменить подписку? Она будет действовать до конца оплаченного периода.")) {
+      return;
+    }
+
+    setCanceling(true);
+    try {
+      const res = await apiPost<{ ok: boolean; error?: string }>("/api/subscriptions/cancel", {}, accessToken);
+      if (res?.ok) {
+        await fetchStatus();
+      } else {
+        alert(res?.error || "Не удалось отменить подписку");
+      }
+    } catch (err) {
+      console.error("Cancel sub error", err);
+      alert("Ошибка при отмене подписки");
+    } finally {
+      setCanceling(false);
+    }
+  }, [accessToken, canceling, fetchStatus]);
+
   return (
     <section className="account-panel-v2 account-subscription-panel" aria-labelledby="account-subscription-heading">
       <header className="account-panel-v2__header">
@@ -383,7 +407,7 @@ export default function AccountSubscription() {
                     )}
                   </div>
                   <h3 className="account-subscription-v2__card-title">
-                    {isActive ? "Подписка активна" : "Подписка завершена"}
+                    {isActive ? (statusData?.canceled_at ? "Подписка отменена" : "Подписка активна") : "Подписка завершена"}
                   </h3>
                 </div>
 
@@ -398,6 +422,15 @@ export default function AccountSubscription() {
                 </div>
 
                 <div className="account-subscription-v2__card-actions">
+                  {isActive && statusData?.can_cancel && (
+                    <button
+                      className="account-subscription-v2__btn-cancel"
+                      onClick={handleCancel}
+                      disabled={canceling}
+                    >
+                      {canceling ? "Отмена..." : "Отменить подписку"}
+                    </button>
+                  )}
                   {!isActive && (
                     <button
                       className="account-subscription-v2__btn-renew"
