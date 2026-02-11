@@ -1,11 +1,208 @@
+.rsPlansContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.rsPlanGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 8px;
+}
+
+.rsPlanCard {
+    position: relative;
+    border-radius: 22px;
+    padding: 22px 22px 20px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.78);
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.rsPlanCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+}
+
+.rsPlanCard.is-selected {
+    border-color: #4FAE57;
+    background: #fff;
+    box-shadow: 0 14px 35px rgba(79, 174, 87, 0.15);
+}
+
+.rsPlanMonth {
+    background: rgba(255, 255, 255, 0.82);
+}
+
+.rsPlanYear {
+    background: linear-gradient(135deg,
+            rgba(209, 250, 229, 0.9) 0%,
+            rgba(255, 255, 255, 0.85) 65%);
+}
+
+.rsPlanTopRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.rsPlanName {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0F172A;
+}
+
+.rsPlanRadio {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.is-selected .rsPlanRadio {
+    border-color: #4FAE57;
+}
+
+.is-selected .rsPlanRadio::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #4FAE57;
+}
+
+.rsBadge {
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.14);
+    color: #117A37;
+    border: 1px solid rgba(34, 197, 94, 0.22);
+}
+
+.rsPlanPrice {
+    margin-top: 12px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.rsPlanPriceBig {
+    font-size: 38px;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    color: #0B1220;
+}
+
+.rsPlanPriceOld {
+    font-size: 18px;
+    text-decoration: line-through;
+    color: rgba(11, 18, 32, 0.3);
+    margin-right: 4px;
+}
+
+.rsPlanPriceNew {
+    color: #D32F2F;
+}
+
+.rsPlanPriceSmall {
+    font-size: 18px;
+    font-weight: 700;
+    color: rgba(11, 18, 32, 0.75);
+}
+
+.rsPlanPriceTrial {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.rsTrialBig {
+    font-size: 24px;
+    font-weight: 900;
+    color: #2E7D32;
+}
+
+.rsTrialSmall {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.6);
+    margin-top: 4px;
+}
+
+.rsPlanDesc {
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.35;
+    color: rgba(11, 18, 32, 0.62);
+    min-height: 56px;
+}
+
+.rsFootnote {
+    margin: 10px 6px 16px;
+    font-size: 12px;
+    color: rgba(11, 18, 32, 0.55);
+    text-align: left;
+}
+
+/* Main CTA Button */
+.rsMainCta {
+    width: 100%;
+    height: 54px;
+    border-radius: 16px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 900;
+    color: white;
+    background: linear-gradient(180deg, #7BCB74 0%, #4FAE57 100%);
+    box-shadow: 0 10px 25px rgba(79, 174, 87, 0.25);
+    transition: all 0.2s;
+    margin-top: 10px;
+}
+
+.rsMainCta:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(79, 174, 87, 0.35);
+}
+
+.rsMainCta:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #ccc;
+    box-shadow: none;
+}
+
+.rsMainCta--free {
+    background: linear-gradient(180deg, #FF7AA8 0%, #E85086 100%);
+    box-shadow: 0 10px 25px rgba(232, 80, 134, 0.25);
+}
+
+/* Promo Section */
+.rsPromoBox {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
 .rsPromoHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    padding: 10px 0;
-    color: #444;
-    /* Increased contrast from a lighter grey if it was one */
+    padding: 12px 0;
+    color: #222;
     transition: color 0.2s;
 }
 
@@ -14,15 +211,13 @@
 }
 
 .rsPromoTitle {
-    font-weight: 500;
-    font-size: 14px;
-    color: #222;
-    /* Darker for better contrast */
+    font-weight: 600;
+    font-size: 15px;
 }
 
 .rsPromoChevron {
     font-size: 10px;
-    opacity: 0.6;
+    opacity: 0.5;
     transition: transform 0.2s;
 }
 
@@ -31,13 +226,12 @@
 }
 
 .rsPromoBody {
-    padding-top: 10px;
+    padding-bottom: 15px;
 }
 
 .rsPromoRow {
     display: flex;
     gap: 10px;
-    margin-bottom: 15px;
 }
 
 .rsPromoInput {
@@ -48,11 +242,7 @@
     padding: 0 15px;
     font-size: 14px;
     outline: none;
-    transition: border-color 0.2s;
-}
-
-.rsPromoInput:focus {
-    border-color: #007AFF;
+    background: #fdfdfd;
 }
 
 .rsPromoBtn {
@@ -63,83 +253,87 @@
     border: none;
     border-radius: 12px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
 }
 
-.rsPromoBtn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 .rsPromoResult {
-    background: #f8f8f8;
+    background: #F1F8E9;
     border-radius: 12px;
     padding: 15px;
-    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .rsPromoBadge {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    margin-bottom: 8px;
-}
-
-.rsPromoBadge--green {
-    background: #E8F5E9;
-    color: #2E7D32;
+    background: #4FAE57;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 800;
 }
 
 .rsPromoDesc {
     font-size: 14px;
-    color: #333;
-    line-height: 1.4;
-}
-
-.rsPromoSub {
-    font-size: 12px;
-    color: #666;
-    margin-top: 4px;
-}
-
-.rsPromoActions {
-    margin-top: 12px;
+    color: #2E7D32;
+    font-weight: 500;
 }
 
 .rsPromoCancel {
     background: none;
     border: none;
-    color: #FF3B30;
-    font-size: 13px;
-    padding: 0;
+    color: #666;
+    font-size: 12px;
+    text-decoration: underline;
     cursor: pointer;
+    padding: 0;
 }
 
 .rsPromoError {
-    color: #FF3B30;
+    color: #D32F2F;
     font-size: 13px;
-    margin-top: 10px;
+    margin-top: 8px;
+    font-weight: 500;
 }
 
 /* Plan Card states */
 .rsPlanCard.is-disabled {
-    opacity: 0.5;
-    pointer-events: none;
+    opacity: 0.4;
+    cursor: not-allowed;
     filter: grayscale(1);
+    background: #f5f5f5;
 }
 
 .rsPlanUnavailableBadge {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: #FFEBEB;
+    background: rgba(211, 47, 47, 0.1);
     color: #D32F2F;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 10px;
-    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
     z-index: 2;
+}
+
+@media (max-width: 720px) {
+    .rsPlanGrid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .rsPlanCard {
+        padding: 18px;
+    }
+
+    .rsPlanPriceBig {
+        font-size: 32px;
+    }
+
+    .rsPlanDesc {
+        min-height: auto;
+    }
 }
