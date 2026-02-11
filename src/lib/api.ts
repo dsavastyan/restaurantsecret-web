@@ -224,6 +224,7 @@ export async function apiDelete<T = unknown>(path: string, token?: string): Prom
 
 export type PromoQuote = {
   valid: boolean;
+  code?: string;
   type: 'free_days' | 'discount_rub' | 'discount_pct';
   amount: number;
   plan: 'monthly' | 'annual' | 'any';

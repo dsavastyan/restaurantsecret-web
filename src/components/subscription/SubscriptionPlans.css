@@ -1,184 +1,29 @@
-.rsPlansContainer {
-    display: flex;
-    flex-direction: column;
-}
-
-.rsPlanGrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-    margin-top: 8px;
-}
-
-.rsPlanCard {
-    border-radius: 22px;
-    padding: 22px 22px 20px;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.08);
-    background: rgba(255, 255, 255, 0.78);
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.2s;
-}
-
-.rsPlanCard:hover {
-    transform: translateY(-2px);
-}
-
-.rsPlanMonth {
-    background: rgba(255, 255, 255, 0.82);
-}
-
-.rsPlanYear {
-    background: linear-gradient(135deg,
-            rgba(209, 250, 229, 0.9) 0%,
-            rgba(255, 255, 255, 0.85) 65%);
-}
-
-.rsPlanTopRow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.rsPlanName {
-    font-size: 18px;
-    font-weight: 800;
-    color: #0F172A;
-}
-
-.rsBadge {
-    font-size: 12px;
-    font-weight: 900;
-    letter-spacing: 0.05em;
-    padding: 6px 10px;
-    border-radius: 999px;
-    background: rgba(34, 197, 94, 0.14);
-    color: #117A37;
-    border: 1px solid rgba(34, 197, 94, 0.22);
-}
-
-.rsPlanPrice {
-    margin-top: 12px;
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-}
-
-.rsPlanPriceBig {
-    font-size: 38px;
-    font-weight: 900;
-    letter-spacing: -0.03em;
-    color: #0B1220;
-}
-
-.rsPlanPriceSmall {
-    font-size: 18px;
-    font-weight: 700;
-    color: rgba(11, 18, 32, 0.75);
-}
-
-.rsPlanDesc {
-    margin-top: 12px;
-    font-size: 14px;
-    line-height: 1.35;
-    color: rgba(11, 18, 32, 0.62);
-    min-height: 56px;
-}
-
-.rsPlanGhostBtn,
-.rsPlanPrimaryBtn {
-    margin-top: auto;
-    width: 100%;
-    height: 46px;
-    border-radius: 14px;
-    cursor: pointer;
-    font-weight: 800;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    transition: all 0.2s;
-}
-
-.rsPlanGhostBtn {
-    border: 1px solid rgba(11, 18, 32, 0.14);
-    background: rgba(255, 255, 255, 0.92);
-    color: #0B1220;
-}
-
-.rsPlanPrimaryBtn {
-    border: none;
-    color: white;
-    background: linear-gradient(180deg, #7BCB74 0%, #4FAE57 100%);
-    box-shadow: 0 10px 18px rgba(79, 174, 87, 0.28);
-}
-
-.rsIconSquare {
-    width: 22px;
-    height: 22px;
-    display: inline-grid;
-    place-items: center;
-    border-radius: 7px;
-    background: rgba(15, 23, 42, 0.06);
-    border: 1px solid rgba(15, 23, 42, 0.10);
-    font-size: 12px;
-}
-
-.rsPlanPrimaryBtn:disabled,
-.rsPlanGhostBtn:disabled,
-.rsPromoBtn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.rsFootnote {
-    margin: 10px 6px 16px;
-    font-size: 12px;
-    color: rgba(11, 18, 32, 0.55);
-    text-align: right;
-    /* Changed to right to match common patterns, or keep left */
-}
-
-/* Promo Box (Accordion) */
-.rsPromoBox {
-    border-radius: 18px;
-    border: 1px solid rgba(99, 102, 241, 0.28);
-    background: rgba(239, 246, 255, 0.7);
-    padding: 0;
-    /* Padding handled by children */
-    box-shadow: 0 10px 22px rgba(59, 130, 246, 0.10);
-    position: relative;
-    overflow: hidden;
-    transition: background 0.3s;
-}
-
-.rsPromoBox--open {
-    background: rgba(239, 246, 255, 0.9);
-}
-
 .rsPromoHeader {
-    padding: 14px 18px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    user-select: none;
+    padding: 10px 0;
+    color: #444;
+    /* Increased contrast from a lighter grey if it was one */
+    transition: color 0.2s;
+}
+
+.rsPromoHeader:hover {
+    color: #000;
 }
 
 .rsPromoTitle {
-    font-size: 18px;
-    font-weight: 900;
-    color: #0B1220;
-    margin-bottom: 0;
+    font-weight: 500;
+    font-size: 14px;
+    color: #222;
+    /* Darker for better contrast */
 }
 
 .rsPromoChevron {
-    font-size: 12px;
-    color: #6366F1;
-    transition: transform 0.3s;
-    opacity: 0.7;
+    font-size: 10px;
+    opacity: 0.6;
+    transition: transform 0.2s;
 }
 
 .rsPromoChevron--open {
@@ -186,349 +31,115 @@
 }
 
 .rsPromoBody {
-    padding: 0 14px 16px;
-    animation: fadeIn 0.3s ease;
+    padding-top: 10px;
 }
 
 .rsPromoRow {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 12px;
-    align-items: center;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
 }
 
 .rsPromoInput {
+    flex: 1;
     height: 44px;
-    border-radius: 14px;
-    border: 1px solid rgba(0, 0, 0, 0.10);
-    padding: 0 14px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 0 15px;
+    font-size: 14px;
     outline: none;
-    background: rgba(255, 255, 255, 0.9);
-    font-weight: 600;
-    width: 100%;
+    transition: border-color 0.2s;
+}
+
+.rsPromoInput:focus {
+    border-color: #007AFF;
 }
 
 .rsPromoBtn {
     height: 44px;
-    padding: 0 18px;
-    border-radius: 999px;
+    padding: 0 20px;
+    background: #000;
+    color: #fff;
     border: none;
-    cursor: pointer;
-    font-weight: 900;
-    color: white;
-    background: linear-gradient(180deg, #FF7AA8 0%, #E85086 100%);
-    box-shadow: 0 5px 12px rgba(232, 80, 134, 0.25);
-}
-
-.rsPromoError {
-    margin-top: 12px;
-    background: #FEF2F2;
-    color: #B91C1C;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 13px;
-    border: 1px solid #FECACA;
-    text-align: center;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-5px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Mobile Adjustments (existing) ... */
-@media (max-width: 720px) {
-
-    /* ... existing mobile styles ... */
-    .rsPlanGrid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-        margin-top: 0;
-    }
-
-    .rsPlanCard {
-        padding: 16px;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        min-height: 72px;
-    }
-
-    /* Reset margins/paddings from desktop column layout */
-
-    /* Name Section */
-    .rsPlanTopRow {
-        flex: 1;
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-start;
-        gap: 8px;
-    }
-
-    .rsPlanName {
-        font-size: 16px;
-        line-height: 1.2;
-    }
-
-    .rsBadge {
-        font-size: 10px;
-        padding: 4px 8px;
-    }
-
-    /* Price Section */
-    .rsPlanPrice {
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 0;
-        margin-top: 0;
-        margin-right: 0;
-        min-width: 60px;
-        text-align: center;
-    }
-
-    .rsPlanPriceBig {
-        font-size: 18px;
-        line-height: 1.2;
-    }
-
-    .rsPlanPriceSmall {
-        font-size: 11px;
-        opacity: 0.6;
-        font-weight: 500;
-    }
-
-    /* Description HIDDEN on mobile */
-    .rsPlanDesc {
-        display: none;
-    }
-
-    /* Button Section */
-    .rsPlanGhostBtn,
-    .rsPlanPrimaryBtn {
-        width: auto;
-        min-width: 110px;
-        height: 40px;
-        padding: 0 16px;
-        margin-top: 0;
-        font-size: 14px;
-        border-radius: 12px;
-        /* Hide buttons on mobile if selecting whole card? 
-           Actually design says 'selectable'. 
-           We might want to hide these buttons and use the Card as proper button?
-           For now keeping them but maybe smaller. 
-        */
-    }
-
-    /* Remove icon in ghost button on mobile */
-    .rsIconSquare {
-        display: none;
-    }
-
-    /* Remove gap in ghost button since icon is gone */
-    .rsPlanGhostBtn {
-        gap: 0;
-    }
-
-    .rsPromoHeader {
-        padding: 12px 14px;
-    }
-
-    .rsPromoTitle {
-        font-size: 16px;
-    }
-}
-
-/* --- New Styles for Refactor --- */
-
-.rsPlanCard {
-    cursor: pointer;
-    /* Make entire card clickable */
-}
-
-.rsPlanCard.is-selected {
-    border: 2px solid #10B981;
-    /* Green border */
-    background: rgba(16, 185, 129, 0.05);
-    transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(16, 185, 129, 0.15);
-}
-
-.rsPlanPriceOld {
-    text-decoration: line-through;
-    color: #94A3B8;
-    font-size: 0.7em;
-    margin-right: 8px;
-    font-weight: 500;
-}
-
-.rsPlanPriceNew {
-    color: #10B981;
-    /* Green price */
-}
-
-/* Promo Result Area */
-.rsPromoResult {
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.6);
     border-radius: 12px;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
 }
 
-.rsPromoDesc {
-    font-size: 15px;
-    color: #1E293B;
-    margin-bottom: 12px;
+.rsPromoBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.rsPromoResult {
+    background: #f8f8f8;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
 }
 
 .rsPromoBadge {
     display: inline-block;
-    padding: 4px 10px;
+    padding: 4px 8px;
     border-radius: 6px;
-    font-size: 13px;
-    font-weight: 700;
-    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 8px;
 }
 
 .rsPromoBadge--green {
-    background: #DCFCE7;
-    color: #166534;
+    background: #E8F5E9;
+    color: #2E7D32;
 }
 
-.rsPromoBadge--neutral {
-    background: #F1F5F9;
-    color: #475569;
+.rsPromoDesc {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.4;
 }
 
 .rsPromoSub {
-    font-size: 13px;
-    color: #64748B;
-    margin-top: 2px;
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
 }
 
 .rsPromoActions {
-    display: flex;
-    gap: 10px;
+    margin-top: 12px;
 }
 
 .rsPromoCancel {
-    background: transparent;
-    border: 1px solid #CBD5E1;
-    color: #64748B;
-    border-radius: 99px;
-    padding: 0 16px;
-    height: 40px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.rsPromoCancel:hover {
-    border-color: #94A3B8;
-    color: #475569;
-}
-
-/* Main Main CTA button (bottom of plans) */
-.rsMainCta {
-    width: 100%;
-    margin-top: 20px;
-    height: 54px;
-    background: #111827;
-    color: white;
+    background: none;
     border: none;
-    border-radius: 16px;
-    font-size: 18px;
-    font-weight: 800;
-    cursor: pointer;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.rsMainCta:hover {
-    background: #1F2937;
-    transform: translateY(-1px);
-}
-
-.rsMainCta:disabled {
-    background: #E2E8F0;
-    color: #94A3B8;
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
-}
-
-.rsMainCta--free {
-    background: linear-gradient(135deg, #34D399 0%, #059669 100%);
-    box-shadow: 0 10px 20px rgba(5, 150, 105, 0.3);
-}
-
-/* Radio button visual for selectable cards */
-.rsPlanRadio {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    border: 2px solid #CBD5E1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 0;
-    /* Handled by layout */
-    transition: all 0.2s;
-}
-
-.rsPlanCard.is-selected .rsPlanRadio {
-    border-color: #10B981;
-    background: #10B981;
-}
-
-.rsPlanRadio::after {
-    content: '';
-    width: 8px;
-    height: 8px;
-    background: white;
-    border-radius: 50%;
-    opacity: 0;
-    transform: scale(0.5);
-    transition: all 0.2s;
-}
-
-.rsPlanCard.is-selected .rsPlanRadio::after {
-    opacity: 1;
-    transform: scale(1);
-}
-
-.rsPlanCard:hover .rsPlanRadio {
-    border-color: #10B981;
-}
-
-.rsPlanPriceTrial {
-    margin-top: 12px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 2px;
-}
-
-.rsTrialBig {
-    font-size: 18px;
-    font-weight: 800;
-    color: #10B981;
-    line-height: 1.2;
-}
-
-.rsTrialSmall {
+    color: #FF3B30;
     font-size: 13px;
-    color: rgba(11, 18, 32, 0.6);
-    font-weight: 500;
+    padding: 0;
+    cursor: pointer;
+}
+
+.rsPromoError {
+    color: #FF3B30;
+    font-size: 13px;
+    margin-top: 10px;
+}
+
+/* Plan Card states */
+.rsPlanCard.is-disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    filter: grayscale(1);
+}
+
+.rsPlanUnavailableBadge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #FFEBEB;
+    color: #D32F2F;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    z-index: 2;
 }
