@@ -337,6 +337,7 @@ export default function AccountSubscription() {
   const handleProceed = useCallback(() => {
     if (selectedPlan) {
       if (promoQuote?.type === 'free_days') {
+        // Use either the code from quote (preferred) or what we might have elsewhere
         handleRedeemPromo(promoQuote.code || '');
       } else {
         createPayment(selectedPlan, promoQuote?.code);
@@ -350,8 +351,13 @@ export default function AccountSubscription() {
   }, []);
 
   const handleChoosePlan = useCallback((plan: UiPlan) => {
-    createPayment(plan);
-  }, [createPayment]);
+    setSelectedPlan(plan);
+    if (promoQuote?.type === 'free_days') {
+      handleRedeemPromo(promoQuote.code || '');
+    } else {
+      createPayment(plan, promoQuote?.code);
+    }
+  }, [createPayment, promoQuote, handleRedeemPromo]);
 
   return (
     <section className="account-panel-v2 account-subscription-panel" aria-labelledby="account-subscription-heading">
