@@ -245,8 +245,8 @@ export async function quotePromo(code: string, token: string) {
   return apiPost<PromoQuote>("/api/promo/quote", { code }, token);
 }
 
-export async function redeemPromo(code: string, token: string) {
-  return apiPost<PromoRedeemResponse>("/api/promo/redeem", { code }, token);
+export async function redeemPromo(code: string, token: string, plan?: string) {
+  return apiPost<PromoRedeemResponse>("/api/promo/redeem", { code, plan }, token);
 }
 
 export async function attachPaymentMethod(token: string, data: { promo_code?: string; plan?: string; return_url?: string }) {
