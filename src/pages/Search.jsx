@@ -21,6 +21,9 @@ export default function Search() {
   const searchType = normalizeType(searchParams.get('type'))
   const [inputValue, setInputValue] = useState(queryParam)
 
+  const [restaurantsExpanded, setRestaurantsExpanded] = useState(false)
+  const [dishesExpanded, setDishesExpanded] = useState(false)
+
   useEffect(() => setInputValue(queryParam), [queryParam])
 
   const ensureAccess = useCallback(() => {
@@ -32,19 +35,13 @@ export default function Search() {
     return false
   }, [canAccess, requireAccess, requestPaywall])
 
-  useEffect(() => {
-    if (canAccess === false) {
-      ensureAccess()
-    }
-  }, [canAccess, ensureAccess])
-
   const [results, setResults] = useState(emptyResults)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
     const query = queryParam.trim()
-    if (!query || canAccess === false) {
+    if (!query) {
       setResults(emptyResults)
       setLoading(false)
       setError('')
@@ -75,7 +72,7 @@ export default function Search() {
     return () => {
       cancelled = true
     }
-  }, [canAccess, queryParam])
+  }, [queryParam])
 
   const updateParams = useCallback((nextQuery, nextType = searchType) => {
     const params = new URLSearchParams()
@@ -89,6 +86,8 @@ export default function Search() {
 
   const handleSubmit = useCallback((event) => {
     event.preventDefault()
+    setRestaurantsExpanded(false)
+    setDishesExpanded(false)
     updateParams(inputValue, searchType)
   }, [inputValue, searchType, updateParams])
 
@@ -114,25 +113,20 @@ export default function Search() {
   }, [openDishCard])
 
   const hasQuery = queryParam.length > 0
-  const showingDishes = searchType === 'dish'
   const dishes = results?.dishes ?? []
   const restaurants = results?.restaurants ?? []
-  const hasResults = showingDishes ? dishes.length > 0 : restaurants.length > 0
 
-  if (canAccess === false) {
-    return (
-      <div className="search-page">
-        <h1 className="search-page__title">Поиск</h1>
-        <p>Оформите подписку, чтобы пользоваться поиском блюд.</p>
-      </div>
-    )
-  }
+  const showRestaurants = searchType === 'restaurant' || searchType === 'dish' // Show both by default or if unified
+  const showDishes = searchType === 'dish' || searchType === 'restaurant'
+
+  const visibleRestaurants = restaurantsExpanded ? restaurants : restaurants.slice(0, 5)
+  const visibleDishes = dishesExpanded ? dishes : dishes.slice(0, 5)
 
   return (
     <div className="search-page">
       <div className="search-page__header">
         <h1 className="search-page__title">Поиск</h1>
-        <p className="search-page__hint">Введите запрос и выберите, что искать.</p>
+        <p className="search-page__hint">Результаты поиска по ресторанам и блюдам</p>
       </div>
 
       <form className="search-page__form" onSubmit={handleSubmit}>
@@ -149,60 +143,77 @@ export default function Search() {
         <button type="submit" className="btn btn--primary search-page__submit">Искать</button>
       </form>
 
-      <div className="segmented-control" role="group" aria-label="Режим поиска">
-        <button
-          type="button"
-          className={`segmented-control__option${showingDishes ? ' is-active' : ''}`}
-          onClick={() => handleTypeChange('dish')}
-        >
-          Блюда
-        </button>
-        <button
-          type="button"
-          className={`segmented-control__option${searchType === 'restaurant' ? ' is-active' : ''}`}
-          onClick={() => handleTypeChange('restaurant')}
-        >
-          Рестораны
-        </button>
-      </div>
-
-      {!hasQuery && (
-        <div className="search-state">Введите название блюда или ресторана и нажмите «Искать».</div>
-      )}
-
       {loading && <div className="search-state">Ищем…</div>}
       {error && <div className="search-state search-state--error">Ошибка: {error}</div>}
-      {!loading && hasQuery && !hasResults && !error && (
+
+      {!loading && hasQuery && restaurants.length === 0 && dishes.length === 0 && !error && (
         <div className="search-state search-state--empty">Ничего не нашли по «{queryParam}»</div>
       )}
 
-      {showingDishes && dishes.length > 0 && (
-        <ul className="search-results">
-          {dishes.map((dish) => (
-            <li key={`dish-${dish.id}`} className="search-card search-card--dish">
-              <button type="button" className="search-card__button" onClick={() => handleDishOpen(dish)}>
-                <div className="search-card__title">{dish.dishName}</div>
-                <div className="search-card__subtitle">{dish.restaurantName}</div>
-              </button>
-            </li>
-          ))}
-        </ul>
+      {hasQuery && !loading && (
+        <>
+          {restaurants.length > 0 && (
+            <section className="search-results-section">
+              <header className="search-results-header">
+                <h2 className="search-results-header__title">Рестораны</h2>
+                <span className="search-results-header__count">Найдено {restaurants.length}</span>
+              </header>
+              <ul className="search-results">
+                {visibleRestaurants.map((restaurant) => (
+                  <li key={`restaurant-${restaurant.id}`} className="search-card">
+                    <button type="button" className="search-card__button" onClick={() => handleRestaurantOpen(restaurant.slug)}>
+                      <div className="search-card__title">{restaurant.name}</div>
+                      {restaurant.city && (
+                        <div className="search-card__subtitle">{restaurant.city}</div>
+                      )}
+                      <div className="search-card__meta">Открыть меню</div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              {restaurants.length > 5 && (
+                <button
+                  className="search-results-expand"
+                  onClick={() => setRestaurantsExpanded(!restaurantsExpanded)}
+                >
+                  {restaurantsExpanded ? 'Свернуть' : 'Показать все'}
+                </button>
+              )}
+            </section>
+          )}
+
+          {dishes.length > 0 && (
+            <section className="search-results-section">
+              <header className="search-results-header">
+                <h2 className="search-results-header__title">Блюда</h2>
+                <span className="search-results-header__count">Найдено {dishes.length}</span>
+              </header>
+              <ul className="search-results">
+                {visibleDishes.map((dish) => (
+                  <li key={`dish-${dish.id}`} className="search-card">
+                    <button type="button" className="search-card__button" onClick={() => handleDishOpen(dish)}>
+                      <div className="search-card__title">{dish.dishName}</div>
+                      <div className="search-card__subtitle">{dish.restaurantName}</div>
+                      <div className="search-card__meta">Подробнее</div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              {dishes.length > 5 && (
+                <button
+                  className="search-results-expand"
+                  onClick={() => setDishesExpanded(!dishesExpanded)}
+                >
+                  {dishesExpanded ? 'Свернуть' : 'Показать все'}
+                </button>
+              )}
+            </section>
+          )}
+        </>
       )}
 
-      {!showingDishes && restaurants.length > 0 && (
-        <ul className="search-results">
-          {restaurants.map((restaurant) => (
-            <li key={`restaurant-${restaurant.id}`} className="search-card search-card--restaurant">
-              <button type="button" className="search-card__button" onClick={() => handleRestaurantOpen(restaurant.slug)}>
-                <div className="search-card__title">{restaurant.name}</div>
-                {restaurant.city && (
-                  <div className="search-card__subtitle">{restaurant.city}</div>
-                )}
-                <div className="search-card__meta">Открыть меню</div>
-              </button>
-            </li>
-          ))}
-        </ul>
+      {!hasQuery && !loading && (
+        <div className="search-state">Введите название блюда или ресторана и нажмите «Искать».</div>
       )}
     </div>
   )
