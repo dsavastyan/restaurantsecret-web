@@ -1,4 +1,5 @@
 import { PD_API_BASE } from "@/config/api";
+import { tryRefresh } from "@/lib/api";
 
 export const COOKIE_POLICY_VERSION = "cookies_v1_2026-01-16";
 export const USER_AGREEMENT_VERSION = "agreement_v1_2026-02-12";
@@ -84,17 +85,27 @@ class AnalyticsService {
             // Ideally, track() gets headers from a centralized API client.
             // Here we will use fetch directly for now, adding Auth header if we can find it.
 
-            const token = localStorage.getItem("rs_access"); // Corrected key from rs_auth_token to rs_access
-            const headers = { "Content-Type": "application/json" };
-            if (token) {
-                headers["Authorization"] = `Bearer ${token}`;
-            }
+            const sendConsent = async (tokenOverride) => {
+                const token = tokenOverride || localStorage.getItem("rs_access");
+                const headers = { "Content-Type": "application/json" };
+                if (token && typeof token === "string" && token.split('.').length === 3) {
+                    headers["Authorization"] = `Bearer ${token}`;
+                }
 
-            await fetch(`${this.apiUrl}/api/consent/analytics`, {
-                method: "POST",
-                headers,
-                body: JSON.stringify(payload),
-            });
+                return await fetch(`${this.apiUrl}/api/consent/analytics`, {
+                    method: "POST",
+                    headers,
+                    body: JSON.stringify(payload),
+                });
+            };
+
+            let res = await sendConsent();
+            if (res.status === 401) {
+                const newToken = await tryRefresh();
+                if (newToken) {
+                    await sendConsent(newToken);
+                }
+            }
         } catch (err) {
             console.error("[Analytics] Failed to set consent", err);
         }
@@ -164,20 +175,32 @@ class AnalyticsService {
             anon_id: anonId,
         };
 
-        try {
-            const token = localStorage.getItem("rs_access"); // Corrected key
+        const sendEvent = async (tokenOverride) => {
+            const token = tokenOverride || localStorage.getItem("rs_access");
             const headers = { "Content-Type": "application/json" };
-            if (token) {
+
+            // Basic check to ensure it's a non-empty string that looks like a JWT
+            if (token && typeof token === "string" && token.split('.').length === 3) {
                 headers["Authorization"] = `Bearer ${token}`;
             }
 
             // Using fetch with keepalive ensures reliability on page unload
-            await fetch(`${this.apiUrl}/api/analytics/event`, {
+            return await fetch(`${this.apiUrl}/api/analytics/event`, {
                 method: "POST",
                 headers,
                 body: JSON.stringify(payload),
                 keepalive: true,
             });
+        };
+
+        try {
+            let res = await sendEvent();
+            if (res.status === 401) {
+                const newToken = await tryRefresh();
+                if (newToken) {
+                    await sendEvent(newToken);
+                }
+            }
         } catch (err) {
             if (import.meta.env.DEV) console.warn("[Analytics] Track failed", err);
         }
@@ -188,22 +211,32 @@ class AnalyticsService {
      * Called upon login.
      */
     async recordPolicyAcceptance() {
-        try {
-            const token = localStorage.getItem("rs_access");
-            if (!token) return;
+        const sendPolicy = async (tokenOverride) => {
+            const token = tokenOverride || localStorage.getItem("rs_access");
+            if (!token || typeof token !== "string" || token.split('.').length !== 3) return null;
 
             const headers = {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`
             };
 
-            await fetch(`${this.apiUrl}/api/consent/policy`, {
+            return await fetch(`${this.apiUrl}/api/consent/policy`, {
                 method: "POST",
                 headers,
                 body: JSON.stringify({
                     policy_version: USER_AGREEMENT_VERSION
                 }),
             });
+        };
+
+        try {
+            let res = await sendPolicy();
+            if (res && res.status === 401) {
+                const newToken = await tryRefresh();
+                if (newToken) {
+                    await sendPolicy(newToken);
+                }
+            }
         } catch (err) {
             console.error("[Analytics] Failed to record policy acceptance", err);
         }

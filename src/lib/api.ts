@@ -135,7 +135,7 @@ export function apiPostAuth(path: string, body?: unknown, token?: string) {
   });
 }
 
-async function tryRefresh(): Promise<string | null> {
+export async function tryRefresh(): Promise<string | null> {
   try {
     const res = await fetch(`${PD_API_BASE}/auth/refresh`, {
       method: "POST",
