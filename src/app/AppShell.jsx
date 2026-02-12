@@ -147,6 +147,17 @@ export default function AppShell() {
 
   const showPaywall = false
 
+  // Keep a lightweight previous-route pointer for analytics attribution in SPA navigation.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const currentPath = `${location.pathname}${location.search || ''}`
+    const previousCurrent = window.sessionStorage.getItem('rs_current_path')
+    if (previousCurrent && previousCurrent !== currentPath) {
+      window.sessionStorage.setItem('rs_prev_path', previousCurrent)
+    }
+    window.sessionStorage.setItem('rs_current_path', currentPath)
+  }, [location.pathname, location.search])
+
   // Manual refresh triggered by the user after completing payment.
   const refreshAccess = useCallback(async () => {
     try {

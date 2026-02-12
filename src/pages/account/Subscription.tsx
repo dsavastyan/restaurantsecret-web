@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ApiError, apiGet, apiPost, quotePromo, redeemPromo, isUnauthorizedError, PromoQuote, attachPaymentMethod } from "@/lib/api";
 import { useAuth } from "@/store/auth";
 import {
@@ -34,6 +34,7 @@ type SubscriptionStatusResponse = {
 type UiPlan = "month" | "year";
 
 type ApiPlan = "monthly" | "annual";
+type SubscriptionLocationState = { from?: string } | null;
 
 const PLAN_LABELS: Record<string, string> = {
   monthly: "Месячный",
@@ -73,6 +74,7 @@ function SubscriptionSkeleton() {
 }
 
 export default function AccountSubscription() {
+  const location = useLocation() as { state: SubscriptionLocationState };
   const { accessToken, logout } = useAuth((state) => ({
     accessToken: state.accessToken || undefined,
     logout: state.logout,
@@ -174,8 +176,12 @@ export default function AccountSubscription() {
 
   useEffect(() => {
     fetchStatus();
+    const stateFrom = location.state && typeof location.state.from === "string" ? location.state.from : null;
+    const prevPath = typeof window !== "undefined" ? window.sessionStorage.getItem("rs_prev_path") : null;
+    const sourcePage = stateFrom || prevPath || document.referrer || "direct";
     analytics.track("subscription_page_view", {
-      source_context: document.referrer || "direct",
+      source_context: sourcePage,
+      source_page: sourcePage,
       current_status: statusData?.status || "none"
     });
   }, []); // Only once on mount

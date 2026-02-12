@@ -10,6 +10,7 @@ import { useSubscriptionStore } from '@/store/subscription'
 import { MenuOutdatedModal } from '@/components/MenuOutdatedModal'
 import DishCard from '@/components/DishCard/DishCard'
 import { useDishCardStore } from '@/store/dishCard'
+import { analytics } from '@/services/analytics'
 
 const createDefaultPresets = () => ({ highProtein: false, lowFat: false, lowKcal: false })
 const createDefaultRange = () => ({
@@ -72,7 +73,11 @@ export default function Menu() {
           setError('')
           const raw = await apiGet(`/restaurants/${slug}/menu`)
           const data = raw?.categories ? raw : { ...(raw || {}), name: raw?.name || slug, categories: [] }
-          if (!aborted) setMenu(normalizeMenu(data))
+          if (!aborted) {
+            const normalizedMenu = normalizeMenu(data)
+            setMenu(normalizedMenu)
+            analytics.track('restaurant_menu_open', { slug, name: normalizedMenu.name || slug })
+          }
         } catch (err) {
           if (!aborted) {
             console.error('Failed to load menu', err)
@@ -163,7 +168,7 @@ export default function Menu() {
 
   const handleSubscribe = () => {
     if (accessToken) {
-      navigate('/account/subscription')
+      navigate('/account/subscription', { state: { from: window.location.pathname + window.location.search } })
       return
     }
     navigate('/login', { state: { from: '/account/subscription' } })

@@ -68,7 +68,7 @@ export default function Statistics() {
         e.preventDefault();
         if (!token) return;
         if (!hasActiveSub) {
-            navigate('/account/subscription');
+            navigate('/account/subscription', { state: { from: window.location.pathname + window.location.search } });
             return;
         }
 
@@ -192,7 +192,7 @@ export default function Statistics() {
             {!isAdding && (
                 <button className="btn-add-product w-full" onClick={() => {
                     if (!hasActiveSub) {
-                        navigate('/account/subscription');
+                        navigate('/account/subscription', { state: { from: window.location.pathname + window.location.search } });
                         return;
                     }
                     setIsAdding(true);

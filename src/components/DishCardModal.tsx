@@ -89,7 +89,7 @@ export default function DishCardModal() {
 
   const handleSubscribeClick = () => {
     if (accessToken) {
-      navigate("/account/subscription");
+      navigate("/account/subscription", { state: { from: location.pathname + location.search } });
       return;
     }
     navigate("/login", { state: { from: "/account/subscription" } });
@@ -155,7 +155,7 @@ export default function DishCardModal() {
     }
 
     if (!hasActiveSub) {
-      navigate("/account/subscription");
+      navigate("/account/subscription", { state: { from: location.pathname + location.search } });
       return;
     }
 
