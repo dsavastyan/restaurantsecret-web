@@ -28,7 +28,7 @@ export default function Footer() {
               type="button"
               onClick={() => setIsCookieModalOpen(true)}
               className="site-footer__link"
-              style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}
+              style={{ background: 'none', border: 'none', padding: 0, fontFamily: 'inherit', cursor: 'pointer' }}
             >
               Настройки cookies
             </button>
@@ -37,13 +37,15 @@ export default function Footer() {
               Контакты
             </Link>
 
+
+
             <a
-              href="https://t.me/restaurantsecret"
+              href="https://t.me/RestSecretSupport_bot"
               className="site-footer__link"
               target="_blank"
               rel="noopener noreferrer"
             >
-              Telegram-бот
+              Поддержка
             </a>
 
             <Link to="/feedback" className="site-footer__link">
