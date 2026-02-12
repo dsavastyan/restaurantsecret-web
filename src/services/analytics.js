@@ -1,6 +1,7 @@
 import { PD_API_BASE } from "@/config/api";
 
 export const COOKIE_POLICY_VERSION = "cookies_v1_2026-01-16";
+export const USER_AGREEMENT_VERSION = "agreement_v1_2026-02-12";
 const CONSENT_KEY = "rs_consent_v1";
 const ANON_ID_KEY = "rs_anon_id";
 
@@ -83,7 +84,7 @@ class AnalyticsService {
             // Ideally, track() gets headers from a centralized API client.
             // Here we will use fetch directly for now, adding Auth header if we can find it.
 
-            const token = localStorage.getItem("rs_auth_token"); // Example key
+            const token = localStorage.getItem("rs_access"); // Corrected key from rs_auth_token to rs_access
             const headers = { "Content-Type": "application/json" };
             if (token) {
                 headers["Authorization"] = `Bearer ${token}`;
@@ -164,7 +165,7 @@ class AnalyticsService {
         };
 
         try {
-            const token = localStorage.getItem("rs_auth_token");
+            const token = localStorage.getItem("rs_access"); // Corrected key
             const headers = { "Content-Type": "application/json" };
             if (token) {
                 headers["Authorization"] = `Bearer ${token}`;
@@ -179,6 +180,32 @@ class AnalyticsService {
             });
         } catch (err) {
             if (import.meta.env.DEV) console.warn("[Analytics] Track failed", err);
+        }
+    }
+
+    /**
+     * Records that the user has accepted the latest policy/agreement.
+     * Called upon login.
+     */
+    async recordPolicyAcceptance() {
+        try {
+            const token = localStorage.getItem("rs_access");
+            if (!token) return;
+
+            const headers = {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            };
+
+            await fetch(`${this.apiUrl}/api/consent/policy`, {
+                method: "POST",
+                headers,
+                body: JSON.stringify({
+                    policy_version: USER_AGREEMENT_VERSION
+                }),
+            });
+        } catch (err) {
+            console.error("[Analytics] Failed to record policy acceptance", err);
         }
     }
 
