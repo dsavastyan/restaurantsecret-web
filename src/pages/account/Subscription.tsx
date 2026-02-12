@@ -302,7 +302,7 @@ export default function AccountSubscription() {
     setPromoError(null);
 
     try {
-      const res = await redeemPromo(trimmedCode, accessToken);
+      const res = await redeemPromo(trimmedCode, accessToken, selectedPlan ? mapUiPlanToApi(selectedPlan) : undefined);
       if (res?.success) {
         analytics.track("promo_redeemed", { code: trimmedCode });
         if (res.next_step === 'link_card') {
@@ -461,9 +461,9 @@ export default function AccountSubscription() {
                   </div>
                 </div>
 
-                {isActive && !statusData?.canceled_at && (
+                {isActive && !statusData?.canceled_at && statusData?.next_charge_at && (
                   <div className="account-subscription-v2__next-charge">
-                    Следующее списание: {formatDate(statusData?.next_charge_at || statusData?.expires_at)}
+                    Следующее списание: {formatDate(statusData?.next_charge_at)}
                     {statusData?.payment_method && statusData.payment_method !== "—" && ` (${statusData.payment_method})`}
                   </div>
                 )}
