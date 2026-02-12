@@ -3430,6 +3430,16 @@ body:has(.account--sheet-open) {
   font-weight: 700;
   margin: 0;
   color: #0f172a;
+  color: #0f172a;
+}
+
+.account-subscription-panel .account-panel-v2__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .account-subscription-v2 {
@@ -3575,6 +3585,27 @@ body:has(.account--sheet-open) {
   white-space: nowrap;
 }
 
+.account-subscription-v2__plan-badge {
+  margin-left: auto;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.account-subscription-v2__next-charge {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .account-subscription-v2__card-status-label {
   font-size: 13px;
   font-weight: 600;
@@ -3625,9 +3656,7 @@ body:has(.account--sheet-open) {
 }
 
 .account-subscription-v2__btn-cancel-top {
-  position: absolute;
-  top: 20px;
-  right: 20px;
+  /* Removed absolute positioning */
   background: rgba(242, 95, 58, 0.1);
   color: #f25f38;
   border: 1px solid rgba(242, 95, 58, 0.2);
@@ -3640,7 +3669,6 @@ body:has(.account--sheet-open) {
   align-items: center;
   gap: 6px;
   transition: all 0.2s ease;
-  z-index: 10;
 }
 
 .account-subscription-v2__btn-cancel-top:hover {
@@ -3884,9 +3912,9 @@ body:has(.account--sheet-open) {
 
 /* Mobile responsive */
 @media (max-width: 768px) {
-  .account-subscription-panel .account-panel-v2__header {
+  /* .account-subscription-panel .account-panel-v2__header {
     display: none;
-  }
+  } */
 
   .account-subscription-v2__card {
     flex-direction: column;
