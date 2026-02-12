@@ -35,6 +35,12 @@ type UiPlan = "month" | "year";
 
 type ApiPlan = "monthly" | "annual";
 
+const PLAN_LABELS: Record<string, string> = {
+  monthly: "Месячный",
+  annual: "Годовая",
+  mock: "Бесплатный период",
+};
+
 const ERROR_LABELS: Record<string, string> = {
   invalid_code: "Промокод не найден",
   not_found: "Промокод не найден",
@@ -407,6 +413,17 @@ export default function AccountSubscription() {
         <h2 id="account-subscription-heading" className="account-panel-v2__title">
           {pageTitle}
         </h2>
+        {isActive && statusData?.can_cancel && (
+          <button
+            className="account-subscription-v2__btn-cancel-top"
+            onClick={handleCancel}
+            disabled={canceling}
+            title="Отменить подписку"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+            {canceling ? "..." : "Отменить"}
+          </button>
+        )}
       </header>
 
       {loading && <SubscriptionSkeleton />}
@@ -427,16 +444,10 @@ export default function AccountSubscription() {
                   <h3 className="account-subscription-v2__card-title">
                     {isActive ? "Подписка активна" : "Подписка завершена"}
                   </h3>
-                  {isActive && statusData?.can_cancel && (
-                    <button
-                      className="account-subscription-v2__btn-cancel-top"
-                      onClick={handleCancel}
-                      disabled={canceling}
-                      title="Отменить подписку"
-                    >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-                      {canceling ? "..." : "Отменить"}
-                    </button>
+                  {isActive && statusData?.plan && (
+                    <div className="account-subscription-v2__plan-badge">
+                      {PLAN_LABELS[statusData.plan] || statusData.plan}
+                    </div>
                   )}
                 </div>
 
@@ -450,10 +461,10 @@ export default function AccountSubscription() {
                   </div>
                 </div>
 
-                {isActive && statusData?.next_charge_at && !statusData?.canceled_at && (
+                {isActive && !statusData?.canceled_at && (
                   <div className="account-subscription-v2__next-charge">
-                    Следующее списание: {formatDate(statusData.next_charge_at)}
-                    {statusData.payment_method && ` (${statusData.payment_method})`}
+                    Следующее списание: {formatDate(statusData?.next_charge_at || statusData?.expires_at)}
+                    {statusData?.payment_method && statusData.payment_method !== "—" && ` (${statusData.payment_method})`}
                   </div>
                 )}
 
