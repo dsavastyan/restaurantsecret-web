@@ -3512,9 +3512,16 @@ body:has(.account--sheet-open) {
 
 .account-subscription-v2__card-header {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   gap: 12px;
   margin-bottom: 8px;
+}
+
+.account-subscription-v2__card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .account-subscription-v2__card-icon {
@@ -3595,11 +3602,8 @@ body:has(.account--sheet-open) {
 }
 
 .account-subscription-v2__plan-badge {
-  position: absolute;
-  top: 24px;
-  right: 24px;
+  align-self: flex-end;
   margin: 0;
-  z-index: 10;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(4px);
   padding: 6px 14px;
@@ -3929,9 +3933,14 @@ body:has(.account--sheet-open) {
 
 /* Mobile responsive */
 @media (max-width: 768px) {
-  /* .account-subscription-panel .account-panel-v2__header {
+  .account-subscription-panel .account-panel-v2__title {
     display: none;
-  } */
+  }
+
+  .account-subscription-panel .account-panel-v2__header {
+    justify-content: flex-end;
+    margin-bottom: 8px;
+  }
 
   .account-subscription-v2__card {
     flex-direction: column;
@@ -3945,6 +3954,10 @@ body:has(.account--sheet-open) {
 
   .account-subscription-v2__card-title {
     white-space: normal;
+  }
+
+  .account-subscription-v2__card-title-row {
+    align-items: flex-start;
   }
 
   .account-subscription-v2__card-right {
