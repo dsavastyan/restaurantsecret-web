@@ -148,6 +148,15 @@ body {
   box-shadow: 0 10px 22px rgba(39, 119, 76, 0.26);
 }
 
+/* Компактная кнопка "Войти" на мобильных */
+@media (max-width: 768px) {
+  .navbar .btn--primary {
+    padding: 8px 16px;
+    font-size: 13px;
+    min-width: auto;
+  }
+}
+
 .btn--primary:active {
   transform: translateY(1px);
 }
@@ -6615,10 +6624,16 @@ body:has(.account--sheet-open) {
   line-height: 1.15;
 }
 
+@media (max-width: 768px) {
+  .login__title {
+    font-size: 26px;
+  }
+}
+
 .login__subtitle {
   font-size: 15.5px;
   color: #6a7d7a;
-  margin: 10px auto 24px;
+  margin: 16px auto 24px;
   text-align: center;
   line-height: 1.45;
   max-width: 430px;
@@ -7007,7 +7022,7 @@ body:has(.account--sheet-open) {
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
+  z-index: 2000;
   padding: 16px;
   animation: rs-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -7283,11 +7298,11 @@ body:has(.account--sheet-open) {
   /* Soft green gradient from mock-up */
   background: linear-gradient(135deg, #E9F3EC 0%, #F6F8F2 100%);
   color: #2F5D4A;
-  transition: filter 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: filter 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(17, 24, 39, 0.12);
   /* Ensure clipping is gone by explicitly resetting potential inherited padding */
   padding: 0;
-  border: none;
 }
 
 @media (min-width: 768px) {
