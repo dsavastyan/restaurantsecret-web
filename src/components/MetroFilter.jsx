@@ -51,6 +51,13 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
         onChange({ stationIds: [] });
     };
 
+    const selectAll = (e) => {
+        e.stopPropagation();
+        const allIds = groupedStations.flatMap((group) => group.ids);
+        const uniqueIds = Array.from(new Set(allIds));
+        onChange({ stationIds: uniqueIds });
+    };
+
     // Close on click outside
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -66,13 +73,22 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
     const selectedCount = groupedStations.filter(g =>
         g.ids.length > 0 && g.ids.every(id => selectedStationIds.includes(id))
     ).length;
+    const allSelected = groupedStations.length > 0 && selectedCount === groupedStations.length;
+
+    const toggleAll = (e) => {
+        if (allSelected) {
+            clearAll(e);
+            return;
+        }
+        selectAll(e);
+    };
 
     const triggerText = selectedCount > 0
         ? `Выбрано: ${selectedCount}`
         : "Выберите станции метро";
 
     return (
-        <div className="metro-filter-container" ref={containerRef}>
+        <div className="metro-filter-container" ref={containerRef} style={{ zIndex: isOpen ? 1100 : 1001 }}>
             <div
                 className={`filter-trigger ${isOpen ? 'active' : ''}`}
                 onClick={() => setIsOpen(!isOpen)}
@@ -102,6 +118,9 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
                                 autoFocus
                             />
                         </div>
+                        <button className="toggle-all-btn" onClick={toggleAll}>
+                            {allSelected ? 'Снять все' : 'Выбрать все'}
+                        </button>
                     </div>
 
                     <div className="options-list">
@@ -253,6 +272,24 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
                     padding: 12px;
                     border-bottom: 1px solid #f1f5f9;
                 }
+                .toggle-all-btn {
+                    margin-top: 10px;
+                    width: 100%;
+                    border: 1px solid #cbd5e1;
+                    border-radius: 10px;
+                    background: #fff;
+                    color: #334155;
+                    font-size: 13px;
+                    font-weight: 600;
+                    padding: 9px 10px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                }
+                .toggle-all-btn:hover {
+                    border-color: var(--rs-accent, #2f8f5b);
+                    color: var(--rs-accent, #2f8f5b);
+                    background: #f8fafc;
+                }
                 .search-input-wrapper {
                     position: relative;
                     display: flex;
@@ -343,7 +380,7 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
                     text-align: center;
                     color: #94a3b8;
                     font-size: 14px;
-                    font-italic: italic;
+                    font-style: italic;
                 }
                 .filter-footer {
                     padding: 12px;

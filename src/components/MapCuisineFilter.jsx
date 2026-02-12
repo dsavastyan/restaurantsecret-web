@@ -25,6 +25,11 @@ export default function MapCuisineFilter({ cuisines = [], selectedCuisines = [],
         onChange({ cuisines: [] });
     };
 
+    const selectAll = (e) => {
+        e.stopPropagation();
+        onChange({ cuisines: cuisines });
+    };
+
     // Close on click outside
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -37,12 +42,22 @@ export default function MapCuisineFilter({ cuisines = [], selectedCuisines = [],
     }, []);
 
     const selectedCount = selectedCuisines.length;
+    const allSelected = cuisines.length > 0 && selectedCount === cuisines.length;
+
+    const toggleAll = (e) => {
+        if (allSelected) {
+            clearAll(e);
+            return;
+        }
+        selectAll(e);
+    };
+
     const triggerText = selectedCount > 0
         ? `Выбрано: ${selectedCount}`
         : "Выберите кухни";
 
     return (
-        <div className="cuisine-filter-container" ref={containerRef}>
+        <div className="cuisine-filter-container" ref={containerRef} style={{ zIndex: isOpen ? 1100 : 1001 }}>
             <div
                 className={`filter-trigger ${isOpen ? 'active' : ''}`}
                 onClick={() => setIsOpen(!isOpen)}
@@ -72,6 +87,9 @@ export default function MapCuisineFilter({ cuisines = [], selectedCuisines = [],
                                 autoFocus
                             />
                         </div>
+                        <button className="toggle-all-btn" onClick={toggleAll}>
+                            {allSelected ? 'Снять все' : 'Выбрать все'}
+                        </button>
                     </div>
 
                     <div className="options-list">
@@ -222,6 +240,24 @@ export default function MapCuisineFilter({ cuisines = [], selectedCuisines = [],
                 .search-box {
                     padding: 12px;
                     border-bottom: 1px solid #f1f5f9;
+                }
+                .toggle-all-btn {
+                    margin-top: 10px;
+                    width: 100%;
+                    border: 1px solid #cbd5e1;
+                    border-radius: 10px;
+                    background: #fff;
+                    color: #334155;
+                    font-size: 13px;
+                    font-weight: 600;
+                    padding: 9px 10px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                }
+                .toggle-all-btn:hover {
+                    border-color: var(--rs-accent, #2f8f5b);
+                    color: var(--rs-accent, #2f8f5b);
+                    background: #f8fafc;
                 }
                 .search-input-wrapper {
                     position: relative;
