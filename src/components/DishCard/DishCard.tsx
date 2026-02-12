@@ -6,6 +6,7 @@ import { useSubscriptionStore } from '@/store/subscription';
 import { useFavoritesStore } from '@/store/favorites';
 import { useDiaryStore } from '@/store/diary';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { analytics } from '@/services/analytics';
 
 type DishCardProps = {
     dish: any;
@@ -37,6 +38,11 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, interac
             navigate('/login', { state: { from: location.pathname + location.search } });
             return;
         }
+        if (!favorited) {
+            analytics.track("favorite_add", { type: "dish", dish_id: dish.id, name: dish.name });
+        } else {
+            analytics.track("favorite_remove", { type: "dish", dish_id: dish.id, name: dish.name });
+        }
         await toggle(accessToken, Number(dish.id), restaurantSlug);
     };
 
@@ -50,7 +56,7 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, interac
         }
 
         if (!hasActiveSub) {
-            navigate('/account/subscription');
+            navigate('/account/subscription', { state: { from: location.pathname + location.search } });
             return;
         }
 
@@ -76,7 +82,7 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, interac
     const handleSubscribe = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (accessToken) {
-            navigate('/account/subscription');
+            navigate('/account/subscription', { state: { from: location.pathname + location.search } });
             return;
         }
         navigate('/login', { state: { from: '/account/subscription' } });

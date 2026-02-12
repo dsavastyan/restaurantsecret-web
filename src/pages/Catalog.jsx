@@ -6,6 +6,7 @@ import CuisineFilter from '../components/CuisineFilter.jsx'
 import { useSWRLite } from '../hooks/useSWRLite.js'
 import { useFavoriteRestaurantsStore } from '@/store/favoriteRestaurants'
 import { useAuth } from '@/store/auth'
+import { analytics } from '@/services/analytics'
 
 // Fetch a large number to emulate "all" items since backend pagination seems flaky
 const FETCH_LIMIT = 1000;
@@ -36,14 +37,20 @@ export default function Catalog() {
     }
   }, [accessToken, loadFavorites]);
 
-  const handleToggleFavorite = useCallback(async (e, slug) => {
+  const handleToggleFavorite = useCallback(async (e, slug, name) => {
     e.stopPropagation();
     if (!accessToken) {
       navigate('/login', { state: { from: window.location.pathname } });
       return;
     }
+    const currentlyFavorite = isFavorite(slug)
+    if (!currentlyFavorite) {
+      analytics.track("favorite_add", { type: "restaurant", slug, name: name || slug })
+    } else {
+      analytics.track("favorite_remove", { type: "restaurant", slug, name: name || slug })
+    }
     await toggleFavorite(accessToken, slug);
-  }, [accessToken, navigate, toggleFavorite]);
+  }, [accessToken, isFavorite, navigate, toggleFavorite]);
 
   // Infinite scroll observer target
   const loaderRef = useRef(null)
@@ -293,7 +300,7 @@ export default function Catalog() {
                   <button
                     type="button"
                     className={`catalog-card__fav-btn ${isFavorite(r.slug) ? 'is-active' : ''}`}
-                    onClick={(e) => handleToggleFavorite(e, r.slug)}
+                    onClick={(e) => handleToggleFavorite(e, r.slug, r.name)}
                     aria-label={isFavorite(r.slug) ? "Удалить из избранного" : "Добавить в избранное"}
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

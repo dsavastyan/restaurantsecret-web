@@ -25,7 +25,7 @@ export default function Paywall({ onRefresh }) {
               <span className="rs-price-value">99</span>
               <span className="rs-price-rub">руб.</span>
             </div>
-            <Link className="rs-btn" to="/account/subscription">
+            <Link className="rs-btn" to="/account/subscription" state={{ from: window.location.pathname + window.location.search }}>
               Оформить подписку
             </Link>
           </div>
@@ -41,7 +41,7 @@ export default function Paywall({ onRefresh }) {
               <span className="rs-price-rub">руб.</span>
             </div>
             <div className="rs-save">Выгоднее на 16&nbsp;%</div>
-            <Link className="rs-btn" to="/account/subscription">
+            <Link className="rs-btn" to="/account/subscription" state={{ from: window.location.pathname + window.location.search }}>
               Оформить подписку
             </Link>
           </div>

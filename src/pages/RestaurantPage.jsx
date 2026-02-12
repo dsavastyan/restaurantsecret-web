@@ -90,7 +90,7 @@ export default function RestaurantPage() {
 
   const handleSubscribeClick = () => {
     if (accessToken) {
-      navigate('/account/subscription');
+      navigate('/account/subscription', { state: { from: window.location.pathname + window.location.search } });
       return;
     }
     navigate('/login', { state: { from: '/account/subscription' } });
