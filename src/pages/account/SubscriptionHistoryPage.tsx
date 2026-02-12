@@ -11,7 +11,9 @@ type SubscriptionHistoryItem = {
   status?: string | null;
   started_at?: string | null;
   expires_at?: string | null;
+  next_charge_at?: string | null;
   source?: string | null;
+  is_trial?: boolean;
 };
 
 type NormalizedHistoryItem = {
@@ -19,6 +21,8 @@ type NormalizedHistoryItem = {
   status: string;
   started_at: string | null;
   expires_at: string | null;
+  next_charge_at: string | null;
+  is_trial: boolean;
 };
 
 type FetchState = {
@@ -77,6 +81,8 @@ function normalizeHistoryResponse(response: RawHistoryResponse): NormalizedHisto
       status,
       started_at: startedAt,
       expires_at: expiresAt,
+      next_charge_at: item.next_charge_at || null,
+      is_trial: Boolean(item.is_trial),
     };
   });
 
@@ -214,9 +220,17 @@ export default function SubscriptionHistoryPage() {
                     <dd className="account-history__meta-value">{formatDate(item.started_at)}</dd>
                   </div>
                   <div className="account-history__meta-field">
-                    <dt className="account-history__meta-term">Окончание</dt>
+                    <dt className="account-history__meta-term">
+                      {item.status === 'active' && item.is_trial ? 'Окончание пробного периода' : 'Окончание'}
+                    </dt>
                     <dd className="account-history__meta-value">{formatDate(item.expires_at)}</dd>
                   </div>
+                  {item.status === 'active' && item.next_charge_at && (
+                    <div className="account-history__meta-field">
+                      <dt className="account-history__meta-term">Следующее списание</dt>
+                      <dd className="account-history__meta-value">{formatDate(item.next_charge_at)}</dd>
+                    </div>
+                  )}
                 </dl>
               </li>
             );
