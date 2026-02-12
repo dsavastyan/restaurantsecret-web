@@ -164,7 +164,11 @@ export default function AccountSubscription() {
 
   useEffect(() => {
     fetchStatus();
-  }, [fetchStatus]);
+    analytics.track("subscription_page_view", {
+      source_context: document.referrer || "direct",
+      current_status: statusData?.status || "none"
+    });
+  }, []); // Only once on mount
 
   const formatDate = useCallback((value?: string | null) => {
     if (!value) return null;
@@ -290,6 +294,7 @@ export default function AccountSubscription() {
     try {
       const res = await redeemPromo(trimmedCode, accessToken);
       if (res?.success) {
+        analytics.track("promo_redeemed", { code: trimmedCode });
         if (res.next_step === 'link_card') {
           // Zero-Auth attach
           let planToUse: UiPlan | null = selectedPlan;
@@ -378,7 +383,7 @@ export default function AccountSubscription() {
     try {
       const res = await apiPost<{ ok: boolean; error?: string }>("/api/subscriptions/cancel", {}, accessToken);
       if (res?.ok) {
-        analytics.track("subscription_canceled", { plan: statusData?.plan || "unknown" });
+        analytics.track("subscription_canceled", { plan: statusData?.plan || "unknown" }, { ignoreConsent: true });
         await fetchStatus();
       } else {
         alert(res?.error || "Не удалось отменить подписку");

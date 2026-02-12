@@ -140,6 +140,8 @@ export default function DishCardModal() {
     }
     if (!isFavorite) {
       analytics.track("favorite_add", { type: "dish", dish_id: data.id, name: data.name });
+    } else {
+      analytics.track("favorite_remove", { type: "dish", dish_id: data.id, name: data.name });
     }
     await toggleFavorite(accessToken, Number(data.id), data.restaurantSlug);
   };

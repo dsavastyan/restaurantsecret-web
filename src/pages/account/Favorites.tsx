@@ -9,6 +9,7 @@ import { apiGet } from '@/lib/requests';
 import { api } from '@/api/client.js';
 import { flattenMenuDishes } from '@/lib/nutrition';
 import { useSubscriptionStore } from '@/store/subscription';
+import { analytics } from '@/services/analytics';
 
 type HydratedDish = {
     dish: any;
@@ -264,6 +265,7 @@ export default function Favorites() {
                                             className="catalog-card__fav-btn is-active"
                                             onClick={(e) => {
                                                 e.stopPropagation();
+                                                analytics.track("favorite_remove", { type: "restaurant", slug: r.slug, name: r.name });
                                                 toggleRestaurantFav(token, r.slug);
                                             }}
                                         >

@@ -46,6 +46,8 @@ export default function RestaurantPage() {
     }
     if (!isFavorite) {
       analytics.track("favorite_add", { type: "restaurant", slug, name: menu?.name || slug });
+    } else {
+      analytics.track("favorite_remove", { type: "restaurant", slug, name: menu?.name || slug });
     }
     await toggleFavorite(accessToken, slug);
   };
@@ -75,7 +77,7 @@ export default function RestaurantPage() {
         if (!aborted) {
           const m = normalizeMenu(data);
           setMenu(m);
-          analytics.track("restaurant_open", { slug, name: m.name });
+          analytics.track("restaurant_menu_open", { slug, name: m.name });
         }
       } catch (e) {
         if (!aborted) setErr('Не удалось загрузить меню');
