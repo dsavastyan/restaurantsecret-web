@@ -6813,23 +6813,36 @@ body:has(.account--sheet-open) {
 
 @media (max-width: 768px) {
   .navbar__inner {
-    height: auto;
-    padding: 12px 16px;
-    gap: 12px;
-    flex-wrap: wrap;
-    align-items: flex-start;
+    height: 56px;
+    padding: 0 16px;
+    gap: 10px;
+    flex-wrap: nowrap;
+    align-items: center;
   }
 
   .navbar__brand {
-    flex: 1 1 100%;
+    flex: 0 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .navbar__brand-group {
-    flex: 1 1 100%;
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .navbar__inner .btn {
-    width: 100%;
+    width: auto;
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
+  .navbar .nav-account-button {
+    flex: 0 0 auto;
+    margin-left: auto;
+    margin-right: 0;
   }
 
   .row {
