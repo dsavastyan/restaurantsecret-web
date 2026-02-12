@@ -3,6 +3,7 @@ import type { MouseEvent } from "react";
 import SubscriptionPlans from "./SubscriptionPlans";
 import "./SubscriptionPlansModal.css";
 import { PromoQuote } from "@/lib/api";
+import { analytics } from "@/services/analytics";
 
 type SubscriptionPlansModalProps = {
   open: boolean;
@@ -48,7 +49,10 @@ export default function SubscriptionPlansModal({
 
   // Reset selection when closed/opened?
   useEffect(() => {
-    if (open) setSelectedPlan(null);
+    if (open) {
+      analytics.track("subscription_page_view", { source_context: "modal" });
+      setSelectedPlan(null);
+    }
   }, [open]);
 
   if (!open) return null;

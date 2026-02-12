@@ -162,8 +162,9 @@ class AnalyticsService {
         sessionStorage.setItem("rs_session_started", "true");
     }
 
-    async track(eventName, props = {}) {
-        if (this.getConsentStatus() !== "granted") return;
+    async track(eventName, props = {}, options = {}) {
+        const { ignoreConsent = false } = options;
+        if (!ignoreConsent && this.getConsentStatus() !== "granted") return;
 
         const anonId = this.ensureAnonId();
         const sessionId = this.getSessionId();
