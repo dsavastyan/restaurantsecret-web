@@ -440,21 +440,23 @@ export default function AccountSubscription() {
             <div className={`account-subscription-v2__card ${isActive ? 'is-active' : 'is-expired'}`}>
               <div className="account-subscription-v2__card-left">
                 <div className="account-subscription-v2__card-header">
-                  <div className="account-subscription-v2__card-icon">
-                    {isActive ? (
-                      <span role="img" aria-label="party">🎉</span>
-                    ) : (
-                      <span className="account-subscription-v2__card-warning">!</span>
-                    )}
-                  </div>
-                  <h3 className="account-subscription-v2__card-title">
-                    {isActive ? "Подписка активна" : "Подписка завершена"}
-                  </h3>
                   {isActive && statusData?.plan && (
                     <div className="account-subscription-v2__plan-badge">
                       {PLAN_LABELS[statusData.plan] || statusData.plan}
                     </div>
                   )}
+                  <div className="account-subscription-v2__card-title-row">
+                    <div className="account-subscription-v2__card-icon">
+                      {isActive ? (
+                        <span role="img" aria-label="party">🎉</span>
+                      ) : (
+                        <span className="account-subscription-v2__card-warning">!</span>
+                      )}
+                    </div>
+                    <h3 className="account-subscription-v2__card-title">
+                      {isActive ? "Подписка активна" : "Подписка завершена"}
+                    </h3>
+                  </div>
                 </div>
 
                 <div className="account-subscription-v2__card-status-row">
