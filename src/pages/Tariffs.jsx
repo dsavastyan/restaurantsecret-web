@@ -30,7 +30,7 @@ export default function Tariffs() {
               <div className="tariff-card__body">
                 <h3 className="tariff-card__title">Месяц</h3>
                 <p className="tariff-card__price">99 ₽</p>
-                <p className="tariff-card__footnote">в месяц*</p>
+                <p className="tariff-card__footnote">/мес*</p>
                 <p className="tariff-card__desc">
                   Подходит, чтобы оценить удобство сервиса и подобрать ресторан под ваши цели.
                 </p>
@@ -42,7 +42,7 @@ export default function Tariffs() {
               <div className="tariff-card__body">
                 <h3 className="tariff-card__title">Год</h3>
                 <p className="tariff-card__price">999 ₽</p>
-                <p className="tariff-card__footnote">12 месяцев за цену 10*</p>
+                <p className="tariff-card__footnote">/год*</p>
                 <p className="tariff-card__tagline">2 месяца бесплатно</p>
                 <p className="tariff-card__desc">
                   Лучший выбор для тех, кто регулярно заказывает или следит за КБЖУ ресторанных блюд.

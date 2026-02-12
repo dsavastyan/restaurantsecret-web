@@ -150,7 +150,7 @@ export default function SubscriptionPlans({
                                     <div className="rsPlanName">Месяц</div>
                                     <div className="rsPlanRadio" />
                                 </div>
-                                {renderPrice(monthPrice, "/мес")}
+                                {renderPrice(monthPrice, "/мес*")}
                                 <div className="rsPlanDesc">
                                     Подходит чтобы оценить удобство сервиса
                                 </div>
@@ -169,7 +169,7 @@ export default function SubscriptionPlans({
                                     <div className="rsBadge">ВЫГОДНО</div>
                                     <div className="rsPlanRadio" />
                                 </div>
-                                {renderPrice(yearPrice, "/год")}
+                                {renderPrice(yearPrice, "/год*")}
                                 <div className="rsPlanDesc">
                                     12 месяцев по цене 10. Лучший выбор
                                 </div>
