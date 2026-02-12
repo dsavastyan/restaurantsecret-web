@@ -77,6 +77,7 @@ export default function LoginPage() {
           analytics.track("signup_completed", { source_page: "login" });
         }
         analytics.track("login_success", { source_page: "login" });
+        analytics.recordPolicyAcceptance(); // Record that user accepted policy upon login
 
         navigate(redirectTo, { replace: true });
       } else {
