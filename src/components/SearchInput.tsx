@@ -143,7 +143,7 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
     if (e.key === "Enter" && !hasHighlightedSuggestion) {
       const q = value.trim();
       if (!q) return;
-      analytics.track("search_submit", { type: "query", ie: q });
+      analytics.track("search_submit", { type: "query", query: q });
       navigate(buildSearchUrl(q));
       return;
     }

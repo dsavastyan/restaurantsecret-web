@@ -44,6 +44,9 @@ export default function RestaurantPage() {
       navigate('/login', { state: { from: window.location.pathname } });
       return;
     }
+    if (!isFavorite) {
+      analytics.track("favorite_add", { type: "restaurant", slug, name: menu?.name || slug });
+    }
     await toggleFavorite(accessToken, slug);
   };
 

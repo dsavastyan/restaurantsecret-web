@@ -89,6 +89,12 @@ export default function PaySuccess() {
         setStatus('success')
         setExpiresAt(detail.expiresAt)
         setMessage('Доступ подтверждён.')
+
+        // Analytics
+        import('@/services/analytics').then(({ analytics }) => {
+          analytics.track("subscription_activated", { plan: "unknown_from_success" });
+          analytics.track("payment_success", { plan: "unknown_from_success" });
+        });
       } else {
         setStatus('inactive')
         setExpiresAt(detail.expiresAt)

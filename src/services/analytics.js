@@ -102,17 +102,59 @@ class AnalyticsService {
         window.dispatchEvent(new Event("rs-consent-update"));
     }
 
+    getSessionId() {
+        const now = Date.now();
+        const storedSession = sessionStorage.getItem("rs_session_id");
+        const lastActivity = localStorage.getItem("rs_last_activity");
+
+        let sessionId = storedSession;
+
+        if (!sessionId || !lastActivity || (now - Number(lastActivity) > 30 * 60 * 1000)) {
+            // New session
+            sessionId = uuidv4();
+            sessionStorage.setItem("rs_session_id", sessionId);
+            sessionStorage.removeItem("rs_session_started"); // Reset flag for new session
+        }
+
+        localStorage.setItem("rs_last_activity", now.toString());
+        return sessionId;
+    }
+
+    async trackSessionStart() {
+        if (this.getConsentStatus() !== "granted") return;
+
+        // Ensure session exists
+        this.getSessionId();
+
+        if (sessionStorage.getItem("rs_session_started")) return;
+
+        // Gather props
+        const params = new URLSearchParams(window.location.search);
+        const props = {
+            landing_path: window.location.pathname,
+            referrer: document.referrer || null,
+            utm_source: params.get("utm_source"),
+            utm_medium: params.get("utm_medium"),
+            utm_campaign: params.get("utm_campaign"),
+            utm_content: params.get("utm_content"),
+            utm_term: params.get("utm_term"),
+            tg_start_param: params.get("tgWebAppStartParam") || params.get("start"),
+            screen_width: window.screen.width,
+            screen_height: window.screen.height,
+            viewport_width: window.innerWidth,
+            viewport_height: window.innerHeight,
+            device_pixel_ratio: window.devicePixelRatio,
+        };
+
+        await this.track("session_start", props);
+        sessionStorage.setItem("rs_session_started", "true");
+    }
+
     async track(eventName, props = {}) {
         if (this.getConsentStatus() !== "granted") return;
 
-        const anonId = this.ensureAnonId(); // Should already exist if granted
-
-        // Session ID: simple session storage
-        let sessionId = sessionStorage.getItem("rs_session_id");
-        if (!sessionId) {
-            sessionId = uuidv4();
-            sessionStorage.setItem("rs_session_id", sessionId);
-        }
+        const anonId = this.ensureAnonId();
+        const sessionId = this.getSessionId();
 
         const payload = {
             event_name: eventName,
@@ -128,9 +170,7 @@ class AnalyticsService {
                 headers["Authorization"] = `Bearer ${token}`;
             }
 
-            // Use sendBeacon if available for strictly better reliability on navigation, 
-            // but standardized JSON POST is required by our backend.
-            // fetch with keepalive is good.
+            // Using fetch with keepalive ensures reliability on page unload
             await fetch(`${this.apiUrl}/api/analytics/event`, {
                 method: "POST",
                 headers,
@@ -138,10 +178,10 @@ class AnalyticsService {
                 keepalive: true,
             });
         } catch (err) {
-            // Silent fail for analytics
             if (import.meta.env.DEV) console.warn("[Analytics] Track failed", err);
         }
     }
+
 }
 
 export const analytics = new AnalyticsService();

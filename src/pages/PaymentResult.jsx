@@ -1,5 +1,6 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { analytics } from "@/services/analytics";
 
 const successMarkers = ["success", "succeeded", "true", "ok", "paid", "completed"];
 
@@ -18,6 +19,17 @@ export default function PaymentResult() {
     if (!status) return true;
     return successMarkers.includes(status);
   }, [status]);
+
+  useEffect(() => {
+    if (!status) return;
+    if (isSuccess) {
+      analytics.track("payment_success", { plan: "unknown_result_page" });
+    } else if (status === 'canceled') {
+      analytics.track("payment_canceled", { plan: "unknown_result_page" });
+    } else {
+      analytics.track("payment_failed", { plan: "unknown_result_page", reason: status });
+    }
+  }, [status, isSuccess]);
 
   const title = isSuccess ? "Спасибо! Ваша подписка оформлена" : "Не удалось получить оплату";
   const description = isSuccess

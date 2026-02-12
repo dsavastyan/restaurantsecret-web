@@ -72,7 +72,12 @@ export default function LoginPage() {
       const res = await apiPost("/auth/verify-otp", { email, code });
       if (res?.ok && res?.access_token) {
         setToken(res.access_token);       // <— сохраняем токен в твой стор (rs_access)
-        analytics.track("otp_success");
+
+        if (res.created) {
+          analytics.track("signup_completed", { source_page: "login" });
+        }
+        analytics.track("login_success", { source_page: "login" });
+
         navigate(redirectTo, { replace: true });
       } else {
         setErr(res?.message || "Неверный код");

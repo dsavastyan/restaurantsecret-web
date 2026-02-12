@@ -9,6 +9,7 @@ import {
 } from "@/store/subscription";
 import SubscriptionPlansModal from "@/components/subscription/SubscriptionPlansModal";
 import SubscriptionPlans from "@/components/subscription/SubscriptionPlans";
+import { analytics } from "@/services/analytics";
 
 // Import assets from src/assets to ensure they are bundled correctly
 import subscriptionActive from "@/assets/subscription/subscription-active.webp";
@@ -204,6 +205,8 @@ export default function AccountSubscription() {
       setPaymentPlan(plan);
       const apiPlan = mapUiPlanToApi(plan);
 
+      analytics.track("checkout_started", { plan, source_page: "subscription_management" });
+
       try {
         const body: any = { plan: apiPlan, autopay_consent: true };
         if (code) body.promo_code = code;
@@ -300,6 +303,8 @@ export default function AccountSubscription() {
             return_url: window.location.origin + '/account/subscription'
           });
 
+          analytics.track("checkout_started", { plan: planToUse, source_page: "subscription_management", method: "promo_attach" });
+
           if (attachRes?.confirmation_url) {
             window.location.href = attachRes.confirmation_url;
             return;
@@ -373,6 +378,7 @@ export default function AccountSubscription() {
     try {
       const res = await apiPost<{ ok: boolean; error?: string }>("/api/subscriptions/cancel", {}, accessToken);
       if (res?.ok) {
+        analytics.track("subscription_canceled", { plan: statusData?.plan || "unknown" });
         await fetchStatus();
       } else {
         alert(res?.error || "Не удалось отменить подписку");
