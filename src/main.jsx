@@ -6,6 +6,7 @@ import Router from './routes/Router.jsx'
 import ToastViewport from './components/ui/ToastViewport.tsx'
 import MaintenanceScreen from './components/MaintenanceScreen.jsx'
 import { ConsentBanner } from './components/ConsentBanner.jsx'
+import { analytics } from './services/analytics'
 import './styles.css'
 
 // Register the service worker (if supported) once the page has fully loaded so
@@ -25,6 +26,16 @@ function Root() {
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
+    // Analytics: Session Start
+    analytics.trackSessionStart().catch(() => { })
+
+    // Analytics: Session End / Duration (Simplified)
+    const handleUnload = () => {
+      // We could track session_end here with navigator.sendBeacon if needed
+      // For now, mostly relying on session_start metadata and backend analysis
+    }
+    window.addEventListener('pagehide', handleUnload)
+
     // Fetch the maintenance kill-switch from public folder. Use a cache-busting
     // timestamp to ensure we get the latest version from GitHub Pages.
     fetch(`/maintenance.json?ts=${Date.now()}`, { cache: 'no-store' })
@@ -52,6 +63,10 @@ function Root() {
       })
       .catch(() => setMaintenance(null))
       .finally(() => setReady(true))
+
+    return () => {
+      window.removeEventListener('pagehide', handleUnload)
+    }
   }, [])
 
   if (!ready) return null // Initial loading state (splash screen could go here)

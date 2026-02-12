@@ -138,6 +138,9 @@ export default function DishCardModal() {
       navigate("/login", { state: { from: location.pathname + location.search } });
       return;
     }
+    if (!isFavorite) {
+      analytics.track("favorite_add", { type: "dish", dish_id: data.id, name: data.name });
+    }
     await toggleFavorite(accessToken, Number(data.id), data.restaurantSlug);
   };
 
@@ -171,6 +174,8 @@ export default function DishCardModal() {
       carbs: safeNum(data.carbs_g),
       weight: safeNum(data.weight) || undefined
     });
+
+    analytics.track("diary_add", { dish_id: data.id, name: data.name, restaurant: data.restaurantSlug });
   };
 
   const anchorId = useMemo(() => {
