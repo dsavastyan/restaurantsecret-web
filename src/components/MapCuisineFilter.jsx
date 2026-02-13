@@ -57,7 +57,7 @@ export default function MapCuisineFilter({ cuisines = [], selectedCuisines = [],
         : "Выберите кухни";
 
     return (
-        <div className="cuisine-filter-container" ref={containerRef} style={{ zIndex: isOpen ? 1100 : 1001 }}>
+        <div className="cuisine-filter-container" ref={containerRef} style={{ zIndex: isOpen ? 90 : 1 }}>
             <div
                 className={`filter-trigger ${isOpen ? 'active' : ''}`}
                 onClick={() => setIsOpen(!isOpen)}
