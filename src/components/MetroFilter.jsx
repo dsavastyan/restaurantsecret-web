@@ -109,7 +109,7 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
         : "Выберите станции метро";
 
     return (
-        <div className="metro-filter-container" ref={containerRef} style={{ zIndex: isOpen ? 1100 : 1001 }}>
+        <div className="metro-filter-container" ref={containerRef} style={{ zIndex: isOpen ? 90 : 1 }}>
             <div
                 className={`filter-trigger ${isOpen ? 'active' : ''}`}
                 onClick={() => setIsOpen(!isOpen)}
