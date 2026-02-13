@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from 'react';
-import { AttributionControl, MapContainer, TileLayer, useMap } from 'react-leaflet';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { AttributionControl, MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet';
 import { useNavigate } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
@@ -19,6 +19,7 @@ L.Icon.Default.mergeOptions({
 });
 
 const defaultCenter = [55.751244, 37.618423]; // Moscow
+const defaultZoom = 10;
 
 // Inner component to handle clustering logic via map instance access
 function ClusterLayer({ restaurants }) {
@@ -86,8 +87,29 @@ function MapViewportController({ focusTarget }) {
 
     useEffect(() => {
         if (!focusTarget) return;
-        map.flyTo([focusTarget.lat, focusTarget.lon], 13, { duration: 0.8 });
+        const nextZoom = Number.isFinite(focusTarget.zoom) ? focusTarget.zoom : 13;
+        map.flyTo([focusTarget.lat, focusTarget.lon], nextZoom, { duration: 0.8 });
     }, [map, focusTarget]);
+
+    return null;
+}
+
+function ViewportChangeListener({ onViewportChange }) {
+    const map = useMapEvents({
+        moveend: () => {
+            const center = map.getCenter();
+            onViewportChange({ lat: center.lat, lon: center.lng, zoom: map.getZoom() });
+        },
+        zoomend: () => {
+            const center = map.getCenter();
+            onViewportChange({ lat: center.lat, lon: center.lng, zoom: map.getZoom() });
+        }
+    });
+
+    useEffect(() => {
+        const center = map.getCenter();
+        onViewportChange({ lat: center.lat, lon: center.lng, zoom: map.getZoom() });
+    }, [map, onViewportChange]);
 
     return null;
 }
@@ -99,6 +121,14 @@ export default function RestaurantMap() {
     const [cuisines, setCuisines] = useState([]);
     const [filters, setFilters] = useState({ stationIds: [], cuisines: [] });
     const [focusTarget, setFocusTarget] = useState(null);
+    const [isDefaultView, setIsDefaultView] = useState(true);
+
+    const handleViewportChange = useCallback(({ lat, lon, zoom }) => {
+        const sameZoom = Math.abs(zoom - defaultZoom) < 0.01;
+        const sameLat = Math.abs(lat - defaultCenter[0]) < 0.001;
+        const sameLon = Math.abs(lon - defaultCenter[1]) < 0.001;
+        setIsDefaultView(sameZoom && sameLat && sameLon);
+    }, []);
 
     useEffect(() => {
         // Fetch metro data once
@@ -185,9 +215,23 @@ export default function RestaurantMap() {
 
             <div className="map-wrapper">
                 {loading && <div className="map-overlay">Загрузка...</div>}
+                {!isDefaultView && (
+                    <button
+                        type="button"
+                        className="show-city-btn"
+                        onClick={() => setFocusTarget({
+                            lat: defaultCenter[0],
+                            lon: defaultCenter[1],
+                            zoom: defaultZoom,
+                            key: `default-${Date.now()}`
+                        })}
+                    >
+                        Показать весь город
+                    </button>
+                )}
                 <MapContainer
                     center={defaultCenter}
-                    zoom={10}
+                    zoom={defaultZoom}
                     scrollWheelZoom={false}
                     className="restaurant-map"
                     attributionControl={false}
@@ -198,6 +242,7 @@ export default function RestaurantMap() {
                     />
                     <AttributionControl prefix={false} />
                     <MapViewportController focusTarget={focusTarget} />
+                    <ViewportChangeListener onViewportChange={handleViewportChange} />
                     <ClusterLayer restaurants={restaurants} />
                 </MapContainer>
             </div>
@@ -258,6 +303,26 @@ export default function RestaurantMap() {
             align-items: center;
             justify-content: center;
             font-weight: 600;
+        }
+        .show-city-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            z-index: 1001;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            color: #0f172a;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 9px 12px;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+            transition: all 0.2s ease;
+        }
+        .show-city-btn:hover {
+            border-color: var(--rs-accent, #2f8f5b);
+            color: var(--rs-accent, #2f8f5b);
         }
         .restaurant-map {
           height: 500px;
