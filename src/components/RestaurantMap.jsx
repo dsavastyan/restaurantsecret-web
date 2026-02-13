@@ -81,12 +81,24 @@ function ClusterLayer({ restaurants }) {
     return null;
 }
 
+function MapViewportController({ focusTarget }) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (!focusTarget) return;
+        map.flyTo([focusTarget.lat, focusTarget.lon], 13, { duration: 0.8 });
+    }, [map, focusTarget]);
+
+    return null;
+}
+
 export default function RestaurantMap() {
     const [restaurants, setRestaurants] = useState([]);
     const [loading, setLoading] = useState(true);
     const [metroData, setMetroData] = useState({ lines: [], stations: [] });
     const [cuisines, setCuisines] = useState([]);
     const [filters, setFilters] = useState({ stationIds: [], cuisines: [] });
+    const [focusTarget, setFocusTarget] = useState(null);
 
     useEffect(() => {
         // Fetch metro data once
@@ -158,6 +170,11 @@ export default function RestaurantMap() {
                     metroData={metroData}
                     selectedStationIds={filters.stationIds}
                     onChange={(f) => setFilters({ ...filters, stationIds: f.stationIds })}
+                    onJumpToStation={(station) => setFocusTarget({
+                        lat: station.lat,
+                        lon: station.lon,
+                        key: `${station.name_ru}-${Date.now()}`
+                    })}
                 />
                 <MapCuisineFilter
                     cuisines={cuisines}
@@ -180,6 +197,7 @@ export default function RestaurantMap() {
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
                     <AttributionControl prefix={false} />
+                    <MapViewportController focusTarget={focusTarget} />
                     <ClusterLayer restaurants={restaurants} />
                 </MapContainer>
             </div>
