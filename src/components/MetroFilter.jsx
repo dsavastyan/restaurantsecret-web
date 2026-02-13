@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 
-export default function MetroFilter({ metroData, selectedStationIds = [], onChange }) {
+export default function MetroFilter({ metroData, selectedStationIds = [], onChange, onJumpToStation }) {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const containerRef = useRef(null);
@@ -14,12 +14,33 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
             if (!groups[s.name_ru]) {
                 groups[s.name_ru] = {
                     name_ru: s.name_ru,
-                    ids: []
+                    ids: [],
+                    points: []
                 };
             }
             groups[s.name_ru].ids.push(s.id);
+            if (Number.isFinite(Number(s.lat)) && Number.isFinite(Number(s.lon))) {
+                groups[s.name_ru].points.push({ lat: Number(s.lat), lon: Number(s.lon) });
+            }
         });
-        return Object.values(groups).sort((a, b) => a.name_ru.localeCompare(b.name_ru));
+        return Object.values(groups)
+            .map((group) => {
+                if (group.points.length === 0) {
+                    return { ...group, lat: null, lon: null };
+                }
+
+                const sum = group.points.reduce(
+                    (acc, point) => ({ lat: acc.lat + point.lat, lon: acc.lon + point.lon }),
+                    { lat: 0, lon: 0 }
+                );
+                const divisor = group.points.length;
+                return {
+                    ...group,
+                    lat: sum.lat / divisor,
+                    lon: sum.lon / divisor
+                };
+            })
+            .sort((a, b) => a.name_ru.localeCompare(b.name_ru));
     }, [stations]);
 
     // Filter stations based on search
@@ -139,6 +160,23 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
                                             {isSelected && <span className="check">✓</span>}
                                         </div>
                                         <span className="station-name">{group.name_ru}</span>
+                                        {typeof onJumpToStation === 'function' && Number.isFinite(group.lat) && Number.isFinite(group.lon) && (
+                                            <button
+                                                className="jump-btn"
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onJumpToStation({
+                                                        name_ru: group.name_ru,
+                                                        lat: group.lat,
+                                                        lon: group.lon
+                                                    });
+                                                    setIsOpen(false);
+                                                }}
+                                            >
+                                                Перейти
+                                            </button>
+                                        )}
                                     </div>
                                 );
                             })
@@ -370,10 +408,28 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
                     font-size: 14px;
                     color: #475569;
                     font-weight: 500;
+                    flex: 1;
                 }
                 .option-item.selected .station-name {
                     color: #0f172a;
                     font-weight: 700;
+                }
+                .jump-btn {
+                    border: 1px solid #cbd5e1;
+                    background: #fff;
+                    color: #334155;
+                    border-radius: 8px;
+                    font-size: 12px;
+                    font-weight: 600;
+                    padding: 6px 10px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    flex-shrink: 0;
+                }
+                .jump-btn:hover {
+                    border-color: var(--rs-accent, #2f8f5b);
+                    color: var(--rs-accent, #2f8f5b);
+                    background: rgba(47, 143, 91, 0.06);
                 }
                 .no-results {
                     padding: 30px 20px;
