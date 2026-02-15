@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 
-export default function MetroFilter({ metroData, selectedStationIds = [], onChange, onJumpToStation }) {
+export default function MetroFilter({ metroData, onJumpToStation }) {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const containerRef = useRef(null);
@@ -10,19 +10,19 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
     // Group stations by name to avoid duplicates (different lines)
     const groupedStations = useMemo(() => {
         const groups = {};
-        stations.forEach(s => {
-            if (!groups[s.name_ru]) {
-                groups[s.name_ru] = {
-                    name_ru: s.name_ru,
-                    ids: [],
+        stations.forEach((station) => {
+            if (!groups[station.name_ru]) {
+                groups[station.name_ru] = {
+                    name_ru: station.name_ru,
                     points: []
                 };
             }
-            groups[s.name_ru].ids.push(s.id);
-            if (Number.isFinite(Number(s.lat)) && Number.isFinite(Number(s.lon))) {
-                groups[s.name_ru].points.push({ lat: Number(s.lat), lon: Number(s.lon) });
+
+            if (Number.isFinite(Number(station.lat)) && Number.isFinite(Number(station.lon))) {
+                groups[station.name_ru].points.push({ lat: Number(station.lat), lon: Number(station.lon) });
             }
         });
+
         return Object.values(groups)
             .map((group) => {
                 if (group.points.length === 0) {
@@ -33,80 +33,32 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
                     (acc, point) => ({ lat: acc.lat + point.lat, lon: acc.lon + point.lon }),
                     { lat: 0, lon: 0 }
                 );
-                const divisor = group.points.length;
+
                 return {
                     ...group,
-                    lat: sum.lat / divisor,
-                    lon: sum.lon / divisor
+                    lat: sum.lat / group.points.length,
+                    lon: sum.lon / group.points.length
                 };
             })
             .sort((a, b) => a.name_ru.localeCompare(b.name_ru));
     }, [stations]);
 
-    // Filter stations based on search
     const filteredStations = useMemo(() => {
         if (!searchQuery) return groupedStations;
         const lower = searchQuery.toLowerCase();
-        return groupedStations.filter(s => s.name_ru.toLowerCase().includes(lower));
+        return groupedStations.filter((station) => station.name_ru.toLowerCase().includes(lower));
     }, [groupedStations, searchQuery]);
 
-    // Handle selection toggle
-    const toggleStation = (ids) => {
-        const allSelected = ids.every(id => selectedStationIds.includes(id));
-
-        let nextIds;
-        if (allSelected) {
-            // Deselect all ids for this station name
-            nextIds = selectedStationIds.filter(id => !ids.includes(id));
-        } else {
-            // Select all ids for this station name
-            const newIds = ids.filter(id => !selectedStationIds.includes(id));
-            nextIds = [...selectedStationIds, ...newIds];
-        }
-
-        onChange({ stationIds: nextIds });
-    };
-
-    const clearAll = (e) => {
-        e.stopPropagation();
-        onChange({ stationIds: [] });
-    };
-
-    const selectAll = (e) => {
-        e.stopPropagation();
-        const allIds = groupedStations.flatMap((group) => group.ids);
-        const uniqueIds = Array.from(new Set(allIds));
-        onChange({ stationIds: uniqueIds });
-    };
-
-    // Close on click outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (containerRef.current && !containerRef.current.contains(event.target)) {
                 setIsOpen(false);
             }
         };
+
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
-
-    // Calculate selected count based on unique station names
-    const selectedCount = groupedStations.filter(g =>
-        g.ids.length > 0 && g.ids.every(id => selectedStationIds.includes(id))
-    ).length;
-    const allSelected = groupedStations.length > 0 && selectedCount === groupedStations.length;
-
-    const toggleAll = (e) => {
-        if (allSelected) {
-            clearAll(e);
-            return;
-        }
-        selectAll(e);
-    };
-
-    const triggerText = selectedCount > 0
-        ? `Выбрано: ${selectedCount}`
-        : "Выберите станции метро";
 
     return (
         <div className="metro-filter-container" ref={containerRef} style={{ zIndex: isOpen ? 90 : 1 }}>
@@ -116,14 +68,9 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
             >
                 <div className="trigger-text-wrapper">
                     <span className="metro-icon">🚇</span>
-                    <span className="placeholder-text">{triggerText}</span>
+                    <span className="placeholder-text">Станции метро</span>
                 </div>
-                <div className="trigger-actions">
-                    {selectedCount > 0 && (
-                        <button className="mini-clear" onClick={clearAll} title="Очистить всё">✕</button>
-                    )}
-                    <div className={`chevron ${isOpen ? 'up' : 'down'}`}></div>
-                </div>
+                <div className={`chevron ${isOpen ? 'up' : 'down'}`}></div>
             </div>
 
             {isOpen && (
@@ -139,55 +86,35 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
                                 autoFocus
                             />
                         </div>
-                        <button className="toggle-all-btn" onClick={toggleAll}>
-                            {allSelected ? 'Снять все' : 'Выбрать все'}
-                        </button>
                     </div>
 
                     <div className="options-list">
                         {filteredStations.length === 0 ? (
                             <div className="no-results">Ничего не найдено</div>
                         ) : (
-                            filteredStations.map(group => {
-                                const isSelected = group.ids.length > 0 && group.ids.every(id => selectedStationIds.includes(id));
-                                return (
-                                    <div
-                                        key={group.name_ru}
-                                        className={`option-item ${isSelected ? 'selected' : ''}`}
-                                        onClick={() => toggleStation(group.ids)}
-                                    >
-                                        <div className="checkbox">
-                                            {isSelected && <span className="check">✓</span>}
-                                        </div>
-                                        <span className="station-name">{group.name_ru}</span>
-                                        {typeof onJumpToStation === 'function' && Number.isFinite(group.lat) && Number.isFinite(group.lon) && (
-                                            <button
-                                                className="jump-btn"
-                                                type="button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    onJumpToStation({
-                                                        name_ru: group.name_ru,
-                                                        lat: group.lat,
-                                                        lon: group.lon
-                                                    });
-                                                    setIsOpen(false);
-                                                }}
-                                            >
-                                                Перейти
-                                            </button>
-                                        )}
-                                    </div>
-                                );
-                            })
+                            filteredStations.map((station) => (
+                                <div key={station.name_ru} className="option-item">
+                                    <span className="station-name">{station.name_ru}</span>
+                                    {typeof onJumpToStation === 'function' && Number.isFinite(station.lat) && Number.isFinite(station.lon) && (
+                                        <button
+                                            className="jump-btn"
+                                            type="button"
+                                            onClick={() => {
+                                                onJumpToStation({
+                                                    name_ru: station.name_ru,
+                                                    lat: station.lat,
+                                                    lon: station.lon
+                                                });
+                                                setIsOpen(false);
+                                            }}
+                                        >
+                                            Перейти
+                                        </button>
+                                    )}
+                                </div>
+                            ))
                         )}
                     </div>
-
-                    {selectedCount > 0 && (
-                        <div className="filter-footer">
-                            <button className="clear-link" onClick={clearAll}>Сбросить выбор</button>
-                        </div>
-                    )}
                 </div>
             )}
 
@@ -240,31 +167,6 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
                     overflow: hidden;
                     text-overflow: ellipsis;
                 }
-                .trigger-actions {
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    margin-left: 8px;
-                }
-                .mini-clear {
-                    background: #f1f5f9;
-                    border: none;
-                    width: 20px;
-                    height: 20px;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 10px;
-                    color: #64748b;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                }
-                .mini-clear:hover {
-                    background: #e2e8f0;
-                    color: #1e293b;
-                    transform: scale(1.1);
-                }
                 .chevron {
                     width: 10px;
                     height: 10px;
@@ -310,24 +212,6 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
                     padding: 12px;
                     border-bottom: 1px solid #f1f5f9;
                 }
-                .toggle-all-btn {
-                    margin-top: 10px;
-                    width: 100%;
-                    border: 1px solid #cbd5e1;
-                    border-radius: 10px;
-                    background: #fff;
-                    color: #334155;
-                    font-size: 13px;
-                    font-weight: 600;
-                    padding: 9px 10px;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                }
-                .toggle-all-btn:hover {
-                    border-color: var(--rs-accent, #2f8f5b);
-                    color: var(--rs-accent, #2f8f5b);
-                    background: #f8fafc;
-                }
                 .search-input-wrapper {
                     position: relative;
                     display: flex;
@@ -371,7 +255,6 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
                     align-items: center;
                     gap: 10px;
                     padding: 10px 12px;
-                    cursor: pointer;
                     border-radius: 10px;
                     transition: all 0.15s ease;
                     margin-bottom: 2px;
@@ -379,40 +262,11 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
                 .option-item:hover {
                     background: #f1f5f9;
                 }
-                .option-item.selected {
-                    background: rgba(47, 143, 91, 0.08);
-                }
-                .checkbox {
-                    width: 20px;
-                    height: 20px;
-                    border: 2px solid #cbd5e1;
-                    border-radius: 6px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    background: #fff;
-                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-                    flex-shrink: 0;
-                }
-                .option-item.selected .checkbox {
-                    background: var(--rs-accent, #2f8f5b);
-                    border-color: var(--rs-accent, #2f8f5b);
-                    transform: scale(1.05);
-                }
-                .check {
-                    color: #fff;
-                    font-size: 12px;
-                    font-weight: bold;
-                }
                 .station-name {
                     font-size: 14px;
                     color: #475569;
                     font-weight: 500;
                     flex: 1;
-                }
-                .option-item.selected .station-name {
-                    color: #0f172a;
-                    font-weight: 700;
                 }
                 .jump-btn {
                     border: 1px solid #cbd5e1;
@@ -437,29 +291,6 @@ export default function MetroFilter({ metroData, selectedStationIds = [], onChan
                     color: #94a3b8;
                     font-size: 14px;
                     font-style: italic;
-                }
-                .filter-footer {
-                    padding: 12px;
-                    border-top: 1px solid #f1f5f9;
-                    background: #f8fafc;
-                    display: flex;
-                    justify-content: center;
-                }
-                .clear-link {
-                    background: none;
-                    border: none;
-                    color: #64748b;
-                    font-size: 13px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    padding: 6px 12px;
-                    border-radius: 8px;
-                    transition: all 0.2s ease;
-                    width: 100%;
-                }
-                .clear-link:hover {
-                    background: #f1f5f9;
-                    color: #1e293b;
                 }
             `}</style>
         </div>
