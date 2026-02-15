@@ -12,6 +12,22 @@ import { analytics } from '@/services/analytics'
 const FETCH_LIMIT = 1000;
 const VISIBLE_CHUNK_SIZE = 20;
 
+const normalizeInstagramUrl = (rawUrl) => {
+  if (!rawUrl) return null
+  const text = String(rawUrl).trim()
+  if (!text || text === '-' || text === '—') return null
+  const withProtocol = /^https?:\/\//i.test(text) ? text : `https://${text.replace(/^\/+/, '')}`
+
+  try {
+    const parsed = new URL(withProtocol)
+    const host = parsed.hostname.replace(/^www\./i, '').toLowerCase()
+    if (!host.endsWith('instagram.com')) return null
+    return parsed.toString()
+  } catch (_) {
+    return null
+  }
+}
+
 export default function Catalog() {
   const { data: filters } = useSWRLite('filters', () => api.filters())
   const [selectedCuisines, setSelectedCuisines] = useState([])
@@ -286,6 +302,7 @@ export default function Catalog() {
           {visibleItems.map((r, i) => {
             const allDishes = extractDishes(r)
             const dishes = allDishes.slice(0, 8)
+            const instagramUrl = normalizeInstagramUrl(r.instagramUrl)
             const dishesCount = typeof r?.dishesCount === 'number'
               ? r.dishesCount
               : allDishes.length
@@ -297,6 +314,21 @@ export default function Catalog() {
                     <h3 className="catalog-card__title">{r.name}</h3>
                     {r.cuisine && <div className="catalog-card__cuisine">{r.cuisine}</div>}
                   </div>
+                  {instagramUrl && (
+                    <a
+                      href={instagramUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      aria-label="Instagram ресторана"
+                      title="Instagram"
+                      style={{ color: '#E1306C', display: 'inline-flex', marginRight: 8 }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor">
+                        <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm11.5 1.8a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
+                      </svg>
+                    </a>
+                  )}
                   <button
                     type="button"
                     className={`catalog-card__fav-btn ${isFavorite(r.slug) ? 'is-active' : ''}`}

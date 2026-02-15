@@ -36,6 +36,22 @@ const formatPositionCount = (count) => {
   return `${count} ${suffix}`
 }
 
+const normalizeInstagramUrl = (rawUrl) => {
+  if (!rawUrl) return null
+  const text = String(rawUrl).trim()
+  if (!text || text === '-' || text === '—') return null
+  const withProtocol = /^https?:\/\//i.test(text) ? text : `https://${text.replace(/^\/+/, '')}`
+
+  try {
+    const parsed = new URL(withProtocol)
+    const host = parsed.hostname.replace(/^www\./i, '').toLowerCase()
+    if (!host.endsWith('instagram.com')) return null
+    return parsed.toString()
+  } catch (_) {
+    return null
+  }
+}
+
 export default function Menu() {
   const { slug } = useParams()
   const navigate = useNavigate()
@@ -142,6 +158,7 @@ export default function Menu() {
 
     return ordered.filter((section) => section.dishes.length)
   }, [filtered, menu?.categories])
+  const instagramUrl = useMemo(() => normalizeInstagramUrl(menu?.instagramUrl), [menu?.instagramUrl])
 
   // Toggle a preset chip and re-run memoized filtering.
   const togglePreset = (key) => {
@@ -191,6 +208,20 @@ export default function Menu() {
           <div className="menu-hero__title-block">
             <div className="menu-hero__title-row">
               <h1 className="menu-hero__title">{menu?.name || 'Меню'}</h1>
+              {instagramUrl && (
+                <a
+                  href={instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram ресторана"
+                  title="Instagram"
+                  style={{ color: '#E1306C', display: 'inline-flex', marginLeft: 8 }}
+                >
+                  <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor">
+                    <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm11.5 1.8a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
+                  </svg>
+                </a>
+              )}
               <div className="menu-hero__badge">
                 {filtered.length ? `${filtered.length} блюд` : 'Ничего не найдено'}
               </div>
