@@ -39,9 +39,9 @@ function ClusterLayer({ restaurants }) {
 
         // Create markers and add to cluster group
         const markers = restaurants
-            .filter(r => r.lat && r.lon)
+            .filter((r) => Number.isFinite(Number(r.lat)) && Number.isFinite(Number(r.lon)))
             .map(r => {
-                const marker = L.marker([r.lat, r.lon]);
+                const marker = L.marker([Number(r.lat), Number(r.lon)]);
 
                 const popupContent = document.createElement('div');
                 popupContent.className = 'map-popup';
@@ -119,9 +119,10 @@ export default function RestaurantMap() {
     const [loading, setLoading] = useState(true);
     const [metroData, setMetroData] = useState({ lines: [], stations: [] });
     const [cuisines, setCuisines] = useState([]);
-    const [filters, setFilters] = useState({ stationIds: [], cuisines: [] });
+    const [filters, setFilters] = useState({ cuisines: [] });
     const [focusTarget, setFocusTarget] = useState(null);
     const [isDefaultView, setIsDefaultView] = useState(true);
+    const uniqueRestaurantCount = new Set(restaurants.map((item) => item.slug)).size;
 
     const handleViewportChange = useCallback(({ lat, lon, zoom }) => {
         const sameZoom = Math.abs(zoom - defaultZoom) < 0.01;
@@ -165,9 +166,6 @@ export default function RestaurantMap() {
             setLoading(true);
             try {
                 const params = new URLSearchParams();
-                if (filters.stationIds && filters.stationIds.length > 0) {
-                    filters.stationIds.forEach(id => params.append('station_id', id));
-                }
                 if (filters.cuisines && filters.cuisines.length > 0) {
                     filters.cuisines.forEach(cuisine => params.append('cuisine', cuisine));
                 }
@@ -191,15 +189,13 @@ export default function RestaurantMap() {
             <div className="map-header">
                 <div className="header-left">
                     <h3>Карта ресторанов</h3>
-                    <span className="badge">{restaurants.length} ресторанов</span>
+                    <span className="badge">{uniqueRestaurantCount} ресторанов • {restaurants.length} точек</span>
                 </div>
             </div>
 
             <div className="filters-row">
                 <MetroFilter
                     metroData={metroData}
-                    selectedStationIds={filters.stationIds}
-                    onChange={(f) => setFilters({ ...filters, stationIds: f.stationIds })}
                     onJumpToStation={(station) => setFocusTarget({
                         lat: station.lat,
                         lon: station.lon,
