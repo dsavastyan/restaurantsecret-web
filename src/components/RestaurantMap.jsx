@@ -21,6 +21,22 @@ L.Icon.Default.mergeOptions({
 const defaultCenter = [55.751244, 37.618423]; // Moscow
 const defaultZoom = 10;
 
+function normalizeInstagramUrl(rawUrl) {
+    if (!rawUrl) return null;
+    const text = String(rawUrl).trim();
+    if (!text || text === '-' || text === '—') return null;
+
+    const withProtocol = /^https?:\/\//i.test(text) ? text : `https://${text.replace(/^\/+/, '')}`;
+    try {
+        const url = new URL(withProtocol);
+        const host = url.hostname.replace(/^www\./i, '').toLowerCase();
+        if (!host.endsWith('instagram.com')) return null;
+        return url.toString();
+    } catch (_) {
+        return null;
+    }
+}
+
 // Inner component to handle clustering logic via map instance access
 function ClusterLayer({ restaurants }) {
     const map = useMap();
@@ -42,13 +58,24 @@ function ClusterLayer({ restaurants }) {
             .filter((r) => Number.isFinite(Number(r.lat)) && Number.isFinite(Number(r.lon)))
             .map(r => {
                 const marker = L.marker([Number(r.lat), Number(r.lon)]);
+                const instagramUrl = normalizeInstagramUrl(r.instagramUrl);
+                const instagramLink = instagramUrl
+                    ? `<a href="${instagramUrl}" target="_blank" rel="noopener noreferrer" class="popup-instagram" title="Instagram">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm11.5 1.8a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                        </svg>
+                      </a>`
+                    : '';
 
                 const popupContent = document.createElement('div');
                 popupContent.className = 'map-popup';
                 popupContent.innerHTML = `
                 <strong>${r.name}</strong><br/>
                 ${r.cuisine || ''}<br/>
-                <a href="/r/${r.slug}/menu" class="popup-link">Перейти к меню</a>
+                <div class="popup-links">
+                    <a href="/r/${r.slug}/menu" class="popup-link">Перейти к меню</a>
+                    ${instagramLink}
+                </div>
             `;
 
                 // Using event delegation or attaching handler to element
@@ -333,8 +360,25 @@ export default function RestaurantMap() {
           color: var(--brand);
           font-weight: 600;
           text-decoration: none;
-          display: inline-block;
+          display: inline-flex;
           margin-top: 4px;
+        }
+        .popup-links {
+          margin-top: 4px;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .popup-instagram {
+          display: inline-flex;
+          width: 18px;
+          height: 18px;
+          color: #e1306c;
+        }
+        .popup-instagram svg {
+          width: 18px;
+          height: 18px;
+          fill: currentColor;
         }
       `}</style>
         </div>
