@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import type { AccountOutletContext } from "./Layout";
+import { getProfileNameForToken } from "@/lib/onboarding";
 import { useAuth } from "@/store/auth";
 import { useGoalsStore } from "@/store/goals";
 
@@ -90,12 +91,20 @@ export default function AccountOverview() {
     }
   }, [me?.user?.created_at]);
 
+  const profileName = useMemo(() => getProfileNameForToken(accessToken), [accessToken]);
+
   return (
     <section
       className="account-panel"
       aria-labelledby="account-profile-heading"
     >
       <div className="account-profile-info">
+        {profileName && (
+          <div className="account-profile-info__item">
+            <label className="account-profile-info__label">Имя</label>
+            <span className="account-profile-info__value">{profileName}</span>
+          </div>
+        )}
         <div className="account-profile-info__item">
           <label className="account-profile-info__label">Электронная почта</label>
           <span className="account-profile-info__value">{me?.user?.email || "—"}</span>
