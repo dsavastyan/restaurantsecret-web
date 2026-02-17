@@ -208,6 +208,7 @@ export default function AppShell() {
   }), [access, handleAccessUpdate, refreshAccess, requestPaywall, closePaywall, requireAccess])
 
   const isContact = location.pathname.startsWith('/contact')
+  const isLanding = location.pathname === '/'
   const isLoginPage = location.pathname === '/login'
   const isOnboardingPage = location.pathname.startsWith('/onboarding')
   const isImmersivePage = isLoginPage || isOnboardingPage
@@ -250,7 +251,7 @@ export default function AppShell() {
             <Outlet context={outletContext} />
           </div>
         ) : (
-          <div className={showPaywall ? 'container locked' : 'container'}>
+          <div className={showPaywall ? 'container locked' : isLanding ? 'container container--landing' : 'container'}>
             {showGlobalSearch && (
               <div className="app-shell__search">
                 <div className="app-shell__search-inner">
@@ -262,7 +263,7 @@ export default function AppShell() {
           </div>
         )}
       </main>
-      {!isImmersivePage && <Footer />}
+      {!isImmersivePage && !isLanding && <Footer />}
     </div>
   )
 }

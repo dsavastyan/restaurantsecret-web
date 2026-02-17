@@ -1,34 +1,39 @@
-// Landing.jsx — MVP landing page for RestaurantSecret
-// Assumptions:
-// - React + Vite SPA already set up
-// - Global stylesheet (styles.css) exists; this file adds semantic classNames
-// - API base: https://api.restaurantsecret.ru/cf
-// - No payment/subscription flows here (frozen by product decision)
-// - Блок преимуществ под hero показывает три ключевые выгоды (без отдельного заголовка)
-// - SEO meta tags to be placed in index.html (not here)
-
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import SearchInput from '@/components/SearchInput'
-import { API_BASE } from '@/config/api'
+import RestaurantMap from '@/components/RestaurantMap'
 import { postSuggest } from '@/lib/api'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
 import { analytics } from '@/services/analytics'
 
 export default function Landing() {
+  const [themeMode, setThemeMode] = useState(() => {
+    if (typeof window === 'undefined') return 'day'
+    const saved = window.localStorage.getItem('rs_landing_theme')
+    if (saved === 'night' || saved === 'day') return saved
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'day'
+  })
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    window.localStorage.setItem('rs_landing_theme', themeMode)
+  }, [themeMode])
+
   return (
-    <main className="landing">
-      <Hero />
+    <main className={`landing landing--${themeMode}`} data-theme={themeMode}>
+      <Hero
+        themeMode={themeMode}
+        onToggleTheme={() => setThemeMode((prev) => (prev === 'day' ? 'night' : 'day'))}
+      />
       <WhyImportant />
-      <RestaurantsSection />
+      <RestaurantsSection themeMode={themeMode} />
     </main>
   )
 }
 
-// Hero section with simple CTA guiding users to the catalog.
-function Hero() {
+function Hero({ themeMode, onToggleTheme }) {
   const [query, setQuery] = useState('')
   const [suggestOpen, setSuggestOpen] = useState(false)
   const searchZoneRef = useRef(null)
@@ -62,9 +67,14 @@ function Hero() {
 
   return (
     <header className="hero" aria-labelledby="hero-title">
-      <div className="hero__brand">
-        <img src="/assets/logo.png" alt="RestaurantSecret" className="brand__logo" />
-        <span className="brand__name">RestaurantSecret</span>
+      <div className="hero__topline">
+        <div className="hero__brand">
+          <img src="/assets/logo.png" alt="RestaurantSecret" className="brand__logo" />
+          <span className="brand__name">RestaurantSecret</span>
+        </div>
+        <button type="button" className="theme-switch" onClick={onToggleTheme}>
+          {themeMode === 'night' ? 'Дневной режим' : 'Ночной режим'}
+        </button>
       </div>
 
       <h1 id="hero-title" className="hero__title">
@@ -93,7 +103,6 @@ function Hero() {
   )
 }
 
-// Highlights the three main value propositions of RestaurantSecret.
 function WhyImportant() {
   return (
     <section className="benefits" aria-label="Преимущества">
@@ -101,26 +110,12 @@ function WhyImportant() {
         <ul className="benefits__grid">
           <li className="benefit-card">
             <div className="benefit-icon" aria-hidden="true">🕓</div>
-            <div className="benefit-text">
-              <div className="benefit-title">Экономь время</div>
-              <div className="benefit-desc">Больше не ищи меню по сайтам</div>
-            </div>
+            <div className="benefit-text">Всё в одном месте</div>
           </li>
 
           <li className="benefit-card">
-            <div className="benefit-icon" aria-hidden="true">🍽️</div>
-            <div className="benefit-text">
-              <div className="benefit-title">Планируй питание</div>
-              <div className="benefit-desc">Заранее подбирай блюда по КБЖУ</div>
-            </div>
-          </li>
-
-          <li className="benefit-card">
-            <div className="benefit-icon" aria-hidden="true">💪</div>
-            <div className="benefit-text">
-              <div className="benefit-title">Контролируй рацион</div>
-              <div className="benefit-desc">Выбирай, не выходя за цели</div>
-            </div>
+            <div className="benefit-icon" aria-hidden="true">🎯</div>
+            <div className="benefit-text">Выбирай в 2 клика, не выходя за цели</div>
           </li>
         </ul>
       </div>
@@ -128,12 +123,7 @@ function WhyImportant() {
   )
 }
 
-// Fetch and display a small preview grid of restaurants directly on the
-// landing page.
-// Replaced marquee with RestaurantMap
-import RestaurantMap from '@/components/RestaurantMap';
-
-function RestaurantsSection() {
+function RestaurantsSection({ themeMode }) {
   return (
     <section className="restaurants" aria-label="Карта ресторанов">
       <div className="container">
@@ -142,48 +132,16 @@ function RestaurantsSection() {
           <p className="section-subtitle">Найдите любимое заведение на карте</p>
         </div>
 
-        <RestaurantMap />
+        <RestaurantMap themeMode={themeMode} />
 
         <div className="center">
           <Link className="btn btn--outline" to="/restaurants">Показать все списком</Link>
         </div>
       </div>
     </section>
-  );
-}
-
-// A single restaurant card used in the preview grid.
-function RestaurantCard({ item, skeleton = false }) {
-  const title = item?.name || 'Ресторан'
-  const cuisine = item?.cuisine || item?.cuisine_name || ''
-  const slug = item?.slug || ''
-  const initials = useMemo(() => getInitials(title), [title])
-  const href = slug ? `/r/${slug}/menu` : '#'
-
-  if (skeleton) {
-    return (
-      <div className="restaurant-card skeleton" aria-hidden="true">
-        <div className="restaurant-badge" aria-hidden="true">&nbsp;</div>
-        <div className="restaurant-text">
-          <div className="restaurant-name">&nbsp;</div>
-          <div className="restaurant-cuisine">&nbsp;</div>
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <Link className="restaurant-card" to={href} title={`Меню ${title} с КБЖУ и составом блюд`}>
-      <div className="restaurant-badge" aria-hidden="true">{initials}</div>
-      <div className="restaurant-text">
-        <div className="restaurant-name">{title}</div>
-        {cuisine && <div className="restaurant-cuisine">{cuisine}</div>}
-      </div>
-    </Link>
   )
 }
 
-// Popover with a suggestion form that posts to the /suggest endpoint.
 function SuggestPopover({ onClose }) {
   const accessToken = useAuth((state) => state.accessToken)
   const accessTokenOrUndefined = accessToken || undefined
@@ -285,96 +243,4 @@ function SuggestPopover({ onClose }) {
       </form>
     </div>
   )
-}
-
-// Create two-character initials from the restaurant name to display in the
-// circular badge.
-function getInitials(name) {
-  const parts = String(name).split(/\s+/).filter(Boolean)
-  const first = parts[0]?.[0] || ''
-  const last = parts[1]?.[0] || ''
-  return (first + last).toUpperCase()
-}
-
-/* ---------------------------------------------------------
-  Minimal styles to complement existing styles.css.
-  If you prefer a separate CSS file, move these rules there.
---------------------------------------------------------- */
-
-const styles = `
-:root {
-  --bg: #f7faf7;
-  --fg: #0f172a;
-  --muted: #64748b;
-  --card: #ffffff;
-  --line: #e5e7eb;
-  --brand: var(--rs-accent, #2f8f5b);
-  --brand-2: #22c55e;
-}
-
-.landing { color: var(--fg); min-height: 100dvh; }
-.container { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
-.section-title { font-size: 28px; line-height: 1.25; margin: 0 0 8px; }
-.section-title--small { font-size: 22px; }
-.section-subtitle { color: var(--muted); margin: 0 0 16px; }
-.center { display: flex; justify-content: center; margin-top: 16px; }
-.hint { color: var(--muted); font-size: 13px; margin-top: 8px; }
-.hint--error { color: #b91c1c; }
-
-/* Benefits */
-.benefits { padding: clamp(12px, 3vw, 24px); }
-.benefits__grid { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(8px, 2vw, 14px); grid-template-columns: 1fr; }
-@media (min-width: 900px) {
-  .benefits__grid { grid-template-columns: 1fr 1fr; }
-}
-.benefit-card { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 12px; padding: 14px 16px; background: #ffffff; border-radius: 16px; border: 1px solid #e8edf0; box-shadow: 0 1px 0 #ffffff inset, 0 6px 18px rgba(31, 74, 62, 0.06); }
-.benefit-icon { width: 42px; height: 42px; display: grid; place-items: center; font-size: 22px; border-radius: 12px; background: linear-gradient(180deg, #f4f8f5 0%, #eef4f0 100%); box-shadow: 0 1px 0 #ffffff inset, 0 2px 8px rgba(31, 74, 62, 0.08); user-select: none; }
-.benefit-text { min-width: 0; }
-.benefit-title { color: #1f4a3e; font-weight: 700; font-size: clamp(15px, 2.2vw, 18px); line-height: 1.2; }
-.benefit-desc { margin-top: 2px; color: #294b43cc; font-size: clamp(13px, 2vw, 16px); line-height: 1.35; }
-@media (max-width: 420px) {
-  .benefit-card { padding: 12px 14px; border-radius: 14px; }
-  .benefit-icon { width: 38px; height: 38px; font-size: 20px; }
-}
-
-/* Restaurants grid */
-.restaurants { padding: clamp(8px, 3vw, 24px); }
-.restaurants__grid { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(8px, 2vw, 16px); grid-template-columns: 1fr; }
-@media (min-width: 768px) { .restaurants__grid { grid-template-columns: 1fr 1fr; } }
-@media (min-width: 1140px) { .restaurants__grid { grid-template-columns: 1fr 1fr 1fr; } }
-.restaurant-item { }
-.restaurant-card { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 14px; width: 100%; padding: 14px 16px; text-decoration: none; background: #fff; border-radius: 18px; border: 1px solid #e8edf0; box-shadow: 0 1px 0 #ffffff inset, 0 6px 18px rgba(31, 74, 62, 0.06); transition: transform .12s ease, box-shadow .15s ease, border-color .12s ease; }
-.restaurant-card:hover { transform: translateY(-1px); box-shadow: 0 1px 0 #ffffff inset, 0 12px 28px rgba(31, 74, 62, 0.10); border-color: #dfe8e6; }
-.restaurant-card:focus-visible { outline: 0; box-shadow: 0 0 0 3px #cfe3da, 0 10px 24px rgba(31, 74, 62, 0.10); }
-.restaurant-badge { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; font-weight: 800; font-size: 16px; letter-spacing: 0.3px; color: #1f4a3e; background: radial-gradient(80% 80% at 30% 20%, #e8f2ea 0%, #dfeee5 60%, #d7e8de 100%); box-shadow: 0 1px 0 #ffffff inset, 0 2px 8px rgba(31, 74, 62, 0.08); user-select: none; }
-.restaurant-text { min-width: 0; }
-.restaurant-name { color: #1f4a3e; font-weight: 800; font-size: clamp(15px, 2.6vw, 20px); line-height: 1.18; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.restaurant-cuisine { margin-top: 2px; color: #2c5149cc; font-size: clamp(13px, 2.2vw, 15px); line-height: 1.2; }
-@media (max-width: 400px) { .restaurant-card { padding: 12px 14px; border-radius: 16px; } .restaurant-badge { width: 44px; height: 44px; border-radius: 12px; } }
-.restaurant-card.skeleton { position: relative; overflow: hidden; color: transparent; }
-.restaurant-card.skeleton::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #f4f7f5 0%, #eef3f0 40%, #f4f7f5 80%); animation: shimmer 1.1s linear infinite; border-radius: inherit; }
-@keyframes shimmer { 0% { transform: translateX(-60%); } 100% { transform: translateX(60%); } }
-
-/* Suggest */
-.suggest { padding: 40px 0; }
-.suggest__form { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
-.input { padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; }
-
-/* Buttons */
-.btn { --btn-bg: var(--brand); --btn-fg: #fff; appearance: none; border: none; border-radius: 12px; padding: 12px 16px; cursor: pointer; font-weight: 600; }
-.btn--primary { background: var(--btn-bg); color: var(--btn-fg); }
-.btn--primary:hover { filter: brightness(0.98); }
-.btn--outline { background: #fff; border: 1px solid var(--line); color: var(--fg); }
-
-`
-
-if (typeof document !== 'undefined') {
-  // Inject component-scoped styles at runtime (keeps single-file delivery)
-  const id = 'landing-inline-styles'
-  if (!document.getElementById(id)) {
-    const el = document.createElement('style')
-    el.id = id
-    el.appendChild(document.createTextNode(styles))
-    document.head.appendChild(el)
-  }
 }
