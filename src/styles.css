@@ -6673,6 +6673,10 @@ body:has(.account--sheet-open) {
   font-family: "Caveat", "Segoe Script", cursive;
 }
 
+.login__subtitle--plain {
+  font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
 .login__alert {
   background: rgba(127, 22, 22, 0.26);
   border: 1px solid rgba(248, 113, 113, 0.45);
@@ -6968,6 +6972,11 @@ body:has(.account--sheet-open) {
     margin-top: 10px;
     margin-bottom: 34px;
     line-height: 1.1;
+  }
+
+  .login__subtitle--plain {
+    font-size: 18px;
+    line-height: 1.2;
   }
 
   .login__form {

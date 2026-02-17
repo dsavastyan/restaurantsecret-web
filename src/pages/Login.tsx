@@ -214,7 +214,9 @@ export default function LoginPage() {
         <div className="login__wrap">
           <div className="login__card">
             {step === "enter" && <h1 className="login__title">Выбирай легко</h1>}
-            <p className="login__subtitle">Ешь вкусно, выбирай осознанно</p>
+            <p className={`login__subtitle ${step === "code" ? "login__subtitle--plain" : ""}`}>
+              {step === "code" ? "Отправили код на почту" : "Ешь вкусно, выбирай осознанно"}
+            </p>
 
             {err && <div className="login__alert">{err}</div>}
 
