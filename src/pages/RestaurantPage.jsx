@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiGet } from '@/lib/requests';
 import { flattenMenuDishes, formatNumeric } from '@/lib/nutrition';
-import { formatDescription } from '@/lib/text';
+import { formatDescription, matchesSearchQuery } from '@/lib/text';
 import { formatMenuCapturedAt } from '@/lib/dates';
 import { useAuth } from '@/store/auth';
 import { useSubscriptionStore } from '@/store/subscription';
@@ -101,7 +101,7 @@ export default function RestaurantPage() {
     const dishes = flattenMenuDishes(menu); // [{id,name,kcal,protein,fat,carbs,category,price,weight}, ...]
     return dishes.filter(d => {
       // 1) поиск по названию
-      if (q && !d.name.toLowerCase().includes(q.trim().toLowerCase())) return false;
+      if (q && !matchesSearchQuery(d.name, q)) return false;
 
       // 2) пресеты
       if (presets.highProtein && !(d.protein >= 25)) return false; // много белка

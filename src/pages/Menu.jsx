@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { apiGet } from '@/lib/requests'
 import { flattenMenuDishes, formatNumeric } from '@/lib/nutrition'
-import { formatDescription } from '@/lib/text'
+import { formatDescription, matchesSearchQuery } from '@/lib/text'
 import { formatMenuCapturedAt } from '@/lib/dates'
 import { useAuth } from '@/store/auth'
 import { useSubscriptionStore } from '@/store/subscription'
@@ -114,9 +114,9 @@ export default function Menu() {
 
   // Apply search and macro filters locally to keep the UI responsive.
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
+    const q = query.trim()
     return dishes.filter((dish) => {
-      if (q && !dish.name?.toLowerCase().includes(q)) return false
+      if (q && !matchesSearchQuery(dish.name, q)) return false
       if (presets.highProtein && !(dish.protein >= 25)) return false
       if (presets.lowFat && !(dish.fat <= 10)) return false
       if (presets.lowKcal && !(dish.kcal <= 400)) return false
