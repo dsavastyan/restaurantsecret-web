@@ -1,12 +1,13 @@
 // Shared layout for authenticated areas. Manages subscription state and toggles
 // the paywall overlay when required.
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import NavBar from '@/components/NavBar'
 import SearchInput from '@/components/SearchInput'
 import DishCardModal from '@/components/DishCardModal'
 import Footer from '@/components/Footer.jsx'
 import { PD_API_BASE } from '@/config/api'
+import { isOnboardingPendingForToken } from '@/lib/onboarding'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
 
@@ -33,6 +34,7 @@ const accessEventMessages = {
 }
 
 export default function AppShell() {
+  const navigate = useNavigate()
   const location = useLocation()
   const accessToken = useAuth((state) => state.accessToken)
   const [access, setAccess] = useState(() => {
@@ -207,6 +209,20 @@ export default function AppShell() {
 
   const isContact = location.pathname.startsWith('/contact')
   const isLoginPage = location.pathname === '/login'
+  const isOnboardingPage = location.pathname.startsWith('/onboarding')
+  const isImmersivePage = isLoginPage || isOnboardingPage
+
+  useEffect(() => {
+    if (!accessToken || isOnboardingPage || isLoginPage) return
+    if (!isOnboardingPendingForToken(accessToken)) return
+
+    const currentPath = `${location.pathname}${location.search || ''}`
+    navigate('/onboarding/welcome', {
+      replace: true,
+      state: { from: currentPath }
+    })
+  }, [accessToken, isLoginPage, isOnboardingPage, location.pathname, location.search, navigate])
+
   const showGlobalSearch = useMemo(() => {
     const allowedPrefixes = ['/catalog', '/app']
     const matchesPrefix = allowedPrefixes.some((prefix) =>
@@ -224,10 +240,10 @@ export default function AppShell() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {!isLoginPage && <NavBar />}
+      {!isImmersivePage && <NavBar />}
       <DishCardModal />
       <main className="flex-1">
-        {isLoginPage ? (
+        {isImmersivePage ? (
           <Outlet context={outletContext} />
         ) : isContact ? (
           <div className={showPaywall ? 'contact-wrapper locked' : 'contact-wrapper'}>
@@ -246,7 +262,7 @@ export default function AppShell() {
           </div>
         )}
       </main>
-      {!isLoginPage && <Footer />}
+      {!isImmersivePage && <Footer />}
     </div>
   )
 }
