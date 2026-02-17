@@ -6898,6 +6898,27 @@ body:has(.account--sheet-open) {
   .login__card {
     max-width: 500px;
     padding: 78px 0 0;
+    border: 1px solid rgba(226, 242, 255, 0.2);
+    border-radius: 26px;
+    background: linear-gradient(180deg, rgba(14, 18, 34, 0.2) 0%, rgba(7, 10, 22, 0.34) 100%);
+    box-shadow:
+      0 28px 56px rgba(0, 0, 0, 0.35),
+      0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+    backdrop-filter: blur(8px);
+  }
+
+  .login__card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(202, 247, 229, 0.24), rgba(220, 241, 255, 0.08) 42%, rgba(223, 248, 172, 0.16));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    display: block;
   }
 
   .login__brand {
