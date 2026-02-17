@@ -8162,6 +8162,41 @@ body:has(.account--sheet-open) {
   color: var(--landing-fg);
 }
 
+.hero__inline-benefits {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+  width: 100%;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+.hero__inline-benefit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: clamp(13px, 1.2vw, 16px);
+  font-weight: 500;
+  color: color-mix(in srgb, var(--landing-fg) 88%, #6b7280);
+}
+
+.hero__inline-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  background: color-mix(in srgb, var(--landing-card) 88%, transparent);
+  border: 1px solid var(--landing-border);
+}
+
+.landing[data-theme="night"] .hero__inline-benefit {
+  color: #cdd8e9;
+}
+
 .hero__motto-wrap {
   width: 100%;
   display: flex;
@@ -8276,6 +8311,37 @@ body:has(.account--sheet-open) {
   font-size: clamp(20px, 2.6vw, 30px);
 }
 
+.restaurants__count {
+  margin: 2px 0 0;
+  display: inline-flex;
+  align-self: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--brand, #2f8f5b);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.restaurants__updates {
+  margin: 6px 0 0;
+  color: var(--landing-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.restaurants__suggest {
+  position: relative;
+  margin-top: 2px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.restaurants__suggest-trigger {
+  font-size: 16px;
+}
+
 .section-heading .section-subtitle {
   margin-bottom: 0;
   color: var(--landing-muted);
@@ -8328,9 +8394,38 @@ body:has(.account--sheet-open) {
     padding: 12px;
   }
 
+  .hero__inline-benefits {
+    gap: 14px;
+  }
+
+  .hero__inline-benefit {
+    font-size: 12px;
+    gap: 6px;
+  }
+
+  .hero__inline-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+
   .hero__motto {
     font-size: clamp(14px, 4.9vw, 22px);
     padding: 6px 12px 12px;
+  }
+
+  .restaurants__count {
+    font-size: 12px;
+    padding: 3px 8px;
+  }
+
+  .restaurants__updates {
+    font-size: 12px;
+  }
+
+  .restaurants__suggest-trigger {
+    font-size: 14px;
   }
 
   .theme-switch {

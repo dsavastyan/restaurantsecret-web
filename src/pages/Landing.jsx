@@ -22,7 +22,6 @@ export default function Landing() {
   return (
     <main className={`landing landing--${themeMode}`} data-theme={themeMode}>
       <Hero />
-      <WhyImportant />
       <RestaurantsSection themeMode={themeMode} />
     </main>
   )
@@ -30,18 +29,53 @@ export default function Landing() {
 
 function Hero() {
   const [query, setQuery] = useState('')
-  const [suggestOpen, setSuggestOpen] = useState(false)
-  const searchZoneRef = useRef(null)
 
   useEffect(() => {
     analytics.track('landing_open')
   }, [])
 
+  return (
+    <header className="hero" aria-labelledby="hero-title">
+      <div className="hero__motto-wrap" aria-label="Слоган">
+        <p className="hero__motto">Ешь вкусно, выбирай осознанно</p>
+      </div>
+
+      <h1 id="hero-title" className="hero__title">
+        Все меню ресторанов
+        <br />
+        с КБЖУ и составом
+        <br />
+        блюд
+      </h1>
+
+      <div className="hero__inline-benefits" aria-label="Преимущества">
+        <div className="hero__inline-benefit">
+          <span className="hero__inline-icon" aria-hidden="true">🕓</span>
+          <span className="hero__inline-text">Всё в одном месте</span>
+        </div>
+        <div className="hero__inline-benefit">
+          <span className="hero__inline-icon" aria-hidden="true">🍽️</span>
+          <span className="hero__inline-text">Выбирай в 2 клика, не выходя за цели</span>
+        </div>
+      </div>
+
+      <div className="hero__search">
+        <SearchInput value={query} onChange={setQuery} />
+      </div>
+    </header>
+  )
+}
+
+function RestaurantsSection({ themeMode }) {
+  const [stats, setStats] = useState({ restaurants: 0, points: 0, weeklyAdded: 0 })
+  const [suggestOpen, setSuggestOpen] = useState(false)
+  const suggestZoneRef = useRef(null)
+
   useEffect(() => {
     if (!suggestOpen) return
 
     function handleClickOutside(event) {
-      if (!searchZoneRef.current?.contains(event.target)) {
+      if (!suggestZoneRef.current?.contains(event.target)) {
         setSuggestOpen(false)
       }
     }
@@ -61,65 +95,32 @@ function Hero() {
   }, [suggestOpen])
 
   return (
-    <header className="hero" aria-labelledby="hero-title">
-      <div className="hero__motto-wrap" aria-label="Слоган">
-        <p className="hero__motto">Ешь вкусно, выбирай осознанно</p>
-      </div>
-
-      <h1 id="hero-title" className="hero__title">
-        Все меню ресторанов
-        <br />
-        с КБЖУ и составом
-        <br />
-        блюд
-      </h1>
-
-      <div className="hero__search" ref={searchZoneRef}>
-        <SearchInput value={query} onChange={setQuery} />
-        <button
-          type="button"
-          className="hero__suggest-trigger"
-          onClick={() => setSuggestOpen((prev) => !prev)}
-          aria-expanded={suggestOpen}
-        >
-          Не нашли нужный ресторан или блюдо?
-        </button>
-        {suggestOpen && <SuggestPopover onClose={() => setSuggestOpen(false)} />}
-      </div>
-    </header>
-  )
-}
-
-function WhyImportant() {
-  return (
-    <section className="benefits" aria-label="Преимущества">
-      <div className="container">
-        <ul className="benefits__grid">
-          <li className="benefit-card">
-            <div className="benefit-icon" aria-hidden="true">🕓</div>
-            <div className="benefit-text">Всё в одном месте</div>
-          </li>
-
-          <li className="benefit-card">
-            <div className="benefit-icon" aria-hidden="true">🎯</div>
-            <div className="benefit-text">Выбирай в 2 клика, не выходя за цели</div>
-          </li>
-        </ul>
-      </div>
-    </section>
-  )
-}
-
-function RestaurantsSection({ themeMode }) {
-  return (
     <section className="restaurants" aria-label="Карта ресторанов">
       <div className="container">
         <div className="section-heading">
           <h2 id="restaurants-title" className="section-title">Мы уже собрали меню этих ресторанов</h2>
-          <p className="section-subtitle">Найдите любимое заведение на карте</p>
+          <p className="restaurants__count">{stats.restaurants} ресторанов • {stats.points} точек</p>
+          <p className="restaurants__updates">
+            Постоянное обновление: на этой неделе добавили {stats.weeklyAdded} ресторанов
+          </p>
+          <div className="restaurants__suggest" ref={suggestZoneRef}>
+            <button
+              type="button"
+              className="hero__suggest-trigger restaurants__suggest-trigger"
+              onClick={() => setSuggestOpen((prev) => !prev)}
+              aria-expanded={suggestOpen}
+            >
+              Не нашли нужный ресторан или блюдо?
+            </button>
+            {suggestOpen && <SuggestPopover onClose={() => setSuggestOpen(false)} />}
+          </div>
         </div>
 
-        <RestaurantMap themeMode={themeMode} />
+        <RestaurantMap
+          themeMode={themeMode}
+          showSummaryHeader={false}
+          onStatsChange={setStats}
+        />
 
         <div className="center">
           <Link className="btn btn--outline" to="/restaurants">Показать все списком</Link>

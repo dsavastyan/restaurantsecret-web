@@ -143,7 +143,23 @@ function MapResizeController({ watch }) {
   return null
 }
 
-export default function RestaurantMap({ themeMode = 'day' }) {
+function calculateWeeklyAdded(restaurants) {
+  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+  const recent = new Set()
+
+  for (const item of restaurants) {
+    const createdRaw = item?.created_at ?? item?.createdAt
+    if (!createdRaw) continue
+    const createdMs = Date.parse(createdRaw)
+    if (!Number.isFinite(createdMs) || createdMs < weekAgo) continue
+    const key = item?.restaurantId ?? item?.slug ?? item?.id
+    if (key) recent.add(String(key))
+  }
+
+  return recent.size
+}
+
+export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSummaryHeader = true }) {
   const [restaurants, setRestaurants] = useState([])
   const [loading, setLoading] = useState(true)
   const [metroData, setMetroData] = useState({ lines: [], stations: [] })
@@ -216,6 +232,15 @@ export default function RestaurantMap({ themeMode = 'day' }) {
   }, [filters])
 
   useEffect(() => {
+    if (typeof onStatsChange !== 'function') return
+    onStatsChange({
+      restaurants: uniqueRestaurantCount,
+      points: restaurants.length,
+      weeklyAdded: calculateWeeklyAdded(restaurants),
+    })
+  }, [onStatsChange, restaurants, uniqueRestaurantCount])
+
+  useEffect(() => {
     if (!isFullscreen) return undefined
 
     const previousOverflow = document.body.style.overflow
@@ -235,26 +260,28 @@ export default function RestaurantMap({ themeMode = 'day' }) {
   }, [isFullscreen])
 
   const tileUrl = isNight
-    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+    ? 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
     : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 
   return (
     <div className={`restaurant-map-container ${isNight ? 'is-night' : 'is-day'} ${isFullscreen ? 'is-fullscreen' : ''}`}>
-      <div className="map-header">
-        <div className="header-left">
-          <h3>Карта ресторанов</h3>
-          <span className="badge">{uniqueRestaurantCount} ресторанов • {restaurants.length} точек</span>
+      {showSummaryHeader && (
+        <div className="map-header">
+          <div className="header-left">
+            <h3>Карта ресторанов</h3>
+            <span className="badge">{uniqueRestaurantCount} ресторанов • {restaurants.length} точек</span>
+          </div>
+          <div className="header-actions">
+            <button
+              type="button"
+              className="map-expand-btn"
+              onClick={() => setIsFullscreen((prev) => !prev)}
+            >
+              {isFullscreen ? 'Свернуть карту' : 'Развернуть карту'}
+            </button>
+          </div>
         </div>
-        <div className="header-actions">
-          <button
-            type="button"
-            className="map-expand-btn"
-            onClick={() => setIsFullscreen((prev) => !prev)}
-          >
-            {isFullscreen ? 'Свернуть карту' : 'На карте'}
-          </button>
-        </div>
-      </div>
+      )}
 
       {isFullscreen && (
         <div className="filters-row">
@@ -277,6 +304,24 @@ export default function RestaurantMap({ themeMode = 'day' }) {
       )}
 
       <div className="map-wrapper">
+        {!isFullscreen && !showSummaryHeader && (
+          <button
+            type="button"
+            className="map-expand-btn map-expand-btn--overlay"
+            onClick={() => setIsFullscreen(true)}
+          >
+            Развернуть карту
+          </button>
+        )}
+        {isFullscreen && !showSummaryHeader && (
+          <button
+            type="button"
+            className="map-expand-btn map-expand-btn--overlay"
+            onClick={() => setIsFullscreen(false)}
+          >
+            Свернуть карту
+          </button>
+        )}
         {loading && <div className="map-overlay">Загрузка...</div>}
         {!isDefaultView && (
           <button
@@ -313,17 +358,6 @@ export default function RestaurantMap({ themeMode = 'day' }) {
           <ClusterLayer restaurants={restaurants} />
         </MapContainer>
       </div>
-
-      {isFullscreen && (
-        <button
-          type="button"
-          className="fullscreen-close"
-          onClick={() => setIsFullscreen(false)}
-          aria-label="Закрыть полноэкранную карту"
-        >
-          ×
-        </button>
-      )}
 
       <style>{`
         .restaurant-map-container {
@@ -383,6 +417,14 @@ export default function RestaurantMap({ themeMode = 'day' }) {
           cursor: pointer;
         }
 
+        .map-expand-btn--overlay {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          z-index: 1002;
+          box-shadow: 0 8px 22px rgba(15, 23, 42, 0.18);
+        }
+
         .restaurant-map-container.is-night .map-expand-btn {
           background: #0f172a;
           border-color: #334155;
@@ -416,6 +458,10 @@ export default function RestaurantMap({ themeMode = 'day' }) {
         .map-wrapper {
           position: relative;
           border-top: 1px solid var(--line, #e2e8f0);
+        }
+
+        .restaurant-map-container > .map-wrapper:first-child {
+          border-top: 0;
         }
 
         .restaurant-map-container.is-night .map-wrapper {
@@ -513,22 +559,6 @@ export default function RestaurantMap({ themeMode = 'day' }) {
 
         .restaurant-map-container.is-fullscreen .restaurant-map {
           height: calc(100dvh - 110px);
-        }
-
-        .fullscreen-close {
-          position: fixed;
-          top: 12px;
-          right: 12px;
-          z-index: 1500;
-          width: 40px;
-          height: 40px;
-          border-radius: 999px;
-          border: 1px solid rgba(148, 163, 184, 0.35);
-          background: rgba(15, 23, 42, 0.9);
-          color: #fff;
-          font-size: 26px;
-          line-height: 1;
-          cursor: pointer;
         }
 
         @media (max-width: 768px) {
