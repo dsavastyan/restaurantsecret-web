@@ -113,7 +113,6 @@ export default function OnboardingWelcomePage() {
         <section className="intro__panel" aria-labelledby="intro-title">
           <div className="intro__brand">
             <img src={logoIcon} alt="" className="intro__logo" aria-hidden="true" />
-            <div className="intro__brand-badge" aria-hidden="true" />
           </div>
 
           <h1 id="intro-title" className="intro__title">
