@@ -121,12 +121,8 @@ export default function OnboardingWelcomePage() {
           </h1>
 
           <p className="intro__subtitle">
-            <span className="intro__subtitle-mobile">Я помогу тебе:</span>
-            <span className="intro__subtitle-desktop">
-              Чтобы я был тебе более полезен,
-              <br />
-              расскажи о себе
-            </span>
+            <span className="intro__subtitle-mobile">Я помогу тебе</span>
+            <span className="intro__subtitle-desktop">Я помогу тебе</span>
           </p>
 
           <ul className="intro__benefits" aria-label="Преимущества сервиса">
