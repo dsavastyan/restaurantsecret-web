@@ -1,386 +1,561 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { AttributionControl, MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet';
-import { useNavigate } from 'react-router-dom';
-import 'leaflet/dist/leaflet.css';
-import 'leaflet.markercluster/dist/MarkerCluster.css';
-import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
-import L from 'leaflet';
-import 'leaflet.markercluster'; // Attaches L.markerClusterGroup
-import { API_BASE } from '@/config/api';
-import MetroFilter from './MetroFilter';
-import MapCuisineFilter from './MapCuisineFilter';
+import { useEffect, useState, useRef, useCallback } from 'react'
+import { AttributionControl, MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet'
+import { useNavigate } from 'react-router-dom'
+import 'leaflet/dist/leaflet.css'
+import 'leaflet.markercluster/dist/MarkerCluster.css'
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
+import L from 'leaflet'
+import 'leaflet.markercluster'
+import { API_BASE } from '@/config/api'
+import MetroFilter from './MetroFilter'
+import MapCuisineFilter from './MapCuisineFilter'
 
-// Fix for default marker icons
-delete L.Icon.Default.prototype._getIconUrl;
+delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+})
 
-const defaultCenter = [55.751244, 37.618423]; // Moscow
-const defaultZoom = 10;
+const defaultCenter = [55.751244, 37.618423]
+const defaultZoom = 10
 
 function normalizeInstagramUrl(rawUrl) {
-    if (!rawUrl) return null;
-    const text = String(rawUrl).trim();
-    if (!text || text === '-' || text === '—') return null;
+  if (!rawUrl) return null
+  const text = String(rawUrl).trim()
+  if (!text || text === '-' || text === '—') return null
 
-    const withProtocol = /^https?:\/\//i.test(text) ? text : `https://${text.replace(/^\/+/, '')}`;
-    try {
-        const url = new URL(withProtocol);
-        const host = url.hostname.replace(/^www\./i, '').toLowerCase();
-        if (!host.endsWith('instagram.com')) return null;
-        return url.toString();
-    } catch (_) {
-        return null;
-    }
+  const withProtocol = /^https?:\/\//i.test(text) ? text : `https://${text.replace(/^\/+/, '')}`
+  try {
+    const url = new URL(withProtocol)
+    const host = url.hostname.replace(/^www\./i, '').toLowerCase()
+    if (!host.endsWith('instagram.com')) return null
+    return url.toString()
+  } catch (_) {
+    return null
+  }
 }
 
-// Inner component to handle clustering logic via map instance access
 function ClusterLayer({ restaurants }) {
-    const map = useMap();
-    const clusterGroupRef = useRef(null);
-    const navigate = useNavigate(); // Hook for navigation
+  const map = useMap()
+  const clusterGroupRef = useRef(null)
+  const navigate = useNavigate()
 
-    useEffect(() => {
-        // Initialize cluster group if not exists
-        if (!clusterGroupRef.current) {
-            clusterGroupRef.current = L.markerClusterGroup({ chunkedLoading: true });
-            map.addLayer(clusterGroupRef.current);
+  useEffect(() => {
+    if (!clusterGroupRef.current) {
+      clusterGroupRef.current = L.markerClusterGroup({ chunkedLoading: true })
+      map.addLayer(clusterGroupRef.current)
+    }
+
+    const group = clusterGroupRef.current
+    group.clearLayers()
+
+    const markers = restaurants
+      .filter((r) => Number.isFinite(Number(r.lat)) && Number.isFinite(Number(r.lon)))
+      .map((r) => {
+        const marker = L.marker([Number(r.lat), Number(r.lon)])
+        const instagramUrl = normalizeInstagramUrl(r.instagramUrl)
+        const instagramLink = instagramUrl
+          ? `<a href="${instagramUrl}" target="_blank" rel="noopener noreferrer" class="popup-instagram" title="Instagram">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm11.5 1.8a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+              </svg>
+            </a>`
+          : ''
+
+        const popupContent = document.createElement('div')
+        popupContent.className = 'map-popup'
+        popupContent.innerHTML = `
+          <strong>${r.name}</strong><br/>
+          ${r.cuisine || ''}<br/>
+          <div class="popup-links">
+            <a href="/r/${r.slug}/menu" class="popup-link">Перейти к меню</a>
+            ${instagramLink}
+          </div>
+        `
+
+        const link = popupContent.querySelector('.popup-link')
+        if (link) {
+          link.addEventListener('click', (e) => {
+            e.preventDefault()
+            navigate(`/r/${r.slug}/menu`)
+          })
         }
 
-        const group = clusterGroupRef.current;
-        group.clearLayers();
+        marker.bindPopup(popupContent)
+        return marker
+      })
 
-        // Create markers and add to cluster group
-        const markers = restaurants
-            .filter((r) => Number.isFinite(Number(r.lat)) && Number.isFinite(Number(r.lon)))
-            .map(r => {
-                const marker = L.marker([Number(r.lat), Number(r.lon)]);
-                const instagramUrl = normalizeInstagramUrl(r.instagramUrl);
-                const instagramLink = instagramUrl
-                    ? `<a href="${instagramUrl}" target="_blank" rel="noopener noreferrer" class="popup-instagram" title="Instagram">
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm11.5 1.8a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
-                        </svg>
-                      </a>`
-                    : '';
+    group.addLayers(markers)
+  }, [map, restaurants, navigate])
 
-                const popupContent = document.createElement('div');
-                popupContent.className = 'map-popup';
-                popupContent.innerHTML = `
-                <strong>${r.name}</strong><br/>
-                ${r.cuisine || ''}<br/>
-                <div class="popup-links">
-                    <a href="/r/${r.slug}/menu" class="popup-link">Перейти к меню</a>
-                    ${instagramLink}
-                </div>
-            `;
+  useEffect(() => {
+    return () => {
+      if (clusterGroupRef.current) {
+        map.removeLayer(clusterGroupRef.current)
+      }
+    }
+  }, [map])
 
-                // Using event delegation or attaching handler to element
-                const link = popupContent.querySelector('.popup-link');
-                if (link) {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        // Use React Router navigation
-                        const targetPath = `/r/${r.slug}/menu`;
-                        navigate(targetPath);
-                    });
-                }
-
-                marker.bindPopup(popupContent);
-                return marker;
-            });
-
-        group.addLayers(markers);
-
-    }, [map, restaurants, navigate]);
-
-    // Cleanup entirely on unmount
-    useEffect(() => {
-        return () => {
-            if (clusterGroupRef.current) {
-                map.removeLayer(clusterGroupRef.current);
-            }
-        };
-    }, [map]);
-
-    return null;
+  return null
 }
 
 function MapViewportController({ focusTarget }) {
-    const map = useMap();
+  const map = useMap()
 
-    useEffect(() => {
-        if (!focusTarget) return;
-        const nextZoom = Number.isFinite(focusTarget.zoom) ? focusTarget.zoom : 13;
-        map.flyTo([focusTarget.lat, focusTarget.lon], nextZoom, { duration: 0.8 });
-    }, [map, focusTarget]);
+  useEffect(() => {
+    if (!focusTarget) return
+    const nextZoom = Number.isFinite(focusTarget.zoom) ? focusTarget.zoom : 13
+    map.flyTo([focusTarget.lat, focusTarget.lon], nextZoom, { duration: 0.8 })
+  }, [map, focusTarget])
 
-    return null;
+  return null
 }
 
 function ViewportChangeListener({ onViewportChange }) {
-    const map = useMapEvents({
-        moveend: () => {
-            const center = map.getCenter();
-            onViewportChange({ lat: center.lat, lon: center.lng, zoom: map.getZoom() });
-        },
-        zoomend: () => {
-            const center = map.getCenter();
-            onViewportChange({ lat: center.lat, lon: center.lng, zoom: map.getZoom() });
-        }
-    });
+  const map = useMapEvents({
+    moveend: () => {
+      const center = map.getCenter()
+      onViewportChange({ lat: center.lat, lon: center.lng, zoom: map.getZoom() })
+    },
+    zoomend: () => {
+      const center = map.getCenter()
+      onViewportChange({ lat: center.lat, lon: center.lng, zoom: map.getZoom() })
+    },
+  })
 
-    useEffect(() => {
-        const center = map.getCenter();
-        onViewportChange({ lat: center.lat, lon: center.lng, zoom: map.getZoom() });
-    }, [map, onViewportChange]);
+  useEffect(() => {
+    const center = map.getCenter()
+    onViewportChange({ lat: center.lat, lon: center.lng, zoom: map.getZoom() })
+  }, [map, onViewportChange])
 
-    return null;
+  return null
 }
 
-export default function RestaurantMap() {
-    const [restaurants, setRestaurants] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [metroData, setMetroData] = useState({ lines: [], stations: [] });
-    const [cuisines, setCuisines] = useState([]);
-    const [filters, setFilters] = useState({ cuisines: [] });
-    const [focusTarget, setFocusTarget] = useState(null);
-    const [isDefaultView, setIsDefaultView] = useState(true);
-    const uniqueRestaurantCount = new Set(restaurants.map((item) => item.slug)).size;
+function MapResizeController({ watch }) {
+  const map = useMap()
 
-    const handleViewportChange = useCallback(({ lat, lon, zoom }) => {
-        const sameZoom = Math.abs(zoom - defaultZoom) < 0.01;
-        const sameLat = Math.abs(lat - defaultCenter[0]) < 0.001;
-        const sameLon = Math.abs(lon - defaultCenter[1]) < 0.001;
-        setIsDefaultView(sameZoom && sameLat && sameLon);
-    }, []);
+  useEffect(() => {
+    const id = window.setTimeout(() => map.invalidateSize(), 120)
+    return () => window.clearTimeout(id)
+  }, [map, watch])
 
-    useEffect(() => {
-        // Fetch metro data once
-        async function fetchMetro() {
-            try {
-                const res = await fetch(`${API_BASE}/metro`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setMetroData(data);
-                }
-            } catch (err) {
-                console.error("Failed to load metro data", err);
-            }
+  return null
+}
+
+export default function RestaurantMap({ themeMode = 'day' }) {
+  const [restaurants, setRestaurants] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [metroData, setMetroData] = useState({ lines: [], stations: [] })
+  const [cuisines, setCuisines] = useState([])
+  const [filters, setFilters] = useState({ cuisines: [] })
+  const [focusTarget, setFocusTarget] = useState(null)
+  const [isDefaultView, setIsDefaultView] = useState(true)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const uniqueRestaurantCount = new Set(restaurants.map((item) => item.slug)).size
+  const isNight = themeMode === 'night'
+
+  const handleViewportChange = useCallback(({ lat, lon, zoom }) => {
+    const sameZoom = Math.abs(zoom - defaultZoom) < 0.01
+    const sameLat = Math.abs(lat - defaultCenter[0]) < 0.001
+    const sameLon = Math.abs(lon - defaultCenter[1]) < 0.001
+    setIsDefaultView(sameZoom && sameLat && sameLon)
+  }, [])
+
+  useEffect(() => {
+    async function fetchMetro() {
+      try {
+        const res = await fetch(`${API_BASE}/metro`)
+        if (res.ok) {
+          const data = await res.json()
+          setMetroData(data)
         }
-        fetchMetro();
+      } catch (err) {
+        console.error('Failed to load metro data', err)
+      }
+    }
 
-        // Fetch cuisines once
-        async function fetchCuisines() {
-            try {
-                const res = await fetch(`${API_BASE}/filters`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setCuisines(data.cuisines || []);
-                }
-            } catch (err) {
-                console.error("Failed to load cuisines data", err);
-            }
+    async function fetchCuisines() {
+      try {
+        const res = await fetch(`${API_BASE}/filters`)
+        if (res.ok) {
+          const data = await res.json()
+          setCuisines(data.cuisines || [])
         }
-        fetchCuisines();
-    }, []);
+      } catch (err) {
+        console.error('Failed to load cuisines data', err)
+      }
+    }
 
-    useEffect(() => {
-        async function fetchRestaurants() {
-            setLoading(true);
-            try {
-                const params = new URLSearchParams();
-                if (filters.cuisines && filters.cuisines.length > 0) {
-                    filters.cuisines.forEach(cuisine => params.append('cuisine', cuisine));
-                }
+    fetchMetro()
+    fetchCuisines()
+  }, [])
 
-                const res = await fetch(`${API_BASE}/restaurants/map?${params.toString()}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setRestaurants(data.items || []);
-                }
-            } catch (err) {
-                console.error("Failed to load map data", err);
-            } finally {
-                setLoading(false);
-            }
+  useEffect(() => {
+    async function fetchRestaurants() {
+      setLoading(true)
+      try {
+        const params = new URLSearchParams()
+        if (filters.cuisines && filters.cuisines.length > 0) {
+          filters.cuisines.forEach((cuisine) => params.append('cuisine', cuisine))
         }
-        fetchRestaurants();
-    }, [filters]);
 
-    return (
-        <div className="restaurant-map-container">
-            <div className="map-header">
-                <div className="header-left">
-                    <h3>Карта ресторанов</h3>
-                    <span className="badge">{uniqueRestaurantCount} ресторанов • {restaurants.length} точек</span>
-                </div>
-            </div>
+        const res = await fetch(`${API_BASE}/restaurants/map?${params.toString()}`)
+        if (res.ok) {
+          const data = await res.json()
+          setRestaurants(data.items || [])
+        }
+      } catch (err) {
+        console.error('Failed to load map data', err)
+      } finally {
+        setLoading(false)
+      }
+    }
 
-            <div className="filters-row">
-                <MetroFilter
-                    metroData={metroData}
-                    onJumpToStation={(station) => setFocusTarget({
-                        lat: station.lat,
-                        lon: station.lon,
-                        key: `${station.name_ru}-${Date.now()}`
-                    })}
-                />
-                <MapCuisineFilter
-                    cuisines={cuisines}
-                    selectedCuisines={filters.cuisines}
-                    onChange={(f) => setFilters({ ...filters, cuisines: f.cuisines })}
-                />
-            </div>
+    fetchRestaurants()
+  }, [filters])
 
-            <div className="map-wrapper">
-                {loading && <div className="map-overlay">Загрузка...</div>}
-                {!isDefaultView && (
-                    <button
-                        type="button"
-                        className="show-city-btn"
-                        onClick={() => setFocusTarget({
-                            lat: defaultCenter[0],
-                            lon: defaultCenter[1],
-                            zoom: defaultZoom,
-                            key: `default-${Date.now()}`
-                        })}
-                    >
-                        Показать весь город
-                    </button>
-                )}
-                <MapContainer
-                    center={defaultCenter}
-                    zoom={defaultZoom}
-                    scrollWheelZoom={false}
-                    className="restaurant-map"
-                    attributionControl={false}
-                >
-                    <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
-                    <AttributionControl prefix={false} />
-                    <MapViewportController focusTarget={focusTarget} />
-                    <ViewportChangeListener onViewportChange={handleViewportChange} />
-                    <ClusterLayer restaurants={restaurants} />
-                </MapContainer>
-            </div>
+  useEffect(() => {
+    if (!isFullscreen) return undefined
 
-            <style>{`
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsFullscreen(false)
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [isFullscreen])
+
+  const tileUrl = isNight
+    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+
+  return (
+    <div className={`restaurant-map-container ${isNight ? 'is-night' : 'is-day'} ${isFullscreen ? 'is-fullscreen' : ''}`}>
+      <div className="map-header">
+        <div className="header-left">
+          <h3>Карта ресторанов</h3>
+          <span className="badge">{uniqueRestaurantCount} ресторанов • {restaurants.length} точек</span>
+        </div>
+        <div className="header-actions">
+          <button
+            type="button"
+            className="map-expand-btn"
+            onClick={() => setIsFullscreen((prev) => !prev)}
+          >
+            {isFullscreen ? 'Свернуть карту' : 'На карте'}
+          </button>
+        </div>
+      </div>
+
+      {isFullscreen && (
+        <div className="filters-row">
+          <MetroFilter
+            metroData={metroData}
+            onJumpToStation={(station) =>
+              setFocusTarget({
+                lat: station.lat,
+                lon: station.lon,
+                key: `${station.name_ru}-${Date.now()}`,
+              })
+            }
+          />
+          <MapCuisineFilter
+            cuisines={cuisines}
+            selectedCuisines={filters.cuisines}
+            onChange={(f) => setFilters({ ...filters, cuisines: f.cuisines })}
+          />
+        </div>
+      )}
+
+      <div className="map-wrapper">
+        {loading && <div className="map-overlay">Загрузка...</div>}
+        {!isDefaultView && (
+          <button
+            type="button"
+            className="show-city-btn"
+            onClick={() =>
+              setFocusTarget({
+                lat: defaultCenter[0],
+                lon: defaultCenter[1],
+                zoom: defaultZoom,
+                key: `default-${Date.now()}`,
+              })
+            }
+          >
+            Показать весь город
+          </button>
+        )}
+
+        <MapContainer
+          center={defaultCenter}
+          zoom={defaultZoom}
+          scrollWheelZoom={isFullscreen}
+          className="restaurant-map"
+          attributionControl={false}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url={tileUrl}
+          />
+          <AttributionControl prefix={false} />
+          <MapViewportController focusTarget={focusTarget} />
+          <ViewportChangeListener onViewportChange={handleViewportChange} />
+          <MapResizeController watch={`${isFullscreen}-${themeMode}`} />
+          <ClusterLayer restaurants={restaurants} />
+        </MapContainer>
+      </div>
+
+      {isFullscreen && (
+        <button
+          type="button"
+          className="fullscreen-close"
+          onClick={() => setIsFullscreen(false)}
+          aria-label="Закрыть полноэкранную карту"
+        >
+          ×
+        </button>
+      )}
+
+      <style>{`
         .restaurant-map-container {
-          margin-top: 24px;
+          margin-top: 12px;
           border-radius: 16px;
           overflow: hidden;
-          border: 1px solid var(--line);
-          background: #fff;
+          border: 1px solid var(--line, #e2e8f0);
+          background: var(--card, #fff);
+          position: relative;
         }
+
+        .restaurant-map-container.is-night {
+          background: #10141b;
+          border-color: rgba(148, 163, 184, 0.24);
+        }
+
         .map-header {
-          padding: 16px;
+          padding: 10px 12px;
           display: flex;
           justify-content: space-between;
           align-items: center;
+          gap: 10px;
         }
+
         .header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          min-width: 0;
         }
-        .map-header h3 { margin: 0; font-size: 18px; }
+
+        .map-header h3 {
+          margin: 0;
+          font-size: 15px;
+          white-space: nowrap;
+        }
+
+        .restaurant-map-container.is-night .map-header h3 {
+          color: #e2e8f0;
+        }
+
+        .header-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-shrink: 0;
+        }
+
+        .map-expand-btn {
+          border: 1px solid #cbd5e1;
+          background: #fff;
+          color: #0f172a;
+          border-radius: 10px;
+          font-size: 13px;
+          font-weight: 700;
+          padding: 8px 12px;
+          cursor: pointer;
+        }
+
+        .restaurant-map-container.is-night .map-expand-btn {
+          background: #0f172a;
+          border-color: #334155;
+          color: #e2e8f0;
+        }
+
         .filters-row {
           display: flex;
           flex-wrap: wrap;
-          gap: 12px;
+          gap: 10px;
+          padding: 0 10px 10px;
           align-items: flex-start;
         }
-        @media (max-width: 768px) {
-          .filters-row {
-            flex-direction: column;
-          }
-          .metro-filter-container,
-          .cuisine-filter-container {
-            width: calc(100% - 32px) !important;
-          }
+
+        .filters-row .metro-filter-container,
+        .filters-row .cuisine-filter-container {
+          margin: 0 !important;
+          width: 260px;
         }
+
         .badge {
-          background: var(--brand);
+          background: var(--brand, #2f8f5b);
           color: #fff;
-          padding: 4px 8px;
+          padding: 3px 8px;
           border-radius: 8px;
           font-size: 12px;
           font-weight: 600;
+          white-space: nowrap;
         }
+
         .map-wrapper {
-            position: relative;
-            border-top: 1px solid var(--line);
+          position: relative;
+          border-top: 1px solid var(--line, #e2e8f0);
         }
+
+        .restaurant-map-container.is-night .map-wrapper {
+          border-top-color: rgba(148, 163, 184, 0.24);
+        }
+
         .map-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.7);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(255, 255, 255, 0.65);
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 600;
         }
+
         .show-city-btn {
-            position: absolute;
-            top: 14px;
-            right: 14px;
-            z-index: 1001;
-            border: 1px solid #cbd5e1;
-            background: #fff;
-            color: #0f172a;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 700;
-            padding: 9px 12px;
-            cursor: pointer;
-            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
-            transition: all 0.2s ease;
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          z-index: 1001;
+          border: 1px solid #cbd5e1;
+          background: #fff;
+          color: #0f172a;
+          border-radius: 10px;
+          font-size: 13px;
+          font-weight: 700;
+          padding: 8px 10px;
+          cursor: pointer;
+          box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
         }
-        .show-city-btn:hover {
-            border-color: var(--rs-accent, #2f8f5b);
-            color: var(--rs-accent, #2f8f5b);
-        }
+
         .restaurant-map {
-          height: 500px;
+          height: min(34dvh, 320px);
           width: 100%;
-          z-index: 1; 
+          z-index: 1;
         }
+
         .map-popup {
-            font-size: 14px;
-            text-align: center;
+          font-size: 14px;
+          text-align: center;
         }
+
         .popup-link {
-          color: var(--brand);
+          color: var(--brand, #2f8f5b);
           font-weight: 600;
           text-decoration: none;
           display: inline-flex;
           margin-top: 4px;
         }
+
         .popup-links {
           margin-top: 4px;
           display: inline-flex;
           align-items: center;
           gap: 8px;
         }
+
         .popup-instagram {
           display: inline-flex;
           width: 18px;
           height: 18px;
           color: #e1306c;
         }
+
         .popup-instagram svg {
           width: 18px;
           height: 18px;
           fill: currentColor;
         }
+
+        .restaurant-map-container.is-fullscreen {
+          position: fixed;
+          inset: 0;
+          z-index: 1400;
+          border-radius: 0;
+          border: none;
+          margin: 0;
+        }
+
+        .restaurant-map-container.is-fullscreen .restaurant-map {
+          height: calc(100dvh - 110px);
+        }
+
+        .fullscreen-close {
+          position: fixed;
+          top: 12px;
+          right: 12px;
+          z-index: 1500;
+          width: 40px;
+          height: 40px;
+          border-radius: 999px;
+          border: 1px solid rgba(148, 163, 184, 0.35);
+          background: rgba(15, 23, 42, 0.9);
+          color: #fff;
+          font-size: 26px;
+          line-height: 1;
+          cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+          .map-header {
+            padding: 8px 10px;
+          }
+
+          .map-header h3 {
+            font-size: 14px;
+          }
+
+          .badge {
+            font-size: 11px;
+          }
+
+          .map-expand-btn {
+            font-size: 12px;
+            padding: 7px 10px;
+          }
+
+          .filters-row {
+            flex-direction: column;
+          }
+
+          .filters-row .metro-filter-container,
+          .filters-row .cuisine-filter-container {
+            width: 100%;
+          }
+
+          .restaurant-map {
+            height: min(30dvh, 260px);
+          }
+
+          .restaurant-map-container.is-fullscreen .restaurant-map {
+            height: calc(100dvh - 170px);
+          }
+        }
       `}</style>
-        </div>
-    );
+    </div>
+  )
 }
