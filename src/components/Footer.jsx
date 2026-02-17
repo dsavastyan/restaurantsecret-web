@@ -53,9 +53,10 @@ export default function Footer() {
             </Link>
           </nav>
 
-          <div className="site-footer__copy">© {year} RestaurantSecret</div>
-          <div className="site-footer__legal">
-            Самозанятое лицо (НПД), Савастьян Дарья, ИНН 771007750946
+          <div className="site-footer__meta">
+            <span className="site-footer__copy">© {year} RestaurantSecret</span>
+            <span className="site-footer__dot" aria-hidden="true">•</span>
+            <span className="site-footer__legal">Самозанятое лицо (НПД), Савастьян Дарья, ИНН 771007750946</span>
           </div>
         </div>
       </footer>

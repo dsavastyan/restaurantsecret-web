@@ -170,6 +170,7 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
   const [isFullscreen, setIsFullscreen] = useState(false)
   const uniqueRestaurantCount = new Set(restaurants.map((item) => item.slug)).size
   const isNight = themeMode === 'night'
+  const hasOverlayExpandButton = !isFullscreen && !showSummaryHeader
 
   const handleViewportChange = useCallback(({ lat, lon, zoom }) => {
     const sameZoom = Math.abs(zoom - defaultZoom) < 0.01
@@ -326,7 +327,7 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
         {!isDefaultView && (
           <button
             type="button"
-            className="show-city-btn"
+            className={`show-city-btn ${hasOverlayExpandButton ? 'show-city-btn--stacked' : ''}`}
             onClick={() =>
               setFocusTarget({
                 lat: defaultCenter[0],
@@ -496,6 +497,10 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
           padding: 8px 10px;
           cursor: pointer;
           box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+        }
+
+        .show-city-btn--stacked {
+          top: 54px;
         }
 
         .restaurant-map-container.is-night .map-overlay {
