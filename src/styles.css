@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Playfair+Display:wght@600&display=swap");
+
 /* Global stylesheet for the RestaurantSecret web app. Most selectors target
    layout primitives, paywall, and the landing page hero. */
 :root {
@@ -6658,6 +6660,7 @@ body:has(.account--sheet-open) {
   text-align: center;
   letter-spacing: 0.3px;
   line-height: 1.1;
+  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
 }
 
 .login__subtitle {
@@ -6667,6 +6670,7 @@ body:has(.account--sheet-open) {
   text-align: center;
   line-height: 1.2;
   max-width: 292px;
+  font-family: "Caveat", "Segoe Script", cursive;
 }
 
 .login__alert {
@@ -6784,6 +6788,12 @@ body:has(.account--sheet-open) {
   color: rgba(246, 249, 255, 0.95);
 }
 
+.login__otp-wrap .login__input::placeholder {
+  letter-spacing: 0.1px;
+  font-size: 17px;
+  color: rgba(228, 233, 246, 0.76);
+}
+
 .login__input:focus {
   outline: none;
   border-color: rgba(173, 255, 193, 0.95);
@@ -6896,8 +6906,35 @@ body:has(.account--sheet-open) {
   }
 
   .login__card {
-    max-width: 500px;
-    padding: 78px 0 0;
+    width: min(90vw, 780px);
+    max-width: 780px;
+    min-height: 500px;
+    padding: 44px 56px;
+    border: 1px solid rgba(226, 242, 255, 0.2);
+    border-radius: 26px;
+    background: linear-gradient(180deg, rgba(14, 18, 34, 0.2) 0%, rgba(7, 10, 22, 0.34) 100%);
+    box-shadow:
+      0 28px 56px rgba(0, 0, 0, 0.35),
+      0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .login__card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(202, 247, 229, 0.24), rgba(220, 241, 255, 0.08) 42%, rgba(223, 248, 172, 0.16));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    display: block;
   }
 
   .login__brand {
@@ -6914,20 +6951,29 @@ body:has(.account--sheet-open) {
   }
 
   .login__title {
-    font-size: 56px;
-    line-height: 1;
+    font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+    font-size: 66px;
+    line-height: 1.12;
+    margin-top: 8px;
+    margin-bottom: 0;
+    text-shadow:
+      0 2px 0 rgba(255, 255, 255, 0.12),
+      0 10px 22px rgba(0, 0, 0, 0.42),
+      0 0 18px rgba(190, 225, 214, 0.18);
   }
 
   .login__subtitle {
-    font-size: 18px;
-    max-width: 420px;
-    margin-bottom: 18px;
+    font-size: 26px;
+    max-width: 520px;
+    margin-top: 10px;
+    margin-bottom: 34px;
+    line-height: 1.1;
   }
 
   .login__form {
-    max-width: 430px;
-    margin: 0 auto;
-    gap: 10px;
+    width: min(100%, 500px);
+    margin: 0;
+    gap: 12px;
   }
 
   .login__input {
@@ -6939,6 +6985,10 @@ body:has(.account--sheet-open) {
   .login__otp-wrap .login__input {
     font-size: 32px;
     letter-spacing: 22px;
+  }
+
+  .login__otp-wrap .login__input::placeholder {
+    font-size: 24px;
   }
 
   .login__submit {
