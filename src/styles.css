@@ -6620,7 +6620,7 @@ body:has(.account--sheet-open) {
   margin: 0 auto;
   border: none;
   background: transparent;
-  padding: 64px 0 0;
+  padding: 56px 0 0;
   box-shadow: none;
   backdrop-filter: none;
 }
@@ -6633,21 +6633,21 @@ body:has(.account--sheet-open) {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   margin: 0;
 }
 
 .login__brand-icon {
-  width: 36px;
-  height: 36px;
+  width: 26px;
+  height: 26px;
   object-fit: contain;
 }
 
 .login__brand-name {
-  font-size: 28px;
+  font-size: 20px;
   line-height: 1;
   color: rgba(244, 246, 255, 0.96);
-  letter-spacing: -0.2px;
+  letter-spacing: -0.1px;
 }
 
 .login__title {
@@ -6692,7 +6692,7 @@ body:has(.account--sheet-open) {
 
 .login__home {
   position: absolute;
-  top: 18px;
+  top: 20px;
   left: 16px;
   z-index: 2;
   width: 36px;
@@ -6725,7 +6725,7 @@ body:has(.account--sheet-open) {
 
 .login__brand-block {
   position: absolute;
-  top: 16%;
+  top: 20px;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
@@ -6887,17 +6887,17 @@ body:has(.account--sheet-open) {
   }
 
   .login__brand-block {
-    top: 20%;
+    top: 20px;
   }
 
   .login__home {
-    top: 22px;
+    top: 20px;
     left: 24px;
   }
 
   .login__card {
     max-width: 500px;
-    padding: 92px 0 0;
+    padding: 78px 0 0;
   }
 
   .login__brand {
@@ -6905,12 +6905,12 @@ body:has(.account--sheet-open) {
   }
 
   .login__brand-icon {
-    width: 44px;
-    height: 44px;
+    width: 30px;
+    height: 30px;
   }
 
   .login__brand-name {
-    font-size: 52px;
+    font-size: 22px;
   }
 
   .login__title {
