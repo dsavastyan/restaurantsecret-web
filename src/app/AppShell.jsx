@@ -8,6 +8,7 @@ import DishCardModal from '@/components/DishCardModal'
 import Footer from '@/components/Footer.jsx'
 import { PD_API_BASE } from '@/config/api'
 import { isOnboardingPendingForToken } from '@/lib/onboarding'
+import { isMoscowDaytime } from '@/lib/moscowDaytime'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
 
@@ -50,6 +51,7 @@ export default function AppShell() {
     }
   })
   const [searchQuery, setSearchQuery] = useState('')
+  const [isDayTheme, setIsDayTheme] = useState(() => isMoscowDaytime())
   const lastAccessEventRef = useRef(null)
 
   // Merge new access info into state. A falsy value resets to defaults.
@@ -224,6 +226,21 @@ export default function AppShell() {
     })
   }, [accessToken, isLoginPage, isOnboardingPage, location.pathname, location.search, navigate])
 
+  // Sync global UI theme by Moscow sunrise/sunset and expose it via html/body dataset.
+  useEffect(() => {
+    const applyTheme = () => {
+      const day = isMoscowDaytime()
+      setIsDayTheme(day)
+      const theme = day ? 'day' : 'night'
+      document.documentElement.setAttribute('data-rs-theme', theme)
+      document.body.setAttribute('data-rs-theme', theme)
+    }
+
+    applyTheme()
+    const id = window.setInterval(applyTheme, 60000)
+    return () => window.clearInterval(id)
+  }, [])
+
   const showGlobalSearch = useMemo(() => {
     const allowedPrefixes = ['/catalog', '/app']
     const matchesPrefix = allowedPrefixes.some((prefix) =>
@@ -240,7 +257,7 @@ export default function AppShell() {
   }, [location.pathname])
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className={`min-h-screen flex flex-col app-theme app-theme--${isDayTheme ? 'day' : 'night'}`}>
       {!isImmersivePage && <NavBar />}
       <DishCardModal />
       <main className="flex-1">

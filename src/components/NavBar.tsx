@@ -10,7 +10,7 @@ export default function NavBar() {
   return (
     <header className="navbar">
       <div className="navbar__inner">
-        <div className="navbar__brand-group">
+        <div className="navbar__left">
           <Link to="/" className="navbar__home" aria-label="На главную">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path
@@ -19,23 +19,27 @@ export default function NavBar() {
               />
             </svg>
           </Link>
-          <Link to="/" className="navbar__brand">
-            RestaurantSecret
-          </Link>
         </div>
 
-        {token && !location.pathname.startsWith("/account") && (
-          <AccountButton />
-        )}
-        {!token && (
-          <Link
-            to="/login"
-            state={{ from: location.pathname + location.search }}
-            className="btn btn--primary"
-          >
-            Войти
-          </Link>
-        )}
+        <Link to="/" className="navbar__brand navbar__brand--center">
+          <img src="/assets/logo.png" alt="" className="navbar__logo" aria-hidden="true" />
+          <span>RestaurantSecret</span>
+        </Link>
+
+        <div className="navbar__right">
+          {token && !location.pathname.startsWith("/account") && (
+            <AccountButton />
+          )}
+          {!token && (
+            <Link
+              to="/login"
+              state={{ from: location.pathname + location.search }}
+              className="btn btn--primary"
+            >
+              Войти
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   );

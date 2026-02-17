@@ -131,8 +131,8 @@ export default function MetroFilter({ metroData, onJumpToStation }) {
                     justify-content: space-between;
                     align-items: center;
                     padding: 10px 14px;
-                    background: #fff;
-                    border: 1px solid #e2e8f0;
+                    background: var(--app-surface, #fff);
+                    border: 1px solid var(--app-border, #e2e8f0);
                     border-radius: 12px;
                     cursor: pointer;
                     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -146,7 +146,7 @@ export default function MetroFilter({ metroData, onJumpToStation }) {
                 .filter-trigger.active {
                     border-color: var(--rs-accent, #2f8f5b);
                     box-shadow: 0 0 0 3px rgba(47, 143, 91, 0.1);
-                    background: #fff;
+                    background: var(--app-surface, #fff);
                 }
                 .trigger-text-wrapper {
                     display: flex;
@@ -162,7 +162,7 @@ export default function MetroFilter({ metroData, onJumpToStation }) {
                 .placeholder-text {
                     font-size: 14px;
                     font-weight: 600;
-                    color: #1e293b;
+                    color: var(--app-text, #1e293b);
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
@@ -195,9 +195,9 @@ export default function MetroFilter({ metroData, onJumpToStation }) {
                     top: calc(100% + 8px);
                     left: 0;
                     right: 0;
-                    background: rgba(255, 255, 255, 0.98);
+                    background: color-mix(in srgb, var(--app-surface, #fff) 96%, transparent);
                     backdrop-filter: blur(10px);
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--app-border, #e2e8f0);
                     border-radius: 16px;
                     box-shadow: 0 20px 40px rgba(0,0,0,0.15);
                     overflow: hidden;
@@ -210,7 +210,7 @@ export default function MetroFilter({ metroData, onJumpToStation }) {
                 }
                 .search-box {
                     padding: 12px;
-                    border-bottom: 1px solid #f1f5f9;
+                    border-bottom: 1px solid var(--app-border, #f1f5f9);
                 }
                 .search-input-wrapper {
                     position: relative;
@@ -226,16 +226,16 @@ export default function MetroFilter({ metroData, onJumpToStation }) {
                 .search-box input {
                     width: 100%;
                     padding: 9px 12px 9px 34px;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--app-border, #e2e8f0);
                     border-radius: 10px;
                     font-size: 14px;
                     outline: none;
-                    background: #f8fafc;
+                    background: var(--app-surface-2, #f8fafc);
                     transition: all 0.2s ease;
                 }
                 .search-box input:focus {
                     border-color: var(--rs-accent, #2f8f5b);
-                    background: #fff;
+                    background: var(--app-surface, #fff);
                     box-shadow: 0 0 0 3px rgba(47, 143, 91, 0.08);
                 }
                 .options-list {
@@ -247,7 +247,7 @@ export default function MetroFilter({ metroData, onJumpToStation }) {
                     width: 6px;
                 }
                 .options-list::-webkit-scrollbar-thumb {
-                    background: #e2e8f0;
+                    background: var(--app-border, #e2e8f0);
                     border-radius: 10px;
                 }
                 .option-item {
@@ -260,18 +260,18 @@ export default function MetroFilter({ metroData, onJumpToStation }) {
                     margin-bottom: 2px;
                 }
                 .option-item:hover {
-                    background: #f1f5f9;
+                    background: var(--app-surface-2, #f1f5f9);
                 }
                 .station-name {
                     font-size: 14px;
-                    color: #475569;
+                    color: var(--app-muted, #475569);
                     font-weight: 500;
                     flex: 1;
                 }
                 .jump-btn {
-                    border: 1px solid #cbd5e1;
-                    background: #fff;
-                    color: #334155;
+                    border: 1px solid var(--app-border, #cbd5e1);
+                    background: var(--app-surface, #fff);
+                    color: var(--app-text, #334155);
                     border-radius: 8px;
                     font-size: 12px;
                     font-weight: 600;

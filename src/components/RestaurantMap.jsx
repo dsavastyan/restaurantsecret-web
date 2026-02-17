@@ -452,6 +452,17 @@ export default function RestaurantMap({ themeMode = 'day' }) {
           box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
         }
 
+        .restaurant-map-container.is-night .map-overlay {
+          background: rgba(8, 16, 30, 0.58);
+          color: #dbe7f8;
+        }
+
+        .restaurant-map-container.is-night .show-city-btn {
+          background: #0f172a;
+          border-color: #334155;
+          color: #e2e8f0;
+        }
+
         .restaurant-map {
           height: min(34dvh, 320px);
           width: 100%;

@@ -4,36 +4,31 @@ import { Link } from 'react-router-dom'
 import SearchInput from '@/components/SearchInput'
 import RestaurantMap from '@/components/RestaurantMap'
 import { postSuggest } from '@/lib/api'
+import { isMoscowDaytime } from '@/lib/moscowDaytime'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
 import { analytics } from '@/services/analytics'
 
 export default function Landing() {
-  const [themeMode, setThemeMode] = useState(() => {
-    if (typeof window === 'undefined') return 'day'
-    const saved = window.localStorage.getItem('rs_landing_theme')
-    if (saved === 'night' || saved === 'day') return saved
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'day'
-  })
+  const [themeMode, setThemeMode] = useState(() => (isMoscowDaytime() ? 'day' : 'night'))
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    window.localStorage.setItem('rs_landing_theme', themeMode)
-  }, [themeMode])
+    const updateTheme = () => setThemeMode(isMoscowDaytime() ? 'day' : 'night')
+    updateTheme()
+    const id = window.setInterval(updateTheme, 60000)
+    return () => window.clearInterval(id)
+  }, [])
 
   return (
     <main className={`landing landing--${themeMode}`} data-theme={themeMode}>
-      <Hero
-        themeMode={themeMode}
-        onToggleTheme={() => setThemeMode((prev) => (prev === 'day' ? 'night' : 'day'))}
-      />
+      <Hero />
       <WhyImportant />
       <RestaurantsSection themeMode={themeMode} />
     </main>
   )
 }
 
-function Hero({ themeMode, onToggleTheme }) {
+function Hero() {
   const [query, setQuery] = useState('')
   const [suggestOpen, setSuggestOpen] = useState(false)
   const searchZoneRef = useRef(null)
@@ -67,14 +62,8 @@ function Hero({ themeMode, onToggleTheme }) {
 
   return (
     <header className="hero" aria-labelledby="hero-title">
-      <div className="hero__topline">
-        <div className="hero__brand">
-          <img src="/assets/logo.png" alt="RestaurantSecret" className="brand__logo" />
-          <span className="brand__name">RestaurantSecret</span>
-        </div>
-        <button type="button" className="theme-switch" onClick={onToggleTheme}>
-          {themeMode === 'night' ? 'Дневной режим' : 'Ночной режим'}
-        </button>
+      <div className="hero__motto-wrap" aria-label="Слоган">
+        <p className="hero__motto">Ешь вкусно, выбирай осознанно</p>
       </div>
 
       <h1 id="hero-title" className="hero__title">
@@ -84,8 +73,6 @@ function Hero({ themeMode, onToggleTheme }) {
         <br />
         блюд
       </h1>
-
-      <p className="hero__subtitle">Ешь вкусно, выбирай осознанно</p>
 
       <div className="hero__search" ref={searchZoneRef}>
         <SearchInput value={query} onChange={setQuery} />
