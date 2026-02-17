@@ -6643,11 +6643,11 @@ body:has(.account--sheet-open) {
   height: auto;
   display: flex;
   justify-content: center;
-  padding: clamp(14px, 2.2vw, 24px) clamp(14px, 2.8vw, 24px) clamp(16px, 2.2vw, 26px);
+  padding: clamp(12px, 1.8vw, 18px) clamp(12px, 2.4vw, 20px) clamp(12px, 1.8vw, 18px);
 }
 
 .intro__panel {
-  width: min(96vw, 1220px);
+  width: min(96vw, 1180px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -6687,15 +6687,15 @@ body:has(.account--sheet-open) {
 }
 
 .intro__logo {
-  width: clamp(108px, 22vw, 164px);
+  width: clamp(96px, 14vw, 148px);
   height: auto;
   filter: drop-shadow(0 12px 20px rgba(32, 19, 8, 0.2));
-  margin-bottom: clamp(8px, 1.2vw, 12px);
+  margin-bottom: clamp(2px, 0.6vw, 6px);
 }
 
 .intro__brand-badge {
-  width: clamp(140px, 20vw, 220px);
-  height: clamp(22px, 2.4vw, 30px);
+  width: clamp(120px, 10vw, 170px);
+  height: clamp(14px, 1.1vw, 18px);
   border-radius: 14px;
   padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -6712,18 +6712,18 @@ body:has(.account--sheet-open) {
 }
 
 .intro__title {
-  margin: clamp(14px, 2vw, 20px) 0 0;
-  font-size: clamp(28px, 3.9vw, 60px);
+  margin: clamp(10px, 1.4vw, 14px) 0 0;
+  font-size: clamp(26px, 3vw, 52px);
   line-height: 1.08;
   font-weight: 500;
   letter-spacing: -0.02em;
 }
 
 .intro__subtitle {
-  margin: clamp(10px, 1.8vw, 14px) 0 0;
-  font-size: clamp(18px, 2.5vw, 44px);
+  margin: clamp(12px, 1.6vw, 18px) 0 clamp(12px, 1.8vw, 20px);
+  font-size: clamp(16px, 1.7vw, 26px);
   line-height: 1.2;
-  max-width: min(95vw, 980px);
+  max-width: min(95vw, 920px);
 }
 
 .intro__subtitle-mobile,
@@ -6736,12 +6736,12 @@ body:has(.account--sheet-open) {
 }
 
 .intro__benefits {
-  margin: clamp(20px, 3vw, 28px) 0 0;
+  margin: clamp(8px, 1.4vw, 14px) auto 0;
   padding: 0;
   list-style: none;
-  width: min(95vw, 980px);
+  width: min(95vw, 920px);
   display: grid;
-  gap: clamp(12px, 1.8vw, 18px);
+  gap: clamp(10px, 1.2vw, 14px);
 }
 
 .intro__benefits li {
@@ -6750,11 +6750,13 @@ body:has(.account--sheet-open) {
   align-items: start;
   gap: 12px;
   text-align: left;
+  width: min(100%, 760px);
+  margin: 0 auto;
 }
 
 .intro__benefit-text {
-  font-size: clamp(15px, 2.15vw, 32px);
-  line-height: 1.28;
+  font-size: clamp(14px, 1.65vw, 25px);
+  line-height: 1.24;
   max-width: 52ch;
 }
 
@@ -6783,8 +6785,8 @@ body:has(.account--sheet-open) {
 }
 
 .intro__motto {
-  margin: clamp(20px, 3vw, 28px) 0 0;
-  font-size: clamp(22px, 2.7vw, 40px);
+  margin: clamp(14px, 1.7vw, 18px) 0 0;
+  font-size: clamp(20px, 2.1vw, 32px);
   line-height: 1.2;
   font-weight: 500;
   position: relative;
@@ -6820,28 +6822,28 @@ body:has(.account--sheet-open) {
 }
 
 .intro__form-panel {
-  margin-top: clamp(18px, 2.8vw, 24px);
-  width: min(95vw, 920px);
+  margin-top: clamp(12px, 1.8vw, 16px);
+  width: min(95vw, 860px);
 }
 
 .intro__form {
-  width: min(100%, 460px);
+  width: min(100%, 420px);
   margin: 0 auto;
 }
 
 .intro__question {
-  margin: 0 0 clamp(10px, 1.5vw, 14px);
-  font-size: clamp(22px, 2.8vw, 44px);
+  margin: 0 0 clamp(8px, 1.2vw, 12px);
+  font-size: clamp(20px, 1.95vw, 32px);
   line-height: 1.1;
   font-weight: 500;
 }
 
 .intro__input {
   width: 100%;
-  height: clamp(44px, 4.6vw, 58px);
+  height: clamp(40px, 3.4vw, 48px);
   border-radius: 14px;
   padding: 0 16px;
-  font-size: clamp(16px, 1.8vw, 24px);
+  font-size: clamp(15px, 1.25vw, 19px);
   font-family: inherit;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
@@ -6890,13 +6892,13 @@ body:has(.account--sheet-open) {
 .intro__button {
   width: 100%;
   margin-top: clamp(10px, 1.6vw, 14px);
-  height: clamp(46px, 4.7vw, 60px);
+  height: clamp(42px, 3.6vw, 50px);
   border-radius: 999px;
   border: 2px solid rgba(210, 178, 102, 0.78);
   background: linear-gradient(95deg, #4ca87d 0%, #d7e77d 100%);
   color: #faf5d8;
   font-family: inherit;
-  font-size: clamp(17px, 1.85vw, 28px);
+  font-size: clamp(17px, 1.35vw, 21px);
   font-weight: 700;
   line-height: 1;
   text-shadow: 0 2px 4px rgba(51, 36, 15, 0.3);
@@ -6916,15 +6918,15 @@ body:has(.account--sheet-open) {
 
 .intro__footnote {
   margin: clamp(14px, 2vw, 20px) 0 0;
-  width: min(95vw, 980px);
-  font-size: clamp(12px, 1.05vw, 15px);
+  width: min(95vw, 920px);
+  font-size: clamp(11px, 0.8vw, 13px);
   line-height: 1.35;
   opacity: 0.94;
 }
 
 .intro__legal {
-  margin: clamp(10px, 1.8vw, 16px) 0 0;
-  font-size: clamp(13px, 1.2vw, 18px);
+  margin: clamp(8px, 1.2vw, 12px) 0 0;
+  font-size: clamp(11px, 0.86vw, 14px);
   line-height: 1.3;
   display: flex;
   align-items: center;
@@ -6955,16 +6957,16 @@ body:has(.account--sheet-open) {
   }
 
   .intro__stage {
-    padding: clamp(14px, 1.3vw, 18px) 22px clamp(14px, 1.4vw, 20px);
+    padding: clamp(10px, 1vw, 14px) 18px clamp(10px, 1vw, 14px);
   }
 
   .intro__brand-badge {
-    width: clamp(156px, 12vw, 210px);
-    height: clamp(22px, 1.7vw, 28px);
+    width: clamp(124px, 8vw, 160px);
+    height: clamp(14px, 1vw, 18px);
   }
 
   .intro__title {
-    font-size: clamp(30px, 3vw, 52px);
+    font-size: clamp(26px, 2.4vw, 42px);
   }
 
   .intro__subtitle-mobile {
@@ -6976,22 +6978,22 @@ body:has(.account--sheet-open) {
   }
 
   .intro__benefits {
-    width: min(95vw, 980px);
+    width: min(95vw, 920px);
   }
 
   .intro__benefit-text {
-    font-size: clamp(18px, 1.9vw, 30px);
+    font-size: clamp(16px, 1.35vw, 22px);
     max-width: 48ch;
   }
 
   .intro__check {
-    width: 34px;
-    height: 34px;
-    font-size: 18px;
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
   }
 
   .intro__motto {
-    font-size: clamp(24px, 2.2vw, 36px);
+    font-size: clamp(20px, 1.7vw, 28px);
   }
 
   .intro__form-panel {
@@ -6999,31 +7001,32 @@ body:has(.account--sheet-open) {
     border: 1px solid rgba(255, 255, 255, 0.14);
     background: rgba(255, 255, 255, 0.06);
     backdrop-filter: blur(20px);
-    padding: clamp(16px, 1.6vw, 24px);
-    box-shadow: 0 14px 34px rgba(12, 13, 16, 0.2);
+    padding: clamp(12px, 1.2vw, 16px);
+    box-shadow: 0 10px 24px rgba(12, 13, 16, 0.18);
   }
 
   .intro__question {
-    font-size: clamp(28px, 2.2vw, 40px);
+    font-size: clamp(22px, 1.75vw, 30px);
+    white-space: nowrap;
   }
 
   .intro__input {
-    height: clamp(42px, 3.4vw, 54px);
-    font-size: clamp(16px, 1.4vw, 22px);
+    height: clamp(38px, 2.8vw, 44px);
+    font-size: clamp(14px, 1.05vw, 17px);
     border-radius: 14px;
   }
 
   .intro__button {
-    height: clamp(44px, 3.6vw, 56px);
-    font-size: clamp(18px, 1.6vw, 24px);
+    height: clamp(40px, 3vw, 46px);
+    font-size: clamp(16px, 1.2vw, 19px);
   }
 
   .intro__footnote {
-    font-size: clamp(11px, 0.86vw, 14px);
+    font-size: clamp(10px, 0.7vw, 12px);
   }
 
   .intro__legal {
-    font-size: clamp(12px, 0.95vw, 16px);
+    font-size: clamp(10px, 0.7vw, 12px);
   }
 }
 
@@ -7040,23 +7043,23 @@ body:has(.account--sheet-open) {
   }
 
   .intro__title {
-    font-size: clamp(20px, 7vw, 32px);
+    font-size: clamp(20px, 6.8vw, 30px);
   }
 
   .intro__subtitle {
-    font-size: clamp(16px, 4.6vw, 23px);
+    font-size: clamp(15px, 4.2vw, 20px);
   }
 
   .intro__benefit-text {
-    font-size: clamp(14px, 4.2vw, 19px);
+    font-size: clamp(14px, 4vw, 18px);
   }
 
   .intro__motto {
-    font-size: clamp(20px, 5.3vw, 28px);
+    font-size: clamp(18px, 5vw, 24px);
   }
 
   .intro__question {
-    font-size: clamp(22px, 7vw, 34px);
+    font-size: clamp(22px, 6.8vw, 30px);
   }
 
   .intro__input {
