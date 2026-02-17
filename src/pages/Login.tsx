@@ -1,9 +1,12 @@
 // src/pages/Login.tsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { apiPost } from "@/lib/api";
 import { useAuth, selectSetToken } from "@/store/auth"; // <— меняем импорт
 import { analytics } from "@/services/analytics";
+import mobileBackground from "@/assets/login/Login background.png";
+import desktopBackground from "@/assets/login/Login background desctop.png";
+import logoIcon from "@/assets/login/Icon.png";
 
 export default function LoginPage() {
   const setToken = useAuth(selectSetToken); // <— берём сеттер из стора
@@ -96,30 +99,36 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="login">
+    <div
+      className="login"
+      style={
+        {
+          "--login-bg-mobile": `url(${mobileBackground})`,
+          "--login-bg-desktop": `url(${desktopBackground})`,
+        } as CSSProperties
+      }
+    >
       <div className="login__stage">
+        <button
+          type="button"
+          className="login__home"
+          onClick={() => navigate("/")}
+          aria-label="На главный экран"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M3 11.75 12 4l9 7.75" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M6.75 10.5v9.25h10.5V10.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
         <div className="login__wrap">
           <div className="login__card">
-            <div className="login__hero" aria-hidden="true">
-              <div className="login__hero-badge">
-                <svg width="28" height="22" viewBox="0 0 24 18" fill="none">
-                  <path
-                    d="M2.5 4.5 12 10.5l9.5-6"
-                    stroke="white"
-                    strokeWidth="1.8"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M3.5 2.5h17a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-17a2 2 0 0 1-2-2v-11a2 2 0 0 1 2-2Z"
-                    stroke="white"
-                    strokeWidth="1.8"
-                  />
-                </svg>
-              </div>
+            <div className="login__brand">
+              <img src={logoIcon} alt="" className="login__brand-icon" aria-hidden="true" />
+              <span className="login__brand-name">RestaurantSecret</span>
             </div>
 
-            <h1 className="login__title">Вход по e-mail</h1>
-            <p className="login__subtitle">Без пароля. Отправим одноразовый код на вашу почту.</p>
+            {step === "enter" && <h1 className="login__title">Выбирай легко</h1>}
+            <p className="login__subtitle">Ешь вкусно, выбирай осознанно</p>
 
             {err && <div className="login__alert">{err}</div>}
 
@@ -145,7 +154,7 @@ export default function LoginPage() {
                     id="email"
                     type="email"
                     className="login__input"
-                    placeholder="you@example.com"
+                    placeholder="Твоя почта..."
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     autoComplete="email"
@@ -154,30 +163,31 @@ export default function LoginPage() {
                     aria-invalid={!!err}
                   />
                 </div>
-                <button className="btn btn--primary login__submit" onClick={sendCode} disabled={loading}>
-                  {loading ? "Отправляем…" : "Получить код"}
+                <button className="login__submit" onClick={sendCode} disabled={loading}>
+                  {loading ? "Отправляем…" : "Продолжить"}
                 </button>
               </div>
             )}
 
             {step === "code" && (
               <div className="login__form">
-                <label className="login__label" htmlFor="code">Код из письма</label>
-                <div className="login__input-wrap login__input-wrap--plain">
+                <label className="login__label sr-only" htmlFor="code">Код из письма</label>
+                <div className="login__input-wrap login__input-wrap--plain login__otp-wrap">
                   <input
                     id="code"
                     type="text"
                     inputMode="numeric"
                     className="login__input"
-                    placeholder="123456"
+                    placeholder=""
+                    maxLength={6}
                     value={code}
-                    onChange={(e) => setCode(e.target.value.trim())}
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, "").trim())}
                     autoFocus
                     disabled={loading}
                     aria-invalid={!!err}
                   />
                 </div>
-                <button className="btn btn--primary login__submit" onClick={verifyCode} disabled={loading}>
+                <button className="login__submit" onClick={verifyCode} disabled={loading}>
                   {loading ? "Проверяем…" : "Войти"}
                 </button>
 
@@ -193,24 +203,24 @@ export default function LoginPage() {
                 </button>
 
                 <p className="login__hint">Код придёт с адреса <b>noreply@restaurantsecret.ru</b>.</p>
+
+                <p className="login__legal">
+                  Продолжая, вы соглашаетесь на{" "}
+                  <a href="/legal/pdn-consent.pdf" target="_blank" rel="noopener noreferrer">
+                    обработку персональных данных
+                  </a>
+                  , а также с{" "}
+                  <a href="https://restaurantsecret.ru/#/privacy" target="_blank" rel="noopener noreferrer">
+                    политикой конфиденциальности
+                  </a>{" "}
+                  и{" "}
+                  <a href="https://restaurantsecret.ru/#/legal" target="_blank" rel="noopener noreferrer">
+                    пользовательским соглашением
+                  </a>
+                  .
+                </p>
               </div>
             )}
-
-            <p className="login__legal">
-              Продолжая, вы соглашаетесь на{" "}
-              <a href="/legal/pdn-consent.pdf" target="_blank" rel="noopener noreferrer">
-                обработку персональных данных
-              </a>
-              , а также с{" "}
-              <a href="https://restaurantsecret.ru/#/privacy" target="_blank" rel="noopener noreferrer">
-                политикой конфиденциальности
-              </a>{" "}
-              и{" "}
-              <a href="https://restaurantsecret.ru/#/legal" target="_blank" rel="noopener noreferrer">
-                пользовательским соглашением
-              </a>
-              .
-            </p>
           </div>
         </div>
       </div>
