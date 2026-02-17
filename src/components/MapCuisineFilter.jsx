@@ -135,8 +135,8 @@ export default function MapCuisineFilter({ cuisines = [], selectedCuisines = [],
                     justify-content: space-between;
                     align-items: center;
                     padding: 10px 14px;
-                    background: #fff;
-                    border: 1px solid #e2e8f0;
+                    background: var(--app-surface, #fff);
+                    border: 1px solid var(--app-border, #e2e8f0);
                     border-radius: 12px;
                     cursor: pointer;
                     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -150,7 +150,7 @@ export default function MapCuisineFilter({ cuisines = [], selectedCuisines = [],
                 .filter-trigger.active {
                     border-color: var(--rs-accent, #2f8f5b);
                     box-shadow: 0 0 0 3px rgba(47, 143, 91, 0.1);
-                    background: #fff;
+                    background: var(--app-surface, #fff);
                 }
                 .trigger-text-wrapper {
                     display: flex;
@@ -166,7 +166,7 @@ export default function MapCuisineFilter({ cuisines = [], selectedCuisines = [],
                 .placeholder-text {
                     font-size: 14px;
                     font-weight: 600;
-                    color: #1e293b;
+                    color: var(--app-text, #1e293b);
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
@@ -178,7 +178,7 @@ export default function MapCuisineFilter({ cuisines = [], selectedCuisines = [],
                     margin-left: 8px;
                 }
                 .mini-clear {
-                    background: #f1f5f9;
+                    background: var(--app-surface-2, #f1f5f9);
                     border: none;
                     width: 20px;
                     height: 20px;
@@ -192,8 +192,8 @@ export default function MapCuisineFilter({ cuisines = [], selectedCuisines = [],
                     transition: all 0.2s ease;
                 }
                 .mini-clear:hover {
-                    background: #e2e8f0;
-                    color: #1e293b;
+                    background: var(--app-border, #e2e8f0);
+                    color: var(--app-text, #1e293b);
                     transform: scale(1.1);
                 }
                 .chevron {
@@ -224,9 +224,9 @@ export default function MapCuisineFilter({ cuisines = [], selectedCuisines = [],
                     top: calc(100% + 8px);
                     left: 0;
                     right: 0;
-                    background: rgba(255, 255, 255, 0.98);
+                    background: color-mix(in srgb, var(--app-surface, #fff) 96%, transparent);
                     backdrop-filter: blur(10px);
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--app-border, #e2e8f0);
                     border-radius: 16px;
                     box-shadow: 0 20px 40px rgba(0,0,0,0.15);
                     overflow: hidden;
@@ -239,15 +239,15 @@ export default function MapCuisineFilter({ cuisines = [], selectedCuisines = [],
                 }
                 .search-box {
                     padding: 12px;
-                    border-bottom: 1px solid #f1f5f9;
+                    border-bottom: 1px solid var(--app-border, #f1f5f9);
                 }
                 .toggle-all-btn {
                     margin-top: 10px;
                     width: 100%;
-                    border: 1px solid #cbd5e1;
+                    border: 1px solid var(--app-border, #cbd5e1);
                     border-radius: 10px;
-                    background: #fff;
-                    color: #334155;
+                    background: var(--app-surface, #fff);
+                    color: var(--app-text, #334155);
                     font-size: 13px;
                     font-weight: 600;
                     padding: 9px 10px;
@@ -257,7 +257,7 @@ export default function MapCuisineFilter({ cuisines = [], selectedCuisines = [],
                 .toggle-all-btn:hover {
                     border-color: var(--rs-accent, #2f8f5b);
                     color: var(--rs-accent, #2f8f5b);
-                    background: #f8fafc;
+                    background: var(--app-surface-2, #f8fafc);
                 }
                 .search-input-wrapper {
                     position: relative;
@@ -273,16 +273,16 @@ export default function MapCuisineFilter({ cuisines = [], selectedCuisines = [],
                 .search-box input {
                     width: 100%;
                     padding: 9px 12px 9px 34px;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--app-border, #e2e8f0);
                     border-radius: 10px;
                     font-size: 14px;
                     outline: none;
-                    background: #f8fafc;
+                    background: var(--app-surface-2, #f8fafc);
                     transition: all 0.2s ease;
                 }
                 .search-box input:focus {
                     border-color: var(--rs-accent, #2f8f5b);
-                    background: #fff;
+                    background: var(--app-surface, #fff);
                     box-shadow: 0 0 0 3px rgba(47, 143, 91, 0.08);
                 }
                 .options-list {
@@ -294,7 +294,7 @@ export default function MapCuisineFilter({ cuisines = [], selectedCuisines = [],
                     width: 6px;
                 }
                 .options-list::-webkit-scrollbar-thumb {
-                    background: #e2e8f0;
+                    background: var(--app-border, #e2e8f0);
                     border-radius: 10px;
                 }
                 .option-item {
@@ -308,7 +308,7 @@ export default function MapCuisineFilter({ cuisines = [], selectedCuisines = [],
                     margin-bottom: 2px;
                 }
                 .option-item:hover {
-                    background: #f1f5f9;
+                    background: var(--app-surface-2, #f1f5f9);
                 }
                 .option-item.selected {
                     background: rgba(47, 143, 91, 0.08);
@@ -316,12 +316,12 @@ export default function MapCuisineFilter({ cuisines = [], selectedCuisines = [],
                 .checkbox {
                     width: 20px;
                     height: 20px;
-                    border: 2px solid #cbd5e1;
+                    border: 2px solid var(--app-border, #cbd5e1);
                     border-radius: 6px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    background: #fff;
+                    background: var(--app-surface, #fff);
                     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
                     flex-shrink: 0;
                 }
@@ -337,11 +337,11 @@ export default function MapCuisineFilter({ cuisines = [], selectedCuisines = [],
                 }
                 .cuisine-name {
                     font-size: 14px;
-                    color: #475569;
+                    color: var(--app-muted, #475569);
                     font-weight: 500;
                 }
                 .option-item.selected .cuisine-name {
-                    color: #0f172a;
+                    color: var(--app-text, #0f172a);
                     font-weight: 700;
                 }
                 .no-results {
@@ -353,15 +353,15 @@ export default function MapCuisineFilter({ cuisines = [], selectedCuisines = [],
                 }
                 .filter-footer {
                     padding: 12px;
-                    border-top: 1px solid #f1f5f9;
-                    background: #f8fafc;
+                    border-top: 1px solid var(--app-border, #f1f5f9);
+                    background: var(--app-surface-2, #f8fafc);
                     display: flex;
                     justify-content: center;
                 }
                 .clear-link {
                     background: none;
                     border: none;
-                    color: #64748b;
+                    color: var(--app-muted, #64748b);
                     font-size: 13px;
                     font-weight: 600;
                     cursor: pointer;
@@ -371,8 +371,8 @@ export default function MapCuisineFilter({ cuisines = [], selectedCuisines = [],
                     width: 100%;
                 }
                 .clear-link:hover {
-                    background: #f1f5f9;
-                    color: #1e293b;
+                    background: var(--app-surface-2, #f1f5f9);
+                    color: var(--app-text, #1e293b);
                 }
             `}</style>
         </div>
