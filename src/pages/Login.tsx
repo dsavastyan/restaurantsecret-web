@@ -264,7 +264,7 @@ export default function LoginPage() {
                     type="text"
                     inputMode="numeric"
                     className="login__input"
-                    placeholder=""
+                    placeholder="Введите код"
                     maxLength={6}
                     value={code}
                     onChange={(e) => setCode(e.target.value.replace(/\D/g, "").trim())}
