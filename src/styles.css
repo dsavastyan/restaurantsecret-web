@@ -8195,7 +8195,7 @@ body:has(.account--sheet-open) {
 }
 
 .hero__title {
-  margin-top: 0;
+  margin-top: 2px;
   font-size: clamp(20px, 3.2vw, 38px);
   line-height: 1.08;
   color: var(--landing-fg);
@@ -8207,7 +8207,7 @@ body:has(.account--sheet-open) {
   justify-content: center;
   gap: 14px;
   width: 100%;
-  margin-top: 2px;
+  margin-top: 12px;
   white-space: nowrap;
 }
 
@@ -8283,7 +8283,7 @@ body:has(.account--sheet-open) {
 }
 
 .hero__search {
-  margin-top: 2px;
+  margin-top: 14px;
   gap: 4px;
 }
 
@@ -8388,13 +8388,21 @@ body:has(.account--sheet-open) {
 }
 
 .center {
-  margin-top: 10px;
+  margin-top: 6px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .btn--outline {
   border-color: var(--landing-border);
   background: var(--landing-card);
   color: var(--landing-fg);
+}
+
+.restaurants .center .btn--outline {
+  margin: 0 auto;
 }
 
 .landing .search-input__control {
@@ -8437,6 +8445,7 @@ body:has(.account--sheet-open) {
 
   .hero__inline-benefits {
     gap: 10px;
+    margin-top: 10px;
     flex-wrap: wrap;
     white-space: normal;
     row-gap: 4px;
@@ -8461,6 +8470,10 @@ body:has(.account--sheet-open) {
 
   .hero__title {
     font-size: clamp(18px, 7.8vw, 30px);
+  }
+
+  .hero__search {
+    margin-top: 10px;
   }
 
   .restaurants__count {

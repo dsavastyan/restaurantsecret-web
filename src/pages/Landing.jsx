@@ -43,9 +43,7 @@ function Hero() {
       <h1 id="hero-title" className="hero__title">
         Все меню ресторанов
         <br />
-        с КБЖУ и составом
-        <br />
-        блюд
+        с КБЖУ и составом блюд
       </h1>
 
       <div className="hero__inline-benefits" aria-label="Преимущества">
