@@ -98,8 +98,25 @@ export default function OnboardingWelcomePage() {
       }
     >
       <div className="intro__stage">
+        <button
+          type="button"
+          className="intro__home"
+          onClick={() => navigate("/")}
+          aria-label="На главный экран"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M3 11.75 12 4l9 7.75" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M6.75 10.5v9.25h10.5V10.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+
         <section className="intro__panel" aria-labelledby="intro-title">
-          <img src={logoIcon} alt="RestSecret" className="intro__logo" />
+          <div className="intro__brand">
+            <img src={logoIcon} alt="" className="intro__logo" aria-hidden="true" />
+            <div className="intro__brand-badge">
+              <span className="intro__brand-name">RestaurantSecret</span>
+            </div>
+          </div>
 
           <h1 id="intro-title" className="intro__title">
             Добро пожаловать в RestSecret!
@@ -117,36 +134,38 @@ export default function OnboardingWelcomePage() {
           <ul className="intro__benefits" aria-label="Преимущества сервиса">
             <li>
               <span className="intro__check" aria-hidden="true">✓</span>
-              Легко находить рестораны и блюда по фильтрам
+              <span className="intro__benefit-text">Легко находить рестораны и блюда по фильтрам</span>
             </li>
             <li>
               <span className="intro__check" aria-hidden="true">✓</span>
-              Выбирать блюда, подходящие по составу и КБЖУ*
+              <span className="intro__benefit-text">Выбирать блюда, подходящие по составу и КБЖУ*</span>
             </li>
           </ul>
 
           <p className="intro__motto">Есть вкусно, выбирать осознанно</p>
 
-          <form className="intro__form" onSubmit={handleSubmit}>
-            <h2 className="intro__question">Как я могу к тебе обращаться?</h2>
-            <input
-              className="intro__input"
-              type="text"
-              value={name}
-              onChange={(event) => {
-                setName(event.target.value);
-                if (error) setError(null);
-              }}
-              placeholder="Ваше имя"
-              autoComplete="given-name"
-              autoFocus
-              aria-invalid={Boolean(error)}
-            />
-            {error && <p className="intro__error">{error}</p>}
-            <button className="intro__button" type="submit">
-              Продолжить
-            </button>
-          </form>
+          <div className="intro__form-panel">
+            <form className="intro__form" onSubmit={handleSubmit}>
+              <h2 className="intro__question">Как я могу к тебе обращаться?</h2>
+              <input
+                className="intro__input"
+                type="text"
+                value={name}
+                onChange={(event) => {
+                  setName(event.target.value);
+                  if (error) setError(null);
+                }}
+                placeholder="Ваше имя"
+                autoComplete="given-name"
+                autoFocus
+                aria-invalid={Boolean(error)}
+              />
+              {error && <p className="intro__error">{error}</p>}
+              <button className="intro__button" type="submit">
+                Продолжить
+              </button>
+            </form>
+          </div>
 
           <p className="intro__footnote">
             * Размещение в Сервисе сведений носит справочно-информационный характер и не является
