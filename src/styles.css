@@ -6907,8 +6907,8 @@ body:has(.account--sheet-open) {
 
   .login__card {
     width: min(90vw, 780px);
-    max-width: 780px;
-    min-height: 500px;
+    max-width: 680px;
+    min-height: 400px;
     padding: 44px 56px;
     border: 1px solid rgba(226, 242, 255, 0.2);
     border-radius: 26px;
