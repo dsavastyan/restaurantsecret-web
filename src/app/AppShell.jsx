@@ -280,7 +280,7 @@ export default function AppShell() {
           </div>
         )}
       </main>
-      {!isImmersivePage && !isLanding && <Footer />}
+      {!isImmersivePage && <Footer />}
     </div>
   )
 }

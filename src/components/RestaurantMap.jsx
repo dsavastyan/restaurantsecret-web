@@ -510,7 +510,7 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
         }
 
         .restaurant-map {
-          height: min(34dvh, 320px);
+          height: min(24dvh, 220px);
           width: 100%;
           z-index: 1;
         }
@@ -589,7 +589,7 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
           }
 
           .restaurant-map {
-            height: min(30dvh, 260px);
+            height: min(20dvh, 170px);
           }
 
           .restaurant-map-container.is-fullscreen .restaurant-map {
