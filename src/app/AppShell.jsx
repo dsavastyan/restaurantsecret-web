@@ -206,6 +206,7 @@ export default function AppShell() {
   }), [access, handleAccessUpdate, refreshAccess, requestPaywall, closePaywall, requireAccess])
 
   const isContact = location.pathname.startsWith('/contact')
+  const isLoginPage = location.pathname === '/login'
   const showGlobalSearch = useMemo(() => {
     const allowedPrefixes = ['/catalog', '/app']
     const matchesPrefix = allowedPrefixes.some((prefix) =>
@@ -223,10 +224,12 @@ export default function AppShell() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <NavBar />
+      {!isLoginPage && <NavBar />}
       <DishCardModal />
       <main className="flex-1">
-        {isContact ? (
+        {isLoginPage ? (
+          <Outlet context={outletContext} />
+        ) : isContact ? (
           <div className={showPaywall ? 'contact-wrapper locked' : 'contact-wrapper'}>
             <Outlet context={outletContext} />
           </div>
@@ -243,7 +246,7 @@ export default function AppShell() {
           </div>
         )}
       </main>
-      <Footer />
+      {!isLoginPage && <Footer />}
     </div>
   )
 }
