@@ -120,13 +120,14 @@ export default function LoginPage() {
             <path d="M6.75 10.5v9.25h10.5V10.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
+        <div className="login__brand-block">
+          <div className="login__brand">
+            <img src={logoIcon} alt="" className="login__brand-icon" aria-hidden="true" />
+            <span className="login__brand-name">RestaurantSecret</span>
+          </div>
+        </div>
         <div className="login__wrap">
           <div className="login__card">
-            <div className="login__brand">
-              <img src={logoIcon} alt="" className="login__brand-icon" aria-hidden="true" />
-              <span className="login__brand-name">RestaurantSecret</span>
-            </div>
-
             {step === "enter" && <h1 className="login__title">Выбирай легко</h1>}
             <p className="login__subtitle">Ешь вкусно, выбирай осознанно</p>
 
@@ -154,7 +155,7 @@ export default function LoginPage() {
                     id="email"
                     type="email"
                     className="login__input"
-                    placeholder="Твоя почта..."
+                    placeholder="Введите email..."
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     autoComplete="email"

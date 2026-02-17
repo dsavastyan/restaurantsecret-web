@@ -6620,7 +6620,7 @@ body:has(.account--sheet-open) {
   margin: 0 auto;
   border: none;
   background: transparent;
-  padding: 8px 0 0;
+  padding: 64px 0 0;
   box-shadow: none;
   backdrop-filter: none;
 }
@@ -6633,37 +6633,37 @@ body:has(.account--sheet-open) {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin: 0;
 }
 
 .login__brand-icon {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   object-fit: contain;
 }
 
 .login__brand-name {
-  font-size: 24px;
+  font-size: 28px;
   line-height: 1;
   color: rgba(244, 246, 255, 0.96);
-  letter-spacing: -0.3px;
+  letter-spacing: -0.2px;
 }
 
 .login__title {
   font-size: 44px;
-  font-weight: 500;
-  color: rgba(247, 249, 255, 0.94);
+  font-weight: 600;
+  color: rgba(247, 249, 255, 0.95);
   margin: 0;
   text-align: center;
-  letter-spacing: -0.3px;
-  line-height: 1.02;
+  letter-spacing: 0.3px;
+  line-height: 1.1;
 }
 
 .login__subtitle {
   font-size: 16px;
   color: rgba(234, 236, 245, 0.9);
-  margin: 8px auto 20px;
+  margin: 12px auto 20px;
   text-align: center;
   line-height: 1.2;
   max-width: 292px;
@@ -6721,6 +6721,15 @@ body:has(.account--sheet-open) {
   display: grid;
   place-items: center;
   padding: 16px 16px 24px;
+}
+
+.login__brand-block {
+  position: absolute;
+  top: 16%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  pointer-events: none;
 }
 
 .login__input-wrap {
@@ -6877,6 +6886,10 @@ body:has(.account--sheet-open) {
     padding: 52px 24px;
   }
 
+  .login__brand-block {
+    top: 20%;
+  }
+
   .login__home {
     top: 22px;
     left: 24px;
@@ -6884,15 +6897,20 @@ body:has(.account--sheet-open) {
 
   .login__card {
     max-width: 500px;
-    padding: 0;
+    padding: 92px 0 0;
   }
 
   .login__brand {
-    margin-bottom: 18px;
+    margin: 0;
+  }
+
+  .login__brand-icon {
+    width: 44px;
+    height: 44px;
   }
 
   .login__brand-name {
-    font-size: 46px;
+    font-size: 52px;
   }
 
   .login__title {
@@ -7072,7 +7090,7 @@ body:has(.account--sheet-open) {
   }
 
   .login__card {
-    padding: 24px 18px 30px;
+    padding: 64px 0 0;
   }
 }
 
