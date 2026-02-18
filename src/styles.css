@@ -7410,12 +7410,13 @@ body:has(.account--sheet-open) {
   }
 
   .intro__footnote {
-    font-size: clamp(4px, 1.2vw, 6px);
-    line-height: 1.2;
+    font-size: clamp(11px, 3.2vw, 13px);
+    line-height: 1.42;
   }
 
   .intro__legal {
-    font-size: clamp(13px, 4vw, 17px);
+    font-size: clamp(11px, 3.3vw, 13px);
+    line-height: 1.4;
   }
 }
 

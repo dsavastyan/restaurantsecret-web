@@ -1,4 +1,5 @@
 const PROFILE_NAME_STORAGE_PREFIX = "rs_profile_name_v1:";
+const ONBOARDING_DONE_STORAGE_PREFIX = "rs_onboarding_done_v1:";
 
 function decodeBase64Url(input: string): string | null {
   try {
@@ -32,6 +33,10 @@ function getNameStorageKey(email: string | null | undefined) {
   return `${PROFILE_NAME_STORAGE_PREFIX}${email || "guest"}`;
 }
 
+function getOnboardingDoneStorageKey(email: string | null | undefined) {
+  return `${ONBOARDING_DONE_STORAGE_PREFIX}${email || "guest"}`;
+}
+
 export function saveProfileNameForToken(token: string | null | undefined, name: string) {
   if (typeof window === "undefined") return;
 
@@ -56,5 +61,25 @@ export function getProfileNameForToken(token: string | null | undefined) {
     return window.localStorage.getItem(getNameStorageKey(tokenEmail)) || "";
   } catch {
     return "";
+  }
+}
+
+export function markOnboardingCompletedForToken(token: string | null | undefined) {
+  if (typeof window === "undefined") return;
+  const tokenEmail = getEmailFromAccessToken(token);
+  try {
+    window.localStorage.setItem(getOnboardingDoneStorageKey(tokenEmail), "1");
+  } catch {
+    // Ignore storage errors in private mode or restricted environments.
+  }
+}
+
+export function isOnboardingCompletedForToken(token: string | null | undefined) {
+  if (typeof window === "undefined") return false;
+  const tokenEmail = getEmailFromAccessToken(token);
+  try {
+    return window.localStorage.getItem(getOnboardingDoneStorageKey(tokenEmail)) === "1";
+  } catch {
+    return false;
   }
 }

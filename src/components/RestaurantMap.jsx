@@ -161,7 +161,7 @@ function calculateWeeklyAdded(restaurants) {
   const recent = new Set()
 
   for (const item of restaurants) {
-    const createdRaw = item?.created_at ?? item?.createdAt
+    const createdRaw = item?.menu_added_at ?? item?.menuAddedAt ?? item?.created_at ?? item?.createdAt
     if (!createdRaw) continue
     const createdMs = parseTimestamp(createdRaw)
     if (!Number.isFinite(createdMs) || createdMs < weekAgo) continue
