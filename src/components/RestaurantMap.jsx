@@ -144,13 +144,26 @@ function MapResizeController({ watch }) {
 }
 
 function calculateWeeklyAdded(restaurants) {
+  function parseTimestamp(value) {
+    if (!value) return NaN
+    const direct = Date.parse(value)
+    if (Number.isFinite(direct)) return direct
+    if (typeof value === 'string') {
+      const normalized = value.trim().replace(' ', 'T')
+      const withTimezone = /(?:Z|[+-]\d{2}:\d{2})$/.test(normalized) ? normalized : `${normalized}Z`
+      const fallback = Date.parse(withTimezone)
+      if (Number.isFinite(fallback)) return fallback
+    }
+    return NaN
+  }
+
   const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
   const recent = new Set()
 
   for (const item of restaurants) {
     const createdRaw = item?.created_at ?? item?.createdAt
     if (!createdRaw) continue
-    const createdMs = Date.parse(createdRaw)
+    const createdMs = parseTimestamp(createdRaw)
     if (!Number.isFinite(createdMs) || createdMs < weekAgo) continue
     const key = item?.restaurantId ?? item?.slug ?? item?.id
     if (key) recent.add(String(key))
