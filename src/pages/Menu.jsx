@@ -64,6 +64,8 @@ export default function Menu() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [isOutdatedOpen, setIsOutdatedOpen] = useState(false)
+  const [isMapOpen, setIsMapOpen] = useState(false)
+  const [copiedShare, setCopiedShare] = useState(false)
 
   const [query, setQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -110,6 +112,16 @@ export default function Menu() {
       aborted = true
     }
   }, [accessToken, fetchStatus, slug])
+
+  useEffect(() => {
+    setIsMapOpen(false)
+  }, [slug])
+
+  useEffect(() => {
+    if (!copiedShare) return undefined
+    const timeoutId = window.setTimeout(() => setCopiedShare(false), 1800)
+    return () => window.clearTimeout(timeoutId)
+  }, [copiedShare])
 
   const dishes = useMemo(() => flattenMenuDishes(menu), [menu])
   const freeDishKeys = useMemo(
@@ -176,6 +188,9 @@ export default function Menu() {
     return ordered.filter((section) => section.dishes.length)
   }, [filtered, menu?.categories])
   const instagramUrl = useMemo(() => normalizeInstagramUrl(menu?.instagramUrl), [menu?.instagramUrl])
+  const mapQuery = useMemo(() => encodeURIComponent(`${menu?.name || slug} ресторан`), [menu?.name, slug])
+  const mapEmbedUrl = useMemo(() => `https://maps.google.com/maps?q=${mapQuery}&z=15&output=embed`, [mapQuery])
+  const mapOpenUrl = useMemo(() => `https://www.google.com/maps/search/?api=1&query=${mapQuery}`, [mapQuery])
 
   // Toggle a preset chip and re-run memoized filtering.
   const togglePreset = (key) => {
@@ -201,6 +216,34 @@ export default function Menu() {
     setRange(createDefaultRange())
   }
 
+  const openMapInBrowser = () => {
+    window.open(mapOpenUrl, '_blank', 'noopener,noreferrer')
+  }
+
+  const handleShare = async () => {
+    const pageUrl = window.location.href
+    const isMobileViewport = window.matchMedia('(max-width: 768px)').matches
+
+    if (isMobileViewport && navigator.share) {
+      try {
+        await navigator.share({
+          title: menu?.name || 'Меню ресторана',
+          url: pageUrl,
+        })
+        return
+      } catch (err) {
+        if (err?.name === 'AbortError') return
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(pageUrl)
+      setCopiedShare(true)
+    } catch (_) {
+      // Ignore clipboard API failures in unsupported environments.
+    }
+  }
+
   return (
     <div className="menu-page">
       <header className="menu-hero">
@@ -215,19 +258,82 @@ export default function Menu() {
           </button>
         </div>
         <div className="menu-hero__header">
-          <div className="menu-hero__title-row">
-            <h1 className="menu-hero__title">{menu?.name || 'Меню'}</h1>
-            {instagramUrl ? <InstagramLink href={instagramUrl} /> : null}
+          <div className="menu-hero__lead">
+            <div className="menu-hero__title-row">
+              <h1 className="menu-hero__title">{menu?.name || 'Меню'}</h1>
+              <div className="menu-hero__socials">
+                {instagramUrl ? <InstagramLink href={instagramUrl} /> : null}
+                <button
+                  type="button"
+                  className="menu-hero__share"
+                  onClick={handleShare}
+                  aria-label="Поделиться страницей ресторана"
+                  title={copiedShare ? 'Ссылка скопирована' : 'Поделиться'}
+                >
+                  <svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none">
+                    <path
+                      d="M16 5a3 3 0 1 1 2.94 3.6l-8.16 4.08a3 3 0 0 1 0 2.64l8.16 4.08A3 3 0 1 1 18 21a3 3 0 0 1 .94-2.31l-8.16-4.08a3 3 0 1 1 0-5.22l8.16-4.08A3 3 0 0 1 18 3Z"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            {!!capturedAt && <div className="menu__captured-at">Меню добавлено: {capturedAt}</div>}
           </div>
 
+          <button
+            type="button"
+            className="menu-hero__mini-map"
+            onClick={() => setIsMapOpen(true)}
+            aria-label="Открыть карту ресторана"
+            title="Открыть карту ресторана"
+          >
+            <iframe
+              className="menu-hero__mini-map-frame"
+              src={mapEmbedUrl}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title={`Карта ресторана ${menu?.name || slug}`}
+            />
+            <span className="menu-hero__mini-map-pin" aria-hidden="true">●</span>
+          </button>
+
           <div className="menu-hero__meta-row">
-            {!!capturedAt && <div className="menu__captured-at">Меню добавлено: {capturedAt}</div>}
             <div className="menu-hero__badge">
-              {filtered.length ? `${filtered.length} блюд` : 'Ничего не найдено'}
+              <span>{filtered.length ? `${filtered.length} блюд` : 'Ничего не найдено'}</span>
+              <button
+                type="button"
+                className="menu-hero__map-mobile-btn"
+                onClick={openMapInBrowser}
+              >
+                Показать на карте
+              </button>
             </div>
           </div>
         </div>
       </header>
+
+      {isMapOpen ? (
+        <div className="menu-map-modal" role="dialog" aria-modal="true" aria-label="Карта ресторана">
+          <button type="button" className="menu-map-modal__backdrop" onClick={() => setIsMapOpen(false)} aria-label="Закрыть карту" />
+          <div className="menu-map-modal__dialog">
+            <button type="button" className="menu-map-modal__close" onClick={() => setIsMapOpen(false)} aria-label="Закрыть">
+              Закрыть
+            </button>
+            <iframe
+              className="menu-map-modal__frame"
+              src={mapEmbedUrl}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title={`Большая карта ресторана ${menu?.name || slug}`}
+            />
+          </div>
+        </div>
+      ) : null}
 
       <section className="menu-category-filter" aria-label="Фильтр по категории">
         <label className="sr-only" htmlFor="menu-category-select">Категория меню</label>
