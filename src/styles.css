@@ -2996,13 +2996,15 @@ body {
   }
 
   .account__header-mobile {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     flex: 1;
-    margin-right: 12px;
   }
 
   .account__mobile-brand {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     display: inline-flex;
     align-items: center;
     gap: 12px;
@@ -3036,34 +3038,56 @@ body {
     font-size: 20px;
     font-weight: 500;
     letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .account__mobile-toggle {
-    width: 100%;
+  .account__mobile-back {
+    flex: 1;
+    min-width: 0;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 16px 22px;
+    gap: 8px;
+    padding: 12px 14px;
     background: #fff;
     border: 1px solid rgba(15, 23, 42, 0.08);
-    border-radius: 24px;
-    box-shadow: 0 8px 26px rgba(15, 23, 42, 0.08);
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
     cursor: pointer;
     font: inherit;
-    font-weight: 700;
-    font-size: 18px;
+    font-weight: 600;
+    font-size: 14px;
     color: var(--rs-text);
+    text-align: left;
     -webkit-tap-highlight-color: transparent;
   }
 
-  .account__mobile-toggle svg {
-    width: 22px;
-    height: 22px;
+  .account__mobile-back svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
     color: var(--rs-accent);
+  }
+
+  .account__mobile-back span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .account__header-actions {
     display: none;
+  }
+
+  .account-logout-btn--mobile {
+    display: inline-flex;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 12px;
+    justify-content: center;
+    flex-shrink: 0;
   }
 }
 
@@ -3300,6 +3324,10 @@ body:has(.account--sheet-open) {
   transition: all 0.2s ease;
 }
 
+.account-logout-btn--mobile {
+  display: none;
+}
+
 .account-logout-btn:hover {
   background: #fee2e2;
   border-color: #fca5a5;
@@ -3370,14 +3398,14 @@ body:has(.account--sheet-open) {
   }
 
   .account-overview-mobile__avatar {
-    width: 86px;
-    height: 86px;
+    width: 58px;
+    height: 58px;
     border-radius: 50%;
-    border: 3px solid #76be5a;
+    border: 2px solid #76be5a;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 52px;
+    font-size: 34px;
     line-height: 1;
     font-weight: 700;
     color: #5b3b1c;
@@ -3394,7 +3422,7 @@ body:has(.account--sheet-open) {
 
   .account-overview-mobile__name {
     margin: 0;
-    font-size: clamp(28px, 11vw, 50px);
+    font-size: clamp(18px, 7.2vw, 32px);
     line-height: 1;
     font-weight: 700;
     letter-spacing: -0.01em;
@@ -3402,7 +3430,7 @@ body:has(.account--sheet-open) {
 
   .account-overview-mobile__email {
     margin: 0;
-    font-size: clamp(14px, 4.2vw, 20px);
+    font-size: clamp(10px, 2.8vw, 13px);
     color: rgba(255, 255, 255, 0.82);
     white-space: nowrap;
     overflow: hidden;
@@ -3487,10 +3515,7 @@ body:has(.account--sheet-open) {
 
   .account-overview-mobile__menu-item--profile {
     cursor: pointer;
-    position: relative;
-    align-items: flex-start;
-    padding-top: 18px;
-    padding-right: 122px;
+    align-items: center;
   }
 
   .account-overview-mobile__menu-icon {
@@ -3519,18 +3544,59 @@ body:has(.account--sheet-open) {
   }
 
   .account-overview-mobile__menu-progress {
-    font-size: 12px;
-    font-weight: 700;
-    background: #18202b;
-    color: #eef2f7;
-    border-radius: 8px;
-    padding: 5px 8px;
-    white-space: nowrap;
-    position: absolute;
-    top: 8px;
-    right: 10px;
+    margin-left: auto;
+    width: 96px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
     pointer-events: none;
-    z-index: 2;
+  }
+
+  .account-overview-mobile__menu-progress-value {
+    align-self: flex-end;
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 800;
+  }
+
+  .account-overview-mobile__menu-progress-value--danger {
+    color: #dc2626;
+  }
+
+  .account-overview-mobile__menu-progress-value--warning {
+    color: #d97706;
+  }
+
+  .account-overview-mobile__menu-progress-value--success {
+    color: #15803d;
+  }
+
+  .account-overview-mobile__menu-progress-track {
+    width: 100%;
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.28);
+    overflow: hidden;
+  }
+
+  .account-overview-mobile__menu-progress-fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    transition: width 0.25s ease;
+  }
+
+  .account-overview-mobile__menu-progress-fill--danger {
+    background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+  }
+
+  .account-overview-mobile__menu-progress-fill--warning {
+    background: linear-gradient(90deg, #f59e0b 0%, #facc15 100%);
+  }
+
+  .account-overview-mobile__menu-progress-fill--success {
+    background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
   }
 
   .account-overview-mobile__menu-arrow {
@@ -5726,11 +5792,29 @@ body:has(.account--sheet-open) {
 
   .site-footer__meta {
     gap: 4px;
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    padding-bottom: 2px;
   }
 
   .site-footer__copy,
   .site-footer__legal {
     font-size: 10px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .site-footer__dot {
+    flex: 0 0 auto;
+  }
+
+  .site-footer__legal {
+    overflow: visible;
+    text-overflow: clip;
   }
 }
 
@@ -8987,7 +9071,7 @@ html[data-rs-theme="night"] .onboarding-flow__legal {
 
 @media (max-width: 900px) {
   .container--landing {
-    height: calc(100dvh - 56px - 136px);
+    height: calc(100dvh - 56px);
     padding-top: 3px;
     padding-bottom: 3px;
   }

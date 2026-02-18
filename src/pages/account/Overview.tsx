@@ -115,6 +115,11 @@ export default function AccountOverview() {
     const filled = fields.filter((field) => String(field || "").trim().length > 0).length;
     return Math.round((filled / fields.length) * 100);
   }, [form]);
+  const profileCompletionTone = useMemo(() => {
+    if (profileCompletion < 50) return "danger";
+    if (profileCompletion < 80) return "warning";
+    return "success";
+  }, [profileCompletion]);
 
   return (
     <section
@@ -176,7 +181,15 @@ export default function AccountOverview() {
             </span>
             <span className="account-overview-mobile__menu-label">Мой профиль</span>
             <span className="account-overview-mobile__menu-progress" aria-label={`Профиль заполнен на ${profileCompletion}%`}>
-              Заполнен на {profileCompletion}%
+              <span className={`account-overview-mobile__menu-progress-value account-overview-mobile__menu-progress-value--${profileCompletionTone}`}>
+                {profileCompletion}%
+              </span>
+              <span className="account-overview-mobile__menu-progress-track" aria-hidden="true">
+                <span
+                  className={`account-overview-mobile__menu-progress-fill account-overview-mobile__menu-progress-fill--${profileCompletionTone}`}
+                  style={{ width: `${profileCompletion}%` }}
+                />
+              </span>
             </span>
           </button>
 

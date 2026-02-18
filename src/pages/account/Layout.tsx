@@ -115,10 +115,8 @@ export default function AccountLayout() {
     }
   }, [accessToken, load]);
 
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-
   const sub = me?.user?.subscription || null;
-  const isNeverSubscribed = !sub || (sub.status === 'none' && !sub.expired);
+  const isAccountRoot = location.pathname === "/account";
 
   const navItems = [
     { to: "/account", label: "Профиль", end: true },
@@ -128,10 +126,6 @@ export default function AccountLayout() {
     { to: "/account/statistics", label: "Дневник питания" },
     { to: "/account/favorites", label: "Избранное" },
   ];
-
-  const currentNav = navItems.find((item) =>
-    item.end ? location.pathname === item.to : location.pathname.startsWith(item.to)
-  ) || navItems[0];
 
   const daysLeft = useMemo(() => {
     if (!sub?.expires_at) return null;
@@ -150,21 +144,45 @@ export default function AccountLayout() {
   }
 
   return (
-    <div className={`account${isSheetOpen ? " account--sheet-open" : ""}`}>
+    <div className="account">
       <div className="account__inner">
         <header className="account__header">
           <div className="account__header-desktop">
             <h1 className="account__title">Личный кабинет</h1>
           </div>
           <div className="account__header-mobile">
+            {isAccountRoot ? (
+              <NavLink to="/" className="account__mobile-brand" aria-label="На главную">
+                <span className="account__mobile-brand-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M3 10.5L12 3l9 7.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M6.75 9.75V21h10.5V9.75" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+                <span className="account__mobile-brand-label">RestaurantSecret</span>
+              </NavLink>
+            ) : (
+              <button
+                type="button"
+                className="account__mobile-back"
+                onClick={() => navigate("/account")}
+                aria-label="Назад в личный кабинет"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>Назад в личный кабинет</span>
+              </button>
+            )}
             <button
-              className="account__mobile-toggle"
-              onClick={() => setIsSheetOpen(true)}
-              aria-label="Открыть меню"
+              type="button"
+              className="account-logout-btn account-logout-btn--mobile"
+              onClick={handleOpenLogoutModal}
+              title="Выйти"
+              aria-label="Выйти"
             >
-              <span className="account__mobile-toggle-label">{currentNav.label}</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M4 6h16M4 12h16m-7 6h7" strokeLinecap="round" />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
           </div>
@@ -203,58 +221,6 @@ export default function AccountLayout() {
           <div className="account__content">
             <Outlet context={outletContext} />
           </div>
-        </div>
-      </div>
-
-      {/* Bottom Sheet for Mobile */}
-      <div
-        className={`account-sheet-overlay${isSheetOpen ? " is-visible" : ""}`}
-        onClick={() => setIsSheetOpen(false)}
-      />
-      <div className={`account-sheet${isSheetOpen ? " is-open" : ""}`}>
-        <div className="account-sheet__handle" />
-        <div className="account-sheet__content">
-          <div className="account-sheet__header-row">
-            <div className="account-sheet__header">Навигация</div>
-            <button
-              type="button"
-              className="account-sheet__logout"
-              onClick={() => {
-                setIsSheetOpen(false);
-                handleOpenLogoutModal();
-              }}
-              title="Выйти"
-              aria-label="Выйти"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          </div>
-          <nav className="account-sheet__nav">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) =>
-                  `account-sheet__link${isActive ? " is-active" : ""}`
-                }
-                onClick={() => setIsSheetOpen(false)}
-              >
-                <span className="account-sheet__link-label">{item.label}</span>
-                {location.pathname === item.to || (item.end === false && location.pathname.startsWith(item.to)) ? (
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                  </svg>
-                ) : (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                )}
-              </NavLink>
-            ))}
-          </nav>
         </div>
       </div>
 
