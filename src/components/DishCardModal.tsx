@@ -298,12 +298,12 @@ export default function DishCardModal() {
                   </div>
                 </section>
 
-                {data.composition_text && (
-                  <section className="dish-card__section">
-                    <div className="dish-card__section-title">Состав</div>
-                    <p className="dish-card__text">{data.composition_text}</p>
-                  </section>
-                )}
+                <section className="dish-card__section">
+                  <div className="dish-card__section-title">Состав</div>
+                  <p className="dish-card__text">
+                    {data.composition_text || "Ресторан не поделился данными о составе"}
+                  </p>
+                </section>
 
 
               </>

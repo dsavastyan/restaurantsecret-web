@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { formatNumeric } from '@/lib/nutrition';
-import { formatDescription } from '@/lib/text';
 import { useAuth } from '@/store/auth';
 import { useSubscriptionStore } from '@/store/subscription';
 import { useFavoritesStore } from '@/store/favorites';
@@ -88,13 +87,18 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, interac
         navigate('/login', { state: { from: '/account/subscription' } });
     };
 
+    const handleDetailsClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!interactive) return;
+        onClick?.();
+    };
+
     return (
-        <div className="menu-card" onClick={onClick}>
+        <div className="menu-card">
             <div className="menu-card__top">
                 <div className="menu-card__title-row">
                     <h3 className="menu-card__title">{dish.name}</h3>
                     <div className="menu-card__actions">
-                        {Number.isFinite(dish.price) && <div className="menu-card__price">{Math.round(dish.price)} ₽</div>}
                         <button
                             type="button"
                             className="menu-card__add-btn"
@@ -127,16 +131,23 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, interac
 
                 {hasActiveSub ? (
                     <>
-                        <div className="menu-card__tags">
-                            <span className="menu-tag">{formatNumeric(dish.kcal)} ккал</span>
+                        <div className="menu-card__macros">
+                            <span className="menu-tag menu-tag--kcal">{formatNumeric(dish.kcal)} ккал</span>
                             <span className="menu-tag">Б {formatNumeric(dish.protein)}</span>
                             <span className="menu-tag">Ж {formatNumeric(dish.fat)}</span>
                             <span className="menu-tag">У {formatNumeric(dish.carbs)}</span>
                             {Number.isFinite(dish.weight) && <span className="menu-tag">{formatNumeric(dish.weight)} г</span>}
                         </div>
-                        <p className="menu-card__description">
-                            {formatDescription(dish.ingredients ?? dish.description) || ''}
-                        </p>
+                        <div className="menu-card__footer">
+                            {Number.isFinite(dish.price) && <div className="menu-card__price">{Math.round(dish.price)} ₽</div>}
+                            <button
+                                type="button"
+                                className="menu-card__details-btn"
+                                onClick={handleDetailsClick}
+                            >
+                                Подробнее
+                            </button>
+                        </div>
                     </>
                 ) : (
                     <div className="menu-paywall">
