@@ -419,17 +419,6 @@ export default function AccountSubscription() {
         <h2 id="account-subscription-heading" className="account-panel-v2__title">
           {pageTitle}
         </h2>
-        {isActive && statusData?.can_cancel && (
-          <button
-            className="account-subscription-v2__btn-cancel-top"
-            onClick={handleCancel}
-            disabled={canceling}
-            title="Отменить подписку"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-            {canceling ? "..." : "Отменить"}
-          </button>
-        )}
       </header>
 
       {loading && <SubscriptionSkeleton />}
@@ -440,11 +429,26 @@ export default function AccountSubscription() {
             <div className={`account-subscription-v2__card ${isActive ? 'is-active' : 'is-expired'}`}>
               <div className="account-subscription-v2__card-left">
                 <div className="account-subscription-v2__card-header">
-                  {isActive && statusData?.plan && (
-                    <div className="account-subscription-v2__plan-badge">
-                      {PLAN_LABELS[statusData.plan] || statusData.plan}
+                  {(isActive && statusData?.plan) || (isActive && statusData?.can_cancel) ? (
+                    <div className="account-subscription-v2__card-toolbar">
+                      {isActive && statusData?.plan && (
+                        <div className="account-subscription-v2__plan-badge">
+                          {PLAN_LABELS[statusData.plan] || statusData.plan}
+                        </div>
+                      )}
+                      {isActive && statusData?.can_cancel && (
+                        <button
+                          className="account-subscription-v2__btn-cancel-top"
+                          onClick={handleCancel}
+                          disabled={canceling}
+                          title="Отменить подписку"
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                          {canceling ? "..." : "Отменить"}
+                        </button>
+                      )}
                     </div>
-                  )}
+                  ) : null}
                   <div className="account-subscription-v2__card-title-row">
                     <div className="account-subscription-v2__card-icon">
                       {isActive ? (

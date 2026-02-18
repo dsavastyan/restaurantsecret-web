@@ -1,6 +1,8 @@
 // Restaurant menu page with filters for macros and calories.
 import React, { useEffect, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { AttributionControl, CircleMarker, MapContainer, TileLayer } from 'react-leaflet'
+import 'leaflet/dist/leaflet.css'
 import { apiGet } from '@/lib/requests'
 import { flattenMenuDishes } from '@/lib/nutrition'
 import { formatDescription, matchesSearchQuery } from '@/lib/text'
@@ -11,6 +13,7 @@ import { MenuOutdatedModal } from '@/components/MenuOutdatedModal'
 import DishCard from '@/components/DishCard/DishCard'
 import { useDishCardStore } from '@/store/dishCard'
 import { analytics } from '@/services/analytics'
+import { toast } from '@/lib/toast'
 
 const createDefaultPresets = () => ({ highProtein: false, lowFat: false, lowKcal: false })
 const createDefaultRange = () => ({
@@ -19,6 +22,7 @@ const createDefaultRange = () => ({
   fat: { min: '', max: '' },
   carbs: { min: '', max: '' }
 })
+const DEFAULT_MAP_CENTER = [55.751244, 37.618423]
 
 const formatPositionCount = (count) => {
   const absCount = Math.abs(count)
@@ -54,6 +58,7 @@ const normalizeInstagramUrl = (rawUrl) => {
 
 export default function Menu() {
   const { slug } = useParams()
+  const navigate = useNavigate()
   const accessToken = useAuth((state) => state.accessToken)
   const { fetchStatus } = useSubscriptionStore((state) => ({
     fetchStatus: state.fetchStatus,
@@ -65,7 +70,7 @@ export default function Menu() {
   const [error, setError] = useState('')
   const [isOutdatedOpen, setIsOutdatedOpen] = useState(false)
   const [isMapOpen, setIsMapOpen] = useState(false)
-  const [copiedShare, setCopiedShare] = useState(false)
+  const [restaurantPoint, setRestaurantPoint] = useState(null)
 
   const [query, setQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -118,10 +123,30 @@ export default function Menu() {
   }, [slug])
 
   useEffect(() => {
-    if (!copiedShare) return undefined
-    const timeoutId = window.setTimeout(() => setCopiedShare(false), 1800)
-    return () => window.clearTimeout(timeoutId)
-  }, [copiedShare])
+    let aborted = false
+    setRestaurantPoint(null)
+
+    ; (async () => {
+      try {
+        const mapData = await apiGet('/restaurants/map')
+        if (aborted) return
+        const targetSlug = String(slug || '').trim().toLowerCase()
+        const points = Array.isArray(mapData?.items) ? mapData.items : []
+        const found = points.find((item) => String(item?.slug || '').trim().toLowerCase() === targetSlug)
+        const lat = Number(found?.lat)
+        const lon = Number(found?.lon)
+        if (Number.isFinite(lat) && Number.isFinite(lon)) {
+          setRestaurantPoint({ lat, lon })
+        }
+      } catch (coordsError) {
+        if (!aborted) console.error('Failed to load restaurant coordinates', coordsError)
+      }
+    })()
+
+    return () => {
+      aborted = true
+    }
+  }, [slug])
 
   const dishes = useMemo(() => flattenMenuDishes(menu), [menu])
   const freeDishKeys = useMemo(
@@ -188,9 +213,17 @@ export default function Menu() {
     return ordered.filter((section) => section.dishes.length)
   }, [filtered, menu?.categories])
   const instagramUrl = useMemo(() => normalizeInstagramUrl(menu?.instagramUrl), [menu?.instagramUrl])
-  const mapQuery = useMemo(() => encodeURIComponent(`${menu?.name || slug} ресторан`), [menu?.name, slug])
-  const mapEmbedUrl = useMemo(() => `https://maps.google.com/maps?q=${mapQuery}&z=15&output=embed`, [mapQuery])
-  const mapOpenUrl = useMemo(() => `https://www.google.com/maps/search/?api=1&query=${mapQuery}`, [mapQuery])
+  const mapCenter = useMemo(
+    () => (restaurantPoint ? [restaurantPoint.lat, restaurantPoint.lon] : DEFAULT_MAP_CENTER),
+    [restaurantPoint]
+  )
+  const mapOpenUrl = useMemo(() => {
+    if (restaurantPoint) {
+      const { lat, lon } = restaurantPoint
+      return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=16/${lat}/${lon}`
+    }
+    return `https://www.openstreetmap.org/search?query=${encodeURIComponent(`${menu?.name || slug} ресторан`)}`
+  }, [menu?.name, restaurantPoint, slug])
 
   // Toggle a preset chip and re-run memoized filtering.
   const togglePreset = (key) => {
@@ -238,7 +271,9 @@ export default function Menu() {
 
     try {
       await navigator.clipboard.writeText(pageUrl)
-      setCopiedShare(true)
+      if (!isMobileViewport) {
+        toast.success('Ссылка скопирована', { duration: 2200 })
+      }
     } catch (_) {
       // Ignore clipboard API failures in unsupported environments.
     }
@@ -248,7 +283,20 @@ export default function Menu() {
     <div className="menu-page">
       <header className="menu-hero">
         <div className="menu-hero__top-row">
-          <div className="menu-hero__pill">Меню ресторана</div>
+          <div className="menu-hero__top-main">
+            <button
+              type="button"
+              className="menu-hero__back-catalog"
+              onClick={() => navigate('/catalog')}
+              aria-label="Ко всем меню"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none">
+                <path d="M15 6 9 12l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <span>Ко всем меню</span>
+            </button>
+            <div className="menu-hero__pill">Меню ресторана</div>
+          </div>
           <button
             type="button"
             className="menu-outdated"
@@ -268,11 +316,11 @@ export default function Menu() {
                   className="menu-hero__share"
                   onClick={handleShare}
                   aria-label="Поделиться страницей ресторана"
-                  title={copiedShare ? 'Ссылка скопирована' : 'Поделиться'}
+                  title="Поделиться"
                 >
                   <svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none">
                     <path
-                      d="M16 5a3 3 0 1 1 2.94 3.6l-8.16 4.08a3 3 0 0 1 0 2.64l8.16 4.08A3 3 0 1 1 18 21a3 3 0 0 1 .94-2.31l-8.16-4.08a3 3 0 1 1 0-5.22l8.16-4.08A3 3 0 0 1 18 3Z"
+                      d="M12 16V4m0 0-4 4m4-4 4 4M6 13v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4"
                       stroke="currentColor"
                       strokeWidth="1.8"
                       strokeLinecap="round"
@@ -292,26 +340,25 @@ export default function Menu() {
             aria-label="Открыть карту ресторана"
             title="Открыть карту ресторана"
           >
-            <iframe
+            <MenuLeafletMap
               className="menu-hero__mini-map-frame"
-              src={mapEmbedUrl}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
+              center={mapCenter}
+              marker={restaurantPoint}
+              interactive={false}
               title={`Карта ресторана ${menu?.name || slug}`}
             />
-            <span className="menu-hero__mini-map-pin" aria-hidden="true">●</span>
           </button>
 
           <div className="menu-hero__meta-row">
+            <button
+              type="button"
+              className="menu-hero__map-mobile-btn"
+              onClick={openMapInBrowser}
+            >
+              Показать на карте
+            </button>
             <div className="menu-hero__badge">
               <span>{filtered.length ? `${filtered.length} блюд` : 'Ничего не найдено'}</span>
-              <button
-                type="button"
-                className="menu-hero__map-mobile-btn"
-                onClick={openMapInBrowser}
-              >
-                Показать на карте
-              </button>
             </div>
           </div>
         </div>
@@ -324,11 +371,11 @@ export default function Menu() {
             <button type="button" className="menu-map-modal__close" onClick={() => setIsMapOpen(false)} aria-label="Закрыть">
               Закрыть
             </button>
-            <iframe
+            <MenuLeafletMap
               className="menu-map-modal__frame"
-              src={mapEmbedUrl}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
+              center={mapCenter}
+              marker={restaurantPoint}
+              interactive
               title={`Большая карта ресторана ${menu?.name || slug}`}
             />
           </div>
@@ -499,6 +546,42 @@ function InstagramLink({ href }) {
         <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm11.5 1.8a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
       </svg>
     </a>
+  )
+}
+
+function MenuLeafletMap({ className, center, marker, interactive, title }) {
+  const zoom = marker ? 16 : 11
+  const mapKey = `${center[0]}:${center[1]}:${zoom}:${interactive ? 'interactive' : 'preview'}`
+
+  return (
+    <MapContainer
+      key={mapKey}
+      center={center}
+      zoom={zoom}
+      className={className}
+      attributionControl={interactive}
+      dragging={interactive}
+      touchZoom={interactive}
+      doubleClickZoom={interactive}
+      scrollWheelZoom={interactive}
+      boxZoom={interactive}
+      keyboard={interactive}
+      zoomControl={interactive}
+      title={title}
+    >
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      {interactive ? <AttributionControl prefix={false} /> : null}
+      {marker ? (
+        <CircleMarker
+          center={[marker.lat, marker.lon]}
+          radius={8}
+          pathOptions={{ color: '#ffffff', weight: 2, fillColor: '#d62839', fillOpacity: 0.95 }}
+        />
+      ) : null}
+    </MapContainer>
   )
 }
 

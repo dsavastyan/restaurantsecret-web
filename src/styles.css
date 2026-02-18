@@ -898,6 +898,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  position: relative;
 }
 
 .menu-hero__top-row {
@@ -905,6 +906,40 @@ body {
   justify-content: space-between;
   gap: 10px;
   align-items: flex-start;
+}
+
+.menu-hero__top-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.menu-hero__back-catalog {
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 999px;
+  padding: 7px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.menu-hero__back-catalog:hover {
+  background: #f8fafc;
+  border-color: rgba(15, 23, 42, 0.24);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.1);
+}
+
+.menu-hero__back-catalog svg {
+  flex: 0 0 auto;
 }
 
 .menu-hero__pill {
@@ -1001,7 +1036,7 @@ body {
 }
 
 .menu-hero__badge {
-  padding: 12px 16px;
+  padding: 10px 14px;
   border-radius: 16px;
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(227, 247, 236, 0.92));
   color: #14532d;
@@ -1009,9 +1044,9 @@ body {
   border: 1px solid rgba(15, 23, 42, 0.16);
   box-shadow: 0 12px 26px rgba(15, 23, 42, 0.09);
   display: inline-flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
 }
 
 .menu-hero__mini-map {
@@ -1021,12 +1056,12 @@ body {
 .menu-hero__map-mobile-btn {
   display: none;
   border: 1px solid rgba(15, 23, 42, 0.16);
-  border-radius: 10px;
+  border-radius: 12px;
   background: #ffffff;
   color: #0f172a;
   font-weight: 700;
-  font-size: 13px;
-  padding: 8px 12px;
+  font-size: 14px;
+  padding: 10px 14px;
   cursor: pointer;
 }
 
@@ -1405,14 +1440,16 @@ body {
   }
 
   .menu-hero__header {
-    grid-template-columns: minmax(0, 1fr) 260px auto;
-    gap: 18px;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+    gap: 22px;
     min-height: 156px;
+    align-items: center;
   }
 
   .menu-hero__mini-map {
     width: 100%;
-    height: 128px;
+    max-width: 420px;
+    height: 156px;
     display: block;
     border: 1px solid rgba(15, 23, 42, 0.16);
     border-radius: 14px;
@@ -1422,6 +1459,7 @@ body {
     position: relative;
     cursor: pointer;
     box-shadow: 0 10px 22px rgba(15, 23, 42, 0.16);
+    justify-self: center;
   }
 
   .menu-hero__mini-map-frame {
@@ -1431,26 +1469,18 @@ body {
     pointer-events: none;
   }
 
-  .menu-hero__mini-map-pin {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -60%);
-    color: #d62839;
-    font-size: 24px;
-    text-shadow: 0 2px 10px rgba(15, 23, 42, 0.45);
-    line-height: 1;
+  .menu-hero__mini-map-frame .leaflet-control-container {
+    display: none;
   }
 
   .menu-hero__meta-row {
     justify-content: flex-end;
-    align-self: stretch;
-    display: flex;
+    align-self: end;
+    grid-column: 1 / -1;
   }
 
   .menu-hero__badge {
-    min-width: 132px;
-    justify-content: center;
+    min-width: 120px;
     text-align: right;
   }
 
@@ -4496,29 +4526,43 @@ body:has(.account--sheet-open) {
 
 .account-subscription-v2__card {
   position: relative;
-  border-radius: 20px;
+  border-radius: 26px;
   padding: 0;
   display: flex;
   flex-direction: row;
   align-items: stretch;
   gap: 0;
   overflow: hidden;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.2s ease;
+  border: 1px solid rgba(184, 206, 193, 0.58);
+  background:
+    linear-gradient(136deg, rgba(250, 255, 252, 0.88) 0%, rgba(255, 249, 243, 0.78) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 14px 34px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.62);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .account-subscription-v2__card:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+  box-shadow:
+    0 22px 38px rgba(15, 23, 42, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.68);
 }
 
 .account-subscription-v2__card.is-active {
-  background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
-  border: 1px solid #dcfce7;
+  border-color: rgba(129, 186, 146, 0.5);
+  background:
+    radial-gradient(90% 120% at 0% 0%, rgba(187, 247, 208, 0.45) 0%, rgba(187, 247, 208, 0) 56%),
+    linear-gradient(138deg, rgba(240, 253, 244, 0.9) 0%, rgba(255, 251, 247, 0.82) 100%);
 }
 
 .account-subscription-v2__card.is-expired {
-  background: linear-gradient(135deg, #fff7ed 0%, #ffffff 100%);
-  border: 1px solid #ffedd5;
+  border-color: rgba(251, 191, 130, 0.46);
+  background:
+    radial-gradient(95% 120% at 0% 0%, rgba(254, 215, 170, 0.34) 0%, rgba(254, 215, 170, 0) 56%),
+    linear-gradient(138deg, rgba(255, 247, 237, 0.9) 0%, rgba(255, 252, 247, 0.82) 100%);
 }
 
 /* Left column - text content */
@@ -4526,19 +4570,19 @@ body:has(.account--sheet-open) {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 40px 20px 40px 40px;
-  gap: 20px;
+  justify-content: flex-start;
+  padding: 30px 28px;
+  gap: 18px;
   min-width: 0;
 }
 
 /* Right column - illustration */
 .account-subscription-v2__card-right {
-  flex: 0 0 300px;
+  flex: 0 0 320px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 20px 24px 20px 0;
   overflow: hidden;
 }
 
@@ -4551,8 +4595,16 @@ body:has(.account--sheet-open) {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 12px;
+  gap: 14px;
   margin-bottom: 8px;
+}
+
+.account-subscription-v2__card-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .account-subscription-v2__card-title-row {
@@ -4627,46 +4679,49 @@ body:has(.account--sheet-open) {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  row-gap: 6px;
 }
 
 .account-subscription-v2__card-title {
-  font-size: 24px;
+  font-size: clamp(32px, 2.7vw, 46px);
   font-weight: 700;
   margin: 0;
-  color: #1e293b;
-  white-space: nowrap;
+  color: #0f172a;
+  white-space: normal;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
 }
 
 .account-subscription-v2__plan-badge {
-  align-self: flex-end;
   margin: 0;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(4px);
-  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  padding: 8px 14px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: #0f172a;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  letter-spacing: 0.08em;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
 }
 
 .account-subscription-v2__next-charge {
-  margin-top: 8px;
-  font-size: 14px;
-  color: #64748b;
+  margin-top: 2px;
+  font-size: 15px;
+  color: #475569;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
 .account-subscription-v2__card-status-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #94a3b8;
-  letter-spacing: 0.02em;
+  font-size: 12px;
+  font-weight: 700;
+  color: #7f8da5;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -4675,8 +4730,9 @@ body:has(.account--sheet-open) {
   align-items: center;
   gap: 8px;
   width: fit-content;
-  color: #475569;
-  font-weight: 600;
+  color: #334155;
+  font-weight: 700;
+  font-size: 15px;
 }
 
 .account-subscription-v2__card-actions {
@@ -4712,24 +4768,25 @@ body:has(.account--sheet-open) {
 }
 
 .account-subscription-v2__btn-cancel-top {
-  /* Removed absolute positioning */
-  background: rgba(242, 95, 58, 0.1);
-  color: #f25f38;
-  border: 1px solid rgba(242, 95, 58, 0.2);
-  padding: 8px 16px;
-  border-radius: 10px;
-  font-size: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #e35c36;
+  border: 1px solid rgba(242, 95, 58, 0.34);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap;
 }
 
 .account-subscription-v2__btn-cancel-top:hover {
-  background: #f25f38;
-  color: #fff;
+  background: rgba(242, 95, 58, 0.14);
+  border-color: rgba(242, 95, 58, 0.52);
+  color: #cc4d2d;
 }
 
 .account-subscription-v2__cancel-note {
@@ -4760,15 +4817,20 @@ body:has(.account--sheet-open) {
   width: 100%;
   max-width: 320px;
   height: 100%;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.48);
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  overflow: hidden;
 }
 
 .account-subscription-v2__card-illus img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
-  border-radius: 0 20px 20px 0;
-  /* Match card radius on right side */
+  border-radius: 0;
+  padding: 12px;
 }
 
 .account-subscription-v2__intro {
@@ -5141,36 +5203,55 @@ body:has(.account--sheet-open) {
   }
 
   .account-subscription-panel .account-panel-v2__header {
-    justify-content: flex-end;
-    margin-bottom: 8px;
+    display: none;
   }
 
   .account-subscription-v2__card {
     flex-direction: column;
-    padding: 0;
+    border-radius: 22px;
   }
 
   .account-subscription-v2__card-left {
-    padding: 28px 24px;
-    gap: 16px;
+    padding: 20px 16px 16px;
+    gap: 14px;
   }
 
   .account-subscription-v2__card-title {
     white-space: normal;
+    font-size: clamp(28px, 8vw, 34px);
+    line-height: 1.04;
   }
 
   .account-subscription-v2__card-title-row {
     align-items: flex-start;
+    gap: 10px;
+  }
+
+  .account-subscription-v2__card-toolbar {
+    gap: 8px;
+  }
+
+  .account-subscription-v2__plan-badge {
+    font-size: 11px;
+    padding: 7px 12px;
+  }
+
+  .account-subscription-v2__btn-cancel-top {
+    margin-left: auto;
+    padding: 7px 12px;
+    font-size: 12px;
   }
 
   .account-subscription-v2__card-right {
-    padding: 0 24px 28px 24px;
+    padding: 0 16px 16px;
     max-width: 100%;
     justify-content: center;
   }
 
   .account-subscription-v2__card-illus {
-    max-width: 260px;
+    max-width: 100%;
+    min-height: 210px;
+    border-radius: 16px;
   }
 
   .account-subscription-v2__card-content {
@@ -5182,6 +5263,28 @@ body:has(.account--sheet-open) {
   .account-subscription-v2__card-actions {
     align-items: stretch;
     justify-content: stretch;
+  }
+
+  .account-subscription-v2__card-status-row {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+
+  .account-subscription-v2__card-date-box {
+    width: 100%;
+    font-size: 26px;
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .account-subscription-v2__card-date-box svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .account-subscription-v2__next-charge {
+    font-size: 14px;
+    line-height: 1.38;
   }
 
   .account-subscription-v2__btn-renew {
@@ -8004,7 +8107,7 @@ body:has(.account--sheet-open) {
 .intro__benefits li {
   display: grid;
   grid-template-columns: 34px minmax(0, 1fr);
-  align-items: start;
+  align-items: center;
   gap: 12px;
   text-align: left;
   width: min(100%, 760px);
@@ -8026,7 +8129,7 @@ body:has(.account--sheet-open) {
   justify-content: center;
   font-size: 17px;
   font-weight: 700;
-  margin-top: 2px;
+  margin-top: 0;
 }
 
 .intro--day .intro__check {
@@ -9117,14 +9220,38 @@ html[data-rs-theme="night"] .onboarding-flow__legal {
   }
 
   .menu-hero__badge {
-    width: 100%;
-    align-items: flex-end;
+    width: auto;
+    max-width: calc(100% - 150px);
+    align-items: center;
   }
 
   .menu-hero__map-mobile-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .menu-hero {
+    padding-bottom: 86px;
+  }
+
+  .menu-hero__meta-row {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    justify-content: space-between;
+    align-items: flex-end;
+    pointer-events: none;
+  }
+
+  .menu-hero__map-mobile-btn,
+  .menu-hero__badge {
+    pointer-events: auto;
+  }
+
+  .menu-hero__badge {
+    margin-left: auto;
   }
 
   .menu-map-modal {
@@ -10163,6 +10290,17 @@ html[data-rs-theme="night"] .menu-hero {
 html[data-rs-theme="night"] .menu-hero__pill {
   color: #e8f2ff;
   background: linear-gradient(140deg, rgba(52, 211, 153, 0.3), rgba(59, 130, 246, 0.3));
+}
+
+html[data-rs-theme="night"] .menu-hero__back-catalog {
+  background: rgba(15, 26, 44, 0.9);
+  border-color: rgba(148, 163, 184, 0.34);
+  color: #dbe7f8;
+}
+
+html[data-rs-theme="night"] .menu-hero__back-catalog:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(148, 163, 184, 0.46);
 }
 
 html[data-rs-theme="night"] .menu-hero__insta {
