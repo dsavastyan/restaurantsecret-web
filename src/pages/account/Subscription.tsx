@@ -126,11 +126,12 @@ export default function AccountSubscription() {
         if (typeof value !== "string") return "none" as const;
         const trimmed = value.trim().toLowerCase();
 
-        if (trimmed === "active" && expiresAt) {
+        if ((trimmed === "active" || trimmed === "canceled") && expiresAt) {
           const expiresDate = new Date(expiresAt);
           if (!isNaN(expiresDate.getTime()) && expiresDate < new Date()) {
             return "expired";
           }
+          return "active";
         }
 
         const known = ["active", "expired", "canceled", "none"] as const;

@@ -51,10 +51,12 @@ const fetchStatus = async (token?: string | null) => {
       token,
     );
     const statusNorm = normalizeStatus(response?.statusNorm || response?.status);
-    let isActive = statusNorm === "active";
+    const expiresAt = response?.expires_at;
 
-    if (isActive && response?.expires_at) {
-      const expiresDate = new Date(response.expires_at);
+    let isActive = (statusNorm === "active" || statusNorm === "canceled");
+
+    if (isActive && expiresAt) {
+      const expiresDate = new Date(expiresAt);
       if (!isNaN(expiresDate.getTime()) && expiresDate < new Date()) {
         isActive = false;
       }
