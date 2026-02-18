@@ -20,13 +20,42 @@ function getRussianPluralWord(count, one, few, many) {
 }
 
 export default function Landing() {
-  const [themeMode, setThemeMode] = useState(() => (isMoscowDaytime() ? 'day' : 'night'))
+  const resolveThemeMode = () => {
+    const htmlTheme = document.documentElement.getAttribute('data-rs-theme')
+    if (htmlTheme === 'day' || htmlTheme === 'night') return htmlTheme
+    return isMoscowDaytime() ? 'day' : 'night'
+  }
+
+  const [themeMode, setThemeMode] = useState(resolveThemeMode)
 
   useEffect(() => {
-    const updateTheme = () => setThemeMode(isMoscowDaytime() ? 'day' : 'night')
+    const updateTheme = () => setThemeMode(resolveThemeMode())
     updateTheme()
     const id = window.setInterval(updateTheme, 60000)
-    return () => window.clearInterval(id)
+
+    const observer = new MutationObserver((changes) => {
+      if (changes.some((change) => change.attributeName === 'data-rs-theme')) {
+        updateTheme()
+      }
+    })
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-rs-theme'],
+    })
+
+    const onStorage = (event) => {
+      if (event.key === 'rs_theme_preference') {
+        updateTheme()
+      }
+    }
+    window.addEventListener('storage', onStorage)
+
+    return () => {
+      window.clearInterval(id)
+      observer.disconnect()
+      window.removeEventListener('storage', onStorage)
+    }
   }, [])
 
   return (

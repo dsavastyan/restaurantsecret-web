@@ -31,6 +31,7 @@ const normalizeInstagramUrl = (rawUrl) => {
 export default function Catalog() {
   const { data: filters } = useSWRLite('filters', () => api.filters())
   const [selectedCuisines, setSelectedCuisines] = useState([])
+  const [selectedMetro, setSelectedMetro] = useState('')
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
 
@@ -139,6 +140,7 @@ export default function Catalog() {
 
     const normalizedQuery = debouncedQuery.toLowerCase()
     const cuisines = selectedCuisines.map((c) => c?.toLowerCase())
+    const metro = selectedMetro.trim().toLowerCase()
 
     return allItems.filter((item) => {
       const name = item?.name?.toLowerCase() || ''
@@ -154,14 +156,24 @@ export default function Catalog() {
         )
       }
 
-      return matchesQuery && matchesCuisine
+      const itemMetroCandidate = [
+        item?.metro,
+        item?.metro_name,
+        item?.metroName,
+        item?.metro_station,
+        item?.metroStation,
+      ].find(Boolean)
+      const itemMetro = String(itemMetroCandidate || '').toLowerCase()
+      const matchesMetro = !metro || itemMetro === metro
+
+      return matchesQuery && matchesCuisine && matchesMetro
     })
-  }, [debouncedQuery, allItems, selectedCuisines])
+  }, [debouncedQuery, allItems, selectedCuisines, selectedMetro])
 
   // Reset visible count when filters change
   useEffect(() => {
     setVisibleCount(VISIBLE_CHUNK_SIZE)
-  }, [debouncedQuery, selectedCuisines])
+  }, [debouncedQuery, selectedCuisines, selectedMetro])
 
   // Slice for display
   const visibleItems = useMemo(() => {
@@ -203,6 +215,15 @@ export default function Catalog() {
     }))).sort((a, b) => a.localeCompare(b, 'ru'))
   }, [filters?.cuisines])
 
+  const metroOptions = useMemo(() => {
+    const values = allItems
+      .map((item) => item?.metro || item?.metro_name || item?.metroName || item?.metro_station || item?.metroStation)
+      .filter(Boolean)
+      .map((name) => String(name).trim())
+      .filter(Boolean)
+    return Array.from(new Set(values)).sort((a, b) => a.localeCompare(b, 'ru'))
+  }, [allItems])
+
   const extractDishes = useCallback((restaurant) => {
     const candidates = [
       restaurant?.dishes,
@@ -243,11 +264,6 @@ export default function Catalog() {
     <div className="catalog-page">
       <section className="catalog-hero">
         <div className="catalog-hero__inner">
-          <div className="catalog-hero__copy">
-            <p className="catalog-hero__eyebrow">Рестораны</p>
-            <h1 className="catalog-hero__title">Поиск по названию ресторана</h1>
-          </div>
-
           <form className="catalog-search" onSubmit={handleSubmit}>
             <label className="sr-only" htmlFor="restaurant-search">Поиск по ресторанам</label>
             <div className="catalog-search__field">
@@ -257,7 +273,7 @@ export default function Catalog() {
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Например, Chaikhona, BB&Burgers, Додо"
+                placeholder="Поиск по названию ресторана"
                 autoComplete="off"
               />
               {query && (
@@ -277,12 +293,28 @@ export default function Catalog() {
 
           <div className="catalog-filters">
             <div className="catalog-filter">
-              <div className="catalog-filter__label">Кухня</div>
+              <div className="catalog-filter__label">Фильтр кухни</div>
               <CuisineFilter
                 cuisines={cuisineOptions}
                 selectedCuisines={selectedCuisines}
                 onChange={setSelectedCuisines}
               />
+            </div>
+            <div className="catalog-filter">
+              <div className="catalog-filter__label">Фильтр по метро</div>
+              <select
+                className="catalog-metro-select"
+                value={selectedMetro}
+                onChange={(e) => setSelectedMetro(e.target.value)}
+                disabled={!metroOptions.length}
+              >
+                <option value="">Любое метро</option>
+                {metroOptions.map((metroName) => (
+                  <option key={metroName} value={metroName.toLowerCase()}>
+                    {metroName}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
@@ -301,65 +333,52 @@ export default function Catalog() {
         <ul className="catalog-grid">
           {visibleItems.map((r, i) => {
             const allDishes = extractDishes(r)
-            const dishes = allDishes.slice(0, 8)
             const instagramUrl = normalizeInstagramUrl(r.instagramUrl)
             const dishesCount = typeof r?.dishesCount === 'number'
               ? r.dishesCount
               : allDishes.length
             return (
               <li key={`${r.slug || r.name}-${i}`} className="catalog-card" role="group" aria-label={r?.name ?? 'Ресторан'}>
-                <div className="catalog-card__header">
-                  <div className="catalog-card__badge" aria-hidden="true">{getInitials(r?.name)}</div>
-                  <div className="catalog-card__title-block">
+                <div className="catalog-card__top">
+                  <div className="catalog-card__identity">
+                    <div className="catalog-card__badge" aria-hidden="true">{getInitials(r?.name)}</div>
                     <h3 className="catalog-card__title">{r.name}</h3>
-                    {r.cuisine && <div className="catalog-card__cuisine">{r.cuisine}</div>}
                   </div>
-                  {instagramUrl && (
-                    <a
-                      href={instagramUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      aria-label="Instagram ресторана"
-                      title="Instagram"
-                      style={{ color: '#E1306C', display: 'inline-flex', marginRight: 8 }}
+                  <div className="catalog-card__top-actions">
+                    {instagramUrl && (
+                      <a
+                        href={instagramUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        aria-label="Instagram ресторана"
+                        title="Instagram"
+                        className="catalog-card__icon-btn catalog-card__icon-btn--ig"
+                      >
+                        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor">
+                          <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm11.5 1.8a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
+                        </svg>
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      className={`catalog-card__icon-btn catalog-card__fav-btn ${isFavorite(r.slug) ? 'is-active' : ''}`}
+                      onClick={(e) => handleToggleFavorite(e, r.slug, r.name)}
+                      aria-label={isFavorite(r.slug) ? "Удалить из избранного" : "Добавить в избранное"}
                     >
-                      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor">
-                        <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm11.5 1.8a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z"
+                          fill={isFavorite(r.slug) ? "#E11D48" : "none"}
+                          stroke={isFavorite(r.slug) ? "#E11D48" : "currentColor"}
+                          strokeWidth="2"
+                        />
                       </svg>
-                    </a>
-                  )}
-                  <button
-                    type="button"
-                    className={`catalog-card__fav-btn ${isFavorite(r.slug) ? 'is-active' : ''}`}
-                    onClick={(e) => handleToggleFavorite(e, r.slug, r.name)}
-                    aria-label={isFavorite(r.slug) ? "Удалить из избранного" : "Добавить в избранное"}
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z"
-                        fill={isFavorite(r.slug) ? "#E11D48" : "none"}
-                        stroke={isFavorite(r.slug) ? "#E11D48" : "currentColor"}
-                        strokeWidth="2"
-                      />
-                    </svg>
-                  </button>
+                    </button>
+                  </div>
                 </div>
 
-                <div className="catalog-card__body">
+                <div className="catalog-card__bottom">
                   <div className="catalog-card__label">Блюда в меню: {dishesCount}</div>
-                  {dishesCount === 0 && (
-                    <div className="catalog-card__empty">Скоро добавим</div>
-                  )}
-                  {dishesCount > 0 && dishes.length > 0 && (
-                    <ul className="catalog-card__dishes">
-                      {dishes.map((dish, idx) => (
-                        <li key={`${r.slug || r.name}-dish-${idx}`} className="catalog-card__dish">{dish}</li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-
-                <div className="catalog-card__actions">
                   <button type="button" className="btn btn--primary" onClick={() => openMenu(r.slug)}>Открыть меню</button>
                 </div>
               </li>

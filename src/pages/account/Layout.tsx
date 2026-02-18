@@ -219,6 +219,24 @@ export default function AccountLayout() {
           <div className="account__header-actions">
             <button
               type="button"
+              className="account-theme-toggle"
+              onClick={handleToggleTheme}
+              title={isNightTheme ? "Включить дневную тему" : "Включить ночную тему"}
+              aria-label={isNightTheme ? "Включить дневную тему" : "Включить ночную тему"}
+            >
+              {isNightTheme ? (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="4.5" />
+                  <path d="M12 2.8v2.2M12 19v2.2M21.2 12h-2.2M5 12H2.8M18.9 5.1l-1.6 1.6M6.7 17.3l-1.6 1.6M18.9 18.9l-1.6-1.6M6.7 6.7L5.1 5.1" strokeLinecap="round" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 14.2A9 9 0 1 1 9.8 3a7.2 7.2 0 0 0 11.2 11.2Z" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </button>
+            <button
+              type="button"
               className="account-logout-btn"
               onClick={handleOpenLogoutModal}
               title="Выйти"
