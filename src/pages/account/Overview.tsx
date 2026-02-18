@@ -102,6 +102,7 @@ export default function AccountOverview() {
     return source.trim().charAt(0).toUpperCase();
   }, [profileName, me?.user?.email]);
   const hasPremium = Boolean(sub && sub.status !== "none" && !sub.expired);
+  const subscriptionMenuLabel = hasPremium ? "Управлять подпиской" : "Оформить подписку";
   const profileCompletion = useMemo(() => {
     const fields = [
       form.gender,
@@ -128,9 +129,13 @@ export default function AccountOverview() {
           <div className="account-overview-mobile__identity">
             <h2 className="account-overview-mobile__name">{profileName || "Профиль"}</h2>
             <p className="account-overview-mobile__email">{me?.user?.email || "—"}</p>
-            {hasPremium && (
-              <span className="account-overview-mobile__premium">Премиум доступ</span>
-            )}
+            <span
+              className={`account-overview-mobile__premium${
+                hasPremium ? "" : " account-overview-mobile__premium--basic"
+              }`}
+            >
+              {hasPremium ? "Премиум доступ" : "Базовый доступ"}
+            </span>
           </div>
         </div>
 
@@ -170,7 +175,7 @@ export default function AccountOverview() {
               </svg>
             </span>
             <span className="account-overview-mobile__menu-label">Мой профиль</span>
-            <span className="account-overview-mobile__menu-progress">
+            <span className="account-overview-mobile__menu-progress" aria-label={`Профиль заполнен на ${profileCompletion}%`}>
               Заполнен на {profileCompletion}%
             </span>
           </button>
@@ -186,14 +191,19 @@ export default function AccountOverview() {
             <span className="account-overview-mobile__menu-arrow" aria-hidden="true">›</span>
           </Link>
 
-          <Link className="account-overview-mobile__menu-item" to="/account/subscription">
+          <Link
+            className={`account-overview-mobile__menu-item${
+              hasPremium ? "" : " account-overview-mobile__menu-item--subscription-cta"
+            }`}
+            to="/account/subscription"
+          >
             <span className="account-overview-mobile__menu-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M4 11a8 8 0 0113.7-5.7M20 13a8 8 0 01-13.7 5.7" strokeLinecap="round" />
                 <path d="M17 3v4h4M7 21v-4H3" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </span>
-            <span className="account-overview-mobile__menu-label">Управлять подпиской</span>
+            <span className="account-overview-mobile__menu-label">{subscriptionMenuLabel}</span>
             <span className="account-overview-mobile__menu-arrow" aria-hidden="true">›</span>
           </Link>
 

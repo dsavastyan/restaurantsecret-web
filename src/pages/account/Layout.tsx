@@ -157,28 +157,16 @@ export default function AccountLayout() {
             <h1 className="account__title">Личный кабинет</h1>
           </div>
           <div className="account__header-mobile">
-            {location.pathname === "/account" ? (
-              <NavLink to="/" className="account__mobile-brand" aria-label="На главную">
-                <span className="account__mobile-brand-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M3 10.5L12 3l9 7.5" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M6.75 9.75V21h10.5V9.75" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-                <span className="account__mobile-brand-label">RestaurantSecret</span>
-              </NavLink>
-            ) : (
-              <button
-                className="account__mobile-toggle"
-                onClick={() => setIsSheetOpen(true)}
-                aria-label="Открыть меню"
-              >
-                <span className="account__mobile-toggle-label">{currentNav.label}</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <path d="M4 6h16M4 12h16m-7 6h7" strokeLinecap="round" />
-                </svg>
-              </button>
-            )}
+            <button
+              className="account__mobile-toggle"
+              onClick={() => setIsSheetOpen(true)}
+              aria-label="Открыть меню"
+            >
+              <span className="account__mobile-toggle-label">{currentNav.label}</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M4 6h16M4 12h16m-7 6h7" strokeLinecap="round" />
+              </svg>
+            </button>
           </div>
 
           <div className="account__header-actions">
@@ -226,7 +214,23 @@ export default function AccountLayout() {
       <div className={`account-sheet${isSheetOpen ? " is-open" : ""}`}>
         <div className="account-sheet__handle" />
         <div className="account-sheet__content">
-          <div className="account-sheet__header">Навигация</div>
+          <div className="account-sheet__header-row">
+            <div className="account-sheet__header">Навигация</div>
+            <button
+              type="button"
+              className="account-sheet__logout"
+              onClick={() => {
+                setIsSheetOpen(false);
+                handleOpenLogoutModal();
+              }}
+              title="Выйти"
+              aria-label="Выйти"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </div>
           <nav className="account-sheet__nav">
             {navItems.map((item) => (
               <NavLink
