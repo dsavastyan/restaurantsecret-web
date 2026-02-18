@@ -2998,23 +2998,14 @@ body {
   .account__header-mobile {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: space-between;
+    gap: 12px;
     flex: 1;
   }
 
-  .account__mobile-brand {
-    flex: 1;
-    min-width: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
-    border-radius: 18px;
-    text-decoration: none;
-    background: rgba(17, 24, 39, 0.58);
-    color: #fff;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.2);
+  .account__mobile-placeholder {
+    width: 1px;
+    height: 1px;
   }
 
   .account__mobile-brand-icon {
@@ -3074,6 +3065,32 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .account__mobile-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .account-theme-toggle {
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    border-radius: 12px;
+    background: #ffffff;
+    color: #334155;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  }
+
+  .account-theme-toggle svg {
+    width: 18px;
+    height: 18px;
   }
 
   .account__header-actions {
@@ -3545,17 +3562,15 @@ body:has(.account--sheet-open) {
 
   .account-overview-mobile__menu-progress {
     margin-left: auto;
-    width: 96px;
+    width: auto;
     display: inline-flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 4px;
+    align-items: center;
+    gap: 6px;
     pointer-events: none;
   }
 
   .account-overview-mobile__menu-progress-value {
-    align-self: flex-end;
-    font-size: 12px;
+    font-size: 11px;
     line-height: 1;
     font-weight: 800;
   }
@@ -3573,7 +3588,7 @@ body:has(.account--sheet-open) {
   }
 
   .account-overview-mobile__menu-progress-track {
-    width: 100%;
+    width: 52px;
     height: 7px;
     border-radius: 999px;
     background: rgba(148, 163, 184, 0.28);
@@ -9277,4 +9292,73 @@ html[data-rs-theme="night"] .landing[data-theme="night"] .hero,
 html[data-rs-theme="night"] .landing[data-theme="night"] .restaurant-map-container,
 html[data-rs-theme="night"] .landing[data-theme="night"] .benefit-card {
   box-shadow: 0 14px 30px rgba(2, 6, 23, 0.42);
+}
+
+html[data-rs-theme="night"] .account,
+html[data-rs-theme="night"] .account__title,
+html[data-rs-theme="night"] .account-panel__title,
+html[data-rs-theme="night"] .account-panel-v2__title {
+  color: #e6eef9;
+}
+
+html[data-rs-theme="night"] .account-nav,
+html[data-rs-theme="night"] .account-panel,
+html[data-rs-theme="night"] .account-panel-v2,
+html[data-rs-theme="night"] .logout-modal__dialog,
+html[data-rs-theme="night"] .account-history__item,
+html[data-rs-theme="night"] .account-subscription-v2__card,
+html[data-rs-theme="night"] .account-subscription-v2__plans,
+html[data-rs-theme="night"] .account-subscription-v2__promo-inner,
+html[data-rs-theme="night"] .account-subscription__tile-v2,
+html[data-rs-theme="night"] .account-overview-mobile__menu-item,
+html[data-rs-theme="night"] .account-overview-mobile__quick-card,
+html[data-rs-theme="night"] .account-overview-form {
+  background: linear-gradient(180deg, rgba(16, 28, 46, 0.95), rgba(10, 20, 36, 0.95));
+  border-color: rgba(148, 163, 184, 0.25);
+  color: #e2e8f0;
+}
+
+html[data-rs-theme="night"] .account-nav__link,
+html[data-rs-theme="night"] .account-profile-info__value,
+html[data-rs-theme="night"] .account-panel__lead,
+html[data-rs-theme="night"] .account-panel__description,
+html[data-rs-theme="night"] .account-overview-mobile__menu-label,
+html[data-rs-theme="night"] .account-overview-mobile__quick-card {
+  color: #d8e4f3;
+}
+
+html[data-rs-theme="night"] .account-panel__box,
+html[data-rs-theme="night"] .account-subscription-v2__promo-box,
+html[data-rs-theme="night"] .account-subscription__promo {
+  background: rgba(10, 20, 36, 0.74);
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+html[data-rs-theme="night"] .account-button--outline,
+html[data-rs-theme="night"] .account-subscription-v2__btn-cancel-top,
+html[data-rs-theme="night"] .account-subscription-v2__btn-history,
+html[data-rs-theme="night"] .account-subscription__history {
+  background: rgba(16, 28, 46, 0.95);
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #dbe7f8;
+}
+
+html[data-rs-theme="night"] .account-overview-mobile__menu-icon,
+html[data-rs-theme="night"] .account-overview-mobile__quick-icon {
+  background: rgba(30, 41, 59, 0.72);
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #c9d7ea;
+}
+
+html[data-rs-theme="night"] .account__mobile-back,
+html[data-rs-theme="night"] .account-theme-toggle,
+html[data-rs-theme="night"] .account-logout-btn--mobile {
+  background: linear-gradient(180deg, rgba(15, 26, 44, 0.94), rgba(10, 19, 34, 0.96));
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #d7e3f6;
+}
+
+html[data-rs-theme="night"] .account-overview-mobile__premium--basic {
+  color: #c7d4e7;
+  background: rgba(71, 85, 105, 0.56);
 }

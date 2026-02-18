@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useOutletContext } from "react-router-dom";
+import { Link, useLocation, useOutletContext } from "react-router-dom";
 import type { AccountOutletContext } from "./Layout";
 import { getProfileNameForToken } from "@/lib/onboarding";
 import { useAuth } from "@/store/auth";
@@ -7,6 +7,7 @@ import { useGoalsStore } from "@/store/goals";
 
 export default function AccountOverview() {
   const { me, sub } = useOutletContext<AccountOutletContext>();
+  const location = useLocation();
   const { accessToken } = useAuth((state) => ({
     accessToken: state.accessToken,
   }));
@@ -29,7 +30,6 @@ export default function AccountOverview() {
   });
   const [isFormDirty, setIsFormDirty] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'' | 'saving' | 'saved'>('');
-  const [isMobileProfileOpen, setIsMobileProfileOpen] = useState(false);
 
   useEffect(() => {
     if (accessToken) fetchGoals(accessToken);
@@ -120,13 +120,14 @@ export default function AccountOverview() {
     if (profileCompletion < 80) return "warning";
     return "success";
   }, [profileCompletion]);
+  const isProfileDetailsPage = location.pathname === "/account/profile";
 
   return (
     <section
       className="account-panel account-overview"
       aria-labelledby="account-profile-heading"
     >
-      <div className="account-overview-mobile">
+      {!isProfileDetailsPage && <div className="account-overview-mobile">
         <div className="account-overview-mobile__hero">
           <div className="account-overview-mobile__avatar" aria-hidden="true">
             {profileInitial}
@@ -166,12 +167,9 @@ export default function AccountOverview() {
         </div>
 
         <div className="account-overview-mobile__menu">
-          <button
-            type="button"
+          <Link
             className="account-overview-mobile__menu-item account-overview-mobile__menu-item--profile"
-            onClick={() => setIsMobileProfileOpen((prev) => !prev)}
-            aria-expanded={isMobileProfileOpen}
-            aria-controls="account-overview-form"
+            to="/account/profile"
           >
             <span className="account-overview-mobile__menu-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -191,7 +189,7 @@ export default function AccountOverview() {
                 />
               </span>
             </span>
-          </button>
+          </Link>
 
           <Link className="account-overview-mobile__menu-item" to="/account/payment-methods">
             <span className="account-overview-mobile__menu-icon" aria-hidden="true">
@@ -231,11 +229,11 @@ export default function AccountOverview() {
             <span className="account-overview-mobile__menu-arrow" aria-hidden="true">›</span>
           </Link>
         </div>
-      </div>
+      </div>}
 
       <div
         id="account-overview-form"
-        className={`account-overview-form${isMobileProfileOpen ? " is-open" : ""}`}
+        className={`account-overview-form${isProfileDetailsPage ? " is-open" : ""}`}
       >
         <div className="account-profile-info">
           {profileName && (
