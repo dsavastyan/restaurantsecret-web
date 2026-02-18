@@ -2978,7 +2978,8 @@ body {
 
 @media (max-width: 899px) {
   .account {
-    padding-top: 16px;
+    padding-top: 8px;
+    padding-bottom: 24px;
   }
 
   .account__header {
@@ -2986,9 +2987,13 @@ body {
     top: 64px;
     z-index: 20;
     margin: 0 -16px;
-    padding: 0 16px 16px;
+    padding: 0 16px 8px;
     background: transparent;
     align-items: center;
+  }
+
+  .account__inner {
+    gap: 10px;
   }
 
   .account__header-desktop {
@@ -3072,25 +3077,6 @@ body {
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
-  }
-
-  .account-theme-toggle {
-    width: 40px;
-    height: 40px;
-    border: 1px solid rgba(15, 23, 42, 0.12);
-    border-radius: 12px;
-    background: #ffffff;
-    color: #334155;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
-  }
-
-  .account-theme-toggle svg {
-    width: 18px;
-    height: 18px;
   }
 
   .account__header-actions {
@@ -3390,22 +3376,47 @@ body:has(.account--sheet-open) {
     background: rgba(255, 246, 227, 0.16);
     border: 1px solid rgba(255, 255, 255, 0.24);
     box-shadow: none;
-    padding: 12px;
+    padding: 10px;
     border-radius: 18px;
     backdrop-filter: blur(10px);
   }
 
   .account-overview-mobile {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
+    padding-top: 2px;
+  }
+
+  .account-overview-mobile__theme-toggle {
+    position: absolute;
+    top: -2px;
+    right: 2px;
+    z-index: 3;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    border: 1px solid rgba(15, 23, 42, 0.16);
+    background: rgba(255, 255, 255, 0.92);
+    color: #334155;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.14);
+    cursor: pointer;
+  }
+
+  .account-overview-mobile__theme-toggle svg {
+    width: 18px;
+    height: 18px;
   }
 
   .account-overview-mobile__hero {
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 14px;
+    padding: 12px;
     border-radius: 18px;
     background:
       radial-gradient(120% 110% at 100% 0%, rgba(252, 211, 127, 0.82) 0%, rgba(252, 211, 127, 0.12) 55%),
@@ -3474,7 +3485,7 @@ body:has(.account--sheet-open) {
   .account-overview-mobile__quick {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 8px;
   }
 
   .account-overview-mobile__quick-card {
@@ -3512,7 +3523,7 @@ body:has(.account--sheet-open) {
   .account-overview-mobile__menu {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
   }
 
   .account-overview-mobile__menu-item {
@@ -9351,7 +9362,7 @@ html[data-rs-theme="night"] .account-overview-mobile__quick-icon {
 }
 
 html[data-rs-theme="night"] .account__mobile-back,
-html[data-rs-theme="night"] .account-theme-toggle,
+html[data-rs-theme="night"] .account-overview-mobile__theme-toggle,
 html[data-rs-theme="night"] .account-logout-btn--mobile {
   background: linear-gradient(180deg, rgba(15, 26, 44, 0.94), rgba(10, 19, 34, 0.96));
   border-color: rgba(148, 163, 184, 0.3);
@@ -9361,4 +9372,84 @@ html[data-rs-theme="night"] .account-logout-btn--mobile {
 html[data-rs-theme="night"] .account-overview-mobile__premium--basic {
   color: #c7d4e7;
   background: rgba(71, 85, 105, 0.56);
+}
+
+html[data-rs-theme="night"] .account-overview-form .form-group label,
+html[data-rs-theme="night"] .account-overview-form .account-profile-info__label {
+  color: #9fb0c5;
+}
+
+html[data-rs-theme="night"] .account-overview-form .form-group input,
+html[data-rs-theme="night"] .account-overview-form .form-group select,
+html[data-rs-theme="night"] .account-overview-form .input-field {
+  background: rgba(10, 20, 36, 0.92);
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #e5edf8;
+}
+
+html[data-rs-theme="night"] .account-overview-form .form-group input::placeholder,
+html[data-rs-theme="night"] .account-overview-form .input-field::placeholder {
+  color: #8294ac;
+}
+
+html[data-rs-theme="night"] .ndsTitle,
+html[data-rs-theme="night"] .ndsStrong,
+html[data-rs-theme="night"] .ndsCardValue,
+html[data-rs-theme="night"] .diary-item-name,
+html[data-rs-theme="night"] .manual-entry-form .form-title {
+  color: #e7eef9;
+}
+
+html[data-rs-theme="night"] .ndsMuted,
+html[data-rs-theme="night"] .diary-item-meta,
+html[data-rs-theme="night"] .macro-subtext {
+  color: #9fb0c5;
+}
+
+html[data-rs-theme="night"] .ndsDateBtn,
+html[data-rs-theme="night"] .ndsDatePill {
+  background: rgba(10, 20, 36, 0.92);
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #dce7f7;
+}
+
+html[data-rs-theme="night"] .ndsCard,
+html[data-rs-theme="night"] .ndsTile {
+  background: linear-gradient(180deg, rgba(17, 30, 49, 0.96), rgba(10, 20, 36, 0.96));
+  border-color: rgba(148, 163, 184, 0.24);
+  box-shadow: 0 12px 26px rgba(2, 6, 23, 0.35);
+}
+
+html[data-rs-theme="night"] .ndsBar,
+html[data-rs-theme="night"] .mini-progress-bar {
+  background: rgba(148, 163, 184, 0.22);
+}
+
+html[data-rs-theme="night"] .manual-entry-form {
+  background: linear-gradient(180deg, rgba(17, 30, 49, 0.94), rgba(10, 20, 36, 0.96));
+  border-color: rgba(148, 163, 184, 0.28);
+}
+
+html[data-rs-theme="night"] .manual-entry-form .input-field {
+  background: rgba(7, 15, 28, 0.92);
+  border-color: rgba(148, 163, 184, 0.32);
+  color: #e5edf8;
+}
+
+html[data-rs-theme="night"] .manual-entry-form .input-field::placeholder {
+  color: #8799b0;
+}
+
+html[data-rs-theme="night"] .btn-add-product {
+  background: linear-gradient(135deg, #2f8f73 0%, #2b6f95 100%);
+}
+
+html[data-rs-theme="night"] .diary-item {
+  background: linear-gradient(180deg, rgba(17, 30, 49, 0.96), rgba(10, 20, 36, 0.96));
+  border-color: rgba(148, 163, 184, 0.28);
+}
+
+html[data-rs-theme="night"] .badge-restaurant {
+  background: rgba(14, 116, 144, 0.32);
+  color: #8adcf2;
 }

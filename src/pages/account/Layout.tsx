@@ -34,6 +34,8 @@ export type AccountOutletContext = {
   token: string | null;
   isLoading: boolean;
   error: string | null;
+  isNightTheme: boolean;
+  toggleTheme: () => void;
 };
 
 export default function AccountLayout() {
@@ -138,9 +140,27 @@ export default function AccountLayout() {
     return Math.max(0, diff);
   }, [sub?.expires_at]);
 
+  const handleToggleTheme = useCallback(() => {
+    const nextTheme = isNightTheme ? "day" : "night";
+    document.documentElement.setAttribute("data-rs-theme", nextTheme);
+    document.body.setAttribute("data-rs-theme", nextTheme);
+    window.localStorage.setItem("rs_theme_preference", nextTheme);
+    setIsNightTheme(!isNightTheme);
+  }, [isNightTheme]);
+
   const outletContext: AccountOutletContext = useMemo(
-    () => ({ me, sub, daysLeft, reload: load, token: accessToken || null, isLoading: loading, error }),
-    [me, sub, daysLeft, load, accessToken, loading, error]
+    () => ({
+      me,
+      sub,
+      daysLeft,
+      reload: load,
+      token: accessToken || null,
+      isLoading: loading,
+      error,
+      isNightTheme,
+      toggleTheme: handleToggleTheme,
+    }),
+    [me, sub, daysLeft, load, accessToken, loading, error, isNightTheme, handleToggleTheme]
   );
 
   useEffect(() => {
@@ -153,14 +173,6 @@ export default function AccountLayout() {
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-rs-theme"] });
     return () => observer.disconnect();
   }, []);
-
-  const handleToggleTheme = useCallback(() => {
-    const nextTheme = isNightTheme ? "day" : "night";
-    document.documentElement.setAttribute("data-rs-theme", nextTheme);
-    document.body.setAttribute("data-rs-theme", nextTheme);
-    window.localStorage.setItem("rs_theme_preference", nextTheme);
-    setIsNightTheme(!isNightTheme);
-  }, [isNightTheme]);
 
   if (!accessToken) {
     return <Navigate to="/login" replace state={{ from: location }} />;
@@ -190,24 +202,6 @@ export default function AccountLayout() {
               </button>
             )}
             <div className="account__mobile-controls">
-              <button
-                type="button"
-                className="account-theme-toggle"
-                onClick={handleToggleTheme}
-                title={isNightTheme ? "Включить дневной режим" : "Включить ночной режим"}
-                aria-label={isNightTheme ? "Включить дневной режим" : "Включить ночной режим"}
-              >
-                {isNightTheme ? (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="4" />
-                    <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41" strokeLinecap="round" />
-                  </svg>
-                ) : (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                )}
-              </button>
               <button
                 type="button"
                 className="account-logout-btn account-logout-btn--mobile"
