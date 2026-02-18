@@ -188,15 +188,15 @@ function calculateRestaurantStats(restaurants) {
     }
   }
 
-  const restaurants = byRestaurant.size
+  const restaurantCount = byRestaurant.size
   let weeklyAdded = 0
   for (const row of byRestaurant.values()) {
     if (row.isRecent) weeklyAdded += 1
   }
 
   return {
-    restaurants,
-    weeklyAdded: Math.min(weeklyAdded, restaurants),
+    restaurants: restaurantCount,
+    weeklyAdded: Math.min(weeklyAdded, restaurantCount),
   }
 }
 
