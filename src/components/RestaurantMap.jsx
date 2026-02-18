@@ -143,33 +143,61 @@ function MapResizeController({ watch }) {
   return null
 }
 
-function calculateWeeklyAdded(restaurants) {
-  function parseTimestamp(value) {
-    if (!value) return NaN
-    const direct = Date.parse(value)
-    if (Number.isFinite(direct)) return direct
-    if (typeof value === 'string') {
-      const normalized = value.trim().replace(' ', 'T')
-      const withTimezone = /(?:Z|[+-]\d{2}:\d{2})$/.test(normalized) ? normalized : `${normalized}Z`
-      const fallback = Date.parse(withTimezone)
-      if (Number.isFinite(fallback)) return fallback
-    }
-    return NaN
+function parseTimestamp(value) {
+  if (!value) return NaN
+  const direct = Date.parse(value)
+  if (Number.isFinite(direct)) return direct
+  if (typeof value === 'string') {
+    const normalized = value.trim().replace(' ', 'T')
+    const withTimezone = /(?:Z|[+-]\d{2}:\d{2})$/.test(normalized) ? normalized : `${normalized}Z`
+    const fallback = Date.parse(withTimezone)
+    if (Number.isFinite(fallback)) return fallback
   }
+  return NaN
+}
 
+function getRestaurantKey(item) {
+  const raw =
+    item?.restaurantId ??
+    item?.restaurant_id ??
+    item?.slug ??
+    item?.restaurantSlug ??
+    item?.restaurant_slug ??
+    item?.id
+  if (raw === null || raw === undefined || raw === '') return null
+  return String(raw)
+}
+
+function calculateRestaurantStats(restaurants) {
   const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
-  const recent = new Set()
+  const byRestaurant = new Map()
 
   for (const item of restaurants) {
+    const key = getRestaurantKey(item)
+    if (!key) continue
+
     const createdRaw = item?.menu_added_at ?? item?.menuAddedAt ?? item?.created_at ?? item?.createdAt
-    if (!createdRaw) continue
     const createdMs = parseTimestamp(createdRaw)
-    if (!Number.isFinite(createdMs) || createdMs < weekAgo) continue
-    const key = item?.restaurantId ?? item?.slug ?? item?.id
-    if (key) recent.add(String(key))
+    const isRecent = Number.isFinite(createdMs) && createdMs >= weekAgo
+
+    const prev = byRestaurant.get(key)
+    if (!prev) {
+      byRestaurant.set(key, { isRecent })
+    } else if (!prev.isRecent && isRecent) {
+      prev.isRecent = true
+    }
   }
 
-  return recent.size
+  const restaurants = byRestaurant.size
+  let weeklyAdded = 0
+  for (const row of byRestaurant.values()) {
+    if (row.isRecent) weeklyAdded += 1
+  }
+
+  return {
+    restaurants,
+    weeklyAdded: Math.min(weeklyAdded, restaurants),
+  }
 }
 
 export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSummaryHeader = true }) {
@@ -181,7 +209,7 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
   const [focusTarget, setFocusTarget] = useState(null)
   const [isDefaultView, setIsDefaultView] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const uniqueRestaurantCount = new Set(restaurants.map((item) => item.slug)).size
+  const { restaurants: uniqueRestaurantCount, weeklyAdded } = calculateRestaurantStats(restaurants)
   const isNight = themeMode === 'night'
   const hasOverlayMapButton = !showSummaryHeader
 
@@ -250,9 +278,9 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
     onStatsChange({
       restaurants: uniqueRestaurantCount,
       points: restaurants.length,
-      weeklyAdded: calculateWeeklyAdded(restaurants),
+      weeklyAdded,
     })
-  }, [onStatsChange, restaurants, uniqueRestaurantCount])
+  }, [onStatsChange, restaurants, uniqueRestaurantCount, weeklyAdded])
 
   useEffect(() => {
     if (!isFullscreen) return undefined

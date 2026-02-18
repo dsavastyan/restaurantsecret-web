@@ -49,6 +49,10 @@ export default function AccountLayout() {
 
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isNightTheme, setIsNightTheme] = useState<boolean>(() => {
+    if (typeof document === "undefined") return false;
+    return document.documentElement.getAttribute("data-rs-theme") === "night";
+  });
 
   const handleOpenLogoutModal = useCallback(() => {
     setIsLogoutModalOpen(true);
@@ -139,6 +143,25 @@ export default function AccountLayout() {
     [me, sub, daysLeft, load, accessToken, loading, error]
   );
 
+  useEffect(() => {
+    const syncThemeState = () => {
+      setIsNightTheme(document.documentElement.getAttribute("data-rs-theme") === "night");
+    };
+    syncThemeState();
+
+    const observer = new MutationObserver(syncThemeState);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-rs-theme"] });
+    return () => observer.disconnect();
+  }, []);
+
+  const handleToggleTheme = useCallback(() => {
+    const nextTheme = isNightTheme ? "day" : "night";
+    document.documentElement.setAttribute("data-rs-theme", nextTheme);
+    document.body.setAttribute("data-rs-theme", nextTheme);
+    window.localStorage.setItem("rs_theme_preference", nextTheme);
+    setIsNightTheme(!isNightTheme);
+  }, [isNightTheme]);
+
   if (!accessToken) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
@@ -152,15 +175,7 @@ export default function AccountLayout() {
           </div>
           <div className="account__header-mobile">
             {isAccountRoot ? (
-              <NavLink to="/" className="account__mobile-brand" aria-label="На главную">
-                <span className="account__mobile-brand-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M3 10.5L12 3l9 7.5" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M6.75 9.75V21h10.5V9.75" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-                <span className="account__mobile-brand-label">RestaurantSecret</span>
-              </NavLink>
+              <span className="account__mobile-placeholder" aria-hidden="true" />
             ) : (
               <button
                 type="button"
@@ -174,17 +189,37 @@ export default function AccountLayout() {
                 <span>Назад в личный кабинет</span>
               </button>
             )}
-            <button
-              type="button"
-              className="account-logout-btn account-logout-btn--mobile"
-              onClick={handleOpenLogoutModal}
-              title="Выйти"
-              aria-label="Выйти"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
+            <div className="account__mobile-controls">
+              <button
+                type="button"
+                className="account-theme-toggle"
+                onClick={handleToggleTheme}
+                title={isNightTheme ? "Включить дневной режим" : "Включить ночной режим"}
+                aria-label={isNightTheme ? "Включить дневной режим" : "Включить ночной режим"}
+              >
+                {isNightTheme ? (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41" strokeLinecap="round" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </button>
+              <button
+                type="button"
+                className="account-logout-btn account-logout-btn--mobile"
+                onClick={handleOpenLogoutModal}
+                title="Выйти"
+                aria-label="Выйти"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           <div className="account__header-actions">

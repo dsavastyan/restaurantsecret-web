@@ -15,6 +15,7 @@ import { useAuth } from '@/store/auth'
 
 // Default shape for the subscription/access status persisted in localStorage.
 const defaultAccess = { ok: false, isActive: false, expiresAt: null, event: null }
+const THEME_PREFERENCE_KEY = 'rs_theme_preference'
 
 const accessEventMessages = {
   subscription_pending: {
@@ -247,17 +248,33 @@ export default function AppShell() {
 
   // Sync global UI theme by Moscow sunrise/sunset and expose it via html/body dataset.
   useEffect(() => {
+    const resolveTheme = () => {
+      const saved = window.localStorage.getItem(THEME_PREFERENCE_KEY)
+      if (saved === 'day' || saved === 'night') {
+        return saved
+      }
+      return isMoscowDaytime() ? 'day' : 'night'
+    }
+
     const applyTheme = () => {
-      const day = isMoscowDaytime()
-      setIsDayTheme(day)
-      const theme = day ? 'day' : 'night'
+      const theme = resolveTheme()
+      setIsDayTheme(theme === 'day')
       document.documentElement.setAttribute('data-rs-theme', theme)
       document.body.setAttribute('data-rs-theme', theme)
     }
 
     applyTheme()
     const id = window.setInterval(applyTheme, 60000)
-    return () => window.clearInterval(id)
+    const onStorage = (event) => {
+      if (event.key === THEME_PREFERENCE_KEY) {
+        applyTheme()
+      }
+    }
+    window.addEventListener('storage', onStorage)
+    return () => {
+      window.clearInterval(id)
+      window.removeEventListener('storage', onStorage)
+    }
   }, [])
 
   const showGlobalSearch = useMemo(() => {
