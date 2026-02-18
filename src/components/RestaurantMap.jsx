@@ -454,27 +454,28 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
         }
 
         .map-expand-btn {
-          border: 1px solid #cbd5e1;
-          background: #fff;
+          border: 1px solid rgba(100, 116, 139, 0.45);
+          background: rgba(100, 116, 139, 0.34);
           color: #0f172a;
           border-radius: 10px;
           font-size: 13px;
           font-weight: 700;
           padding: 8px 12px;
           cursor: pointer;
+          backdrop-filter: blur(4px);
         }
 
         .map-expand-btn--overlay {
           position: absolute;
           top: 12px;
           right: 12px;
-          z-index: 1002;
+          z-index: 80;
           box-shadow: 0 8px 22px rgba(15, 23, 42, 0.18);
         }
 
         .restaurant-map-container.is-night .map-expand-btn {
-          background: #0f172a;
-          border-color: #334155;
+          background: rgba(71, 85, 105, 0.42);
+          border-color: rgba(148, 163, 184, 0.45);
           color: #e2e8f0;
         }
 
@@ -538,15 +539,16 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
           position: absolute;
           top: 12px;
           right: 12px;
-          z-index: 1001;
-          border: 1px solid #cbd5e1;
-          background: #fff;
+          z-index: 79;
+          border: 1px solid rgba(100, 116, 139, 0.45);
+          background: rgba(100, 116, 139, 0.34);
           color: #0f172a;
           border-radius: 10px;
-          font-size: 13px;
-          font-weight: 700;
+          font-size: 11px;
+          font-weight: 600;
           padding: 8px 10px;
           cursor: pointer;
+          backdrop-filter: blur(4px);
           box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
         }
 
@@ -560,8 +562,8 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
         }
 
         .restaurant-map-container.is-night .show-city-btn {
-          background: #0f172a;
-          border-color: #334155;
+          background: rgba(71, 85, 105, 0.42);
+          border-color: rgba(148, 163, 184, 0.45);
           color: #e2e8f0;
         }
 

@@ -864,8 +864,8 @@ body {
 
 .menu-hero__title-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: flex-end;
+  justify-content: flex-start;
   gap: 12px;
 }
 
@@ -875,6 +875,9 @@ body {
   align-items: center;
   justify-content: center;
   text-decoration: none;
+  font-size: clamp(34px, 9vw, 52px);
+  line-height: 1;
+  flex: 0 0 auto;
 }
 
 .menu-hero__icon-placeholder {
@@ -1149,6 +1152,13 @@ body {
   gap: 10px;
 }
 
+.menu-card__top {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 100%;
+}
+
 .menu-card__title-row {
   display: flex;
   justify-content: space-between;
@@ -1191,10 +1201,10 @@ body {
 }
 
 .menu-card__footer {
-  margin-top: 4px;
+  margin-top: auto;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   gap: 10px;
 }
 
@@ -1207,6 +1217,8 @@ body {
   padding: 8px 14px;
   font: inherit;
   cursor: pointer;
+  margin-left: auto;
+  align-self: flex-end;
 }
 
 .menu-paywall {
@@ -1585,6 +1597,8 @@ body {
 .catalog-results {
   display: grid;
   gap: 14px;
+  width: 100%;
+  min-width: 0;
 }
 
 .catalog-grid {
@@ -1592,53 +1606,62 @@ body {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 14px;
+  gap: 12px;
   grid-template-columns: 1fr;
+  width: 100%;
+  min-width: 0;
 }
 
 .catalog-card {
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 16px;
-  padding: 14px;
+  padding: 12px;
   display: grid;
-  gap: 10px;
+  gap: 8px;
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .catalog-card__top {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
+  min-width: 0;
 }
 
 .catalog-card__identity {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex: 1 1 auto;
   min-width: 0;
 }
 
 .catalog-card__badge {
-  width: 54px;
-  height: 54px;
-  border-radius: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
   background: #0f172a;
   color: #fff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 26px;
+  font-size: 20px;
   letter-spacing: 0.04em;
   flex-shrink: 0;
 }
 
 .catalog-card__identity .catalog-card__title {
   margin: 0;
-  font-size: clamp(26px, 4.8vw, 38px);
-  line-height: 1.05;
+  display: block;
+  max-width: 100%;
+  font-size: clamp(18px, 1.6vw, 24px);
+  line-height: 1.2;
   color: #0f172a;
   font-weight: 700;
   overflow: hidden;
@@ -1689,9 +1712,9 @@ body {
 
 .catalog-card__label {
   font-weight: 600;
-  font-size: 22px;
+  font-size: 16px;
   color: #0f172a;
-  line-height: 1.15;
+  line-height: 1.2;
   letter-spacing: -0.01em;
 }
 
@@ -1699,8 +1722,15 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  padding-top: 8px;
+  gap: 8px;
+  padding-top: 6px;
+  min-width: 0;
+}
+
+.catalog-card__bottom .btn {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  font-size: 13px;
 }
 
 .catalog-actions {
@@ -1739,7 +1769,7 @@ body {
 
 @media (min-width: 780px) {
   .catalog-grid {
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .catalog-search__submit {
@@ -1753,21 +1783,33 @@ body {
     gap: 8px;
   }
 
-  .catalog-card__title {
-    font-size: clamp(24px, 7.2vw, 32px);
-  }
-
   .catalog-card__identity .catalog-card__title {
-    font-size: clamp(24px, 7.2vw, 32px);
+    font-size: clamp(17px, 5.4vw, 22px);
   }
 
   .catalog-card__label {
-    font-size: 18px;
+    font-size: 14px;
   }
 
   .catalog-card__bottom {
     flex-direction: row;
     align-items: center;
+  }
+
+  .catalog-card__badge {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+
+  .catalog-card__top-actions .catalog-card__icon-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .catalog-card__bottom .btn {
+    padding: 7px 12px;
+    font-size: 12px;
   }
 }
 
@@ -7689,6 +7731,7 @@ body:has(.account--sheet-open) {
   padding: 0 16px;
   font-size: clamp(15px, 1.25vw, 19px);
   font-family: inherit;
+  text-align: center;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
@@ -7881,41 +7924,59 @@ body:has(.account--sheet-open) {
     height: 36px;
   }
 
+  .intro__logo {
+    width: clamp(82px, 21vw, 104px);
+  }
+
   .intro__title {
-    font-size: clamp(20px, 6.8vw, 30px);
+    font-size: clamp(16px, 5.4vw, 24px);
   }
 
   .intro__subtitle {
-    font-size: clamp(15px, 4.2vw, 20px);
+    margin: clamp(10px, 3.2vw, 16px) 0 clamp(10px, 3.6vw, 16px);
+    font-size: clamp(13px, 3.6vw, 17px);
   }
 
   .intro__benefit-text {
-    font-size: clamp(14px, 4vw, 18px);
+    font-size: clamp(12px, 3.5vw, 16px);
   }
 
   .intro__motto {
-    font-size: clamp(18px, 5vw, 24px);
+    margin-top: clamp(16px, 4vw, 22px);
+    font-size: clamp(16px, 4.4vw, 21px);
+  }
+
+  .intro__form-panel {
+    margin-top: clamp(30px, 7.2vw, 46px);
+  }
+
+  .intro__form {
+    display: grid;
+    gap: 12px;
   }
 
   .intro__question {
-    font-size: clamp(22px, 6.8vw, 30px);
+    margin-bottom: clamp(14px, 4.8vw, 20px);
+    font-size: clamp(20px, 6vw, 26px);
   }
 
   .intro__input {
-    font-size: clamp(15px, 4.6vw, 22px);
+    font-size: clamp(14px, 4vw, 19px);
   }
 
   .intro__button {
-    font-size: clamp(18px, 6vw, 28px);
+    margin-top: clamp(6px, 2.8vw, 10px);
+    font-size: clamp(16px, 5vw, 22px);
   }
 
   .intro__footnote {
-    font-size: clamp(11px, 3.2vw, 13px);
+    margin-top: clamp(18px, 5vw, 24px);
+    font-size: clamp(10px, 2.8vw, 12px);
     line-height: 1.42;
   }
 
   .intro__legal {
-    font-size: clamp(11px, 3.3vw, 13px);
+    font-size: clamp(10px, 2.8vw, 12px);
     line-height: 1.4;
   }
 }

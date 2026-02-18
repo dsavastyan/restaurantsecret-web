@@ -2,10 +2,6 @@ import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { fetchCurrentUser, saveOnboardingProfileName } from "@/lib/api";
 import { isMoscowDaytime } from "@/lib/moscowDaytime";
-import {
-  getProfileNameForToken,
-  saveProfileNameForToken,
-} from "@/lib/onboarding";
 import { useAuth } from "@/store/auth";
 import { analytics } from "@/services/analytics";
 import dayThemeBackground from "@/assets/intro screens/day_theme.png";
@@ -54,14 +50,6 @@ export default function OnboardingWelcomePage() {
 
   useEffect(() => {
     if (!accessToken) return;
-    const storedName = getProfileNameForToken(accessToken);
-    if (storedName) {
-      setName(storedName);
-    }
-  }, [accessToken]);
-
-  useEffect(() => {
-    if (!accessToken) return;
     let isCancelled = false;
 
     (async () => {
@@ -103,7 +91,6 @@ export default function OnboardingWelcomePage() {
 
     try {
       await saveOnboardingProfileName(accessToken, normalizedName);
-      saveProfileNameForToken(accessToken, normalizedName);
       analytics.track("onboarding_welcome_completed", {
         name_length: normalizedName.length,
       });

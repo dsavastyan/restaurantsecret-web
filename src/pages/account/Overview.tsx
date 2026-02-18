@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useOutletContext } from "react-router-dom";
 import type { AccountOutletContext } from "./Layout";
-import { getProfileNameForToken } from "@/lib/onboarding";
 import { useAuth } from "@/store/auth";
 import { useGoalsStore } from "@/store/goals";
 
@@ -36,16 +35,26 @@ export default function AccountOverview() {
   }, [accessToken, fetchGoals]);
 
   useEffect(() => {
-    if (goals) {
+    if (!goals) {
       setForm({
-        gender: goals.gender || 'male',
-        age: goals.age?.toString() || '',
-        weight: goals.weight?.toString() || '',
-        height: goals.height?.toString() || '',
-        activity: goals.activity_level || 'min',
-        goal: goals.goal_type || 'maintain'
+        gender: '',
+        age: '',
+        weight: '',
+        height: '',
+        activity: '',
+        goal: ''
       });
+      return;
     }
+
+    setForm({
+      gender: goals.gender || '',
+      age: goals.age?.toString() || '',
+      weight: goals.weight?.toString() || '',
+      height: goals.height?.toString() || '',
+      activity: goals.activity_level || '',
+      goal: goals.goal_type || ''
+    });
   }, [goals]);
 
   const handleStatChange = (field: string, value: string) => {
@@ -60,12 +69,12 @@ export default function AccountOverview() {
 
     try {
       await updateStats(accessToken, {
-        gender: form.gender as any,
+        gender: form.gender ? form.gender as any : null,
         age: parseInt(form.age) || null,
         weight: parseFloat(form.weight) || null,
         height: parseFloat(form.height) || null,
-        activity_level: form.activity as any,
-        goal_type: form.goal as any
+        activity_level: form.activity ? form.activity as any : null,
+        goal_type: form.goal ? form.goal as any : null
       });
 
       setSaveStatus('saved');
@@ -94,9 +103,8 @@ export default function AccountOverview() {
 
   const profileName = useMemo(() => {
     const backendName = me?.user?.first_name?.trim();
-    if (backendName) return backendName;
-    return getProfileNameForToken(accessToken);
-  }, [accessToken, me?.user?.first_name]);
+    return backendName || "";
+  }, [me?.user?.first_name]);
   const profileInitial = useMemo(() => {
     const source = profileName || me?.user?.email || "U";
     return source.trim().charAt(0).toUpperCase();
@@ -296,6 +304,7 @@ export default function AccountOverview() {
           <div className="form-group">
             <label>Пол</label>
             <select value={form.gender} onChange={e => handleStatChange('gender', e.target.value)}>
+              <option value="">Не указывать</option>
               <option value="male">Мужской</option>
               <option value="female">Женский</option>
             </select>
@@ -315,6 +324,7 @@ export default function AccountOverview() {
           <div className="form-group full">
             <label>Активность</label>
             <select value={form.activity} onChange={e => handleStatChange('activity', e.target.value)}>
+              <option value="">Не указывать</option>
               <option value="min">Минимальная (сидячая работа)</option>
               <option value="light">Лёгкая (1-3 тренировки)</option>
               <option value="avg">Средняя (3-5 тренировок)</option>
@@ -324,6 +334,7 @@ export default function AccountOverview() {
           <div className="form-group full">
             <label>Цель</label>
             <select value={form.goal} onChange={e => handleStatChange('goal', e.target.value)}>
+              <option value="">Не указывать</option>
               <option value="lose">Похудение</option>
               <option value="maintain">Поддержание формы</option>
               <option value="gain">Набор массы</option>
