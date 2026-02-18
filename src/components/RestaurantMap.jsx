@@ -454,15 +454,24 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
         }
 
         .map-expand-btn {
-          border: 1px solid rgba(100, 116, 139, 0.45);
-          background: rgba(100, 116, 139, 0.34);
+          border: 1px solid rgba(255, 255, 255, 0.72);
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.82) 0%, rgba(248, 250, 252, 0.68) 100%);
           color: #0f172a;
           border-radius: 10px;
           font-size: 13px;
           font-weight: 700;
           padding: 8px 12px;
           cursor: pointer;
-          backdrop-filter: blur(4px);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          box-shadow: 0 8px 20px rgba(148, 163, 184, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+          transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+        }
+
+        .map-expand-btn:hover {
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.78) 100%);
+          border-color: rgba(255, 255, 255, 0.84);
+          transform: translateY(-1px);
         }
 
         .map-expand-btn--overlay {
@@ -540,16 +549,24 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
           top: 12px;
           right: 12px;
           z-index: 79;
-          border: 1px solid rgba(100, 116, 139, 0.45);
-          background: rgba(100, 116, 139, 0.34);
+          border: 1px solid rgba(255, 255, 255, 0.72);
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.82) 0%, rgba(248, 250, 252, 0.68) 100%);
           color: #0f172a;
           border-radius: 10px;
           font-size: 11px;
           font-weight: 600;
           padding: 8px 10px;
           cursor: pointer;
-          backdrop-filter: blur(4px);
-          box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          box-shadow: 0 8px 20px rgba(148, 163, 184, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+          transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+        }
+
+        .show-city-btn:hover {
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.78) 100%);
+          border-color: rgba(255, 255, 255, 0.84);
+          transform: translateY(-1px);
         }
 
         .show-city-btn--stacked {
