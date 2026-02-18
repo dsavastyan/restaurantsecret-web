@@ -10,6 +10,7 @@ type DishCardDraft = {
   dishName: string;
   restaurantSlug: string;
   restaurantName?: string;
+  isFreeAccess?: boolean;
 };
 
 type DishCardData = {
@@ -17,6 +18,7 @@ type DishCardData = {
   name: string;
   restaurantSlug: string;
   restaurantName?: string;
+  isFreeAccess?: boolean;
   portionLabel: string;
   kcal?: number | null;
   proteins_g?: number | null;
@@ -234,6 +236,7 @@ const deriveCardData = (
     name,
     restaurantSlug: draft.restaurantSlug,
     restaurantName: restaurantName || draft.restaurantName,
+    isFreeAccess: Boolean(draft.isFreeAccess),
     portionLabel: buildPortionLabel(dish),
     kcal,
     proteins_g: proteins,

@@ -5,6 +5,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import NavBar from '@/components/NavBar'
 import SearchInput from '@/components/SearchInput'
 import DishCardModal from '@/components/DishCardModal'
+import DiaryFloatingButton from '@/components/DiaryFloatingButton'
 import Footer from '@/components/Footer.jsx'
 import { PD_API_BASE } from '@/config/api'
 import { fetchCurrentUser } from '@/lib/api'
@@ -292,6 +293,7 @@ export default function AppShell() {
     <div className={`min-h-screen flex flex-col app-theme app-theme--${isDayTheme ? 'day' : 'night'}`}>
       <NavBar />
       <DishCardModal />
+      <DiaryFloatingButton />
       <main className="flex-1">
         {isImmersivePage ? (
           <Outlet context={outletContext} />

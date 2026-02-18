@@ -97,9 +97,14 @@ export default function RestaurantPage() {
   };
 
   // применение фильтров
+  const allDishes = useMemo(() => flattenMenuDishes(menu), [menu]);
+  const freeDishKeys = useMemo(
+    () => new Set(allDishes.slice(0, 3).map((dish) => buildDishAccessKey(dish))),
+    [allDishes]
+  );
+
   const filtered = useMemo(() => {
-    const dishes = flattenMenuDishes(menu); // [{id,name,kcal,protein,fat,carbs,category,price,weight}, ...]
-    return dishes.filter(d => {
+    return allDishes.filter(d => {
       // 1) поиск по названию
       if (q && !matchesSearchQuery(d.name, q)) return false;
 
@@ -116,7 +121,7 @@ export default function RestaurantPage() {
 
       return true;
     });
-  }, [menu, q, presets, range]);
+  }, [allDishes, q, presets, range]);
 
   const menuCapturedAtLabel = useMemo(
     () => formatMenuCapturedAt(menu?.menuCapturedAt),
@@ -208,6 +213,7 @@ export default function RestaurantPage() {
                   key={d.id || d.name}
                   dish={d}
                   hasActiveSub={hasActiveSub}
+                  isFreeAccess={freeDishKeys.has(buildDishAccessKey(d))}
                   onSubscribe={handleSubscribeClick}
                   menuCapturedAt={menuCapturedAtLabel}
                 />
@@ -287,8 +293,9 @@ function MacroRange({ label, value, onChange }) {
   );
 }
 
-function DishCard({ dish, hasActiveSub, onSubscribe, menuCapturedAt }) {
+function DishCard({ dish, hasActiveSub, isFreeAccess = false, onSubscribe, menuCapturedAt }) {
   const description = formatDescription(dish.ingredients ?? dish.description);
+  const hasDishAccess = hasActiveSub || isFreeAccess;
 
   return (
     <div className="dish">
@@ -296,7 +303,7 @@ function DishCard({ dish, hasActiveSub, onSubscribe, menuCapturedAt }) {
         <div className="dish__name">{dish.name}</div>
         {Number.isFinite(dish.price) && <div className="dish__price">{Math.round(dish.price)} ₽</div>}
       </div>
-      {hasActiveSub ? (
+      {hasDishAccess ? (
         <>
           <div className="dish__meta">
             <span className="pill">{formatNumeric(dish.kcal)} ккал</span>
@@ -408,3 +415,8 @@ const styles = `
 .dish__paywall-text { margin:0; color:#475569; }
 .dish__captured { margin-top:8px; font-size:12px; color:#475569; }
 `;
+
+function buildDishAccessKey(dish) {
+  if (dish?.id != null && dish?.id !== '') return `id:${dish.id}`;
+  return `name:${String(dish?.name || '').trim().toLowerCase()}`;
+}
