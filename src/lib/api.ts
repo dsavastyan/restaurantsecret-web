@@ -241,6 +241,39 @@ export type PromoRedeemResponse = {
   error?: string;
 };
 
+export type CurrentUserResponse = {
+  ok: boolean;
+  user?: {
+    id: string;
+    email: string;
+    created_at: string;
+    onboarding_completed?: boolean;
+    onboarding_completed_at?: string | null;
+    subscription: {
+      plan: string;
+      status: string;
+      expires_at: string;
+      expired: boolean;
+      payment_provider?: string | null;
+      payment_method?: string | null;
+      provider?: string | null;
+      gateway?: string | null;
+    } | null;
+  };
+};
+
+export function fetchCurrentUser(token: string) {
+  return apiGet<CurrentUserResponse>("/users/me", token);
+}
+
+export function completeOnboarding(token: string) {
+  return apiPost<{ ok: boolean; onboarding_completed: boolean; onboarding_completed_at: string }>(
+    "/api/onboarding/complete",
+    undefined,
+    token
+  );
+}
+
 export async function quotePromo(code: string, token: string) {
   return apiPost<PromoQuote>("/api/promo/quote", { code }, token);
 }

@@ -7,7 +7,7 @@ import SearchInput from '@/components/SearchInput'
 import DishCardModal from '@/components/DishCardModal'
 import Footer from '@/components/Footer.jsx'
 import { PD_API_BASE } from '@/config/api'
-import { isOnboardingPendingForToken } from '@/lib/onboarding'
+import { fetchCurrentUser } from '@/lib/api'
 import { isMoscowDaytime } from '@/lib/moscowDaytime'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
@@ -217,13 +217,28 @@ export default function AppShell() {
 
   useEffect(() => {
     if (!accessToken || isOnboardingPage || isLoginPage) return
-    if (!isOnboardingPendingForToken(accessToken)) return
 
-    const currentPath = `${location.pathname}${location.search || ''}`
-    navigate('/onboarding/welcome', {
-      replace: true,
-      state: { from: currentPath }
-    })
+    let isCancelled = false
+
+    ;(async () => {
+      try {
+        const me = await fetchCurrentUser(accessToken)
+        if (isCancelled) return
+        if (me?.user?.onboarding_completed === true) return
+
+        const currentPath = `${location.pathname}${location.search || ''}`
+        navigate('/onboarding/welcome', {
+          replace: true,
+          state: { from: currentPath }
+        })
+      } catch (err) {
+        console.error('Failed to check onboarding status', err)
+      }
+    })()
+
+    return () => {
+      isCancelled = true
+    }
   }, [accessToken, isLoginPage, isOnboardingPage, location.pathname, location.search, navigate])
 
   // Sync global UI theme by Moscow sunrise/sunset and expose it via html/body dataset.
@@ -258,7 +273,7 @@ export default function AppShell() {
 
   return (
     <div className={`min-h-screen flex flex-col app-theme app-theme--${isDayTheme ? 'day' : 'night'}`}>
-      {!isImmersivePage && <NavBar />}
+      <NavBar />
       <DishCardModal />
       <main className="flex-1">
         {isImmersivePage ? (

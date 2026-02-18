@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { fetchCurrentUser } from "@/lib/api";
 import { isMoscowDaytime } from "@/lib/moscowDaytime";
 import {
-  clearOnboardingPendingForToken,
   getProfileNameForToken,
-  isOnboardingPendingForToken,
   saveProfileNameForToken,
 } from "@/lib/onboarding";
 import { useAuth } from "@/store/auth";
@@ -30,8 +29,7 @@ export default function OnboardingWelcomePage() {
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isDayTheme, setIsDayTheme] = useState(() => isMoscowDaytime());
-
-  const isPending = isOnboardingPendingForToken(accessToken);
+  const [isOnboardingAllowed, setIsOnboardingAllowed] = useState<boolean | null>(null);
 
   const nextPath = useMemo(() => {
     const state = (location.state || {}) as IntroLocationState;
@@ -61,6 +59,26 @@ export default function OnboardingWelcomePage() {
     }
   }, [accessToken]);
 
+  useEffect(() => {
+    if (!accessToken) return;
+    let isCancelled = false;
+
+    (async () => {
+      try {
+        const me = await fetchCurrentUser(accessToken);
+        if (isCancelled) return;
+        setIsOnboardingAllowed(me?.user?.onboarding_completed !== true);
+      } catch (statusError) {
+        console.error("Failed to load onboarding status", statusError);
+        if (!isCancelled) setIsOnboardingAllowed(true);
+      }
+    })();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [accessToken]);
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -71,19 +89,25 @@ export default function OnboardingWelcomePage() {
     }
 
     saveProfileNameForToken(accessToken, normalizedName);
-    clearOnboardingPendingForToken(accessToken);
     analytics.track("onboarding_welcome_completed", {
       name_length: normalizedName.length,
     });
 
-    navigate(nextPath, { replace: true });
+    navigate("/onboarding/profile/step-1", {
+      replace: true,
+      state: { next: nextPath },
+    });
   };
 
   if (!accessToken) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  if (!isPending) {
+  if (isOnboardingAllowed === null) {
+    return null;
+  }
+
+  if (!isOnboardingAllowed) {
     return <Navigate to="/account" replace />;
   }
 
@@ -98,18 +122,6 @@ export default function OnboardingWelcomePage() {
       }
     >
       <div className="intro__stage">
-        <button
-          type="button"
-          className="intro__home"
-          onClick={() => navigate("/")}
-          aria-label="На главный экран"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M3 11.75 12 4l9 7.75" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M6.75 10.5v9.25h10.5V10.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-
         <section className="intro__panel" aria-labelledby="intro-title">
           <div className="intro__brand">
             <img src={logoIcon} alt="" className="intro__logo" aria-hidden="true" />
