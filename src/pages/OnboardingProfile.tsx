@@ -50,7 +50,7 @@ export default function OnboardingProfilePage() {
 
   const step = rawStep === "step-2" ? "step-2" : "step-1";
   const [isOnboardingAllowed, setIsOnboardingAllowed] = useState<boolean | null>(null);
-  const profileName = useMemo(() => getProfileNameForToken(accessToken), [accessToken]);
+  const [profileName, setProfileName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<OnboardingFormState>({
@@ -88,10 +88,15 @@ export default function OnboardingProfilePage() {
       try {
         const me = await fetchCurrentUser(accessToken);
         if (isCancelled) return;
+        const backendName = me?.user?.first_name?.trim();
+        setProfileName(backendName || getProfileNameForToken(accessToken));
         setIsOnboardingAllowed(me?.user?.onboarding_completed !== true);
       } catch (statusError) {
         console.error("Failed to load onboarding status", statusError);
-        if (!isCancelled) setIsOnboardingAllowed(true);
+        if (!isCancelled) {
+          setProfileName(getProfileNameForToken(accessToken));
+          setIsOnboardingAllowed(true);
+        }
       }
     })();
 

@@ -92,7 +92,11 @@ export default function AccountOverview() {
     }
   }, [me?.user?.created_at]);
 
-  const profileName = useMemo(() => getProfileNameForToken(accessToken), [accessToken]);
+  const profileName = useMemo(() => {
+    const backendName = me?.user?.first_name?.trim();
+    if (backendName) return backendName;
+    return getProfileNameForToken(accessToken);
+  }, [accessToken, me?.user?.first_name]);
   const profileInitial = useMemo(() => {
     const source = profileName || me?.user?.email || "U";
     return source.trim().charAt(0).toUpperCase();

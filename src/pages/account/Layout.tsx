@@ -18,6 +18,7 @@ export type Me = {
   user?: {
     id: string;
     email: string;
+    first_name?: string | null;
     created_at: string;
     onboarding_completed?: boolean;
     onboarding_completed_at?: string | null;

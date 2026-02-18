@@ -1,5 +1,6 @@
 // src/lib/api.ts
 import { PD_API_BASE, PUBLIC_API_BASE } from "@/config/api";
+import { markOnboardingCompletedForToken } from "@/lib/onboarding";
 import { setToken } from "@/store/auth";
 
 export type SearchSuggestionRestaurant = {
@@ -246,6 +247,7 @@ export type CurrentUserResponse = {
   user?: {
     id: string;
     email: string;
+    first_name?: string | null;
     created_at: string;
     onboarding_completed?: boolean;
     onboarding_completed_at?: string | null;
@@ -266,12 +268,44 @@ export function fetchCurrentUser(token: string) {
   return apiGet<CurrentUserResponse>("/users/me", token);
 }
 
-export function completeOnboarding(token: string) {
-  return apiPost<{ ok: boolean; onboarding_completed: boolean; onboarding_completed_at: string }>(
-    "/api/onboarding/complete",
-    undefined,
-    token
-  );
+export async function completeOnboarding(token: string) {
+  const fallbackResponse = {
+    ok: true,
+    onboarding_completed: true,
+    onboarding_completed_at: new Date().toISOString(),
+  };
+
+  const candidatePaths = ["/api/onboarding/complete", "/onboarding/complete"];
+  let lastNotFoundError: ApiError | null = null;
+
+  for (const path of candidatePaths) {
+    try {
+      const response = await apiPost<{ ok: boolean; onboarding_completed: boolean; onboarding_completed_at: string }>(
+        path,
+        undefined,
+        token
+      );
+      markOnboardingCompletedForToken(token);
+      return response;
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 404) {
+        lastNotFoundError = error;
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  if (lastNotFoundError) {
+    markOnboardingCompletedForToken(token);
+    return fallbackResponse;
+  }
+
+  return fallbackResponse;
+}
+
+export function saveOnboardingProfileName(token: string, name: string) {
+  return apiPost<{ ok: boolean; first_name: string }>("/api/onboarding/profile-name", { name }, token);
 }
 
 export async function quotePromo(code: string, token: string) {

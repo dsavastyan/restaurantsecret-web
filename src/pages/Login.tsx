@@ -9,7 +9,6 @@ import mobileNightBackground from "@/assets/login/Login background.png";
 import desktopNightBackground from "@/assets/login/Login background desctop.png";
 import mobileDayBackground from "@/assets/login/Login bacground mobile day.png";
 import desktopDayBackground from "@/assets/login/Login bachround desctop day.png";
-import logoIcon from "@/assets/login/Icon.png";
 
 export default function LoginPage() {
   const setToken = useAuth(selectSetToken); // <— берём сеттер из стора
@@ -127,12 +126,6 @@ export default function LoginPage() {
       }
     >
       <div className="login__stage">
-        <div className="login__brand-block">
-          <div className="login__brand">
-            <img src={logoIcon} alt="" className="login__brand-icon" aria-hidden="true" />
-            <span className="login__brand-name">RestaurantSecret</span>
-          </div>
-        </div>
         <div className="login__wrap">
           <div className="login__card">
             {step === "enter" && <h1 className="login__title">Выбирай легко</h1>}

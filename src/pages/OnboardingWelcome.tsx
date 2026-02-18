@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
-import { fetchCurrentUser } from "@/lib/api";
+import { fetchCurrentUser, saveOnboardingProfileName } from "@/lib/api";
 import { isMoscowDaytime } from "@/lib/moscowDaytime";
 import {
   getProfileNameForToken,
@@ -28,6 +28,7 @@ export default function OnboardingWelcomePage() {
 
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDayTheme, setIsDayTheme] = useState(() => isMoscowDaytime());
   const [isOnboardingAllowed, setIsOnboardingAllowed] = useState<boolean | null>(null);
 
@@ -67,6 +68,10 @@ export default function OnboardingWelcomePage() {
       try {
         const me = await fetchCurrentUser(accessToken);
         if (isCancelled) return;
+        const firstName = me?.user?.first_name?.trim();
+        if (firstName) {
+          setName(firstName);
+        }
         setIsOnboardingAllowed(me?.user?.onboarding_completed !== true);
       } catch (statusError) {
         console.error("Failed to load onboarding status", statusError);
@@ -79,8 +84,13 @@ export default function OnboardingWelcomePage() {
     };
   }, [accessToken]);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!accessToken) {
+      setError("Сессия истекла. Войдите снова.");
+      return;
+    }
 
     const normalizedName = name.trim();
     if (!normalizedName) {
@@ -88,15 +98,25 @@ export default function OnboardingWelcomePage() {
       return;
     }
 
-    saveProfileNameForToken(accessToken, normalizedName);
-    analytics.track("onboarding_welcome_completed", {
-      name_length: normalizedName.length,
-    });
+    setIsSubmitting(true);
+    setError(null);
 
-    navigate("/onboarding/profile/step-1", {
-      replace: true,
-      state: { next: nextPath },
-    });
+    try {
+      await saveOnboardingProfileName(accessToken, normalizedName);
+      saveProfileNameForToken(accessToken, normalizedName);
+      analytics.track("onboarding_welcome_completed", {
+        name_length: normalizedName.length,
+      });
+
+      navigate("/onboarding/profile/step-1", {
+        replace: true,
+        state: { next: nextPath },
+      });
+    } catch (saveError) {
+      console.error("Failed to save onboarding name", saveError);
+      setError("Не удалось сохранить имя. Попробуйте еще раз.");
+      setIsSubmitting(false);
+    }
   };
 
   if (!accessToken) {
@@ -163,11 +183,12 @@ export default function OnboardingWelcomePage() {
                 placeholder="Ваше имя"
                 autoComplete="given-name"
                 autoFocus
+                disabled={isSubmitting}
                 aria-invalid={Boolean(error)}
               />
               {error && <p className="intro__error">{error}</p>}
-              <button className="intro__button" type="submit">
-                Продолжить
+              <button className="intro__button" type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Сохраняем..." : "Продолжить"}
               </button>
             </form>
           </div>

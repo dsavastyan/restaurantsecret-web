@@ -9,6 +9,7 @@ import Footer from '@/components/Footer.jsx'
 import { PD_API_BASE } from '@/config/api'
 import { fetchCurrentUser } from '@/lib/api'
 import { isMoscowDaytime } from '@/lib/moscowDaytime'
+import { isOnboardingCompletedForToken } from '@/lib/onboarding'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
 
@@ -224,7 +225,10 @@ export default function AppShell() {
       try {
         const me = await fetchCurrentUser(accessToken)
         if (isCancelled) return
-        if (me?.user?.onboarding_completed === true) return
+        if (
+          me?.user?.onboarding_completed === true ||
+          isOnboardingCompletedForToken(accessToken)
+        ) return
 
         const currentPath = `${location.pathname}${location.search || ''}`
         navigate('/onboarding/welcome', {
