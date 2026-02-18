@@ -61,6 +61,7 @@ export default function DishCardModal() {
     toggleFavorite: state.toggle,
   }));
   const addDiaryEntry = useDiaryStore((s) => s.addEntry);
+  const hasDishAccess = hasActiveSub || Boolean(data?.isFreeAccess);
 
   const [isOutdatedOpen, setIsOutdatedOpen] = useState(false);
   const [reason, setReason] = useState<
@@ -154,7 +155,7 @@ export default function DishCardModal() {
       return;
     }
 
-    if (!hasActiveSub) {
+    if (!hasDishAccess) {
       navigate("/account/subscription", { state: { from: location.pathname + location.search } });
       return;
     }
@@ -282,7 +283,7 @@ export default function DishCardModal() {
               </div>
             </div>
 
-            {hasActiveSub ? (
+            {hasDishAccess ? (
               <>
                 <section className="dish-card__section">
                   <div className="dish-card__section-title">КБЖУ на порцию</div>

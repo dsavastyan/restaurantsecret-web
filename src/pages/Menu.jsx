@@ -112,6 +112,10 @@ export default function Menu() {
   }, [accessToken, fetchStatus, slug])
 
   const dishes = useMemo(() => flattenMenuDishes(menu), [menu])
+  const freeDishKeys = useMemo(
+    () => new Set(dishes.slice(0, 3).map((dish) => buildDishAccessKey(dish))),
+    [dishes]
+  )
   const capturedAt = useMemo(() => formatMenuCapturedAt(menu?.menuCapturedAt), [menu?.menuCapturedAt])
 
   // Apply search and macro filters locally to keep the UI responsive.
@@ -321,21 +325,26 @@ export default function Menu() {
                   <div className="menu-section__count">{formatPositionCount(section.dishes.length)}</div>
                 </header>
                 <ul className="menu-grid">
-                  {section.dishes.map((dish) => (
-                    <DishCard
-                      key={`${section.name}-${dish.name}`}
-                      dish={dish}
-                      restaurantSlug={slug}
-                      restaurantName={menu?.name || slug}
-                      showRestaurantName={false}
-                      onClick={() => open({
-                        id: dish.id,
-                        dishName: dish.name,
-                        restaurantSlug: slug,
-                        restaurantName: menu?.name || slug,
-                      })}
-                    />
-                  ))}
+                  {section.dishes.map((dish) => {
+                    const isFreeAccess = freeDishKeys.has(buildDishAccessKey(dish))
+                    return (
+                      <DishCard
+                        key={`${section.name}-${dish.name}`}
+                        dish={dish}
+                        restaurantSlug={slug}
+                        restaurantName={menu?.name || slug}
+                        showRestaurantName={false}
+                        isFreeAccess={isFreeAccess}
+                        onClick={() => open({
+                          id: dish.id,
+                          dishName: dish.name,
+                          restaurantSlug: slug,
+                          restaurantName: menu?.name || slug,
+                          isFreeAccess,
+                        })}
+                      />
+                    )
+                  })}
                 </ul>
               </article>
             ))
@@ -429,4 +438,9 @@ function inRange(value, min, max) {
   const lower = min === '' ? -Infinity : Number(min)
   const upper = max === '' ? Infinity : Number(max)
   return numeric >= lower && numeric <= upper
+}
+
+function buildDishAccessKey(dish) {
+  if (dish?.id != null && dish?.id !== '') return `id:${dish.id}`
+  return `name:${String(dish?.name || '').trim().toLowerCase()}`
 }

@@ -12,13 +12,14 @@ type DishCardProps = {
     restaurantSlug: string;
     restaurantName?: string;
     showRestaurantName?: boolean;
+    isFreeAccess?: boolean;
     // If true, clicking on the card opens the modal (default behavior)
     interactive?: boolean;
     // Custom click handler if needed
     onClick?: () => void;
 };
 
-export default function DishCard({ dish, restaurantSlug, restaurantName, showRestaurantName = true, interactive = true, onClick }: DishCardProps) {
+export default function DishCard({ dish, restaurantSlug, restaurantName, showRestaurantName = true, isFreeAccess = false, interactive = true, onClick }: DishCardProps) {
     const navigate = useNavigate();
     const location = useLocation();
     const accessToken = useAuth((state) => state.accessToken);
@@ -31,6 +32,7 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, showRes
     }));
 
     const favorited = isFavorite;
+    const hasDishAccess = hasActiveSub || isFreeAccess;
 
     const handleFavoriteClick = async (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -55,7 +57,7 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, showRes
             return;
         }
 
-        if (!hasActiveSub) {
+        if (!hasDishAccess) {
             navigate('/account/subscription', { state: { from: location.pathname + location.search } });
             return;
         }
@@ -130,7 +132,7 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, showRes
                 </div>
                 {showRestaurantName && restaurantName && <div className="menu-card__restaurant">{restaurantName}</div>}
 
-                {hasActiveSub ? (
+                {hasDishAccess ? (
                     <>
                         <div className="menu-card__macros">
                             <span className="menu-tag menu-tag--kcal">{formatNumeric(dish.kcal)} ккал</span>
