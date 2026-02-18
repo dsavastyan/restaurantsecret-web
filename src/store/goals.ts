@@ -31,18 +31,19 @@ export const useGoalsStore = create<GoalsState>((set, get) => ({
     error: null,
 
     fetch: async (token) => {
-        set({ isLoading: true, error: null });
+        // Clear previous user's cached goals before loading fresh data.
+        set({ data: null, isLoading: true, error: null });
         try {
             const res = await fetchUserGoals(token);
             if (res?.ok) {
                 console.log('[Goals] Fetched:', res);
-                set({ data: res.goals, isLoading: false });
+                set({ data: res.goals ?? null, isLoading: false });
             } else {
-                set({ isLoading: false, error: 'Failed' });
+                set({ data: null, isLoading: false, error: 'Failed' });
             }
         } catch (e) {
             console.error(e);
-            set({ isLoading: false, error: 'Error' });
+            set({ data: null, isLoading: false, error: 'Error' });
         }
     },
 

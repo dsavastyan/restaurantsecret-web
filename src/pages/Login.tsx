@@ -115,6 +115,14 @@ export default function LoginPage() {
     sendCode();
   };
 
+  const backToEmail = () => {
+    if (loading) return;
+    setStep("enter");
+    setCode("");
+    setErr(null);
+    setTimer(0);
+  };
+
   return (
     <div
       className="login"
@@ -192,6 +200,14 @@ export default function LoginPage() {
                 </div>
                 <button className="login__submit" onClick={verifyCode} disabled={loading}>
                   {loading ? "Проверяем…" : "Войти"}
+                </button>
+                <button
+                  type="button"
+                  className="login__resend"
+                  onClick={backToEmail}
+                  disabled={loading}
+                >
+                  Назад к email
                 </button>
 
                 <button

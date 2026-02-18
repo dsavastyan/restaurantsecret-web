@@ -2,9 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 import logoIcon from "@/assets/intro screens/RestSecret logo.png";
 import { completeOnboarding, fetchCurrentUser } from "@/lib/api";
-import {
-  getProfileNameForToken,
-} from "@/lib/onboarding";
 import { analytics } from "@/services/analytics";
 import { useAuth } from "@/store/auth";
 import { useGoalsStore } from "@/store/goals";
@@ -51,7 +48,8 @@ export default function OnboardingProfilePage() {
   const step = rawStep === "step-2" ? "step-2" : "step-1";
   const [isOnboardingAllowed, setIsOnboardingAllowed] = useState<boolean | null>(null);
   const [profileName, setProfileName] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
+  const [isSavingStep, setIsSavingStep] = useState(false);
+  const [isSkipping, setIsSkipping] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<OnboardingFormState>({
     gender: "",
@@ -89,12 +87,12 @@ export default function OnboardingProfilePage() {
         const me = await fetchCurrentUser(accessToken);
         if (isCancelled) return;
         const backendName = me?.user?.first_name?.trim();
-        setProfileName(backendName || getProfileNameForToken(accessToken));
+        setProfileName(backendName || "");
         setIsOnboardingAllowed(me?.user?.onboarding_completed !== true);
       } catch (statusError) {
         console.error("Failed to load onboarding status", statusError);
         if (!isCancelled) {
-          setProfileName(getProfileNameForToken(accessToken));
+          setProfileName("");
           setIsOnboardingAllowed(true);
         }
       }
@@ -106,7 +104,17 @@ export default function OnboardingProfilePage() {
   }, [accessToken]);
 
   useEffect(() => {
-    if (!goals) return;
+    if (!goals) {
+      setForm({
+        gender: "",
+        age: "",
+        goal: "",
+        height: "",
+        weight: "",
+        activity: "",
+      });
+      return;
+    }
     setForm({
       gender: goals.gender || "",
       age: goals.age?.toString() || "",
@@ -158,8 +166,10 @@ export default function OnboardingProfilePage() {
   };
 
   const handleContinue = async () => {
+    if (isSavingStep || isSkipping) return;
+
     try {
-      setIsSaving(true);
+      setIsSavingStep(true);
       setError(null);
       await saveStep(step);
 
@@ -180,12 +190,13 @@ export default function OnboardingProfilePage() {
       console.error("Failed to save onboarding profile step", saveError);
       setError("Не удалось сохранить данные. Попробуйте еще раз.");
     } finally {
-      setIsSaving(false);
+      setIsSavingStep(false);
     }
   };
 
   const handleSkip = () => {
-    setIsSaving(true);
+    if (isSkipping) return;
+    setIsSkipping(true);
     setError(null);
     (async () => {
       try {
@@ -197,7 +208,7 @@ export default function OnboardingProfilePage() {
       } catch (skipError) {
         console.error("Failed to skip onboarding", skipError);
         setError("Не удалось завершить онбординг. Попробуйте еще раз.");
-        setIsSaving(false);
+        setIsSkipping(false);
       }
     })();
   };
@@ -329,17 +340,17 @@ export default function OnboardingProfilePage() {
               type="button"
               className="onboarding-flow__action onboarding-flow__action--primary"
               onClick={handleContinue}
-              disabled={isSaving}
+              disabled={isSavingStep || isSkipping}
             >
-              {isSaving ? "Сохраняем..." : "Продолжить"}
+              {isSavingStep ? "Сохраняем..." : "Продолжить"}
             </button>
             <button
               type="button"
               className="onboarding-flow__action onboarding-flow__action--secondary"
               onClick={handleSkip}
-              disabled={isSaving}
+              disabled={isSkipping}
             >
-              Заполнить позже
+              {isSkipping ? "Пропускаем..." : "Заполнить позже"}
             </button>
           </div>
         </form>

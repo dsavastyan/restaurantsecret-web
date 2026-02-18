@@ -11,13 +11,14 @@ type DishCardProps = {
     dish: any;
     restaurantSlug: string;
     restaurantName?: string;
+    showRestaurantName?: boolean;
     // If true, clicking on the card opens the modal (default behavior)
     interactive?: boolean;
     // Custom click handler if needed
     onClick?: () => void;
 };
 
-export default function DishCard({ dish, restaurantSlug, restaurantName, interactive = true, onClick }: DishCardProps) {
+export default function DishCard({ dish, restaurantSlug, restaurantName, showRestaurantName = true, interactive = true, onClick }: DishCardProps) {
     const navigate = useNavigate();
     const location = useLocation();
     const accessToken = useAuth((state) => state.accessToken);
@@ -127,7 +128,7 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, interac
                         </button>
                     </div>
                 </div>
-                {restaurantName && <div className="menu-card__restaurant">{restaurantName}</div>}
+                {showRestaurantName && restaurantName && <div className="menu-card__restaurant">{restaurantName}</div>}
 
                 {hasActiveSub ? (
                     <>
