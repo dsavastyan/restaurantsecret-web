@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import { AttributionControl, MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet'
 import { useNavigate } from 'react-router-dom'
 import 'leaflet/dist/leaflet.css'
@@ -7,6 +7,8 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import L from 'leaflet'
 import 'leaflet.markercluster'
 import { API_BASE } from '@/config/api'
+import { useAuth } from '@/store/auth'
+import { useFavoriteRestaurantsStore } from '@/store/favoriteRestaurants'
 import MetroFilter from './MetroFilter'
 import MapCuisineFilter from './MapCuisineFilter'
 
@@ -19,6 +21,20 @@ L.Icon.Default.mergeOptions({
 
 const defaultCenter = [55.751244, 37.618423]
 const defaultZoom = 10
+const defaultMarkerIconUrl = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png'
+
+const favoriteMarkerIcon = L.divIcon({
+  className: 'map-fav-marker-wrapper',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  html: `
+    <div class="map-fav-marker">
+      <img src="${defaultMarkerIconUrl}" alt="" />
+      <span class="map-fav-marker__heart" aria-hidden="true">❤</span>
+    </div>
+  `,
+})
 
 function normalizeInstagramUrl(rawUrl) {
   if (!rawUrl) return null
@@ -36,7 +52,7 @@ function normalizeInstagramUrl(rawUrl) {
   }
 }
 
-function ClusterLayer({ restaurants }) {
+function ClusterLayer({ restaurants, favoriteSlugs }) {
   const map = useMap()
   const clusterGroupRef = useRef(null)
   const navigate = useNavigate()
@@ -53,7 +69,12 @@ function ClusterLayer({ restaurants }) {
     const markers = restaurants
       .filter((r) => Number.isFinite(Number(r.lat)) && Number.isFinite(Number(r.lon)))
       .map((r) => {
-        const marker = L.marker([Number(r.lat), Number(r.lon)])
+        const slugKey = String(r.slug || '').trim().toLowerCase()
+        const isFavoriteRestaurant = slugKey && favoriteSlugs.has(slugKey)
+        const marker = L.marker(
+          [Number(r.lat), Number(r.lon)],
+          isFavoriteRestaurant ? { icon: favoriteMarkerIcon } : undefined,
+        )
         const instagramUrl = normalizeInstagramUrl(r.instagramUrl)
         const instagramLink = instagramUrl
           ? `<a href="${instagramUrl}" target="_blank" rel="noopener noreferrer" class="popup-instagram" title="Instagram">
@@ -87,7 +108,7 @@ function ClusterLayer({ restaurants }) {
       })
 
     group.addLayers(markers)
-  }, [map, restaurants, navigate])
+  }, [map, restaurants, favoriteSlugs, navigate])
 
   useEffect(() => {
     return () => {
@@ -207,6 +228,15 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
   const [focusTarget, setFocusTarget] = useState(null)
   const [isDefaultView, setIsDefaultView] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const accessToken = useAuth((state) => state.accessToken)
+  const { favoriteLookup, loadFavoriteRestaurants } = useFavoriteRestaurantsStore((state) => ({
+    favoriteLookup: state.lookup,
+    loadFavoriteRestaurants: state.load,
+  }))
+  const favoriteSlugs = useMemo(
+    () => new Set(Array.from(favoriteLookup || []).map((slug) => String(slug).trim().toLowerCase())),
+    [favoriteLookup],
+  )
   const { restaurants: uniqueRestaurantCount, weeklyAdded } = calculateRestaurantStats(restaurants)
   const isNight = themeMode === 'night'
   const hasOverlayMapButton = !showSummaryHeader
@@ -217,6 +247,10 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
     const sameLon = Math.abs(lon - defaultCenter[1]) < 0.001
     setIsDefaultView(sameZoom && sameLat && sameLon)
   }, [])
+
+  useEffect(() => {
+    loadFavoriteRestaurants(accessToken || '')
+  }, [accessToken, loadFavoriteRestaurants])
 
   useEffect(() => {
     async function fetchMetro() {
@@ -395,7 +429,7 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
           <MapViewportController focusTarget={focusTarget} />
           <ViewportChangeListener onViewportChange={handleViewportChange} />
           <MapResizeController watch={`${isFullscreen}-${themeMode}`} />
-          <ClusterLayer restaurants={restaurants} />
+          <ClusterLayer restaurants={restaurants} favoriteSlugs={favoriteSlugs} />
         </MapContainer>
       </div>
 
@@ -626,6 +660,40 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
           width: 18px;
           height: 18px;
           fill: currentColor;
+        }
+
+        .map-fav-marker-wrapper {
+          background: transparent;
+          border: 0;
+        }
+
+        .map-fav-marker {
+          position: relative;
+          width: 25px;
+          height: 41px;
+        }
+
+        .map-fav-marker img {
+          width: 25px;
+          height: 41px;
+          display: block;
+        }
+
+        .map-fav-marker__heart {
+          position: absolute;
+          top: -6px;
+          right: -9px;
+          width: 16px;
+          height: 16px;
+          border-radius: 999px;
+          background: #fff;
+          color: #e11d48;
+          font-size: 10px;
+          font-weight: 700;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 7px rgba(15, 23, 42, 0.3);
         }
 
         .restaurant-map-container.is-fullscreen {
