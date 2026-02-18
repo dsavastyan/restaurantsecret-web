@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { apiPost } from "@/lib/api";
 import { isMoscowDaytime } from "@/lib/moscowDaytime";
-import { markOnboardingPending } from "@/lib/onboarding";
 import { useAuth, selectSetToken } from "@/store/auth"; // <— меняем импорт
 import { analytics } from "@/services/analytics";
 import mobileNightBackground from "@/assets/login/Login background.png";
@@ -88,15 +87,16 @@ export default function LoginPage() {
       if (res?.ok && res?.access_token) {
         setToken(res.access_token);       // <— сохраняем токен в твой стор (rs_access)
 
-        if (res.created) {
+        const needsOnboarding = res.onboarding_completed !== true;
+
+        if (res.created && needsOnboarding) {
           analytics.track("signup_completed", { source_page: "login" });
-          markOnboardingPending(email);
           analytics.track("onboarding_started", { step: "welcome" });
         }
         analytics.track("login_success", { source_page: "login" });
         analytics.recordPolicyAcceptance(); // Record that user accepted policy upon login
 
-        if (res.created) {
+        if (needsOnboarding) {
           navigate("/onboarding/welcome", { replace: true, state: { next: redirectTo } });
         } else {
           navigate(redirectTo, { replace: true });
@@ -127,17 +127,6 @@ export default function LoginPage() {
       }
     >
       <div className="login__stage">
-        <button
-          type="button"
-          className="login__home"
-          onClick={() => navigate("/")}
-          aria-label="На главный экран"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M3 11.75 12 4l9 7.75" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M6.75 10.5v9.25h10.5V10.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
         <div className="login__brand-block">
           <div className="login__brand">
             <img src={logoIcon} alt="" className="login__brand-icon" aria-hidden="true" />

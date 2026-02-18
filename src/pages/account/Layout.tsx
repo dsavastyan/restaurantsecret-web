@@ -13,7 +13,17 @@ export type Sub = {
   provider?: string | null;
   gateway?: string | null;
 };
-export type Me = { ok: boolean; user?: { id: string; email: string; created_at: string; subscription: Sub | null } };
+export type Me = {
+  ok: boolean;
+  user?: {
+    id: string;
+    email: string;
+    created_at: string;
+    onboarding_completed?: boolean;
+    onboarding_completed_at?: string | null;
+    subscription: Sub | null;
+  };
+};
 
 export type AccountOutletContext = {
   me: Me | null;

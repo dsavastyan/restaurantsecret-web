@@ -1,4 +1,3 @@
-const ONBOARDING_PENDING_EMAIL_KEY = "rs_onboarding_v1_pending_email";
 const PROFILE_NAME_STORAGE_PREFIX = "rs_profile_name_v1:";
 
 function decodeBase64Url(input: string): string | null {
@@ -26,50 +25,6 @@ export function getEmailFromAccessToken(token: string | null | undefined): strin
     return email || null;
   } catch {
     return null;
-  }
-}
-
-function readPendingEmail() {
-  if (typeof window === "undefined") return null;
-
-  try {
-    const value = window.localStorage.getItem(ONBOARDING_PENDING_EMAIL_KEY);
-    if (!value) return null;
-    return value.trim().toLowerCase() || null;
-  } catch {
-    return null;
-  }
-}
-
-export function markOnboardingPending(email: string | null | undefined) {
-  if (typeof window === "undefined") return;
-  const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
-  if (!normalizedEmail) return;
-
-  try {
-    window.localStorage.setItem(ONBOARDING_PENDING_EMAIL_KEY, normalizedEmail);
-  } catch {
-    // Ignore storage errors in private mode or restricted environments.
-  }
-}
-
-export function isOnboardingPendingForToken(token: string | null | undefined) {
-  const pendingEmail = readPendingEmail();
-  const tokenEmail = getEmailFromAccessToken(token);
-  return Boolean(pendingEmail && tokenEmail && pendingEmail === tokenEmail);
-}
-
-export function clearOnboardingPendingForToken(token: string | null | undefined) {
-  if (typeof window === "undefined") return;
-
-  const pendingEmail = readPendingEmail();
-  const tokenEmail = getEmailFromAccessToken(token);
-  if (!pendingEmail || !tokenEmail || pendingEmail !== tokenEmail) return;
-
-  try {
-    window.localStorage.removeItem(ONBOARDING_PENDING_EMAIL_KEY);
-  } catch {
-    // Ignore storage errors in private mode or restricted environments.
   }
 }
 

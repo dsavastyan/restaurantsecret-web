@@ -6,6 +6,8 @@ import AccountButton from "./AccountButton";
 export default function NavBar() {
   const token = useAuth((state) => state.accessToken);
   const location = useLocation();
+  const isLoginPage = location.pathname === "/login";
+  const isOnboardingPage = location.pathname.startsWith("/onboarding");
 
   return (
     <header className="navbar">
@@ -27,10 +29,10 @@ export default function NavBar() {
         </Link>
 
         <div className="navbar__right">
-          {token && !location.pathname.startsWith("/account") && (
+          {token && !location.pathname.startsWith("/account") && !isOnboardingPage && (
             <AccountButton />
           )}
-          {!token && (
+          {!token && !isLoginPage && (
             <Link
               to="/login"
               state={{ from: location.pathname + location.search }}
