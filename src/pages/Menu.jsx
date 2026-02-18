@@ -1,8 +1,8 @@
 // Restaurant menu page with filters for macros and calories.
 import React, { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { apiGet } from '@/lib/requests'
-import { flattenMenuDishes, formatNumeric } from '@/lib/nutrition'
+import { flattenMenuDishes } from '@/lib/nutrition'
 import { formatDescription, matchesSearchQuery } from '@/lib/text'
 import { formatMenuCapturedAt } from '@/lib/dates'
 import { useAuth } from '@/store/auth'
@@ -54,10 +54,8 @@ const normalizeInstagramUrl = (rawUrl) => {
 
 export default function Menu() {
   const { slug } = useParams()
-  const navigate = useNavigate()
   const accessToken = useAuth((state) => state.accessToken)
-  const { hasActiveSub, fetchStatus } = useSubscriptionStore((state) => ({
-    hasActiveSub: state.hasActiveSub,
+  const { fetchStatus } = useSubscriptionStore((state) => ({
     fetchStatus: state.fetchStatus,
   }))
   const open = useDishCardStore((state) => state.open)
@@ -68,12 +66,16 @@ export default function Menu() {
   const [isOutdatedOpen, setIsOutdatedOpen] = useState(false)
 
   const [query, setQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('all')
+  const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false)
   const [presets, setPresets] = useState(createDefaultPresets)
   const [range, setRange] = useState(createDefaultRange)
 
   // Reset filters whenever the restaurant slug changes.
   useEffect(() => {
     setQuery('')
+    setSelectedCategory('all')
+    setIsAdvancedFiltersOpen(false)
     setPresets(createDefaultPresets())
     setRange(createDefaultRange())
   }, [slug])
@@ -116,7 +118,10 @@ export default function Menu() {
   const filtered = useMemo(() => {
     const q = query.trim()
     return dishes.filter((dish) => {
-      if (q && !matchesSearchQuery(dish.name, q)) return false
+      const categoryName = formatDescription(dish.category, '') || 'Без категории'
+      if (selectedCategory !== 'all' && categoryName !== selectedCategory) return false
+      const searchableComposition = formatDescription(dish.ingredients ?? dish.description, '')
+      if (q && !matchesSearchQuery(dish.name, q) && !matchesSearchQuery(searchableComposition, q)) return false
       if (presets.highProtein && !(dish.protein >= 25)) return false
       if (presets.lowFat && !(dish.fat <= 10)) return false
       if (presets.lowKcal && !(dish.kcal <= 400)) return false
@@ -126,7 +131,15 @@ export default function Menu() {
       if (!inRange(dish.carbs, range.carbs.min, range.carbs.max)) return false
       return true
     })
-  }, [dishes, query, presets, range])
+  }, [dishes, query, selectedCategory, presets, range])
+
+  const categoryOptions = useMemo(() => {
+    const source = Array.isArray(menu?.categories) ? menu.categories : []
+    const names = source
+      .map((category) => formatDescription(category?.name, '') || 'Без категории')
+      .filter(Boolean)
+    return Array.from(new Set(names))
+  }, [menu?.categories])
 
   const groupedDishes = useMemo(() => {
     if (!menu?.categories?.length) {
@@ -179,16 +192,9 @@ export default function Menu() {
   // Reset search, presets and custom ranges in one click.
   const resetFilters = () => {
     setQuery('')
+    setSelectedCategory('all')
     setPresets(createDefaultPresets())
     setRange(createDefaultRange())
-  }
-
-  const handleSubscribe = () => {
-    if (accessToken) {
-      navigate('/account/subscription', { state: { from: window.location.pathname + window.location.search } })
-      return
-    }
-    navigate('/login', { state: { from: '/account/subscription' } })
   }
 
   return (
@@ -205,75 +211,100 @@ export default function Menu() {
           </button>
         </div>
         <div className="menu-hero__header">
-          <div className="menu-hero__title-block">
-            <div className="menu-hero__title-row">
-              <h1 className="menu-hero__title">{menu?.name || 'Меню'}</h1>
-              {instagramUrl && (
-                <a
-                  href={instagramUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram ресторана"
-                  title="Instagram"
-                  style={{ color: '#E1306C', display: 'inline-flex', marginLeft: 8 }}
-                >
-                  <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor">
-                    <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm11.5 1.8a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
-                  </svg>
-                </a>
-              )}
-              <div className="menu-hero__badge">
-                {filtered.length ? `${filtered.length} блюд` : 'Ничего не найдено'}
-              </div>
-            </div>
+          <div className="menu-hero__title-row">
+            {instagramUrl ? <InstagramLink href={instagramUrl} /> : <span className="menu-hero__icon-placeholder" aria-hidden />}
+            <h1 className="menu-hero__title">{menu?.name || 'Меню'}</h1>
+            {instagramUrl ? <InstagramLink href={instagramUrl} /> : <span className="menu-hero__icon-placeholder" aria-hidden />}
+          </div>
+
+          <div className="menu-hero__meta-row">
             {!!capturedAt && <div className="menu__captured-at">Меню добавлено: {capturedAt}</div>}
+            <div className="menu-hero__badge">
+              {filtered.length ? `${filtered.length} блюд` : 'Ничего не найдено'}
+            </div>
           </div>
         </div>
       </header>
 
+      <section className="menu-category-filter" aria-label="Фильтр по категории">
+        <label className="sr-only" htmlFor="menu-category-select">Категория меню</label>
+        <select
+          id="menu-category-select"
+          className="menu-category-filter__select"
+          value={selectedCategory}
+          onChange={(event) => setSelectedCategory(event.target.value)}
+        >
+          <option value="all">Категории</option>
+          {categoryOptions.map((name) => (
+            <option key={name} value={name}>{name}</option>
+          ))}
+        </select>
+      </section>
+
       <section className="menu-filters" aria-label="Фильтры блюд">
-        <div className="menu-filters__bar">
-          <div className="menu-filters__search">
-            <label className="sr-only" htmlFor="menu-search">Поиск по названию блюда</label>
-            <input
-              id="menu-search"
-              className="menu-filters__input"
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Поиск по блюду или составу"
-              aria-label="Поиск блюда"
+        <div className="menu-filters__search">
+          <label className="sr-only" htmlFor="menu-search">Поиск по названию блюда</label>
+          <input
+            id="menu-search"
+            className="menu-filters__input"
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Поиск по блюду или составу"
+            aria-label="Поиск блюда"
+          />
+        </div>
+
+        <div className="menu-filters__macro-row">
+          <button
+            type="button"
+            className={`menu-filters__toggle-btn ${isAdvancedFiltersOpen ? 'is-active' : ''}`}
+            onClick={() => setIsAdvancedFiltersOpen((prev) => !prev)}
+            aria-expanded={isAdvancedFiltersOpen}
+            aria-controls="advanced-macro-filters"
+            title="Подробные фильтры КБЖУ"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M3 6h10M17 6h4M9 6a2 2 0 1 0 0 0ZM3 12h4M11 12h10M15 12a2 2 0 1 0 0 0ZM3 18h10M17 18h4M9 18a2 2 0 1 0 0 0Z"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+
+          <div className="menu-filters__chips" role="group" aria-label="Быстрые фильтры">
+            <FilterChip
+              active={presets.highProtein}
+              label="💪 Много белка"
+              description=">= 25 г"
+              onClick={() => togglePreset('highProtein')}
+            />
+            <FilterChip
+              active={presets.lowFat}
+              label="🥗 Мало жиров"
+              description="<= 10 г"
+              onClick={() => togglePreset('lowFat')}
+            />
+            <FilterChip
+              active={presets.lowKcal}
+              label="🔥 Мало калорий"
+              description="<= 400 ккал"
+              onClick={() => togglePreset('lowKcal')}
             />
           </div>
+        </div>
+
+        <div id="advanced-macro-filters" className={`menu-filters__advanced ${isAdvancedFiltersOpen ? 'is-open' : ''}`}>
+          <div className="filter-grid">
+            <MacroRange label="Калории" value={range.kcal} onChange={(edge, val) => updateRange('kcal', edge, val)} />
+            <MacroRange label="Белки (г)" value={range.protein} onChange={(edge, val) => updateRange('protein', edge, val)} />
+            <MacroRange label="Жиры (г)" value={range.fat} onChange={(edge, val) => updateRange('fat', edge, val)} />
+            <MacroRange label="Углеводы (г)" value={range.carbs} onChange={(edge, val) => updateRange('carbs', edge, val)} />
+          </div>
           <button type="button" className="menu-filters__reset" onClick={resetFilters}>Сбросить всё</button>
-        </div>
-
-        <div className="menu-filters__chips" role="group" aria-label="Быстрые фильтры">
-          <FilterChip
-            active={presets.highProtein}
-            label="💪 Много белка"
-            description=">= 25 г"
-            onClick={() => togglePreset('highProtein')}
-          />
-          <FilterChip
-            active={presets.lowFat}
-            label="🥗 Мало жиров"
-            description="<= 10 г"
-            onClick={() => togglePreset('lowFat')}
-          />
-          <FilterChip
-            active={presets.lowKcal}
-            label="🔥 Мало калорий"
-            description="<= 400 ккал"
-            onClick={() => togglePreset('lowKcal')}
-          />
-        </div>
-
-        <div className="filter-grid">
-          <MacroRange label="Калории" value={range.kcal} onChange={(edge, val) => updateRange('kcal', edge, val)} />
-          <MacroRange label="Белки (г)" value={range.protein} onChange={(edge, val) => updateRange('protein', edge, val)} />
-          <MacroRange label="Жиры (г)" value={range.fat} onChange={(edge, val) => updateRange('fat', edge, val)} />
-          <MacroRange label="Углеводы (г)" value={range.carbs} onChange={(edge, val) => updateRange('carbs', edge, val)} />
         </div>
       </section>
 
@@ -336,6 +367,23 @@ function FilterChip({ active, label, description, onClick }) {
       <span className="menu-chip__label">{label}</span>
       <span className="menu-chip__description">{description}</span>
     </button>
+  )
+}
+
+function InstagramLink({ href }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Instagram ресторана"
+      title="Instagram"
+      className="menu-hero__insta"
+    >
+      <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor">
+        <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm11.5 1.8a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
+      </svg>
+    </a>
   )
 }
 
