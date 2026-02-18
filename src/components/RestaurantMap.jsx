@@ -158,14 +158,12 @@ function parseTimestamp(value) {
 
 function getRestaurantKey(item) {
   const raw =
-    item?.restaurantId ??
-    item?.restaurant_id ??
     item?.slug ??
     item?.restaurantSlug ??
     item?.restaurant_slug ??
-    item?.id
+    item?.name
   if (raw === null || raw === undefined || raw === '') return null
-  return String(raw)
+  return String(raw).trim().toLowerCase()
 }
 
 function calculateRestaurantStats(restaurants) {

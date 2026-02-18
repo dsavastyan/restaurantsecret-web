@@ -6,7 +6,7 @@ import { useAuth } from "@/store/auth";
 import { useGoalsStore } from "@/store/goals";
 
 export default function AccountOverview() {
-  const { me, sub } = useOutletContext<AccountOutletContext>();
+  const { me, sub, isNightTheme, toggleTheme } = useOutletContext<AccountOutletContext>();
   const location = useLocation();
   const { accessToken } = useAuth((state) => ({
     accessToken: state.accessToken,
@@ -128,6 +128,24 @@ export default function AccountOverview() {
       aria-labelledby="account-profile-heading"
     >
       {!isProfileDetailsPage && <div className="account-overview-mobile">
+        <button
+          type="button"
+          className="account-overview-mobile__theme-toggle"
+          onClick={toggleTheme}
+          title={isNightTheme ? "Включить дневной режим" : "Включить ночной режим"}
+          aria-label={isNightTheme ? "Включить дневной режим" : "Включить ночной режим"}
+        >
+          {isNightTheme ? (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41" strokeLinecap="round" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </button>
         <div className="account-overview-mobile__hero">
           <div className="account-overview-mobile__avatar" aria-hidden="true">
             {profileInitial}

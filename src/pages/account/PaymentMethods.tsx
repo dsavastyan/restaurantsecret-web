@@ -222,6 +222,7 @@ export default function PaymentMethods() {
                     justify-content: space-between;
                     align-items: center;
                     gap: 16px;
+                    flex-wrap: wrap;
                 }
                 .payment-methods-list {
                     display: flex;
@@ -272,10 +273,52 @@ export default function PaymentMethods() {
                 .account-button--sm {
                     padding: 6px 16px;
                     font-size: 0.9em;
+                    white-space: nowrap;
                 }
                 .payment-methods-empty {
                     color: var(--text-secondary);
                     margin-top: 20px;
+                }
+                @media (max-width: 640px) {
+                    .account-panel-v2__header {
+                        align-items: flex-start;
+                    }
+                    .account-panel-v2__title {
+                        font-size: 24px;
+                        line-height: 1.05;
+                        max-width: 160px;
+                    }
+                    .account-button--sm {
+                        margin-left: auto;
+                        min-width: 152px;
+                        min-height: 48px;
+                        border-radius: 999px;
+                        padding: 10px 14px;
+                        font-size: 1.05em;
+                    }
+                    .payment-method-card {
+                        padding: 12px;
+                        gap: 10px;
+                        border-radius: 16px;
+                    }
+                    .payment-method-card__title {
+                        font-size: 16px;
+                        line-height: 1.2;
+                    }
+                    .payment-method-card__meta {
+                        font-size: 13px;
+                    }
+                }
+                html[data-rs-theme="night"] .payment-method-card {
+                    background: rgba(241, 245, 249, 0.92);
+                }
+                html[data-rs-theme="night"] .payment-method-card__title {
+                    color: #0f172a;
+                }
+                html[data-rs-theme="night"] .payment-method-card__meta,
+                html[data-rs-theme="night"] .payment-method-card__icon,
+                html[data-rs-theme="night"] .payment-method-card__delete {
+                    color: #475569;
                 }
             `}</style>
         </section>
