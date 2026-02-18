@@ -280,9 +280,15 @@ export default function AppShell() {
       location.pathname === prefix || location.pathname.startsWith(`${prefix}/`)
     )
 
+    const isCatalogRoute =
+      location.pathname === '/catalog' ||
+      location.pathname.startsWith('/catalog/') ||
+      location.pathname === '/app/catalog' ||
+      location.pathname.startsWith('/app/catalog/')
+
     // Каталог ресторанов имеет собственный поисковый блок, поэтому общий поиск
     // здесь не показываем, чтобы избежать дублирования.
-    if (location.pathname === '/restaurants' || location.pathname.startsWith('/restaurants/')) {
+    if (isCatalogRoute || location.pathname === '/restaurants' || location.pathname.startsWith('/restaurants/')) {
       return false
     }
 
