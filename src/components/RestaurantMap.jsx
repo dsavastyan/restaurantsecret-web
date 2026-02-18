@@ -304,7 +304,7 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
     : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 
   return (
-    <div className={`restaurant-map-container ${isNight ? 'is-night' : 'is-day'} ${isFullscreen ? 'is-fullscreen' : ''}`}>
+    <div className={`restaurant-map-container ${showSummaryHeader ? '' : 'is-landing'} ${isNight ? 'is-night' : 'is-day'} ${isFullscreen ? 'is-fullscreen' : ''}`}>
       {showSummaryHeader && (
         <div className="map-header">
           <div className="header-left">
@@ -409,6 +409,13 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
           position: relative;
         }
 
+        .restaurant-map-container.is-landing {
+          flex: 1;
+          min-height: 0;
+          display: flex;
+          flex-direction: column;
+        }
+
         .restaurant-map-container.is-night {
           background: #10141b;
           border-color: rgba(148, 163, 184, 0.24);
@@ -500,6 +507,11 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
           border-top: 1px solid var(--line, #e2e8f0);
         }
 
+        .restaurant-map-container.is-landing .map-wrapper {
+          flex: 1;
+          min-height: 0;
+        }
+
         .restaurant-map-container > .map-wrapper:first-child {
           border-top: 0;
         }
@@ -557,6 +569,11 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
           height: min(20dvh, 180px);
           width: 100%;
           z-index: 1;
+        }
+
+        .restaurant-map-container.is-landing .restaurant-map {
+          height: 100%;
+          min-height: 180px;
         }
 
         .map-popup {
@@ -634,6 +651,11 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
 
           .restaurant-map {
             height: min(20dvh, 170px);
+          }
+
+          .restaurant-map-container.is-landing .restaurant-map {
+            height: 100%;
+            min-height: 190px;
           }
 
           .restaurant-map-container.is-fullscreen .restaurant-map {

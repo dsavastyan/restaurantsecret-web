@@ -123,13 +123,13 @@ export default function PaymentMethods() {
     };
 
     return (
-        <section className="account-panel-v2" aria-labelledby="payment-methods-heading">
+        <section className="account-panel-v2 account-payment-panel" aria-labelledby="payment-methods-heading">
             <header className="account-panel-v2__header">
                 <h2 id="payment-methods-heading" className="account-panel-v2__title">
                     Способы оплаты
                 </h2>
                 <button
-                    className="account-button account-button--primary account-button--sm"
+                    className="account-button account-button--primary account-payment-panel__add-btn"
                     onClick={handleAddCard}
                     disabled={attaching || loading}
                 >
@@ -138,13 +138,13 @@ export default function PaymentMethods() {
             </header>
 
             {error && (
-                <div className="account-subscription-v2__error-box" style={{ marginBottom: 16 }}>
+                <div className="account-subscription-v2__error-box account-payment-panel__error">
                     <p>{error}</p>
                 </div>
             )}
 
             {loading && methods.length === 0 ? (
-                <div className="account-skeleton" style={{ marginTop: 20 }}>
+                <div className="account-skeleton account-payment-panel__skeleton">
                     <div className="account-skeleton__line" />
                     <div className="account-skeleton__line" />
                 </div>
@@ -215,112 +215,6 @@ export default function PaymentMethods() {
                     </div>
                 </div>
             )}
-
-            <style>{`
-                .account-panel-v2__header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    gap: 16px;
-                    flex-wrap: wrap;
-                }
-                .payment-methods-list {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 12px;
-                    margin-top: 16px;
-                }
-                .payment-method-card {
-                    display: flex;
-                    align-items: center;
-                    background: var(--bg-surface-2, #f5f5f5);
-                    padding: 12px 16px;
-                    border-radius: 12px;
-                    gap: 16px;
-                }
-                .payment-method-card__icon {
-                    color: var(--text-secondary, #666);
-                }
-                .payment-method-card__info {
-                    flex: 1;
-                }
-                .payment-method-card__title {
-                    font-weight: 500;
-                    color: var(--text-primary, #000);
-                }
-                .payment-method-card__meta {
-                    font-size: 0.85em;
-                    color: var(--text-secondary, #666);
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                }
-                .payment-method-card__pending-label {
-                    color: #f97316; /* Orange-500 */
-                    font-weight: 500;
-                }
-                .payment-method-card__delete {
-                    background: none;
-                    border: none;
-                    cursor: pointer;
-                    color: var(--text-secondary, #999);
-                    padding: 8px;
-                    transition: color 0.2s;
-                }
-                .payment-method-card__delete:hover {
-                    color: #ef4444; 
-                }
-                .account-button--sm {
-                    padding: 6px 16px;
-                    font-size: 0.9em;
-                    white-space: nowrap;
-                }
-                .payment-methods-empty {
-                    color: var(--text-secondary);
-                    margin-top: 20px;
-                }
-                @media (max-width: 640px) {
-                    .account-panel-v2__header {
-                        align-items: flex-start;
-                    }
-                    .account-panel-v2__title {
-                        font-size: 24px;
-                        line-height: 1.05;
-                        max-width: 160px;
-                    }
-                    .account-button--sm {
-                        margin-left: auto;
-                        min-width: 152px;
-                        min-height: 48px;
-                        border-radius: 999px;
-                        padding: 10px 14px;
-                        font-size: 1.05em;
-                    }
-                    .payment-method-card {
-                        padding: 12px;
-                        gap: 10px;
-                        border-radius: 16px;
-                    }
-                    .payment-method-card__title {
-                        font-size: 16px;
-                        line-height: 1.2;
-                    }
-                    .payment-method-card__meta {
-                        font-size: 13px;
-                    }
-                }
-                html[data-rs-theme="night"] .payment-method-card {
-                    background: rgba(241, 245, 249, 0.92);
-                }
-                html[data-rs-theme="night"] .payment-method-card__title {
-                    color: #0f172a;
-                }
-                html[data-rs-theme="night"] .payment-method-card__meta,
-                html[data-rs-theme="night"] .payment-method-card__icon,
-                html[data-rs-theme="night"] .payment-method-card__delete {
-                    color: #475569;
-                }
-            `}</style>
         </section>
     );
 }

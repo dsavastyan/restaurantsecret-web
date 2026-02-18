@@ -9,6 +9,16 @@ import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
 import { analytics } from '@/services/analytics'
 
+function getRussianPluralWord(count, one, few, many) {
+  const value = Math.abs(Number(count)) % 100
+  const lastDigit = value % 10
+
+  if (value >= 11 && value <= 14) return many
+  if (lastDigit === 1) return one
+  if (lastDigit >= 2 && lastDigit <= 4) return few
+  return many
+}
+
 export default function Landing() {
   const [themeMode, setThemeMode] = useState(() => (isMoscowDaytime() ? 'day' : 'night'))
 
@@ -97,9 +107,11 @@ function RestaurantsSection({ themeMode }) {
       <div className="container">
         <div className="section-heading">
           <h2 id="restaurants-title" className="section-title">Мы уже собрали меню этих ресторанов</h2>
-          <p className="restaurants__count">{stats.restaurants} ресторанов • {stats.points} точек</p>
+          <p className="restaurants__count">
+            {stats.restaurants} {getRussianPluralWord(stats.restaurants, 'ресторан', 'ресторана', 'ресторанов')} • {stats.points} точек
+          </p>
           <p className="restaurants__updates">
-            Постоянное обновление: на этой неделе добавили {stats.weeklyAdded} ресторанов
+            Постоянное обновление: на этой неделе добавили {stats.weeklyAdded} {getRussianPluralWord(stats.weeklyAdded, 'ресторан', 'ресторана', 'ресторанов')}
           </p>
           <div className="restaurants__suggest" ref={suggestZoneRef}>
             <button
