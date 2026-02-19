@@ -12,7 +12,6 @@ import SubscriptionPlans from "@/components/subscription/SubscriptionPlans";
 import { analytics } from "@/services/analytics";
 
 // Import assets from src/assets to ensure they are bundled correctly
-import subscriptionActive from "@/assets/subscription/subscription-active.webp";
 import subscriptionActivePng from "@/assets/subscription/subscription-active.png";
 import subscriptionExpiredPng from "@/assets/subscription/subscription-expired.png";
 
@@ -212,7 +211,7 @@ export default function AccountSubscription() {
   const isCanceled = status === "canceled";
   const isExpired = status === "expired";
   const expiresLabel = useMemo(() => formatDate(statusData?.expires_at), [statusData?.expires_at, formatDate]);
-  const illustrationSrc = subscriptionActive;
+  const illustrationSrc = subscriptionActivePng;
   const currentPlanKey = typeof statusData?.plan === "string" ? statusData.plan.trim().toLowerCase() : "";
   const currentUiPlan: UiPlan | null = currentPlanKey === "monthly" ? "month" : currentPlanKey === "annual" ? "year" : null;
   const planTitle = PLAN_LABELS[currentPlanKey] || "Тариф";

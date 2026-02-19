@@ -4564,7 +4564,7 @@ body:has(.account--sheet-open) {
   border-radius: 26px;
   padding: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 40%);
+  grid-template-columns: 1fr;
   align-items: stretch;
   gap: 0;
   overflow: hidden;
@@ -5183,7 +5183,7 @@ body:has(.account--sheet-open) {
   width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: flex-start;
   gap: 18px;
   padding: 26px;
@@ -5194,7 +5194,8 @@ body:has(.account--sheet-open) {
 
 .account-subscription-v2__floating-frame {
   position: relative;
-  width: min(100%, 740px);
+  width: 100%;
+  max-width: 100%;
   border-radius: 26px;
   padding: 22px 18px 18px;
   border: 1px solid rgba(191, 197, 185, 0.6);
@@ -5211,8 +5212,8 @@ body:has(.account--sheet-open) {
 .account-subscription-v2__floating-title {
   margin: 0 0 14px;
   color: #202734;
-  font-size: clamp(28px, 2.8vw, 42px);
-  line-height: 1.05;
+  font-size: clamp(18px, 1.9vw, 30px);
+  line-height: 1.12;
   letter-spacing: -0.02em;
   text-align: left;
 }
@@ -5333,7 +5334,7 @@ body:has(.account--sheet-open) {
   margin: 0;
   text-align: center;
   color: #4b5563;
-  font-size: 20px;
+  font-size: 16px;
   line-height: 1.34;
 }
 
@@ -10972,6 +10973,77 @@ html[data-rs-theme="night"] .account-subscription__history {
   background: rgba(16, 28, 46, 0.95);
   border-color: rgba(148, 163, 184, 0.3);
   color: #dbe7f8;
+}
+
+html[data-rs-theme="night"] .account-subscription-v2__mobile-surface {
+  background:
+    radial-gradient(120% 110% at 8% 0%, rgba(34, 197, 94, 0.14) 0%, rgba(34, 197, 94, 0) 52%),
+    radial-gradient(120% 110% at 92% 0%, rgba(56, 189, 248, 0.12) 0%, rgba(56, 189, 248, 0) 55%),
+    linear-gradient(180deg, rgba(13, 24, 41, 0.94), rgba(9, 17, 30, 0.95));
+}
+
+html[data-rs-theme="night"] .account-subscription-v2__floating-frame {
+  border-color: rgba(148, 163, 184, 0.34);
+  background: linear-gradient(175deg, rgba(18, 34, 56, 0.94), rgba(11, 22, 38, 0.92));
+  box-shadow: 0 16px 34px rgba(2, 6, 23, 0.42), inset 0 1px 0 rgba(148, 163, 184, 0.2);
+}
+
+html[data-rs-theme="night"] .account-subscription-v2__floating-frame--expired {
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(251, 113, 133, 0.14) 0%, rgba(251, 113, 133, 0) 56%),
+    linear-gradient(175deg, rgba(25, 29, 49, 0.94), rgba(12, 20, 37, 0.93));
+}
+
+html[data-rs-theme="night"] .account-subscription-v2__floating-title,
+html[data-rs-theme="night"] .account-subscription-v2__inner-plan {
+  color: #edf4ff;
+}
+
+html[data-rs-theme="night"] .account-subscription-v2__inner-frame {
+  border-color: rgba(148, 163, 184, 0.34);
+  background: linear-gradient(180deg, rgba(13, 26, 44, 0.9), rgba(10, 19, 34, 0.9));
+  box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.2);
+}
+
+html[data-rs-theme="night"] .account-subscription-v2__dish-icon {
+  color: #94d3ab;
+}
+
+html[data-rs-theme="night"] .account-subscription-v2__inner-badge {
+  background: linear-gradient(135deg, #2f7f67, #2f8f74);
+  color: #e8fff4;
+  box-shadow: 0 10px 18px rgba(2, 6, 23, 0.45);
+}
+
+html[data-rs-theme="night"] .account-subscription-v2__inner-meta,
+html[data-rs-theme="night"] .account-subscription-v2__inner-next,
+html[data-rs-theme="night"] .account-subscription-v2__expired-description,
+html[data-rs-theme="night"] .account-subscription-v2__notice {
+  color: #b9c9de;
+}
+
+html[data-rs-theme="night"] .account-subscription-v2__notice strong {
+  color: #f1f7ff;
+}
+
+html[data-rs-theme="night"] .account-subscription-v2__btn-renew {
+  border-color: rgba(110, 198, 149, 0.46);
+  background: linear-gradient(160deg, rgba(33, 80, 67, 0.95), rgba(28, 62, 57, 0.95));
+  color: #dff6ea;
+  box-shadow: 0 10px 20px rgba(2, 6, 23, 0.42), 0 0 18px rgba(74, 222, 128, 0.14);
+}
+
+html[data-rs-theme="night"] .account-subscription-v2__btn-renew:hover {
+  background: linear-gradient(160deg, rgba(41, 95, 78, 0.98), rgba(30, 72, 64, 0.98));
+  border-color: rgba(134, 239, 172, 0.58);
+}
+
+html[data-rs-theme="night"] .account-subscription-v2__desktop-sticker {
+  filter: drop-shadow(0 12px 20px rgba(2, 6, 23, 0.42));
+}
+
+html[data-rs-theme="night"] .account-subscription-v2__mobile-illus img {
+  filter: drop-shadow(0 10px 20px rgba(2, 6, 23, 0.35));
 }
 
 html[data-rs-theme="night"] .account-overview-mobile__menu-icon,
