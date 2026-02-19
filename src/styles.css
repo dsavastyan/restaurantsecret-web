@@ -5539,18 +5539,13 @@ body:has(.account--sheet-open) {
   .account-subscription-v2__mobile-illus {
     width: 220px;
     margin-top: -24px;
-    margin-bottom: 2px;
-    height: 150px;
-    overflow: hidden;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
+    margin-bottom: -8px;
   }
 
   .account-subscription-v2__mobile-illus img {
-    width: 220px;
-    max-width: none;
-    transform: translateY(-2px);
+    width: 100%;
+    max-width: 100%;
+    transform: none;
   }
 
   .account-subscription-v2__floating-frame--expired {
@@ -5579,7 +5574,7 @@ body:has(.account--sheet-open) {
   }
 
   .account-subscription-v2__notice--mobile {
-    margin-top: 2px;
+    margin-top: -30px;
   }
 
   .account-subscription-v2__card-left {
