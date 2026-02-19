@@ -5212,7 +5212,7 @@ body:has(.account--sheet-open) {
 .account-subscription-v2__floating-title {
   margin: 0 0 14px;
   color: #202734;
-  font-size: clamp(18px, 1.9vw, 30px);
+  font-size: clamp(16px, 1.6vw, 25px);
   line-height: 1.12;
   letter-spacing: -0.02em;
   text-align: left;
@@ -5260,7 +5260,7 @@ body:has(.account--sheet-open) {
 
 .account-subscription-v2__inner-plan {
   color: #1f2937;
-  font-size: clamp(28px, 2.1vw, 34px);
+  font-size: clamp(18px, 2vw, 30px);
   line-height: 1;
   font-weight: 600;
 }
@@ -5283,7 +5283,7 @@ body:has(.account--sheet-open) {
 .account-subscription-v2__inner-meta,
 .account-subscription-v2__inner-next {
   margin: 10px 0 0;
-  font-size: 18px;
+  font-size: 14px;
   line-height: 1.28;
   color: #5d6674;
 }
@@ -5292,6 +5292,7 @@ body:has(.account--sheet-open) {
   margin-top: 6px;
   color: #4b5563;
   font-weight: 500;
+  font-size: 15px;
 }
 
 .account-subscription-v2__btn-renew {
@@ -5307,9 +5308,9 @@ body:has(.account--sheet-open) {
 
 .account-subscription-v2__desktop-sticker {
   position: absolute;
-  right: -78px;
+  right: -28px;
   bottom: -48px;
-  width: 208px;
+  width: 196px;
   height: auto;
   pointer-events: none;
 }
@@ -5317,6 +5318,7 @@ body:has(.account--sheet-open) {
 .account-subscription-v2__mobile-illus {
   display: none;
   width: 220px;
+  margin: 0 auto;
 }
 
 .account-subscription-v2__mobile-illus img {
@@ -5334,7 +5336,7 @@ body:has(.account--sheet-open) {
   margin: 0;
   text-align: center;
   color: #4b5563;
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.34;
 }
 
@@ -5349,7 +5351,7 @@ body:has(.account--sheet-open) {
 
 .account-subscription-v2__notice--desktop {
   display: block;
-  margin-top: 14px;
+  margin-top: 10px;
 }
 
 .account-subscription-v2__notice--expired {
@@ -5429,7 +5431,7 @@ body:has(.account--sheet-open) {
 
   .account-subscription-v2__mobile-surface {
     padding: 12px 8px 16px;
-    gap: 12px;
+    gap: 8px;
   }
 
   .account-subscription-v2__floating-frame {
@@ -5484,6 +5486,12 @@ body:has(.account--sheet-open) {
     display: block;
   }
 
+  .account-subscription-v2__mobile-illus {
+    width: 180px;
+    margin-top: -2px;
+    margin-bottom: -2px;
+  }
+
   .account-subscription-v2__floating-frame--expired {
     max-width: 100%;
     padding: 16px 12px 12px;
@@ -5505,7 +5513,8 @@ body:has(.account--sheet-open) {
   }
 
   .account-subscription-v2__notice {
-    font-size: 18px;
+    font-size: 14px;
+    margin-top: 0;
   }
 
   .account-subscription-v2__card-left {
