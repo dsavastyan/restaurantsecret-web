@@ -5539,7 +5539,7 @@ body:has(.account--sheet-open) {
   .account-subscription-v2__mobile-illus {
     width: 220px;
     margin-top: -24px;
-    margin-bottom: 6px;
+    margin-bottom: 18px;
   }
 
   .account-subscription-v2__mobile-illus img {
@@ -5568,7 +5568,11 @@ body:has(.account--sheet-open) {
 
   .account-subscription-v2__notice {
     font-size: 14px;
-    margin-top: 6px;
+    margin-top: 10px;
+  }
+
+  .account-subscription-v2__notice--mobile {
+    margin-top: 18px;
   }
 
   .account-subscription-v2__card-left {
