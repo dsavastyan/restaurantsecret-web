@@ -5218,6 +5218,42 @@ body:has(.account--sheet-open) {
   text-align: left;
 }
 
+.account-subscription-v2__floating-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.account-subscription-v2__floating-head .account-subscription-v2__floating-title {
+  margin: 0;
+}
+
+.account-subscription-v2__btn-cancel-inline {
+  border: 1px solid rgba(242, 95, 58, 0.34);
+  background: rgba(255, 255, 255, 0.78);
+  color: #c44a2e;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.account-subscription-v2__btn-cancel-inline:hover {
+  background: rgba(242, 95, 58, 0.12);
+  border-color: rgba(242, 95, 58, 0.5);
+}
+
+.account-subscription-v2__btn-cancel-inline:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
 .account-subscription-v2__floating-title--center {
   text-align: center;
   margin-bottom: 8px;
@@ -5431,7 +5467,7 @@ body:has(.account--sheet-open) {
 
   .account-subscription-v2__mobile-surface {
     padding: 12px 8px 16px;
-    gap: 8px;
+    gap: 2px;
   }
 
   .account-subscription-v2__floating-frame {
@@ -5443,6 +5479,17 @@ body:has(.account--sheet-open) {
     margin-bottom: 10px;
     font-size: 28px;
     text-align: left;
+  }
+
+  .account-subscription-v2__floating-head {
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .account-subscription-v2__btn-cancel-inline {
+    padding: 7px 10px;
+    font-size: 11px;
   }
 
   .account-subscription-v2__inner-frame {
@@ -5487,9 +5534,13 @@ body:has(.account--sheet-open) {
   }
 
   .account-subscription-v2__mobile-illus {
-    width: 180px;
-    margin-top: -2px;
-    margin-bottom: -2px;
+    width: 220px;
+    margin-top: -24px;
+    margin-bottom: -22px;
+  }
+
+  .account-subscription-v2__mobile-illus img {
+    transform: translateY(-10px);
   }
 
   .account-subscription-v2__floating-frame--expired {
@@ -5514,7 +5565,7 @@ body:has(.account--sheet-open) {
 
   .account-subscription-v2__notice {
     font-size: 14px;
-    margin-top: 0;
+    margin-top: -4px;
   }
 
   .account-subscription-v2__card-left {
@@ -10850,6 +10901,18 @@ html[data-rs-theme="night"] .account-subscription__promo {
   border-color: rgba(148, 163, 184, 0.22);
 }
 
+@media (max-width: 768px) {
+  html[data-rs-theme="night"] .account-overview-mobile__menu-item--subscription-cta {
+    border-color: rgba(244, 114, 182, 0.34);
+    background:
+      radial-gradient(120% 130% at 0% 0%, rgba(244, 114, 182, 0.2) 0%, rgba(244, 114, 182, 0) 52%),
+      linear-gradient(160deg, rgba(28, 28, 47, 0.96) 0%, rgba(14, 19, 35, 0.96) 100%);
+    box-shadow:
+      0 10px 24px rgba(2, 6, 23, 0.38),
+      0 0 20px rgba(244, 114, 182, 0.2);
+  }
+}
+
 html[data-rs-theme="night"] .account-subscription-v2__intro::before {
   border-color: rgba(148, 163, 184, 0.36);
   background:
@@ -11045,6 +11108,18 @@ html[data-rs-theme="night"] .account-subscription-v2__btn-renew {
 html[data-rs-theme="night"] .account-subscription-v2__btn-renew:hover {
   background: linear-gradient(160deg, rgba(41, 95, 78, 0.98), rgba(30, 72, 64, 0.98));
   border-color: rgba(134, 239, 172, 0.58);
+}
+
+html[data-rs-theme="night"] .account-subscription-v2__btn-cancel-inline {
+  background: rgba(35, 24, 30, 0.88);
+  border-color: rgba(251, 113, 133, 0.42);
+  color: #fecdd3;
+}
+
+html[data-rs-theme="night"] .account-subscription-v2__btn-cancel-inline:hover {
+  background: rgba(65, 28, 38, 0.92);
+  border-color: rgba(251, 113, 133, 0.6);
+  color: #ffe4e7;
 }
 
 html[data-rs-theme="night"] .account-subscription-v2__desktop-sticker {

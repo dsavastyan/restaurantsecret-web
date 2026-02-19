@@ -99,6 +99,7 @@ export default function AccountSubscription() {
   const [promoLoading, setPromoLoading] = useState(false);
   const [plansOpen, setPlansOpen] = useState(false);
   const [promoQuote, setPromoQuote] = useState<PromoQuote | null>(null);
+  const [canceling, setCanceling] = useState(false);
 
   const fetchStatus = useCallback(async () => {
     if (!accessToken) {
@@ -416,6 +417,29 @@ export default function AccountSubscription() {
     }
   }, [createPayment, promoQuote, handleRedeemPromo, isActive, currentUiPlan]);
 
+  const handleCancel = useCallback(async () => {
+    if (!accessToken || canceling) return;
+    if (!window.confirm("Вы уверены, что хотите отменить подписку? Она будет действовать до конца оплаченного периода.")) {
+      return;
+    }
+
+    setCanceling(true);
+    try {
+      const res = await apiPost<{ ok: boolean; error?: string }>("/api/subscriptions/cancel", {}, accessToken);
+      if (res?.ok) {
+        analytics.track("subscription_canceled", { plan: statusData?.plan || "unknown" }, { ignoreConsent: true });
+        await fetchStatus();
+      } else {
+        alert(res?.error || "Не удалось отменить подписку");
+      }
+    } catch (err) {
+      console.error("Cancel sub error", err);
+      alert("Ошибка при отмене подписки");
+    } finally {
+      setCanceling(false);
+    }
+  }, [accessToken, canceling, fetchStatus, statusData?.plan]);
+
   return (
     <section className="account-panel-v2 account-subscription-panel" aria-labelledby="account-subscription-heading">
       <header className="account-panel-v2__header">
@@ -434,7 +458,19 @@ export default function AccountSubscription() {
                 {isActive ? (
                   <>
                     <div className="account-subscription-v2__floating-frame">
-                      <h3 className="account-subscription-v2__floating-title">Текущая подписка</h3>
+                      <div className="account-subscription-v2__floating-head">
+                        <h3 className="account-subscription-v2__floating-title">Текущая подписка</h3>
+                        {statusData?.can_cancel && (
+                          <button
+                            className="account-subscription-v2__btn-cancel-inline"
+                            type="button"
+                            onClick={handleCancel}
+                            disabled={canceling}
+                          >
+                            {canceling ? "Отмена..." : "Отменить подписку"}
+                          </button>
+                        )}
+                      </div>
 
                       <div className="account-subscription-v2__inner-frame">
                         <div className="account-subscription-v2__inner-top">
