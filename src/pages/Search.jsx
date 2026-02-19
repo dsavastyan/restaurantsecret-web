@@ -2,7 +2,9 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useOutletContext, useSearchParams } from 'react-router-dom'
 
-import { searchFull } from '@/lib/api'
+import { postSuggest, searchFull } from '@/lib/api'
+import { toast } from '@/lib/toast'
+import { useAuth } from '@/store/auth'
 import { useDishCardStore } from '@/store/dishCard'
 
 const DEFAULT_TYPE = 'dish'
@@ -15,6 +17,8 @@ export default function Search() {
   const navigate = useNavigate()
   const { access, requireAccess, requestPaywall } = useOutletContext() || {}
   const canAccess = access?.isActive
+  const accessToken = useAuth((state) => state.accessToken)
+  const accessTokenOrUndefined = accessToken || undefined
   const openDishCard = useDishCardStore((state) => state.open)
 
   const queryParam = searchParams.get('q')?.trim() ?? ''
@@ -38,6 +42,7 @@ export default function Search() {
   const [results, setResults] = useState(emptyResults)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [submittingSuggest, setSubmittingSuggest] = useState(false)
 
   useEffect(() => {
     const query = queryParam.trim()
@@ -112,6 +117,29 @@ export default function Search() {
     })
   }, [openDishCard])
 
+  const handleSuggestRestaurant = useCallback(async () => {
+    const trimmedQuery = queryParam.trim()
+    if (!trimmedQuery || submittingSuggest) return
+
+    setSubmittingSuggest(true)
+    try {
+      await postSuggest(
+        {
+          kind: 'restaurant',
+          name: trimmedQuery,
+          comment: 'Запрос пользователя из страницы поиска',
+        },
+        accessTokenOrUndefined,
+      )
+      toast.success('Спасибо, ваш запрос принят!')
+    } catch (requestError) {
+      console.error('Failed to submit search suggestion', requestError)
+      toast.error('Не удалось отправить запрос. Попробуйте ещё раз.')
+    } finally {
+      setSubmittingSuggest(false)
+    }
+  }, [accessTokenOrUndefined, queryParam, submittingSuggest])
+
   const hasQuery = queryParam.length > 0
   const dishes = results?.dishes ?? []
   const restaurants = results?.restaurants ?? []
@@ -147,7 +175,17 @@ export default function Search() {
       {error && <div className="search-state search-state--error">Ошибка: {error}</div>}
 
       {!loading && hasQuery && restaurants.length === 0 && dishes.length === 0 && !error && (
-        <div className="search-state search-state--empty">Ничего не нашли по «{queryParam}»</div>
+        <div className="search-state search-state--empty search-state--empty-action">
+          <span>Ничего не нашли по «{queryParam}»</span>
+          <button
+            type="button"
+            className="search-state__suggest-btn"
+            onClick={handleSuggestRestaurant}
+            disabled={submittingSuggest}
+          >
+            {submittingSuggest ? 'Отправляем…' : `🔔 Запросить добавление ресторана «${queryParam}» (запрос пользователя)`}
+          </button>
+        </div>
       )}
 
       {hasQuery && !loading && (
