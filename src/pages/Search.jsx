@@ -183,7 +183,7 @@ export default function Search() {
             onClick={handleSuggestRestaurant}
             disabled={submittingSuggest}
           >
-            {submittingSuggest ? 'Отправляем…' : `🔔 Запросить добавление ресторана «${queryParam}» (запрос пользователя)`}
+            {submittingSuggest ? 'Отправляем…' : `🔔 Запросить добавление ресторана «${queryParam}»`}
           </button>
         </div>
       )}
