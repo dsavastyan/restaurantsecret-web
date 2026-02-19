@@ -5179,6 +5179,183 @@ body:has(.account--sheet-open) {
   margin-top: 16px;
 }
 
+.account-subscription-v2__mobile-surface {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 18px;
+  padding: 26px;
+  border-radius: 26px;
+  background:
+    linear-gradient(160deg, rgba(244, 248, 248, 0.95) 0%, rgba(250, 249, 246, 0.88) 100%);
+}
+
+.account-subscription-v2__floating-frame {
+  position: relative;
+  width: min(100%, 740px);
+  border-radius: 26px;
+  padding: 22px 18px 18px;
+  border: 1px solid rgba(191, 197, 185, 0.6);
+  background: rgba(245, 246, 246, 0.92);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.1);
+}
+
+.account-subscription-v2__floating-frame--expired {
+  max-width: 640px;
+  text-align: center;
+  padding: 26px 20px 18px;
+}
+
+.account-subscription-v2__floating-title {
+  margin: 0 0 14px;
+  color: #202734;
+  font-size: clamp(28px, 2.8vw, 42px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-align: left;
+}
+
+.account-subscription-v2__floating-title--center {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.account-subscription-v2__expired-description {
+  margin: 0 auto 14px;
+  max-width: 520px;
+  font-size: clamp(24px, 2vw, 34px);
+  line-height: 1.22;
+  color: #4b5563;
+}
+
+.account-subscription-v2__inner-frame {
+  position: relative;
+  border-radius: 22px;
+  border: 1px solid rgba(188, 195, 190, 0.65);
+  background: rgba(255, 255, 255, 0.88);
+  padding: 14px 14px 16px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+}
+
+.account-subscription-v2__inner-top {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 138px;
+}
+
+.account-subscription-v2__dish-icon {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  color: #7a9a78;
+  flex: 0 0 auto;
+}
+
+.account-subscription-v2__inner-plan {
+  color: #1f2937;
+  font-size: clamp(28px, 2.1vw, 34px);
+  line-height: 1;
+  font-weight: 600;
+}
+
+.account-subscription-v2__inner-badge {
+  position: absolute;
+  right: -10px;
+  top: 2px;
+  background: linear-gradient(135deg, #7ea872, #96ba84);
+  color: #0f1c10;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  padding: 8px 14px;
+  border-radius: 9px;
+  transform: rotate(-1.5deg);
+  box-shadow: 0 8px 14px rgba(15, 23, 42, 0.14);
+}
+
+.account-subscription-v2__inner-meta,
+.account-subscription-v2__inner-next {
+  margin: 10px 0 0;
+  font-size: 18px;
+  line-height: 1.28;
+  color: #5d6674;
+}
+
+.account-subscription-v2__inner-next {
+  margin-top: 6px;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+.account-subscription-v2__btn-renew {
+  margin-top: 14px;
+  width: 100%;
+  justify-content: center;
+  border-radius: 14px;
+  border: 2px solid #c5d2c0;
+  background: linear-gradient(180deg, #fcfffc 0%, #eef6ee 100%);
+  color: #3c6452;
+  box-shadow: 0 6px 14px rgba(79, 138, 106, 0.15);
+}
+
+.account-subscription-v2__desktop-sticker {
+  position: absolute;
+  right: -78px;
+  bottom: -48px;
+  width: 208px;
+  height: auto;
+  pointer-events: none;
+}
+
+.account-subscription-v2__mobile-illus {
+  display: none;
+  width: 220px;
+}
+
+.account-subscription-v2__mobile-illus img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.account-subscription-v2__mobile-illus--expired {
+  display: block;
+  width: min(100%, 260px);
+}
+
+.account-subscription-v2__notice {
+  margin: 0;
+  text-align: center;
+  color: #4b5563;
+  font-size: 20px;
+  line-height: 1.34;
+}
+
+.account-subscription-v2__notice strong {
+  font-weight: 800;
+  color: #263238;
+}
+
+.account-subscription-v2__notice--mobile {
+  display: none;
+}
+
+.account-subscription-v2__notice--desktop {
+  display: block;
+  margin-top: 14px;
+}
+
+.account-subscription-v2__notice--expired {
+  display: block;
+  max-width: 720px;
+}
+
 /* Mobile responsive */
 @media (max-width: 768px) {
   .account-subscription-panel .account-panel-v2__title {
@@ -5247,6 +5424,87 @@ body:has(.account--sheet-open) {
   .account-subscription-v2__card {
     grid-template-columns: 1fr;
     border-radius: 22px;
+  }
+
+  .account-subscription-v2__mobile-surface {
+    padding: 12px 8px 16px;
+    gap: 12px;
+  }
+
+  .account-subscription-v2__floating-frame {
+    border-radius: 18px;
+    padding: 14px 10px 12px;
+  }
+
+  .account-subscription-v2__floating-title {
+    margin-bottom: 10px;
+    font-size: 28px;
+    text-align: left;
+  }
+
+  .account-subscription-v2__inner-frame {
+    border-radius: 16px;
+    padding: 10px 10px 12px;
+  }
+
+  .account-subscription-v2__inner-top {
+    padding-right: 112px;
+  }
+
+  .account-subscription-v2__dish-icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .account-subscription-v2__inner-plan {
+    font-size: 22px;
+  }
+
+  .account-subscription-v2__inner-badge {
+    right: -6px;
+    top: 0;
+    padding: 6px 10px;
+    font-size: 10px;
+  }
+
+  .account-subscription-v2__inner-meta,
+  .account-subscription-v2__inner-next {
+    margin-top: 8px;
+    font-size: 16px;
+  }
+
+  .account-subscription-v2__desktop-sticker,
+  .account-subscription-v2__notice--desktop {
+    display: none;
+  }
+
+  .account-subscription-v2__mobile-illus,
+  .account-subscription-v2__notice--mobile {
+    display: block;
+  }
+
+  .account-subscription-v2__floating-frame--expired {
+    max-width: 100%;
+    padding: 16px 12px 12px;
+  }
+
+  .account-subscription-v2__expired-description {
+    margin-bottom: 10px;
+    max-width: 100%;
+    font-size: 18px;
+  }
+
+  .account-subscription-v2__mobile-illus--expired {
+    width: 210px;
+  }
+
+  .account-subscription-v2__notice--expired {
+    max-width: 100%;
+    font-size: 16px;
+  }
+
+  .account-subscription-v2__notice {
+    font-size: 18px;
   }
 
   .account-subscription-v2__card-left {
