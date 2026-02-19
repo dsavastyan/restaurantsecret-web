@@ -5539,11 +5539,18 @@ body:has(.account--sheet-open) {
   .account-subscription-v2__mobile-illus {
     width: 220px;
     margin-top: -24px;
-    margin-bottom: 18px;
+    margin-bottom: 2px;
+    height: 150px;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
   }
 
   .account-subscription-v2__mobile-illus img {
-    transform: translateY(-10px);
+    width: 220px;
+    max-width: none;
+    transform: translateY(-2px);
   }
 
   .account-subscription-v2__floating-frame--expired {
@@ -5568,11 +5575,11 @@ body:has(.account--sheet-open) {
 
   .account-subscription-v2__notice {
     font-size: 14px;
-    margin-top: 10px;
+    margin-top: 2px;
   }
 
   .account-subscription-v2__notice--mobile {
-    margin-top: 18px;
+    margin-top: 2px;
   }
 
   .account-subscription-v2__card-left {
