@@ -4782,6 +4782,9 @@ body:has(.account--sheet-open) {
 
 .account-subscription-v2__card-history {
   margin-top: 8px;
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .account-subscription-v2__btn-renew {
@@ -5536,7 +5539,7 @@ body:has(.account--sheet-open) {
   .account-subscription-v2__mobile-illus {
     width: 220px;
     margin-top: -24px;
-    margin-bottom: -22px;
+    margin-bottom: 6px;
   }
 
   .account-subscription-v2__mobile-illus img {
@@ -5565,7 +5568,7 @@ body:has(.account--sheet-open) {
 
   .account-subscription-v2__notice {
     font-size: 14px;
-    margin-top: -4px;
+    margin-top: 6px;
   }
 
   .account-subscription-v2__card-left {
