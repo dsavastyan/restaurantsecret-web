@@ -13,7 +13,8 @@ import { analytics } from "@/services/analytics";
 
 // Import assets from src/assets to ensure they are bundled correctly
 import subscriptionActive from "@/assets/subscription/subscription-active.webp";
-import subscriptionExpired from "@/assets/subscription/subscription-expired.webp";
+import subscriptionActivePng from "@/assets/subscription/subscription-active.png";
+import subscriptionExpiredPng from "@/assets/subscription/subscription-expired.png";
 
 type SubscriptionStatusResponse = {
   ok?: boolean;
@@ -37,9 +38,15 @@ type ApiPlan = "monthly" | "annual";
 type SubscriptionLocationState = { from?: string } | null;
 
 const PLAN_LABELS: Record<string, string> = {
-  monthly: "Месячный",
+  monthly: "Месячная",
   annual: "Годовая",
   mock: "Бесплатный период",
+};
+
+const PLAN_PRICE_BADGES: Record<string, string> = {
+  monthly: "99 РУБ / МЕСЯЦ",
+  annual: "999 РУБ / ГОД",
+  mock: "ПРОБНЫЙ ПЕРИОД",
 };
 
 const ERROR_LABELS: Record<string, string> = {
@@ -93,7 +100,6 @@ export default function AccountSubscription() {
   const [promoLoading, setPromoLoading] = useState(false);
   const [plansOpen, setPlansOpen] = useState(false);
   const [promoQuote, setPromoQuote] = useState<PromoQuote | null>(null);
-  const [canceling, setCanceling] = useState(false);
 
   const fetchStatus = useCallback(async () => {
     if (!accessToken) {
@@ -206,7 +212,25 @@ export default function AccountSubscription() {
   const isCanceled = status === "canceled";
   const isExpired = status === "expired";
   const expiresLabel = useMemo(() => formatDate(statusData?.expires_at), [statusData?.expires_at, formatDate]);
-  const illustrationSrc = isActive ? subscriptionActive : subscriptionExpired;
+  const illustrationSrc = subscriptionActive;
+  const currentPlanKey = typeof statusData?.plan === "string" ? statusData.plan.trim().toLowerCase() : "";
+  const currentUiPlan: UiPlan | null = currentPlanKey === "monthly" ? "month" : currentPlanKey === "annual" ? "year" : null;
+  const planTitle = PLAN_LABELS[currentPlanKey] || "Тариф";
+  const planPriceBadge = PLAN_PRICE_BADGES[currentPlanKey] || "ТЕКУЩИЙ ТАРИФ";
+  const paymentPeriodLabel = statusData?.is_trial && !statusData?.next_charge_at
+    ? "Пробный период"
+    : currentPlanKey === "annual"
+      ? "Оплата каждый год"
+      : currentPlanKey === "monthly"
+        ? "Оплата каждый месяц"
+        : "Периодичность оплаты";
+  const nextBillingLabel = statusData?.next_charge_at
+    ? `Следующее списание: ${formatDate(statusData?.next_charge_at) ?? "—"}`
+    : statusData?.is_trial
+      ? `Окончание пробного периода: ${expiresLabel ?? "—"}`
+      : `Следующее списание: ${expiresLabel ?? "—"}`;
+  const expiredTitle = "Подписка истекла";
+  const expiredDescription = `Ваша подписка на ${planTitle} закончилась ${expiresLabel ?? ""}`.trim();
 
   const showHistory = (isActive || isCanceled || isExpired) && !loading;
   const isNeverSubscribed = status === "none" && !showHistory;
@@ -219,7 +243,7 @@ export default function AccountSubscription() {
   }, [promoError]);
 
   const createPayment = useCallback(
-    async (plan: UiPlan, code?: string) => {
+    async (plan: UiPlan, code?: string, deferUntilPeriodEnd?: boolean) => {
       if (!accessToken || paymentPlan) return;
 
       setPaymentError(null);
@@ -231,6 +255,7 @@ export default function AccountSubscription() {
       try {
         const body: any = { plan: apiPlan, autopay_consent: true };
         if (code) body.promo_code = code;
+        if (deferUntilPeriodEnd) body.defer_until_period_end = true;
 
         const res = await apiPost<{ confirmation_url?: string; error?: string }>(
           "/api/payments/create",
@@ -384,35 +409,13 @@ export default function AccountSubscription() {
 
   const handleChoosePlan = useCallback((plan: UiPlan) => {
     setSelectedPlan(plan);
+    const deferUntilPeriodEnd = Boolean(isActive && currentUiPlan && currentUiPlan !== plan);
     if (promoQuote?.type === 'free_days') {
       handleRedeemPromo(promoQuote.code || '');
     } else {
-      createPayment(plan, promoQuote?.code);
+      createPayment(plan, promoQuote?.code, deferUntilPeriodEnd);
     }
-  }, [createPayment, promoQuote, handleRedeemPromo]);
-
-  const handleCancel = useCallback(async () => {
-    if (!accessToken || canceling) return;
-    if (!window.confirm("Вы уверены, что хотите отменить подписку? Она будет действовать до конца оплаченного периода.")) {
-      return;
-    }
-
-    setCanceling(true);
-    try {
-      const res = await apiPost<{ ok: boolean; error?: string }>("/api/subscriptions/cancel", {}, accessToken);
-      if (res?.ok) {
-        analytics.track("subscription_canceled", { plan: statusData?.plan || "unknown" }, { ignoreConsent: true });
-        await fetchStatus();
-      } else {
-        alert(res?.error || "Не удалось отменить подписку");
-      }
-    } catch (err) {
-      console.error("Cancel sub error", err);
-      alert("Ошибка при отмене подписки");
-    } finally {
-      setCanceling(false);
-    }
-  }, [accessToken, canceling, fetchStatus]);
+  }, [createPayment, promoQuote, handleRedeemPromo, isActive, currentUiPlan]);
 
   return (
     <section className="account-panel-v2 account-subscription-panel" aria-labelledby="account-subscription-heading">
@@ -428,76 +431,82 @@ export default function AccountSubscription() {
         <div className="account-subscription-v2">
           {(isActive || isExpired || isCanceled) && (
             <div className={`account-subscription-v2__card ${isActive ? 'is-active' : 'is-expired'}`}>
-              <div className="account-subscription-v2__card-left">
-                <div className="account-subscription-v2__card-header">
-                  {(isActive && statusData?.plan) || (isActive && statusData?.can_cancel) ? (
-                    <div className="account-subscription-v2__card-toolbar">
-                      {isActive && statusData?.plan && (
-                        <div className="account-subscription-v2__plan-badge">
-                          {PLAN_LABELS[statusData.plan] || statusData.plan}
+              <div className="account-subscription-v2__mobile-surface">
+                {isActive ? (
+                  <>
+                    <div className="account-subscription-v2__floating-frame">
+                      <h3 className="account-subscription-v2__floating-title">Текущая подписка</h3>
+
+                      <div className="account-subscription-v2__inner-frame">
+                        <div className="account-subscription-v2__inner-top">
+                          <div className="account-subscription-v2__dish-icon" aria-hidden="true">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                              <path d="M4 16C4 12.2 7.1 9 11 9h2c3.9 0 7 3.2 7 7H4Z" fill="currentColor" opacity=".2" />
+                              <path d="M12 4v2M7.5 7.5l1.4 1.4M16.5 7.5l-1.4 1.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                              <path d="M3.5 16h17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                            </svg>
+                          </div>
+                          <div className="account-subscription-v2__inner-plan">{planTitle}</div>
+                          <div className="account-subscription-v2__inner-badge">{planPriceBadge}</div>
                         </div>
-                      )}
-                      {isActive && statusData?.can_cancel && (
-                        <button
-                          className="account-subscription-v2__btn-cancel-top"
-                          onClick={handleCancel}
-                          disabled={canceling}
-                          title="Отменить подписку"
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-                          {canceling ? "..." : "Отменить"}
-                        </button>
-                      )}
+
+                        <p className="account-subscription-v2__inner-meta">{paymentPeriodLabel}</p>
+                        <p className="account-subscription-v2__inner-next">{nextBillingLabel}</p>
+                      </div>
+
+                      <button
+                        className="account-subscription-v2__btn-renew"
+                        onClick={() => setPlansOpen(true)}
+                        disabled={Boolean(paymentPlan)}
+                      >
+                        Изменить план
+                      </button>
+
+                      <img
+                        className="account-subscription-v2__desktop-sticker"
+                        src={subscriptionActivePng}
+                        alt=""
+                      />
+
+                      <p className="account-subscription-v2__notice account-subscription-v2__notice--desktop">
+                        Мы пришлем уведомление за <strong>2 дня до следующего списания</strong>!
+                      </p>
                     </div>
-                  ) : null}
-                  <div className="account-subscription-v2__card-title-row">
-                    <div className="account-subscription-v2__card-icon">
-                      {isActive ? (
-                        <span role="img" aria-label="party">🎉</span>
-                      ) : (
-                        <span className="account-subscription-v2__card-warning">!</span>
-                      )}
+
+                    <div className="account-subscription-v2__mobile-illus">
+                      <img
+                        src={illustrationSrc}
+                        alt=""
+                      />
                     </div>
-                    <h3 className="account-subscription-v2__card-title">
-                      {isActive ? "Подписка активна" : "Подписка завершена"}
-                    </h3>
-                  </div>
-                </div>
-
-                <div className="account-subscription-v2__card-status-row">
-                  <span className="account-subscription-v2__card-status-label">
-                    {isActive ? (statusData?.is_trial ? "Пробный период до" : "Активна до") : "Завершена"}
-                  </span>
-                  <div className="account-subscription-v2__card-date-box">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><path d="M16 2v4" /><path d="M8 2v4" /><path d="M3 10h18" /></svg>
-                    <span>{expiresLabel ?? "—"}</span>
-                  </div>
-                </div>
-
-                {isActive && !statusData?.canceled_at && statusData?.next_charge_at && (
-                  <div className="account-subscription-v2__next-charge">
-                    Следующее списание: {formatDate(statusData?.next_charge_at)}
-                    {statusData?.payment_method && statusData.payment_method !== "—" && ` (${statusData.payment_method})`}
-                  </div>
+                    <p className="account-subscription-v2__notice account-subscription-v2__notice--mobile">
+                      Мы пришлем уведомление за <strong>2 дня до следующего списания</strong>!
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div className="account-subscription-v2__floating-frame account-subscription-v2__floating-frame--expired">
+                      <h3 className="account-subscription-v2__floating-title account-subscription-v2__floating-title--center">{expiredTitle}</h3>
+                      <p className="account-subscription-v2__expired-description">{expiredDescription}</p>
+                      <button
+                        className="account-subscription-v2__btn-renew"
+                        onClick={() => setPlansOpen(true)}
+                        disabled={Boolean(paymentPlan)}
+                      >
+                        Продлить подписку
+                      </button>
+                    </div>
+                    <div className="account-subscription-v2__mobile-illus account-subscription-v2__mobile-illus--expired">
+                      <img
+                        src={subscriptionExpiredPng}
+                        alt=""
+                      />
+                    </div>
+                    <p className="account-subscription-v2__notice account-subscription-v2__notice--expired">
+                      Чтобы и дальше продолжать пользоваться Премиум функциями, обновите подписку
+                    </p>
+                  </>
                 )}
-
-                {isActive && statusData?.canceled_at && (
-                  <div className="account-subscription-v2__cancel-note">
-                    Автопродление выключено. Доступ сохранится до {expiresLabel}.
-                  </div>
-                )}
-
-                <div className="account-subscription-v2__card-actions">
-                  {!isActive && (
-                    <button
-                      className="account-subscription-v2__btn-renew"
-                      onClick={() => setPlansOpen(true)}
-                      disabled={Boolean(paymentPlan)}
-                    >
-                      Продлить подписку <span className="arrow-next">→</span>
-                    </button>
-                  )}
-                </div>
 
                 {showHistory && (
                   <div className="account-subscription-v2__card-history">
@@ -506,15 +515,6 @@ export default function AccountSubscription() {
                     </Link>
                   </div>
                 )}
-              </div>
-
-              <div className="account-subscription-v2__card-right">
-                <div className="account-subscription-v2__card-illus">
-                  <img
-                    src={illustrationSrc}
-                    alt=""
-                  />
-                </div>
               </div>
             </div>
           )}
@@ -545,6 +545,8 @@ export default function AccountSubscription() {
             loading={promoLoading || Boolean(paymentPlan)}
             promoError={promoErrorLabel}
             promoQuote={promoQuote}
+            disabledPlan={isActive ? currentUiPlan : null}
+            disabledPlanHint={isActive ? "Текущий тариф недоступен в выборе. Новый тариф начнет действовать после окончания текущего периода." : null}
           />
 
           {error && (

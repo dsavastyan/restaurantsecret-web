@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { apiGet, apiPost, apiDelete } from "@/lib/api";
+import { toast } from "@/lib/toast";
 
 type FavoriteRestaurant = {
     restaurantSlug: string;
@@ -97,9 +98,11 @@ const toggleFavorite = async (token: string, restaurantSlug: string) => {
             await apiDelete(`/api/favorites/restaurants/${restaurantSlug}`, token);
         } else {
             await apiPost("/api/favorites/restaurants", { restaurant_slug: restaurantSlug }, token);
+            toast.success("Ресторан добавлен в избранное");
         }
     } catch (err) {
         console.error("Failed to toggle favorite restaurant", err);
+        toast.error("Не удалось обновить избранное");
         // Rollback (simplified: just reload from server)
         loadFavorites(token);
     }

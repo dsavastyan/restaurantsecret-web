@@ -15,6 +15,8 @@ type SubscriptionPlansModalProps = {
   loading?: boolean;
   promoError?: string | null;
   promoQuote?: PromoQuote | null;
+  disabledPlan?: "month" | "year" | null;
+  disabledPlanHint?: string | null;
 };
 
 export default function SubscriptionPlansModal({
@@ -27,6 +29,8 @@ export default function SubscriptionPlansModal({
   loading = false,
   promoError,
   promoQuote,
+  disabledPlan = null,
+  disabledPlanHint,
 }: SubscriptionPlansModalProps) {
   const [selectedPlan, setSelectedPlan] = useState<"month" | "year" | null>(null);
 
@@ -85,6 +89,8 @@ export default function SubscriptionPlansModal({
             loading={loading}
             promoError={promoError}
             promoQuote={promoQuote}
+            disabledPlan={disabledPlan}
+            disabledPlanHint={disabledPlanHint}
           />
         </div>
       </div>

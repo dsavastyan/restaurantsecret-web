@@ -12,6 +12,8 @@ type SubscriptionPlansProps = {
     loading?: boolean;
     promoError?: string | null;
     promoQuote?: PromoQuote | null;
+    disabledPlan?: "month" | "year" | null;
+    disabledPlanHint?: string | null;
 };
 
 export default function SubscriptionPlans({
@@ -24,6 +26,8 @@ export default function SubscriptionPlans({
     loading = false,
     promoError,
     promoQuote,
+    disabledPlan = null,
+    disabledPlanHint,
 }: SubscriptionPlansProps) {
     const [promo, setPromo] = useState("");
     const [isPromoOpen, setIsPromoOpen] = useState(false);
@@ -58,8 +62,8 @@ export default function SubscriptionPlans({
         }
     }, [promoQuote]);
 
-    const isMonthDisabled = promoQuote?.plan === 'annual';
-    const isYearDisabled = promoQuote?.plan === 'monthly' || (promoQuote?.type === 'discount_rub' && promoQuote?.amount > 0 && promoQuote?.plan === 'monthly');
+    const isMonthDisabled = promoQuote?.plan === 'annual' || disabledPlan === "month";
+    const isYearDisabled = promoQuote?.plan === 'monthly' || (promoQuote?.type === 'discount_rub' && promoQuote?.amount > 0 && promoQuote?.plan === 'monthly') || disabledPlan === "year";
     // Actually the requirement says for RS10PERCFREE (annual only) month is disabled. 
     // And for RS50PERCFREE/RS20RUB (monthly only) year is disabled.
 
@@ -138,13 +142,22 @@ export default function SubscriptionPlans({
             {/* Plans Grid */}
             {!isFreeAccessNoCard && (
                 <>
+                    {disabledPlanHint && (
+                        <div className="rsPromoError" style={{ marginTop: 0, marginBottom: 8 }}>
+                            {disabledPlanHint}
+                        </div>
+                    )}
                     <div className="rsPlanGrid">
                         {/* Month Card */}
                         <div
                             className={`rsPlanCard rsPlanMonth ${selectedPlan === 'month' ? 'is-selected' : ''} ${isMonthDisabled ? 'is-disabled' : ''}`}
                             onClick={() => !isMonthDisabled && onSelectPlan('month')}
                         >
-                            {isMonthDisabled && <div className="rsPlanUnavailableBadge">Недоступно с выбранным промокодом</div>}
+                            {isMonthDisabled && (
+                                <div className="rsPlanUnavailableBadge">
+                                    {disabledPlan === "month" ? "Текущий тариф" : "Недоступно с выбранным промокодом"}
+                                </div>
+                            )}
                             <div style={{ flex: 1 }}>
                                 <div className="rsPlanTopRow">
                                     <div className="rsPlanName">Месяц</div>
@@ -162,7 +175,11 @@ export default function SubscriptionPlans({
                             className={`rsPlanCard rsPlanYear ${selectedPlan === 'year' ? 'is-selected' : ''} ${isYearDisabled ? 'is-disabled' : ''}`}
                             onClick={() => !isYearDisabled && onSelectPlan('year')}
                         >
-                            {isYearDisabled && <div className="rsPlanUnavailableBadge">Недоступно с выбранным промокодом</div>}
+                            {isYearDisabled && (
+                                <div className="rsPlanUnavailableBadge">
+                                    {disabledPlan === "year" ? "Текущий тариф" : "Недоступно с выбранным промокодом"}
+                                </div>
+                            )}
                             <div style={{ flex: 1 }}>
                                 <div className="rsPlanTopRow">
                                     <div className="rsPlanName">Год</div>
