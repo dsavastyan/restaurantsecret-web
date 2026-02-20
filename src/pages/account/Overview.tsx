@@ -254,6 +254,19 @@ export default function AccountOverview() {
             <span className="account-overview-mobile__menu-label">Дневник питания</span>
             <span className="account-overview-mobile__menu-arrow" aria-hidden="true">›</span>
           </Link>
+
+          <Link className="account-overview-mobile__menu-item" to="/account/friends">
+            <span className="account-overview-mobile__menu-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="9" cy="8" r="3" />
+                <circle cx="17" cy="10" r="2.2" />
+                <path d="M3 19c1.1-3 3.2-4.5 6-4.5s4.9 1.5 6 4.5" strokeLinecap="round" />
+                <path d="M14.5 18.4c.6-1.8 1.9-2.9 3.8-2.9 1.5 0 2.6.6 3.5 1.9" strokeLinecap="round" />
+              </svg>
+            </span>
+            <span className="account-overview-mobile__menu-label">Друзья</span>
+            <span className="account-overview-mobile__menu-arrow" aria-hidden="true">›</span>
+          </Link>
         </div>
       </div>}
 

@@ -131,6 +131,7 @@ export default function AccountLayout() {
     { to: "/account/goals", label: "Мои цели" },
     { to: "/account/statistics", label: "Дневник питания" },
     { to: "/account/favorites", label: "Избранное" },
+    { to: "/account/friends", label: "Друзья" },
   ];
 
   const daysLeft = useMemo(() => {

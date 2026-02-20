@@ -11979,3 +11979,234 @@ html[data-rs-theme="night"] .badge-restaurant {
     font-size: clamp(20px, 4.8vw, 24px);
   }
 }
+
+/* Friends */
+.friends-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.friends-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.friends-header__meta {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 14px;
+}
+
+.friends-search-card,
+.friends-block,
+.friend-favorites-controls {
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.friends-search-card__label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.friends-search-card__input {
+  width: 100%;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  background: var(--app-surface-2);
+  color: var(--app-text);
+  font: inherit;
+  padding: 10px 12px;
+}
+
+.friends-search-card__hint {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--app-muted);
+}
+
+.friends-search-list,
+.friends-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.friends-search-list__item,
+.friends-list__item {
+  border: 1px solid var(--app-border);
+  background: var(--app-surface-2);
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.friends-search-list__identity,
+.friends-list__item > div:first-child {
+  min-width: 0;
+}
+
+.friends-search-list__name,
+.friends-list__name {
+  margin: 0;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.friends-search-list__email,
+.friends-list__meta {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--app-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.friends-search-list__actions,
+.friends-list__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.friends-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(15, 23, 42, 0.08);
+  color: var(--app-text);
+}
+
+.friends-pill--incoming {
+  background: rgba(37, 99, 235, 0.14);
+  color: #1d4ed8;
+}
+
+.friends-pill--common {
+  background: rgba(16, 185, 129, 0.16);
+  color: #047857;
+}
+
+.friends-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.friends-block__title {
+  margin: 0;
+  font-size: 17px;
+}
+
+.friends-block--full {
+  grid-column: 1 / -1;
+}
+
+.friends-block--error {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.friend-favorites-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.friend-favorites-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.friend-favorites-header__meta {
+  margin: 0;
+  color: var(--app-muted);
+}
+
+.friend-favorites-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.friend-favorites-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.friend-favorites-toggle input {
+  width: 16px;
+  height: 16px;
+}
+
+.friend-favorites-count {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--app-muted);
+}
+
+.friend-favorites-card__meta {
+  margin: 6px 0 12px;
+}
+
+@media (max-width: 960px) {
+  .friends-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .friends-search-list__item,
+  .friends-list__item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .friends-search-list__actions,
+  .friends-list__actions {
+    width: 100%;
+  }
+
+  .friends-search-list__actions .btn,
+  .friends-list__actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .friend-favorites-controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+html[data-rs-theme="night"] .friends-pill--incoming {
+  background: rgba(96, 165, 250, 0.22);
+  color: #bfdbfe;
+}
+
+html[data-rs-theme="night"] .friends-pill--common {
+  background: rgba(16, 185, 129, 0.24);
+  color: #6ee7b7;
+}
