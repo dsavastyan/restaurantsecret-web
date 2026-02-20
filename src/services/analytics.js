@@ -5,6 +5,7 @@ export const COOKIE_POLICY_VERSION = "cookies_v1_2026-01-16";
 export const USER_AGREEMENT_VERSION = "agreement_v1_2026-02-12";
 const CONSENT_KEY = "rs_consent_v1";
 const ANON_ID_KEY = "rs_anon_id";
+const ATTRIBUTION_KEY = "rs_landing_attribution_v1";
 
 // Helper to generate UUID v4
 function uuidv4() {
@@ -19,6 +20,53 @@ function uuidv4() {
 class AnalyticsService {
     constructor() {
         this.apiUrl = PD_API_BASE;
+        this.captureInitialAttribution();
+    }
+
+    captureInitialAttribution() {
+        try {
+            if (sessionStorage.getItem(ATTRIBUTION_KEY)) return;
+
+            const params = new URLSearchParams(window.location.search);
+            const attribution = {
+                landing_path: window.location.pathname,
+                referrer: document.referrer || null,
+                utm_source: params.get("utm_source"),
+                utm_medium: params.get("utm_medium"),
+                utm_campaign: params.get("utm_campaign"),
+                utm_content: params.get("utm_content"),
+                utm_term: params.get("utm_term"),
+                tg_start_param: params.get("tgWebAppStartParam") || params.get("start"),
+            };
+
+            sessionStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(attribution));
+        } catch {
+            // Ignore storage errors in private mode / blocked storage contexts.
+        }
+    }
+
+    getInitialAttribution() {
+        try {
+            const raw = sessionStorage.getItem(ATTRIBUTION_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed && typeof parsed === "object") return parsed;
+            }
+        } catch {
+            // Fallback to current location below.
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        return {
+            landing_path: window.location.pathname,
+            referrer: document.referrer || null,
+            utm_source: params.get("utm_source"),
+            utm_medium: params.get("utm_medium"),
+            utm_campaign: params.get("utm_campaign"),
+            utm_content: params.get("utm_content"),
+            utm_term: params.get("utm_term"),
+            tg_start_param: params.get("tgWebAppStartParam") || params.get("start"),
+        };
     }
 
     getConsentStatus() {
@@ -104,6 +152,13 @@ class AnalyticsService {
                 const newToken = await tryRefresh();
                 if (newToken) {
                     await sendConsent(newToken);
+                } else {
+                    // If token is stale and refresh failed, retry as anonymous request.
+                    await fetch(`${this.apiUrl}/api/consent/analytics`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload),
+                    });
                 }
             }
         } catch (err) {
@@ -147,16 +202,8 @@ class AnalyticsService {
         if (sessionStorage.getItem("rs_session_started")) return;
 
         // Gather props
-        const params = new URLSearchParams(window.location.search);
         const props = {
-            landing_path: window.location.pathname,
-            referrer: document.referrer || null,
-            utm_source: params.get("utm_source"),
-            utm_medium: params.get("utm_medium"),
-            utm_campaign: params.get("utm_campaign"),
-            utm_content: params.get("utm_content"),
-            utm_term: params.get("utm_term"),
-            tg_start_param: params.get("tgWebAppStartParam") || params.get("start"),
+            ...this.getInitialAttribution(),
             screen_width: window.screen.width,
             screen_height: window.screen.height,
             viewport_width: window.innerWidth,
@@ -164,13 +211,15 @@ class AnalyticsService {
             device_pixel_ratio: window.devicePixelRatio,
         };
 
-        await this.track("session_start", props);
-        sessionStorage.setItem("rs_session_started", "true");
+        const sent = await this.track("session_start", props);
+        if (sent) {
+            sessionStorage.setItem("rs_session_started", "true");
+        }
     }
 
     async track(eventName, props = {}, options = {}) {
         const { ignoreConsent = false } = options;
-        if (!ignoreConsent && this.getConsentStatus() !== "granted") return;
+        if (!ignoreConsent && this.getConsentStatus() !== "granted") return false;
 
         const anonId = this.ensureAnonId();
         const sessionId = this.getSessionId();
@@ -205,11 +254,21 @@ class AnalyticsService {
             if (res.status === 401) {
                 const newToken = await tryRefresh();
                 if (newToken) {
-                    await sendEvent(newToken);
+                    res = await sendEvent(newToken);
+                } else {
+                    // If token is stale and refresh failed, retry as anonymous request.
+                    res = await fetch(`${this.apiUrl}/api/analytics/event`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload),
+                        keepalive: true,
+                    });
                 }
             }
+            return Boolean(res?.ok);
         } catch (err) {
             if (import.meta.env.DEV) console.warn("[Analytics] Track failed", err);
+            return false;
         }
     }
 
