@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import SearchInput from '@/components/SearchInput'
@@ -8,6 +8,8 @@ import { isMoscowDaytime } from '@/lib/moscowDaytime'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
 import { analytics } from '@/services/analytics'
+
+const THEME_PREFERENCE_KEY = 'rs_theme_preference'
 
 function getRussianPluralWord(count, one, few, many) {
   const value = Math.abs(Number(count)) % 100
@@ -27,6 +29,14 @@ export default function Landing() {
   }
 
   const [themeMode, setThemeMode] = useState(resolveThemeMode)
+
+  const handleToggleTheme = useCallback(() => {
+    const nextTheme = themeMode === 'night' ? 'day' : 'night'
+    document.documentElement.setAttribute('data-rs-theme', nextTheme)
+    document.body.setAttribute('data-rs-theme', nextTheme)
+    window.localStorage.setItem(THEME_PREFERENCE_KEY, nextTheme)
+    setThemeMode(nextTheme)
+  }, [themeMode])
 
   useEffect(() => {
     const updateTheme = () => setThemeMode(resolveThemeMode())
@@ -60,13 +70,13 @@ export default function Landing() {
 
   return (
     <main className={`landing landing--${themeMode}`} data-theme={themeMode}>
-      <Hero />
+      <Hero themeMode={themeMode} onToggleTheme={handleToggleTheme} />
       <RestaurantsSection themeMode={themeMode} />
     </main>
   )
 }
 
-function Hero() {
+function Hero({ themeMode, onToggleTheme }) {
   const [query, setQuery] = useState('')
 
   useEffect(() => {
@@ -75,6 +85,18 @@ function Hero() {
 
   return (
     <header className="hero" aria-labelledby="hero-title">
+      <div className="hero__topline">
+        <button
+          type="button"
+          className="theme-switch"
+          onClick={onToggleTheme}
+          title={themeMode === 'night' ? 'Включить светлую тему' : 'Включить тёмную тему'}
+          aria-label={themeMode === 'night' ? 'Включить светлую тему' : 'Включить тёмную тему'}
+        >
+          {themeMode === 'night' ? 'Светлая тема' : 'Тёмная тема'}
+        </button>
+      </div>
+
       <div className="hero__motto-wrap" aria-label="Слоган">
         <p className="hero__motto">Ешь вкусно, выбирай осознанно</p>
       </div>
