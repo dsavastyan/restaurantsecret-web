@@ -211,6 +211,7 @@ export default function AccountSubscription() {
   const isActive = status === "active";
   const isCanceled = status === "canceled";
   const isExpired = status === "expired";
+  const isCancellationScheduled = Boolean(statusData?.canceled_at);
   const expiresLabel = useMemo(() => formatDate(statusData?.expires_at), [statusData?.expires_at, formatDate]);
   const illustrationSrc = subscriptionActivePng;
   const currentPlanKey = typeof statusData?.plan === "string" ? statusData.plan.trim().toLowerCase() : "";
@@ -419,7 +420,7 @@ export default function AccountSubscription() {
 
   const handleCancel = useCallback(async () => {
     if (!accessToken || canceling) return;
-    if (!window.confirm("Вы уверены, что хотите отменить подписку? Она будет действовать до конца оплаченного периода.")) {
+    if (!window.confirm("Вы уверены что хотите отменить подписку?")) {
       return;
     }
 
@@ -504,7 +505,11 @@ export default function AccountSubscription() {
                       />
 
                       <p className="account-subscription-v2__notice account-subscription-v2__notice--desktop">
-                        Мы пришлем уведомление за <strong>2 дня до следующего списания</strong>!
+                        {isCancellationScheduled ? (
+                          <>Автосписание отключено. Мы пришлем уведомление за <strong>2 дня до окончания подписки</strong>!</>
+                        ) : (
+                          <>Мы пришлем уведомление за <strong>2 дня до следующего списания</strong>!</>
+                        )}
                       </p>
                     </div>
 
@@ -515,7 +520,11 @@ export default function AccountSubscription() {
                       />
                     </div>
                     <p className="account-subscription-v2__notice account-subscription-v2__notice--mobile">
-                      Мы пришлем уведомление за <strong>2 дня до следующего списания</strong>!
+                      {isCancellationScheduled ? (
+                        <>Автосписание отключено. Мы пришлем уведомление за <strong>2 дня до окончания подписки</strong>!</>
+                      ) : (
+                        <>Мы пришлем уведомление за <strong>2 дня до следующего списания</strong>!</>
+                      )}
                     </p>
                   </>
                 ) : (
