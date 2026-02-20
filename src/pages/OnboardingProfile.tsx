@@ -215,7 +215,7 @@ export default function OnboardingProfilePage() {
 
   const handleBack = () => {
     if (step === "step-1") {
-      navigate("/onboarding/welcome", { replace: true, state: { next: nextPath } });
+      navigate("/onboarding/install-app", { replace: true, state: { next: nextPath } });
       return;
     }
 
