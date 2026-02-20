@@ -11812,3 +11812,170 @@ html[data-rs-theme="night"] .badge-restaurant {
   background: rgba(14, 116, 144, 0.32);
   color: #8adcf2;
 }
+
+.ios-install-prompt__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 14px;
+  background: rgba(15, 23, 42, 0.54);
+  backdrop-filter: blur(3px);
+}
+
+.ios-install-prompt {
+  position: relative;
+  width: min(420px, 100%);
+  max-height: 95vh;
+  overflow-y: auto;
+  border-radius: 28px;
+  padding: 18px 18px 22px;
+  background:
+    radial-gradient(circle at 3px 3px, rgba(148, 163, 184, 0.2) 2px, transparent 2px),
+    #f5f7fa;
+  background-size: 14px 14px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.32);
+}
+
+.ios-install-prompt__close {
+  position: sticky;
+  top: 0;
+  margin-left: auto;
+  margin-right: 0;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  color: #1f2937;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ios-install-prompt__logo {
+  display: block;
+  width: 88px;
+  height: 88px;
+  margin: 2px auto 14px;
+  border-radius: 22px;
+  object-fit: cover;
+}
+
+.ios-install-prompt__card {
+  background: #e8e9f5;
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.ios-install-prompt__title {
+  margin: 0 0 12px;
+  text-align: center;
+  font-size: 48px;
+  line-height: 1.1;
+  font-weight: 800;
+  color: #101828;
+}
+
+.ios-install-prompt__steps {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 10px;
+  color: #1f2937;
+  font-size: 30px;
+  line-height: 1.38;
+}
+
+.ios-install-prompt__lang-row {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.ios-install-prompt__lang {
+  min-width: 96px;
+  height: 42px;
+  border-radius: 10px;
+  border: 0;
+  background: #8bc6a3;
+  color: #0b111d;
+  font-size: 27px;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0.88;
+}
+
+.ios-install-prompt__lang.is-active {
+  opacity: 1;
+  box-shadow: 0 0 0 2px rgba(22, 101, 52, 0.22) inset;
+}
+
+.ios-install-prompt__image {
+  display: block;
+  width: min(500px, 100%);
+  margin: 14px auto 0;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: #fff;
+}
+
+.ios-install-prompt__step-three {
+  margin: 16px 4px 0;
+  font-size: 34px;
+  line-height: 1.33;
+  color: #111827;
+}
+
+.ios-install-prompt__support {
+  display: block;
+  margin-top: 16px;
+  text-align: center;
+  font-size: 26px;
+  color: #0f766e;
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .ios-install-prompt {
+    border-radius: 20px;
+    padding: 14px 14px 18px;
+  }
+
+  .ios-install-prompt__logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+    margin-bottom: 10px;
+  }
+
+  .ios-install-prompt__card {
+    border-radius: 14px;
+    padding: 14px;
+  }
+
+  .ios-install-prompt__title {
+    font-size: clamp(36px, 8.4vw, 42px);
+  }
+
+  .ios-install-prompt__steps {
+    font-size: clamp(20px, 5.2vw, 26px);
+  }
+
+  .ios-install-prompt__lang {
+    min-width: 84px;
+    height: 40px;
+    font-size: clamp(20px, 5vw, 24px);
+  }
+
+  .ios-install-prompt__step-three {
+    font-size: clamp(25px, 6vw, 30px);
+  }
+
+  .ios-install-prompt__support {
+    font-size: clamp(20px, 4.8vw, 24px);
+  }
+}
