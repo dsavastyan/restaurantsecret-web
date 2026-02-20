@@ -12,6 +12,7 @@ import { useSubscriptionStore } from '@/store/subscription'
 import { MenuOutdatedModal } from '@/components/MenuOutdatedModal'
 import DishCard from '@/components/DishCard/DishCard'
 import { useDishCardStore } from '@/store/dishCard'
+import { useFavoriteRestaurantsStore } from '@/store/favoriteRestaurants'
 import { analytics } from '@/services/analytics'
 import { toast } from '@/lib/toast'
 
@@ -64,6 +65,15 @@ export default function Menu() {
     fetchStatus: state.fetchStatus,
   }))
   const open = useDishCardStore((state) => state.open)
+  const {
+    isFavoriteRestaurant,
+    toggleFavoriteRestaurant,
+    loadFavoriteRestaurants,
+  } = useFavoriteRestaurantsStore((state) => ({
+    isFavoriteRestaurant: state.isFavorite(slug),
+    toggleFavoriteRestaurant: state.toggle,
+    loadFavoriteRestaurants: state.load,
+  }))
 
   const [menu, setMenu] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -121,6 +131,12 @@ export default function Menu() {
   useEffect(() => {
     setIsMapOpen(false)
   }, [slug])
+
+  useEffect(() => {
+    if (accessToken) {
+      loadFavoriteRestaurants(accessToken)
+    }
+  }, [accessToken, loadFavoriteRestaurants])
 
   useEffect(() => {
     let aborted = false
@@ -279,6 +295,20 @@ export default function Menu() {
     }
   }
 
+  const handleToggleRestaurantFavorite = async () => {
+    if (!slug) return
+    if (!accessToken) {
+      navigate('/login', { state: { from: window.location.pathname + window.location.search } })
+      return
+    }
+    if (!isFavoriteRestaurant) {
+      analytics.track('favorite_add', { type: 'restaurant', slug, name: menu?.name || slug })
+    } else {
+      analytics.track('favorite_remove', { type: 'restaurant', slug, name: menu?.name || slug })
+    }
+    await toggleFavoriteRestaurant(accessToken, slug)
+  }
+
   return (
     <div className="menu-page">
       <header className="menu-hero">
@@ -295,7 +325,27 @@ export default function Menu() {
               </svg>
               <span>Ко всем меню</span>
             </button>
-            <div className="menu-hero__pill">Меню ресторана</div>
+            <div className="menu-hero__pill">
+              <span>Меню ресторана</span>
+              <button
+                type="button"
+                className={`menu-hero__pill-fav ${isFavoriteRestaurant ? 'is-active' : ''}`}
+                onClick={handleToggleRestaurantFavorite}
+                aria-label={isFavoriteRestaurant ? 'Удалить ресторан из избранного' : 'Добавить ресторан в избранное'}
+                title={isFavoriteRestaurant ? 'В избранном' : 'Добавить в избранное'}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                  <path
+                    d="M12 21.35 10.55 20.03C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3 9.24 3 10.91 3.81 12 5.09 13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35Z"
+                    fill={isFavoriteRestaurant ? '#E11D48' : 'none'}
+                    stroke={isFavoriteRestaurant ? '#E11D48' : 'currentColor'}
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
           <button
             type="button"

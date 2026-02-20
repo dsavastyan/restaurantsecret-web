@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom'
 
 const PROMPT_DELAY_MS = 15000
 const REOPEN_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000
-const DISMISSED_AT_KEY = 'rs_ios_install_prompt_dismissed_at'
+const DISMISSED_AT_KEY = 'rs_ios_install_prompt_dismissed_at_v3'
+const INSTALLED_SEEN_KEY = 'rs_ios_install_prompt_installed_seen'
 
 const STEP_ONE_IMAGES = {
   rus: '/assets/web%20app%20instruction/add-to-home-rus.png',
@@ -15,15 +16,12 @@ const STEP_THREE_IMAGES = {
   eng: '/assets/web%20app%20instruction/web-app-view-eng.png'
 }
 
-function isIphoneSafari() {
+function isIphoneBrowser() {
   if (typeof window === 'undefined') return false
   if (window.Telegram?.WebApp) return false
 
   const ua = window.navigator.userAgent || ''
-  const isIphone = /iPhone/i.test(ua)
-  const isSafari = /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS|YaBrowser|DuckDuckGo/i.test(ua)
-
-  return isIphone && isSafari
+  return /iPhone/i.test(ua)
 }
 
 function isInstalledPwa() {
@@ -44,21 +42,44 @@ export default function IphoneInstallPrompt() {
     typeof window !== 'undefined' && (window.navigator.language || '').toLowerCase().startsWith('ru')
       ? 'rus'
       : 'eng'
+
   const [isOpen, setIsOpen] = useState(false)
   const [stepOneLang, setStepOneLang] = useState(defaultLang)
   const [stepThreeLang, setStepThreeLang] = useState(defaultLang)
   const timerRef = useRef(null)
+  const forceShow =
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('showInstallPrompt') === '1'
 
-  const isEligibleDevice = useMemo(() => isIphoneSafari(), [])
+  const isEligibleDevice = useMemo(() => isIphoneBrowser(), [])
 
   useEffect(() => {
-    if (!isEligibleDevice || isInstalledPwa()) return
+    if (forceShow) {
+      const forceTimer = window.setTimeout(() => setIsOpen(true), 300)
+      return () => {
+        window.clearTimeout(forceTimer)
+      }
+    }
 
+    if (!isEligibleDevice) return
+
+    if (isInstalledPwa()) {
+      window.localStorage.setItem(INSTALLED_SEEN_KEY, '1')
+      return
+    }
+
+    const installedSeen = window.localStorage.getItem(INSTALLED_SEEN_KEY) === '1'
     const dismissedAt = getDismissedAt()
-    if (dismissedAt && Date.now() - dismissedAt < REOPEN_INTERVAL_MS) return
+
+    if (!installedSeen && dismissedAt && Date.now() - dismissedAt < REOPEN_INTERVAL_MS) return
+
+    if (installedSeen) {
+      // If user had app installed before and then removed it, we should show prompt again.
+      window.localStorage.removeItem(DISMISSED_AT_KEY)
+    }
 
     const startTimer = () => {
       if (timerRef.current) return
+
       timerRef.current = window.setTimeout(() => {
         if (!isInstalledPwa()) {
           setIsOpen(true)
@@ -67,14 +88,20 @@ export default function IphoneInstallPrompt() {
 
       window.removeEventListener('pointerdown', startTimer)
       window.removeEventListener('touchstart', startTimer)
+      window.removeEventListener('touchend', startTimer)
       window.removeEventListener('keydown', startTimer)
       window.removeEventListener('scroll', startTimer)
+      window.removeEventListener('click', startTimer)
     }
+
+    const fallbackStartId = window.setTimeout(startTimer, 1000)
 
     window.addEventListener('pointerdown', startTimer, { passive: true })
     window.addEventListener('touchstart', startTimer, { passive: true })
+    window.addEventListener('touchend', startTimer, { passive: true })
     window.addEventListener('keydown', startTimer)
     window.addEventListener('scroll', startTimer, { passive: true })
+    window.addEventListener('click', startTimer, { passive: true })
 
     const reevaluateInstall = () => {
       if (isInstalledPwa()) {
@@ -87,14 +114,17 @@ export default function IphoneInstallPrompt() {
     return () => {
       window.removeEventListener('pointerdown', startTimer)
       window.removeEventListener('touchstart', startTimer)
+      window.removeEventListener('touchend', startTimer)
       window.removeEventListener('keydown', startTimer)
       window.removeEventListener('scroll', startTimer)
+      window.removeEventListener('click', startTimer)
       document.removeEventListener('visibilitychange', reevaluateInstall)
+      window.clearTimeout(fallbackStartId)
       if (timerRef.current) {
         window.clearTimeout(timerRef.current)
       }
     }
-  }, [isEligibleDevice])
+  }, [forceShow, isEligibleDevice])
 
   const handleClose = () => {
     window.localStorage.setItem(DISMISSED_AT_KEY, String(Date.now()))

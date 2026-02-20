@@ -198,6 +198,14 @@ export default function FriendsPage() {
   const outgoingCount = outgoingRequests.length;
   const friendsCount = friends.length;
 
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("rs:friends-incoming-count", {
+        detail: { count: incomingCount },
+      }),
+    );
+  }, [incomingCount]);
+
   const searchHint = useMemo(() => {
     const query = searchQuery.trim();
     if (!query) return "Введите имя или email, чтобы найти пользователя.";

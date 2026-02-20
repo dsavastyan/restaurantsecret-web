@@ -48,6 +48,7 @@ export default function AccountLayout() {
   const [me, setMe] = useState<Me | null>(null);
   const [loading, setLoading] = useState<boolean>(Boolean(accessToken));
   const [error, setError] = useState<string | null>(null);
+  const [incomingFriendRequestsCount, setIncomingFriendRequestsCount] = useState(0);
 
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -115,11 +116,57 @@ export default function AccountLayout() {
     }
   }, [accessToken, logout]);
 
+  const loadIncomingFriendRequestsCount = useCallback(async () => {
+    if (!accessToken) {
+      setIncomingFriendRequestsCount(0);
+      return;
+    }
+
+    try {
+      const response = await apiGet<{ ok: boolean; incoming_requests?: unknown[] }>("/api/friends", accessToken);
+      if (!response?.ok) {
+        throw new Error("FRIENDS_NOT_OK");
+      }
+      const incoming = Array.isArray(response.incoming_requests) ? response.incoming_requests : [];
+      setIncomingFriendRequestsCount(incoming.length);
+    } catch (err) {
+      if (isUnauthorizedError(err)) {
+        logout();
+        setIncomingFriendRequestsCount(0);
+        return;
+      }
+      console.error("Failed to load incoming friend requests count", err);
+      setIncomingFriendRequestsCount(0);
+    }
+  }, [accessToken, logout]);
+
   useEffect(() => {
     if (accessToken) {
       load();
     }
   }, [accessToken, load]);
+
+  useEffect(() => {
+    if (accessToken) {
+      loadIncomingFriendRequestsCount();
+    } else {
+      setIncomingFriendRequestsCount(0);
+    }
+  }, [accessToken, loadIncomingFriendRequestsCount, location.pathname]);
+
+  useEffect(() => {
+    const onIncomingRequestsCountUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent<{ count?: number }>;
+      const count = Number(customEvent.detail?.count);
+      if (Number.isFinite(count) && count >= 0) {
+        setIncomingFriendRequestsCount(count);
+      }
+    };
+    window.addEventListener("rs:friends-incoming-count", onIncomingRequestsCountUpdate as EventListener);
+    return () => {
+      window.removeEventListener("rs:friends-incoming-count", onIncomingRequestsCountUpdate as EventListener);
+    };
+  }, []);
 
   const sub = me?.user?.subscription || null;
   const isAccountRoot = location.pathname === "/account";
@@ -131,7 +178,7 @@ export default function AccountLayout() {
     { to: "/account/goals", label: "Мои цели" },
     { to: "/account/statistics", label: "Дневник питания" },
     { to: "/account/favorites", label: "Избранное" },
-    { to: "/account/friends", label: "Друзья" },
+    { to: "/account/friends", label: "Друзья", badge: incomingFriendRequestsCount > 0 ? `+${incomingFriendRequestsCount}` : null },
   ];
 
   const daysLeft = useMemo(() => {
@@ -262,6 +309,7 @@ export default function AccountLayout() {
                 }
               >
                 <span className="account-nav__label">{item.label}</span>
+                {item.badge ? <span className="account-nav__badge">{item.badge}</span> : null}
               </NavLink>
             ))}
           </nav>
