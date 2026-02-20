@@ -13,6 +13,7 @@ import PaySuccess from '../pages/PaySuccess.jsx'
 import PaymentResult from '../pages/PaymentResult.jsx'
 import Login from '../pages/Login.tsx'
 import OnboardingWelcome from '../pages/OnboardingWelcome.tsx'
+import OnboardingInstallApp from '../pages/OnboardingInstallApp.tsx'
 import OnboardingProfile from '../pages/OnboardingProfile.tsx'
 import Contact from '../pages/Contact.jsx'
 import Legal from '../pages/Legal.jsx'
@@ -42,6 +43,7 @@ function AppRoutes() {
         <Route index element={<Landing />} />
         <Route path="login" element={<Login />} />
         <Route path="onboarding/welcome" element={<OnboardingWelcome />} />
+        <Route path="onboarding/install-app" element={<OnboardingInstallApp />} />
         <Route path="onboarding/profile/:step" element={<OnboardingProfile />} />
         <Route path="legal" element={<Legal />} />
         <Route path="tariffs" element={<Tariffs />} />

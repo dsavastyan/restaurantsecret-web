@@ -95,7 +95,7 @@ export default function OnboardingWelcomePage() {
         name_length: normalizedName.length,
       });
 
-      navigate("/onboarding/profile/step-1", {
+      navigate("/onboarding/install-app", {
         replace: true,
         state: { next: nextPath },
       });

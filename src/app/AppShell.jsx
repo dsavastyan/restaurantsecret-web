@@ -7,7 +7,6 @@ import SearchInput from '@/components/SearchInput'
 import DishCardModal from '@/components/DishCardModal'
 import DiaryFloatingButton from '@/components/DiaryFloatingButton'
 import Footer from '@/components/Footer.jsx'
-import IphoneInstallPrompt from '@/components/IphoneInstallPrompt.jsx'
 import { PD_API_BASE } from '@/config/api'
 import { fetchCurrentUser } from '@/lib/api'
 import { isMoscowDaytime } from '@/lib/moscowDaytime'
@@ -301,7 +300,6 @@ export default function AppShell() {
       <NavBar />
       <DishCardModal />
       <DiaryFloatingButton />
-      <IphoneInstallPrompt />
       <main className="flex-1">
         {isImmersivePage ? (
           <Outlet context={outletContext} />
