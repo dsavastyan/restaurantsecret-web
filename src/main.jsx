@@ -28,6 +28,7 @@ function Root() {
   useEffect(() => {
     // Analytics: Session Start
     analytics.trackSessionStart().catch(() => { })
+    analytics.trackLandingAttribution().catch(() => { })
 
     // Analytics: Session End / Duration (Simplified)
     const handleUnload = () => {

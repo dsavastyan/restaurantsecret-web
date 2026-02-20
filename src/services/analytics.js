@@ -6,6 +6,8 @@ export const USER_AGREEMENT_VERSION = "agreement_v1_2026-02-12";
 const CONSENT_KEY = "rs_consent_v1";
 const ANON_ID_KEY = "rs_anon_id";
 const ATTRIBUTION_KEY = "rs_landing_attribution_v1";
+const ATTRIBUTION_EVENT_SENT_KEY = "rs_attribution_event_signature_v1";
+const ANALYTICS_SCHEMA_VERSION = "2026-02-20-utm-fix-v3";
 
 // Helper to generate UUID v4
 function uuidv4() {
@@ -25,37 +27,13 @@ class AnalyticsService {
 
     captureInitialAttribution() {
         try {
-            if (sessionStorage.getItem(ATTRIBUTION_KEY)) return;
-
-            const params = new URLSearchParams(window.location.search);
-            const attribution = {
-                landing_path: window.location.pathname,
-                referrer: document.referrer || null,
-                utm_source: params.get("utm_source"),
-                utm_medium: params.get("utm_medium"),
-                utm_campaign: params.get("utm_campaign"),
-                utm_content: params.get("utm_content"),
-                utm_term: params.get("utm_term"),
-                tg_start_param: params.get("tgWebAppStartParam") || params.get("start"),
-            };
-
-            sessionStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(attribution));
+            this.syncAttributionFromLocation();
         } catch {
             // Ignore storage errors in private mode / blocked storage contexts.
         }
     }
 
-    getInitialAttribution() {
-        try {
-            const raw = sessionStorage.getItem(ATTRIBUTION_KEY);
-            if (raw) {
-                const parsed = JSON.parse(raw);
-                if (parsed && typeof parsed === "object") return parsed;
-            }
-        } catch {
-            // Fallback to current location below.
-        }
-
+    readAttributionFromLocation() {
         const params = new URLSearchParams(window.location.search);
         return {
             landing_path: window.location.pathname,
@@ -67,6 +45,76 @@ class AnalyticsService {
             utm_term: params.get("utm_term"),
             tg_start_param: params.get("tgWebAppStartParam") || params.get("start"),
         };
+    }
+
+    hasCampaignAttribution(attribution) {
+        return Boolean(
+            attribution?.utm_source ||
+            attribution?.utm_medium ||
+            attribution?.utm_campaign ||
+            attribution?.utm_content ||
+            attribution?.utm_term ||
+            attribution?.tg_start_param
+        );
+    }
+
+    buildAttributionSignature(attribution) {
+        return [
+            attribution?.utm_source || "",
+            attribution?.utm_medium || "",
+            attribution?.utm_campaign || "",
+            attribution?.utm_content || "",
+            attribution?.utm_term || "",
+            attribution?.tg_start_param || "",
+            attribution?.landing_path || "",
+        ].join("|");
+    }
+
+    syncAttributionFromLocation() {
+        const current = this.readAttributionFromLocation();
+        const currentSig = this.buildAttributionSignature(current);
+        const hasCampaign = this.hasCampaignAttribution(current);
+        const stored = sessionStorage.getItem(ATTRIBUTION_KEY);
+
+        if (!stored) {
+            sessionStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(current));
+            return;
+        }
+
+        let parsed = null;
+        try {
+            parsed = JSON.parse(stored);
+        } catch {
+            parsed = null;
+        }
+
+        if (!parsed || typeof parsed !== "object") {
+            sessionStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(current));
+            return;
+        }
+
+        const storedSig = this.buildAttributionSignature(parsed);
+        if (hasCampaign && currentSig !== storedSig) {
+            // New UTM in the same tab should start a fresh attribution boundary.
+            sessionStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(current));
+            sessionStorage.removeItem("rs_session_started");
+            sessionStorage.removeItem(ATTRIBUTION_EVENT_SENT_KEY);
+        }
+    }
+
+    getInitialAttribution() {
+        try {
+            this.syncAttributionFromLocation();
+            const raw = sessionStorage.getItem(ATTRIBUTION_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed && typeof parsed === "object") return parsed;
+            }
+        } catch {
+            // Fallback to current location below.
+        }
+
+        return this.readAttributionFromLocation();
     }
 
     getConsentStatus() {
@@ -83,6 +131,26 @@ class AnalyticsService {
 
     getAnonId() {
         return localStorage.getItem(ANON_ID_KEY) || null;
+    }
+
+    getAccessToken() {
+        const token = localStorage.getItem("rs_access");
+        if (!token || typeof token !== "string" || token.split(".").length !== 3) return null;
+
+        try {
+            const payloadBase64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+            const paddedPayload = payloadBase64.padEnd(Math.ceil(payloadBase64.length / 4) * 4, "=");
+            const payloadJson = atob(paddedPayload);
+            const payload = JSON.parse(payloadJson);
+            const exp = Number(payload?.exp);
+            if (Number.isFinite(exp) && Date.now() >= exp * 1000) {
+                return null;
+            }
+        } catch {
+            // If payload parsing failed, we still allow trying this token.
+        }
+
+        return token;
     }
 
     ensureAnonId() {
@@ -134,7 +202,7 @@ class AnalyticsService {
             // Here we will use fetch directly for now, adding Auth header if we can find it.
 
             const sendConsent = async (tokenOverride) => {
-                const token = tokenOverride || localStorage.getItem("rs_access");
+                const token = tokenOverride || this.getAccessToken();
                 const headers = { "Content-Type": "application/json" };
                 if (token && typeof token === "string" && token.split('.').length === 3) {
                     headers["Authorization"] = `Bearer ${token}`;
@@ -172,6 +240,7 @@ class AnalyticsService {
         // This captures landing UTM params for first-time consent on entry page.
         if (status === "granted") {
             this.trackSessionStart().catch(() => { });
+            this.trackLandingAttribution().catch(() => { });
         }
     }
 
@@ -211,28 +280,47 @@ class AnalyticsService {
             device_pixel_ratio: window.devicePixelRatio,
         };
 
-        const sent = await this.track("session_start", props);
+        const sent = await this.track("session_start", props, { withAttribution: false });
         if (sent) {
             sessionStorage.setItem("rs_session_started", "true");
         }
     }
 
+    async trackLandingAttribution() {
+        if (this.getConsentStatus() !== "granted") return;
+
+        const attribution = this.getInitialAttribution();
+        if (!this.hasCampaignAttribution(attribution)) return;
+
+        const signature = this.buildAttributionSignature(attribution);
+        const sentSignature = sessionStorage.getItem(ATTRIBUTION_EVENT_SENT_KEY);
+        if (sentSignature === signature) return;
+
+        const sent = await this.track("landing_attribution", attribution, { withAttribution: false });
+        if (sent) {
+            sessionStorage.setItem(ATTRIBUTION_EVENT_SENT_KEY, signature);
+        }
+    }
+
     async track(eventName, props = {}, options = {}) {
-        const { ignoreConsent = false } = options;
+        const { ignoreConsent = false, withAttribution = true } = options;
         if (!ignoreConsent && this.getConsentStatus() !== "granted") return false;
 
         const anonId = this.ensureAnonId();
         const sessionId = this.getSessionId();
+        const mergedProps = withAttribution
+            ? { analytics_schema_version: ANALYTICS_SCHEMA_VERSION, ...this.getInitialAttribution(), ...props }
+            : { analytics_schema_version: ANALYTICS_SCHEMA_VERSION, ...props };
 
         const payload = {
             event_name: eventName,
-            props,
+            props: mergedProps,
             session_id: sessionId,
             anon_id: anonId,
         };
 
         const sendEvent = async (tokenOverride) => {
-            const token = tokenOverride || localStorage.getItem("rs_access");
+            const token = tokenOverride || this.getAccessToken();
             const headers = { "Content-Type": "application/json" };
 
             // Basic check to ensure it's a non-empty string that looks like a JWT
@@ -278,7 +366,7 @@ class AnalyticsService {
      */
     async recordPolicyAcceptance() {
         const sendPolicy = async (tokenOverride) => {
-            const token = tokenOverride || localStorage.getItem("rs_access");
+            const token = tokenOverride || this.getAccessToken();
             if (!token || typeof token !== "string" || token.split('.').length !== 3) return null;
 
             const headers = {
