@@ -26,6 +26,8 @@ import Feedback from '../pages/Feedback.jsx'
 
 import SubscriptionHistoryPage from '../pages/account/SubscriptionHistoryPage.tsx'
 import Favorites from '../pages/account/Favorites.tsx'
+import Friends from '../pages/account/Friends.tsx'
+import FriendFavorites from '../pages/account/FriendFavorites.tsx'
 import Goals from '../pages/account/Goals.tsx'
 import Statistics from '../pages/account/Statistics.tsx'
 import PaymentMethods from '../pages/account/PaymentMethods.tsx'
@@ -54,6 +56,8 @@ function AppRoutes() {
           <Route path="subscription/history" element={<SubscriptionHistoryPage />} />
           <Route path="payment-methods/*" element={<PaymentMethods />} />
           <Route path="favorites" element={<Favorites />} />
+          <Route path="friends" element={<Friends />} />
+          <Route path="friends/:friendId" element={<FriendFavorites />} />
           <Route path="goals" element={<Goals />} />
           <Route path="statistics" element={<Statistics />} />
         </Route>
