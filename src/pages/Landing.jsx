@@ -88,12 +88,21 @@ function Hero({ themeMode, onToggleTheme }) {
       <div className="hero__topline">
         <button
           type="button"
-          className="theme-switch"
+          className="account-theme-toggle"
           onClick={onToggleTheme}
           title={themeMode === 'night' ? 'Включить светлую тему' : 'Включить тёмную тему'}
           aria-label={themeMode === 'night' ? 'Включить светлую тему' : 'Включить тёмную тему'}
         >
-          {themeMode === 'night' ? 'Светлая тема' : 'Тёмная тема'}
+          {themeMode === 'night' ? (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="4.5" />
+              <path d="M12 2.8v2.2M12 19v2.2M21.2 12h-2.2M5 12H2.8M18.9 5.1l-1.6 1.6M6.7 17.3l-1.6 1.6M18.9 18.9l-1.6-1.6M6.7 6.7L5.1 5.1" strokeLinecap="round" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 14.2A9 9 0 1 1 9.8 3a7.2 7.2 0 0 0 11.2 11.2Z" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
         </button>
       </div>
 
