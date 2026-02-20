@@ -81,6 +81,7 @@ function Hero({ themeMode, onToggleTheme }) {
 
   useEffect(() => {
     analytics.track('landing_open')
+    analytics.trackLandingAttribution().catch(() => { })
   }, [])
 
   return (
