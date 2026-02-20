@@ -559,7 +559,7 @@ function MenuLeafletMap({ className, center, marker, interactive, title }) {
       center={center}
       zoom={zoom}
       className={className}
-      attributionControl={interactive}
+      attributionControl={false}
       dragging={interactive}
       touchZoom={interactive}
       doubleClickZoom={interactive}

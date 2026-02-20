@@ -6384,11 +6384,13 @@ body:has(.account--sheet-open) {
 }
 
 .suggest-popover {
-  position: absolute;
-  top: calc(100% + 12px);
+  position: fixed;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  width: min(420px, 90vw);
+  transform: translate(-50%, -50%);
+  width: min(420px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
   background: #fff;
   border-radius: 20px;
   box-shadow: 0 30px 60px rgba(15, 23, 42, 0.2);
@@ -10649,6 +10651,225 @@ html[data-rs-theme="night"] .search-state__suggest-btn:hover {
 
 html[data-rs-theme="night"] .site-footer__dot {
   color: rgba(159, 176, 197, 0.72);
+}
+
+/* Night theme polish for legal/privacy/tariffs/licenses/contact/feedback pages */
+html[data-rs-theme="night"] .legal-page,
+html[data-rs-theme="night"] .tariffs-page,
+html[data-rs-theme="night"] .contact-page {
+  background:
+    radial-gradient(120% 90% at 8% 0%, rgba(34, 197, 94, 0.16) 0%, transparent 56%),
+    radial-gradient(110% 90% at 96% 4%, rgba(59, 130, 246, 0.14) 0%, transparent 60%),
+    linear-gradient(180deg, #07101d 0%, #0a1426 100%);
+  color: #e6edf7;
+}
+
+html[data-rs-theme="night"] .legal-container {
+  background: linear-gradient(180deg, rgba(13, 24, 41, 0.88), rgba(9, 18, 34, 0.92));
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 24px;
+  box-shadow: 0 18px 44px rgba(2, 6, 23, 0.38);
+  margin-top: 18px;
+  margin-bottom: 28px;
+}
+
+html[data-rs-theme="night"] .legal-eyebrow,
+html[data-rs-theme="night"] .legal-updated {
+  color: #9fb0c5;
+}
+
+html[data-rs-theme="night"] .legal-title,
+html[data-rs-theme="night"] .legal-content,
+html[data-rs-theme="night"] .legal-list,
+html[data-rs-theme="night"] .legal-content h2,
+html[data-rs-theme="night"] .legal-content strong {
+  color: #e6edf7;
+}
+
+html[data-rs-theme="night"] .legal-content section {
+  background: rgba(12, 22, 38, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 16px;
+  padding: 16px 18px;
+}
+
+html[data-rs-theme="night"] .legal-content a {
+  color: #7dd3fc;
+}
+
+html[data-rs-theme="night"] .legal-content a:hover {
+  color: #bae6fd;
+}
+
+html[data-rs-theme="night"] .tariffs-eyebrow {
+  color: #86efac;
+}
+
+html[data-rs-theme="night"] .tariffs-title,
+html[data-rs-theme="night"] .tariffs-section-title,
+html[data-rs-theme="night"] .tariffs-cta__lead {
+  color: #e6edf7;
+}
+
+html[data-rs-theme="night"] .tariffs-note,
+html[data-rs-theme="night"] .tariffs-cta__legal {
+  color: #9fb0c5;
+}
+
+html[data-rs-theme="night"] .tariffs-benefits,
+html[data-rs-theme="night"] .tariff-card {
+  background: linear-gradient(180deg, rgba(16, 29, 49, 0.94), rgba(10, 20, 36, 0.94));
+  border-color: rgba(148, 163, 184, 0.24);
+  box-shadow: 0 14px 34px rgba(2, 6, 23, 0.34);
+}
+
+html[data-rs-theme="night"] .tariffs-benefits__item {
+  background: linear-gradient(135deg, rgba(22, 163, 74, 0.16), rgba(34, 197, 94, 0.06));
+  border-color: rgba(134, 239, 172, 0.24);
+  color: #e6edf7;
+}
+
+html[data-rs-theme="night"] .tariff-card--featured {
+  background:
+    radial-gradient(160% 120% at 0% 0%, rgba(34, 197, 94, 0.2), transparent 60%),
+    linear-gradient(180deg, rgba(16, 32, 47, 0.96), rgba(9, 20, 34, 0.96));
+  border-color: rgba(74, 222, 128, 0.38);
+  box-shadow: 0 18px 40px rgba(6, 78, 59, 0.35);
+}
+
+html[data-rs-theme="night"] .tariff-card__title,
+html[data-rs-theme="night"] .tariff-card__price,
+html[data-rs-theme="night"] .tariff-card__desc {
+  color: #e6edf7;
+}
+
+html[data-rs-theme="night"] .tariff-card__footnote {
+  color: #9fb0c5;
+}
+
+html[data-rs-theme="night"] .tariff-card__tagline {
+  color: #86efac;
+}
+
+html[data-rs-theme="night"] .tariff-card__badge {
+  background: #0b1322;
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  color: #dbeafe;
+}
+
+html[data-rs-theme="night"] .tariffs-cta__legal a {
+  text-decoration-color: rgba(125, 211, 252, 0.55);
+}
+
+html[data-rs-theme="night"] .contact-card {
+  background: linear-gradient(180deg, rgba(15, 28, 46, 0.94), rgba(9, 19, 34, 0.96));
+  border-color: rgba(148, 163, 184, 0.24);
+  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.34);
+  color: #e6edf7;
+}
+
+html[data-rs-theme="night"] .contact-card--accent,
+html[data-rs-theme="night"] .contact-page--feedback .contact-card--accent {
+  background:
+    radial-gradient(120% 130% at 0% 0%, rgba(34, 197, 94, 0.2) 0%, transparent 52%),
+    linear-gradient(160deg, rgba(12, 28, 45, 0.98), rgba(8, 17, 30, 0.98));
+  border: 1px solid rgba(74, 222, 128, 0.34);
+  color: #e6edf7;
+  box-shadow: 0 16px 38px rgba(2, 6, 23, 0.42);
+}
+
+html[data-rs-theme="night"] .contact-card__eyebrow,
+html[data-rs-theme="night"] .contact-card--accent .contact-card__eyebrow,
+html[data-rs-theme="night"] .contact-page--feedback .contact-card--accent .contact-card__eyebrow {
+  color: #9fb0c5;
+}
+
+html[data-rs-theme="night"] .contact-card__hint,
+html[data-rs-theme="night"] .contact-card--accent .contact-card__hint,
+html[data-rs-theme="night"] .contact-page--feedback .contact-card--accent .contact-card__hint {
+  color: #b4c2d6;
+}
+
+html[data-rs-theme="night"] .contact-details__row,
+html[data-rs-theme="night"] .contact-list__item,
+html[data-rs-theme="night"] .contact-page--feedback .contact-card:not(.contact-card--accent) .contact-list__item {
+  background: rgba(8, 16, 30, 0.84);
+  border-color: rgba(148, 163, 184, 0.24);
+}
+
+html[data-rs-theme="night"] .contact-details__row dt,
+html[data-rs-theme="night"] .contact-list__label,
+html[data-rs-theme="night"] .contact-page--feedback .contact-card:not(.contact-card--accent) .contact-list__label {
+  color: #9fb0c5;
+}
+
+html[data-rs-theme="night"] .contact-details__row dd,
+html[data-rs-theme="night"] .contact-list__value,
+html[data-rs-theme="night"] .contact-page--feedback .contact-card:not(.contact-card--accent) .contact-list__value {
+  color: #e6edf7;
+}
+
+html[data-rs-theme="night"] .contact-list__cta,
+html[data-rs-theme="night"] .contact-page--feedback .contact-card:not(.contact-card--accent) .contact-list__cta {
+  background: rgba(30, 64, 175, 0.26);
+  border: 1px solid rgba(125, 211, 252, 0.32);
+  color: #dbeafe;
+}
+
+html[data-rs-theme="night"] .contact-note,
+html[data-rs-theme="night"] .contact-card--accent .contact-note {
+  background: rgba(8, 16, 30, 0.78);
+  border-color: rgba(148, 163, 184, 0.28);
+  color: #c7d4e6;
+}
+
+html[data-rs-theme="night"] .contact-note a,
+html[data-rs-theme="night"] .contact-card--accent .contact-note a,
+html[data-rs-theme="night"] .contact-card--accent a {
+  color: #7dd3fc;
+}
+
+html[data-rs-theme="night"] .feedback-form__label,
+html[data-rs-theme="night"] .contact-card--accent .feedback-form__label,
+html[data-rs-theme="night"] .contact-page--feedback .contact-card--accent .feedback-form__label {
+  color: #b4c2d6;
+}
+
+html[data-rs-theme="night"] .feedback-form__input,
+html[data-rs-theme="night"] .feedback-form__select,
+html[data-rs-theme="night"] .feedback-form__textarea,
+html[data-rs-theme="night"] .contact-card--accent .feedback-form__input,
+html[data-rs-theme="night"] .contact-card--accent .feedback-form__select,
+html[data-rs-theme="night"] .contact-card--accent .feedback-form__textarea,
+html[data-rs-theme="night"] .contact-page--feedback .contact-card--accent .feedback-form__input,
+html[data-rs-theme="night"] .contact-page--feedback .contact-card--accent .feedback-form__select,
+html[data-rs-theme="night"] .contact-page--feedback .contact-card--accent .feedback-form__textarea {
+  background: rgba(8, 16, 30, 0.92);
+  border-color: rgba(148, 163, 184, 0.34);
+  color: #e6edf7;
+}
+
+html[data-rs-theme="night"] .feedback-form__input::placeholder,
+html[data-rs-theme="night"] .feedback-form__textarea::placeholder,
+html[data-rs-theme="night"] .contact-card--accent .feedback-form__input::placeholder,
+html[data-rs-theme="night"] .contact-card--accent .feedback-form__textarea::placeholder,
+html[data-rs-theme="night"] .contact-page--feedback .contact-card--accent .feedback-form__input::placeholder,
+html[data-rs-theme="night"] .contact-page--feedback .contact-card--accent .feedback-form__textarea::placeholder {
+  color: #8ea2be;
+}
+
+html[data-rs-theme="night"] .feedback-form__input:focus,
+html[data-rs-theme="night"] .feedback-form__select:focus,
+html[data-rs-theme="night"] .feedback-form__textarea:focus,
+html[data-rs-theme="night"] .contact-card--accent .feedback-form__input:focus,
+html[data-rs-theme="night"] .contact-card--accent .feedback-form__select:focus,
+html[data-rs-theme="night"] .contact-card--accent .feedback-form__textarea:focus,
+html[data-rs-theme="night"] .contact-page--feedback .contact-card--accent .feedback-form__input:focus,
+html[data-rs-theme="night"] .contact-page--feedback .contact-card--accent .feedback-form__select:focus,
+html[data-rs-theme="night"] .contact-page--feedback .contact-card--accent .feedback-form__textarea:focus {
+  background: rgba(8, 16, 30, 0.96);
+  border-color: rgba(125, 211, 252, 0.56);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
 }
 
 html[data-rs-theme="night"] .menu-page {

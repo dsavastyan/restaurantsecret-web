@@ -90,9 +90,11 @@ export default function DishCardModal() {
 
   const handleSubscribeClick = () => {
     if (accessToken) {
+      close();
       navigate("/account/subscription", { state: { from: location.pathname + location.search } });
       return;
     }
+    close();
     navigate("/login", { state: { from: "/account/subscription" } });
   };
 
@@ -136,6 +138,7 @@ export default function DishCardModal() {
     e.stopPropagation();
     if (!data) return;
     if (!accessToken) {
+      close();
       navigate("/login", { state: { from: location.pathname + location.search } });
       return;
     }
@@ -151,11 +154,13 @@ export default function DishCardModal() {
     e.stopPropagation();
     if (!data) return;
     if (!accessToken) {
+      close();
       navigate("/login", { state: { from: location.pathname + location.search } });
       return;
     }
 
     if (!hasDishAccess) {
+      close();
       navigate("/account/subscription", { state: { from: location.pathname + location.search } });
       return;
     }
