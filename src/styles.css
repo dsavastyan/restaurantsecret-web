@@ -12171,25 +12171,47 @@ html[data-rs-theme="night"] .friends-pill--common {
   margin-top: 12px;
   display: flex;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .onboarding-install__lang {
-  min-width: 92px;
-  height: 40px;
-  border-radius: 10px;
-  border: 0;
-  background: #8bc6a3;
-  color: #0b111d;
-  font-size: 24px;
+  min-width: 86px;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 11px;
+  border: 1px solid rgba(74, 124, 90, 0.28);
+  background: linear-gradient(180deg, #b8e9cc 0%, #9fdab8 100%);
+  color: #0f2b1f;
+  font-size: clamp(18px, 2.2vw, 20px);
   font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.01em;
   cursor: pointer;
-  opacity: 0.88;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.55) inset,
+    0 6px 12px rgba(16, 51, 32, 0.12);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
 }
 
 .onboarding-install__lang.is-active {
-  opacity: 1;
-  box-shadow: 0 0 0 2px rgba(22, 101, 52, 0.22) inset;
+  background: linear-gradient(180deg, #9ddfba 0%, #88cdab 100%);
+  box-shadow:
+    0 0 0 2px rgba(22, 101, 52, 0.2) inset,
+    0 8px 14px rgba(16, 51, 32, 0.16);
+}
+
+.onboarding-install__lang:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.55) inset,
+    0 10px 16px rgba(16, 51, 32, 0.16);
+}
+
+.onboarding-install__lang:active {
+  transform: translateY(0);
+  box-shadow:
+    0 0 0 1px rgba(22, 101, 52, 0.18) inset,
+    0 4px 9px rgba(16, 51, 32, 0.14);
 }
 
 .onboarding-install__image {
@@ -12204,8 +12226,8 @@ html[data-rs-theme="night"] .friends-pill--common {
 .onboarding-install__step-three {
   margin: 14px 2px 0;
   color: #111827;
-  font-size: clamp(18px, 2.1vw, 28px);
-  line-height: 1.32;
+  font-size: clamp(17px, 2vw, 24px);
+  line-height: 1.35;
 }
 
 .onboarding-install__support {
@@ -12227,8 +12249,22 @@ html[data-rs-theme="night"] .onboarding-install__step-three {
 }
 
 html[data-rs-theme="night"] .onboarding-install__lang {
-  background: #3f7f63;
-  color: #eafdf2;
+  border-color: rgba(138, 201, 160, 0.3);
+  background: linear-gradient(180deg, #3b7b60 0%, #326a53 100%);
+  color: #ecfdf4;
+  box-shadow:
+    0 1px 0 rgba(211, 254, 227, 0.16) inset,
+    0 8px 14px rgba(3, 10, 7, 0.35);
+}
+
+html[data-rs-theme="night"] .onboarding-install__lang.is-active {
+  background: linear-gradient(180deg, #4c926f 0%, #3f7f63 100%);
+}
+
+html[data-rs-theme="night"] .onboarding-install__lang:hover {
+  box-shadow:
+    0 1px 0 rgba(211, 254, 227, 0.16) inset,
+    0 10px 18px rgba(3, 10, 7, 0.45);
 }
 
 html[data-rs-theme="night"] .onboarding-install__image {
