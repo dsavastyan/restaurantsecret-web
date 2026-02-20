@@ -47,6 +47,7 @@ export default function IphoneInstallPrompt() {
   const [stepOneLang, setStepOneLang] = useState(defaultLang)
   const [stepThreeLang, setStepThreeLang] = useState(defaultLang)
   const timerRef = useRef(null)
+
   const forceShow =
     typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('showInstallPrompt') === '1'
 
@@ -68,15 +69,10 @@ export default function IphoneInstallPrompt() {
     }
 
     const installedSeen = window.localStorage.getItem(INSTALLED_SEEN_KEY) === '1'
-
-    const installedSeen = window.localStorage.getItem(INSTALLED_SEEN_KEY) === '1'
     const dismissedAt = getDismissedAt()
 
     if (!installedSeen && dismissedAt && Date.now() - dismissedAt < REOPEN_INTERVAL_MS) return
 
-    if (installedSeen) {
-      // If user had app installed before and then removed it, we should show prompt again.
-    if (!installedSeen && dismissedAt && Date.now() - dismissedAt < REOPEN_INTERVAL_MS) return
     if (installedSeen) {
       // If user had app installed before and then removed it, show prompt again.
       window.localStorage.removeItem(DISMISSED_AT_KEY)
@@ -99,6 +95,7 @@ export default function IphoneInstallPrompt() {
       window.removeEventListener('click', startTimer)
     }
 
+    // Fallback in case iOS event sequence skips our interaction handlers.
     const fallbackStartId = window.setTimeout(startTimer, 1000)
 
     window.addEventListener('pointerdown', startTimer, { passive: true })

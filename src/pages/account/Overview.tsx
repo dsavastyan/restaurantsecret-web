@@ -5,7 +5,7 @@ import { useAuth } from "@/store/auth";
 import { useGoalsStore } from "@/store/goals";
 
 export default function AccountOverview() {
-  const { me, sub, isNightTheme, toggleTheme } = useOutletContext<AccountOutletContext>();
+  const { me, sub, isNightTheme, incomingFriendRequestsCount, toggleTheme } = useOutletContext<AccountOutletContext>();
   const location = useLocation();
   const { accessToken } = useAuth((state) => ({
     accessToken: state.accessToken,
@@ -265,6 +265,9 @@ export default function AccountOverview() {
               </svg>
             </span>
             <span className="account-overview-mobile__menu-label">Друзья</span>
+            {incomingFriendRequestsCount > 0 ? (
+              <span className="account-overview-mobile__menu-badge">{`+${incomingFriendRequestsCount}`}</span>
+            ) : null}
             <span className="account-overview-mobile__menu-arrow" aria-hidden="true">›</span>
           </Link>
         </div>

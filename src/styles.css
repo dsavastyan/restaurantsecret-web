@@ -4121,6 +4121,22 @@ body:has(.account--sheet-open) {
     font-weight: 600;
   }
 
+  .account-overview-mobile__menu-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 24px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: rgba(225, 29, 72, 0.12);
+    border: 1px solid rgba(225, 29, 72, 0.3);
+    color: #be123c;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
   .account-overview-mobile__menu-progress {
     margin-left: auto;
     width: auto;
@@ -11192,6 +11208,12 @@ html[data-rs-theme="night"] .account-overview-mobile__quick-card {
 }
 
 html[data-rs-theme="night"] .account-nav__badge {
+  background: rgba(251, 113, 133, 0.2);
+  border-color: rgba(251, 113, 133, 0.45);
+  color: #fecdd3;
+}
+
+html[data-rs-theme="night"] .account-overview-mobile__menu-badge {
   background: rgba(251, 113, 133, 0.2);
   border-color: rgba(251, 113, 133, 0.45);
   color: #fecdd3;
