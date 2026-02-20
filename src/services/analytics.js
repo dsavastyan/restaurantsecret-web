@@ -112,6 +112,12 @@ class AnalyticsService {
 
         // Trigger event for UI updates if needed
         window.dispatchEvent(new Event("rs-consent-update"));
+
+        // If user has just granted analytics, send session_start now.
+        // This captures landing UTM params for first-time consent on entry page.
+        if (status === "granted") {
+            this.trackSessionStart().catch(() => { });
+        }
     }
 
     getSessionId() {
