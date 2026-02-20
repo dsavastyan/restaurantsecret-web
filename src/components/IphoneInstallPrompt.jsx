@@ -68,12 +68,17 @@ export default function IphoneInstallPrompt() {
     }
 
     const installedSeen = window.localStorage.getItem(INSTALLED_SEEN_KEY) === '1'
+
+    const installedSeen = window.localStorage.getItem(INSTALLED_SEEN_KEY) === '1'
     const dismissedAt = getDismissedAt()
 
     if (!installedSeen && dismissedAt && Date.now() - dismissedAt < REOPEN_INTERVAL_MS) return
 
     if (installedSeen) {
       // If user had app installed before and then removed it, we should show prompt again.
+    if (!installedSeen && dismissedAt && Date.now() - dismissedAt < REOPEN_INTERVAL_MS) return
+    if (installedSeen) {
+      // If user had app installed before and then removed it, show prompt again.
       window.localStorage.removeItem(DISMISSED_AT_KEY)
     }
 
