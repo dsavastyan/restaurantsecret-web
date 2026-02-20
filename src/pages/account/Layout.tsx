@@ -35,6 +35,7 @@ export type AccountOutletContext = {
   isLoading: boolean;
   error: string | null;
   isNightTheme: boolean;
+  incomingFriendRequestsCount: number;
   toggleTheme: () => void;
 };
 
@@ -206,9 +207,10 @@ export default function AccountLayout() {
       isLoading: loading,
       error,
       isNightTheme,
+      incomingFriendRequestsCount,
       toggleTheme: handleToggleTheme,
     }),
-    [me, sub, daysLeft, load, accessToken, loading, error, isNightTheme, handleToggleTheme]
+    [me, sub, daysLeft, load, accessToken, loading, error, isNightTheme, incomingFriendRequestsCount, handleToggleTheme]
   );
 
   useEffect(() => {
