@@ -175,6 +175,7 @@ export default function DishCardModal() {
     await addDiaryEntry(accessToken, {
       dish_id: Number.isFinite(dishId) ? dishId : undefined,
       restaurant_slug: data.restaurantSlug,
+      restaurant_name: data.restaurantName || undefined,
       name: data.name || "Блюдо",
       calories: safeNum(data.kcal),
       protein: safeNum(data.proteins_g),

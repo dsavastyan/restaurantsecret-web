@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/store/auth';
 import { useDiaryStore } from '@/store/diary';
 import { useGoalsStore } from '@/store/goals';
@@ -257,7 +257,11 @@ export default function Statistics() {
                             <div className="diary-item-name">{entry.name}</div>
                             <div className="diary-item-meta">
                                 {entry.calories} ккал • Б {Math.round(Number(entry.protein))} • Ж {Math.round(Number(entry.fat))} • У {Math.round(Number(entry.carbs))}
-                                {entry.restaurant_slug && <span className="badge-restaurant">Ресторан</span>}
+                                {entry.restaurant_slug && (
+                                    <Link to={`/r/${entry.restaurant_slug}/menu`} className="badge-restaurant badge-restaurant-link">
+                                        {entry.restaurant_name || entry.restaurant_slug}
+                                    </Link>
+                                )}
                             </div>
                         </div>
                         <button className="btn-icon-danger" onClick={() => handleDelete(entry.id)}>×</button>

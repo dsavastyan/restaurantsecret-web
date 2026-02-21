@@ -187,6 +187,18 @@ function getRestaurantKey(item) {
   return String(raw).trim().toLowerCase()
 }
 
+function isFastFoodCuisine(cuisineRaw) {
+  if (!cuisineRaw) return false
+  const normalized = String(cuisineRaw).toLowerCase().replace(/\s+/g, '')
+  return (
+    normalized.includes('фастфуд') ||
+    normalized.includes('быстроепитание') ||
+    normalized.includes('fastfood') ||
+    normalized.includes('fast-food') ||
+    normalized.includes('quickservice')
+  )
+}
+
 function calculateRestaurantStats(restaurants) {
   const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
   const byRestaurant = new Map()
@@ -224,7 +236,7 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
   const [loading, setLoading] = useState(true)
   const [metroData, setMetroData] = useState({ lines: [], stations: [] })
   const [cuisines, setCuisines] = useState([])
-  const [filters, setFilters] = useState({ cuisines: [] })
+  const [filters, setFilters] = useState({ cuisines: [], excludeFastFood: false })
   const [focusTarget, setFocusTarget] = useState(null)
   const [isDefaultView, setIsDefaultView] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -237,7 +249,11 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
     () => new Set(Array.from(favoriteLookup || []).map((slug) => String(slug).trim().toLowerCase())),
     [favoriteLookup],
   )
-  const { restaurants: uniqueRestaurantCount, weeklyAdded } = calculateRestaurantStats(restaurants)
+  const visibleRestaurants = useMemo(() => {
+    if (!filters.excludeFastFood) return restaurants
+    return restaurants.filter((restaurant) => !isFastFoodCuisine(restaurant?.cuisine))
+  }, [restaurants, filters.excludeFastFood])
+  const { restaurants: uniqueRestaurantCount, weeklyAdded } = calculateRestaurantStats(visibleRestaurants)
   const isNight = themeMode === 'night'
   const hasOverlayMapButton = !showSummaryHeader
 
@@ -303,16 +319,16 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
     }
 
     fetchRestaurants()
-  }, [filters])
+  }, [filters.cuisines])
 
   useEffect(() => {
     if (typeof onStatsChange !== 'function') return
     onStatsChange({
       restaurants: uniqueRestaurantCount,
-      points: restaurants.length,
+      points: visibleRestaurants.length,
       weeklyAdded,
     })
-  }, [onStatsChange, restaurants, uniqueRestaurantCount, weeklyAdded])
+  }, [onStatsChange, visibleRestaurants, uniqueRestaurantCount, weeklyAdded])
 
   useEffect(() => {
     if (!isFullscreen) return undefined
@@ -343,7 +359,7 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
         <div className="map-header">
           <div className="header-left">
             <h3>Карта ресторанов</h3>
-            <span className="badge">{uniqueRestaurantCount} ресторанов • {restaurants.length} точек</span>
+            <span className="badge">{uniqueRestaurantCount} ресторанов • {visibleRestaurants.length} точек</span>
           </div>
           <div className="header-actions">
             <button
@@ -372,8 +388,19 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
           <MapCuisineFilter
             cuisines={cuisines}
             selectedCuisines={filters.cuisines}
-            onChange={(f) => setFilters({ ...filters, cuisines: f.cuisines })}
+            onChange={(f) => setFilters((prev) => ({ ...prev, cuisines: f.cuisines }))}
           />
+          <label className="map-fastfood-filter" htmlFor="exclude-fastfood-checkbox">
+            <input
+              id="exclude-fastfood-checkbox"
+              type="checkbox"
+              checked={filters.excludeFastFood}
+              onChange={(event) =>
+                setFilters((prev) => ({ ...prev, excludeFastFood: event.target.checked }))
+              }
+            />
+            <span>Исключить сети фастфуд</span>
+          </label>
         </div>
       )}
 
@@ -429,7 +456,7 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
           <MapViewportController focusTarget={focusTarget} />
           <ViewportChangeListener onViewportChange={handleViewportChange} />
           <MapResizeController watch={`${isFullscreen}-${themeMode}`} />
-          <ClusterLayer restaurants={restaurants} favoriteSlugs={favoriteSlugs} />
+          <ClusterLayer restaurants={visibleRestaurants} favoriteSlugs={favoriteSlugs} />
         </MapContainer>
       </div>
 
@@ -534,6 +561,38 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
         .filters-row .cuisine-filter-container {
           margin: 0 !important;
           width: 260px;
+        }
+
+        .map-fastfood-filter {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          min-height: 40px;
+          padding: 8px 12px;
+          border-radius: 12px;
+          border: 1px solid rgba(15, 23, 42, 0.12);
+          background: rgba(255, 255, 255, 0.88);
+          box-shadow: 0 6px 16px rgba(148, 163, 184, 0.18);
+          color: #0f172a;
+          font-size: 13px;
+          font-weight: 600;
+          line-height: 1.2;
+          user-select: none;
+        }
+
+        .map-fastfood-filter input {
+          width: 16px;
+          height: 16px;
+          accent-color: #2f8f5b;
+          margin: 0;
+          flex-shrink: 0;
+        }
+
+        .restaurant-map-container.is-night .map-fastfood-filter {
+          background: rgba(30, 41, 59, 0.84);
+          border-color: rgba(148, 163, 184, 0.38);
+          color: #dbe7f8;
+          box-shadow: 0 8px 20px rgba(2, 6, 23, 0.32);
         }
 
         .badge {
@@ -732,7 +791,8 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
           }
 
           .filters-row .metro-filter-container,
-          .filters-row .cuisine-filter-container {
+          .filters-row .cuisine-filter-container,
+          .filters-row .map-fastfood-filter {
             width: 100%;
           }
 

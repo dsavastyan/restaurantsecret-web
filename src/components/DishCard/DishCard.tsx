@@ -72,6 +72,7 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, showRes
         await addDiaryEntry(accessToken, {
             dish_id: Number.isFinite(dishId) ? dishId : undefined,
             restaurant_slug: restaurantSlug,
+            restaurant_name: restaurantName || undefined,
             name: dish.name || 'Блюдо',
             calories: safeNum(dish.kcal),
             protein: safeNum(dish.protein),

@@ -8357,6 +8357,17 @@ body:has(.account--sheet-open) {
   text-transform: uppercase;
 }
 
+.badge-restaurant-link {
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.badge-restaurant-link:hover {
+  background: #bae6fd;
+  border-color: #38bdf8;
+}
+
 .btn-icon-danger {
   background: none;
   border: none;
@@ -9650,8 +9661,59 @@ html[data-rs-theme="night"] .onboarding-flow__legal {
     align-items: flex-start;
   }
 
+  .menu-card {
+    padding: 10px;
+    border-radius: 12px;
+    gap: 8px;
+  }
+
+  .menu-card__top {
+    gap: 8px;
+  }
+
+  .menu-card__title {
+    font-size: 17px;
+    line-height: 1.25;
+  }
+
+  .menu-card__actions {
+    gap: 8px;
+  }
+
+  .menu-card__add-btn,
+  .menu-card__fav-btn {
+    padding: 2px;
+  }
+
+  .menu-card__add-btn svg,
+  .menu-card__fav-btn svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .menu-card__macros {
+    gap: 5px;
+  }
+
+  .menu-tag {
+    padding: 5px 8px;
+    font-size: 14px;
+  }
+
+  .menu-card__footer {
+    gap: 8px;
+    align-items: center;
+  }
+
   .menu-card__price {
     align-self: flex-start;
+    font-size: 13px;
+  }
+
+  .menu-card__details-btn {
+    padding: 6px 12px;
+    border-radius: 9px;
+    font-size: 15px;
   }
 
   .menu-hero__badge {
@@ -9745,6 +9807,26 @@ html[data-rs-theme="night"] .onboarding-flow__legal {
 
   .login__card {
     padding: 64px 0 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .menu-card {
+    padding: 9px;
+  }
+
+  .menu-card__title {
+    font-size: 16px;
+  }
+
+  .menu-tag {
+    padding: 5px 7px;
+    font-size: 13px;
+  }
+
+  .menu-card__details-btn {
+    padding: 6px 10px;
+    font-size: 14px;
   }
 }
 
@@ -11906,6 +11988,11 @@ html[data-rs-theme="night"] .diary-item {
 html[data-rs-theme="night"] .badge-restaurant {
   background: rgba(14, 116, 144, 0.32);
   color: #8adcf2;
+}
+
+html[data-rs-theme="night"] .badge-restaurant-link:hover {
+  background: rgba(14, 116, 144, 0.5);
+  border-color: rgba(56, 189, 248, 0.7);
 }
 
 

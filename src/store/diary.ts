@@ -9,6 +9,7 @@ export type DiaryEntry = {
     date: string;
     dish_id?: number | null;
     restaurant_slug?: string | null;
+    restaurant_name?: string | null;
     name: string;
     calories: number;
     protein: string | number;
