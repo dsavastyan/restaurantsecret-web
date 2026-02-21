@@ -34,7 +34,7 @@ class AnalyticsService {
     }
 
     readAttributionFromLocation() {
-        const params = new URLSearchParams(window.location.search);
+        const params = this.getNormalizedQueryParams();
         return {
             landing_path: window.location.pathname,
             referrer: document.referrer || null,
@@ -43,7 +43,36 @@ class AnalyticsService {
             utm_campaign: params.get("utm_campaign"),
             utm_content: params.get("utm_content"),
             utm_term: params.get("utm_term"),
-            tg_start_param: params.get("tgWebAppStartParam") || params.get("start"),
+            tg_start_param: params.get("tgwebappstartparam") || params.get("start"),
+        };
+    }
+
+    getNormalizedQueryParams() {
+        const normalized = new Map();
+
+        const appendFromQueryString = (queryString) => {
+            if (!queryString) return;
+            const raw = queryString.startsWith("?") ? queryString.slice(1) : queryString;
+            const parsed = new URLSearchParams(raw);
+            for (const [key, value] of parsed.entries()) {
+                const normalizedKey = key.trim().toLowerCase().replace(/^amp;/, "");
+                if (!normalizedKey) continue;
+                const normalizedValue = typeof value === "string" ? value.trim() : value;
+                normalized.set(normalizedKey, normalizedValue || null);
+            }
+        };
+
+        appendFromQueryString(window.location.search);
+
+        // Some integrations pass UTM params after '#', keep those too.
+        const hash = window.location.hash || "";
+        const queryIdx = hash.indexOf("?");
+        if (queryIdx !== -1) {
+            appendFromQueryString(hash.slice(queryIdx + 1));
+        }
+
+        return {
+            get: (key) => normalized.get(String(key).trim().toLowerCase()) ?? null,
         };
     }
 
