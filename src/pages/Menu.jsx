@@ -5,7 +5,7 @@ import { AttributionControl, CircleMarker, MapContainer, TileLayer } from 'react
 import 'leaflet/dist/leaflet.css'
 import { apiGet } from '@/lib/requests'
 import { flattenMenuDishes } from '@/lib/nutrition'
-import { formatDescription, matchesSearchQuery } from '@/lib/text'
+import { formatDescription, getRussianPluralWord, matchesSearchQuery } from '@/lib/text'
 import { formatMenuCapturedAt } from '@/lib/dates'
 import { useAuth } from '@/store/auth'
 import { useSubscriptionStore } from '@/store/subscription'
@@ -408,7 +408,11 @@ export default function Menu() {
               Показать на карте
             </button>
             <div className="menu-hero__badge">
-              <span>{filtered.length ? `${filtered.length} блюд` : 'Ничего не найдено'}</span>
+              <span>
+                {filtered.length
+                  ? `${filtered.length} ${getRussianPluralWord(filtered.length, 'блюдо', 'блюда', 'блюд')}`
+                  : 'Ничего не найдено'}
+              </span>
             </div>
           </div>
         </div>

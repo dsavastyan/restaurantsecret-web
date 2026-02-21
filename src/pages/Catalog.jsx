@@ -7,6 +7,7 @@ import { useSWRLite } from '../hooks/useSWRLite.js'
 import { useFavoriteRestaurantsStore } from '@/store/favoriteRestaurants'
 import { useAuth } from '@/store/auth'
 import { analytics } from '@/services/analytics'
+import { getRussianPluralWord } from '@/lib/text'
 
 // Fetch a large number to emulate "all" items since backend pagination seems flaky
 const FETCH_LIMIT = 1000;
@@ -378,7 +379,9 @@ export default function Catalog() {
                 </div>
 
                 <div className="catalog-card__bottom">
-                  <div className="catalog-card__label">Блюда в меню: {dishesCount}</div>
+                  <div className="catalog-card__label">
+                    Блюда в меню: {dishesCount} {getRussianPluralWord(dishesCount, 'блюдо', 'блюда', 'блюд')}
+                  </div>
                   <button type="button" className="btn btn--primary" onClick={() => openMenu(r.slug)}>Открыть меню</button>
                 </div>
               </li>

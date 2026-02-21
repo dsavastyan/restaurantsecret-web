@@ -6,6 +6,21 @@ export function formatDescription(text: unknown, fallback = "") {
   return normalized;
 }
 
+export function getRussianPluralWord(
+  count: number,
+  one: string,
+  few: string,
+  many: string
+): string {
+  const value = Math.abs(Number(count)) % 100;
+  const lastDigit = value % 10;
+
+  if (value >= 11 && value <= 14) return many;
+  if (lastDigit === 1) return one;
+  if (lastDigit >= 2 && lastDigit <= 4) return few;
+  return many;
+}
+
 const RU_STOP_WORDS = new Set([
   "и",
   "в",
