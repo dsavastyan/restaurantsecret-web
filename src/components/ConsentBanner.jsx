@@ -6,18 +6,30 @@ export function ConsentBanner() {
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
+        let showTimer = null;
+
         const checkStatus = () => {
             const status = analytics.getConsentStatus();
             if (status === "unset") {
-                setVisible(true);
+                if (showTimer) clearTimeout(showTimer);
+                showTimer = setTimeout(() => {
+                    setVisible(true);
+                }, 5000);
             } else {
+                if (showTimer) {
+                    clearTimeout(showTimer);
+                    showTimer = null;
+                }
                 setVisible(false);
             }
         };
 
         checkStatus();
         window.addEventListener("rs-consent-update", checkStatus);
-        return () => window.removeEventListener("rs-consent-update", checkStatus);
+        return () => {
+            if (showTimer) clearTimeout(showTimer);
+            window.removeEventListener("rs-consent-update", checkStatus);
+        };
     }, []);
 
     const handleAccept = () => {
