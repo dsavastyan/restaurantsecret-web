@@ -263,8 +263,6 @@ class AnalyticsService {
     }
 
     async trackSessionStart() {
-        if (this.getConsentStatus() !== "granted") return;
-
         // Ensure session exists
         this.getSessionId();
 
@@ -280,7 +278,10 @@ class AnalyticsService {
             device_pixel_ratio: window.devicePixelRatio,
         };
 
-        const sent = await this.track("session_start", props, { withAttribution: false });
+        const sent = await this.track("session_start", props, {
+            ignoreConsent: true,
+            withAttribution: false,
+        });
         if (sent) {
             sessionStorage.setItem("rs_session_started", "true");
         }
