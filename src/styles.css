@@ -6463,7 +6463,7 @@ body:has(.account--sheet-open) {
   box-shadow: 0 30px 60px rgba(15, 23, 42, 0.2);
   border: 1px solid rgba(15, 23, 42, 0.08);
   padding: 18px;
-  z-index: 40;
+  z-index: 1600;
 }
 
 .suggest-popover__header {
@@ -10539,6 +10539,7 @@ html[data-rs-theme="night"] .rs-banner__text {
   width: 100%;
   display: flex;
   justify-content: center;
+  z-index: 90;
 }
 
 .restaurants__suggest-trigger {
