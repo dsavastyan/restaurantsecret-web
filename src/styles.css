@@ -6963,7 +6963,32 @@ body:has(.account--sheet-open) {
   font-weight: 500;
   font-size: 15px;
   line-height: 1.4;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   animation: toast-in 0.2s ease-out;
+}
+
+.toast__message {
+  flex: 1 1 auto;
+}
+
+.toast__action {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.toast__action:hover {
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .toast--info {
@@ -7003,7 +7028,13 @@ body:has(.account--sheet-open) {
 
   .toast {
     width: 100%;
-    text-align: center;
+    align-items: stretch;
+    flex-direction: column;
+    text-align: left;
+  }
+
+  .toast__action {
+    align-self: flex-start;
   }
 }
 
@@ -10580,6 +10611,15 @@ html[data-rs-theme="night"] .rs-banner__text {
 
 .landing .search-input__control::placeholder {
   color: var(--landing-muted);
+}
+
+.landing .hero__search,
+.landing .search-input {
+  z-index: 120;
+}
+
+.landing .search-input__dropdown {
+  z-index: 121;
 }
 
 .landing .suggest-popover {

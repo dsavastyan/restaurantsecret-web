@@ -1,7 +1,13 @@
 export type ToastVariant = "success" | "info" | "warning" | "error";
 
+export type ToastAction = {
+  label: string;
+  onClick: () => void;
+};
+
 export type ToastOptions = {
   duration?: number;
+  action?: ToastAction;
 };
 
 export type ToastMessage = {
@@ -9,6 +15,7 @@ export type ToastMessage = {
   variant: ToastVariant;
   message: string;
   duration: number;
+  action?: ToastAction;
 };
 
 type ToastListener = (toast: ToastMessage) => void;
@@ -25,6 +32,7 @@ const emit = (variant: ToastVariant, message: string, options?: ToastOptions) =>
     variant,
     message,
     duration,
+    action: options?.action,
   };
   listeners.forEach((listener) => listener(toast));
 };

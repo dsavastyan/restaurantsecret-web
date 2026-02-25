@@ -22,13 +22,32 @@ export default function ToastViewport() {
     };
   }, []);
 
+  const dismissToast = (id: number) => {
+    setToasts((prev) => prev.filter((item) => item.id !== id));
+  };
+
   if (!toasts.length) return null;
 
   return (
     <div className="toast-viewport" aria-live="polite" aria-atomic="true">
       {toasts.map((toast) => (
         <div key={toast.id} className={`toast toast--${toast.variant}`} role="status">
-          {toast.message}
+          <span className="toast__message">{toast.message}</span>
+          {toast.action ? (
+            <button
+              type="button"
+              className="toast__action"
+              onClick={() => {
+                try {
+                  toast.action?.onClick();
+                } finally {
+                  dismissToast(toast.id);
+                }
+              }}
+            >
+              {toast.action.label}
+            </button>
+          ) : null}
         </div>
       ))}
     </div>

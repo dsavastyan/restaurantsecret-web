@@ -138,6 +138,17 @@ export default function AppShell() {
     tg.setHeaderColor('bg_color')
   }, [])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const handleToastNavigate = (event) => {
+      const to = event?.detail?.to
+      if (typeof to !== 'string' || !to) return
+      navigate(to)
+    }
+    window.addEventListener('rs:navigate', handleToastNavigate)
+    return () => window.removeEventListener('rs:navigate', handleToastNavigate)
+  }, [navigate])
+
   // Expose helpers to descendants through React Router outlet context.
   const requestPaywall = useCallback(() => {
     // Paywall functionality disabled.

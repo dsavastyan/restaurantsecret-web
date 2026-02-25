@@ -2,6 +2,11 @@ import { useSyncExternalStore } from "react";
 import { apiGet, apiPost, apiDelete } from "@/lib/api";
 import { toast } from "@/lib/toast";
 
+const openFavoritesPage = () => {
+    if (typeof window === "undefined") return;
+    window.dispatchEvent(new CustomEvent("rs:navigate", { detail: { to: "/account/favorites" } }));
+};
+
 type FavoriteItem = {
     dishId: number;
     restaurantSlug: string;
@@ -100,7 +105,12 @@ const toggleFavorite = async (token: string, dishId: number, restaurantSlug: str
             await apiDelete(`/api/favorites/${dishId}`, token);
         } else {
             await apiPost("/api/favorites", { dish_id: dishId, restaurant_slug: restaurantSlug }, token);
-            toast.success("Блюдо добавлено в избранное");
+            toast.success("Блюдо добавлено в избранное", {
+                action: {
+                    label: "Перейти в избранное",
+                    onClick: openFavoritesPage,
+                },
+            });
         }
     } catch (err) {
         console.error("Failed to toggle favorite", err);
