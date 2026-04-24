@@ -308,18 +308,20 @@ export default function AppShell() {
 
   return (
     <div className={`min-h-screen flex flex-col app-theme app-theme--${isDayTheme ? 'day' : 'night'}`}>
-      <NavBar />
+      {!isLanding && <NavBar />}
       <DishCardModal />
-      <DiaryFloatingButton />
+      {!isLanding && <DiaryFloatingButton />}
       <main className="flex-1">
-        {isImmersivePage ? (
+        {isLanding ? (
+          <Outlet context={outletContext} />
+        ) : isImmersivePage ? (
           <Outlet context={outletContext} />
         ) : isContact ? (
           <div className={showPaywall ? 'contact-wrapper locked' : 'contact-wrapper'}>
             <Outlet context={outletContext} />
           </div>
         ) : (
-          <div className={showPaywall ? 'container locked' : isLanding ? 'container container--landing' : 'container'}>
+          <div className={showPaywall ? 'container locked' : 'container'}>
             {showGlobalSearch && (
               <div className="app-shell__search">
                 <div className="app-shell__search-inner">
@@ -331,7 +333,7 @@ export default function AppShell() {
           </div>
         )}
       </main>
-      {!isImmersivePage && <Footer />}
+      {!isImmersivePage && !isLanding && <Footer />}
     </div>
   )
 }
