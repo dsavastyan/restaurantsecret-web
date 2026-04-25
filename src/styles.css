@@ -1,5 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Playfair+Display:wght@600&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Fraunces:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap");
 
 /* Global stylesheet for the RestaurantSecret web app. Most selectors target
    layout primitives, paywall, and the landing page hero. */
@@ -12438,16 +12438,17 @@ html[data-rs-theme="night"] .onboarding-install__image {
 
 /* Warm landing redesign */
 .landing-warm {
-  --warm-bg: #f6ecd9;
+  --warm-bg: #f3ede2;
   --warm-bg-soft: #fbf3e1;
-  --warm-card: #fffaf0;
-  --warm-ink: #2b2418;
-  --warm-ink-soft: #6e5f48;
-  --warm-rule: #d9c9a8;
-  --warm-accent: #7ea74b;
-  --warm-accent-dk: #5c7f33;
+  --warm-card: #ffffff;
+  --warm-ink: #2a2620;
+  --warm-ink-soft: #7a6f5f;
+  --warm-rule: #ded3bf;
+  --warm-rule-strong: rgba(255, 255, 255, 0.3);
+  --warm-accent: #8a9a6b;
+  --warm-accent-dk: #6d7d50;
   --warm-warm: #d47a3a;
-  --warm-p: #7ea74b;
+  --warm-p: #8a9a6b;
   --warm-f: #e8a15e;
   --warm-c: #d87a5e;
   --warm-donut-track: #eee3d0;
@@ -12458,12 +12459,12 @@ html[data-rs-theme="night"] .onboarding-install__image {
 }
 
 .landing-warm--night {
-  --warm-bg: #f1ebdf;
-  --warm-bg-soft: #f7f0e4;
-  --warm-card: #fdf8ef;
-  --warm-ink: #2b2418;
-  --warm-ink-soft: #6e5f48;
-  --warm-rule: #d3c5a8;
+  --warm-bg: #eae2d4;
+  --warm-bg-soft: #f4ecdd;
+  --warm-card: #fffaf0;
+  --warm-ink: #2a2620;
+  --warm-ink-soft: #726959;
+  --warm-rule: #d4c7b1;
 }
 
 .landing-warm a {
@@ -12484,9 +12485,8 @@ html[data-rs-theme="night"] .onboarding-install__image {
 }
 
 .landing-warm__nav {
-  padding-top: 20px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--warm-rule);
+  padding-top: 24px;
+  padding-bottom: 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -12496,21 +12496,21 @@ html[data-rs-theme="night"] .onboarding-install__image {
 .landing-warm__brand-link {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .landing-warm__logo {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   object-fit: cover;
   display: block;
 }
 
 .landing-warm__brand {
-  font-family: 'Fraunces', 'Source Serif Pro', Georgia, serif;
-  font-size: 22px;
-  font-weight: 600;
+  font-family: 'DM Serif Display', 'Fraunces', 'Source Serif Pro', Georgia, serif;
+  font-size: 20px;
+  font-weight: 400;
   letter-spacing: -0.2px;
 }
 
@@ -12526,16 +12526,19 @@ html[data-rs-theme="night"] .onboarding-install__image {
 .landing-warm__nav-center button {
   border: 0;
   background: transparent;
-  color: var(--warm-ink-soft);
-  font: 500 14px/1 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  color: var(--warm-ink);
+  font: 500 12px/1 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
   cursor: pointer;
-  padding: 0;
+  padding: 0 0 3px;
+  border-bottom: 1px solid var(--warm-rule);
   white-space: nowrap;
 }
 
 .landing-warm__nav-center a:hover,
 .landing-warm__nav-center button:hover {
-  color: var(--warm-ink);
+  color: var(--warm-accent-dk);
 }
 
 .landing-warm__nav-right {
@@ -12545,23 +12548,23 @@ html[data-rs-theme="night"] .onboarding-install__image {
 }
 
 .landing-warm__login-link {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
   color: var(--warm-ink);
 }
 
 .landing-warm__login-link:hover {
-  color: var(--warm-warm);
+  color: var(--warm-accent-dk);
 }
 
 .landing-warm__nav-cta {
   background: var(--warm-ink);
-  color: var(--warm-bg-soft);
+  color: #fff;
   border: 0;
   padding: 10px 18px;
   border-radius: 999px;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
   transition: transform 0.2s ease, filter 0.2s ease;
 }
 
@@ -12569,7 +12572,7 @@ html[data-rs-theme="night"] .onboarding-install__image {
 .landing-warm__nav-cta:visited,
 .landing-warm__nav-cta:hover,
 .landing-warm__nav-cta:active {
-  color: var(--warm-bg-soft) !important;
+  color: #fff !important;
 }
 
 .landing-warm__nav-cta:hover {
@@ -12581,81 +12584,72 @@ html[data-rs-theme="night"] .onboarding-install__image {
 }
 
 .landing-warm__hero {
-  padding-top: 60px;
-  padding-bottom: 40px;
+  padding-top: 100px;
+  padding-bottom: 80px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .landing-warm__hero-title {
   margin: 0;
-  max-width: 1050px;
-  font-family: 'Fraunces', 'Source Serif Pro', Georgia, serif;
-  font-size: clamp(56px, 8vw, 104px);
-  font-weight: 500;
-  line-height: 0.95;
-  letter-spacing: -2.5px;
+  max-width: 900px;
+  font-family: 'DM Serif Display', 'Fraunces', 'Source Serif Pro', Georgia, serif;
+  font-size: clamp(56px, 6.4vw, 72px);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -1.5px;
 }
 
-.landing-warm__hero-title em,
-.landing-warm__hero-title .landing-warm__hero-underlined,
+.landing-warm__hero-focus {
+  font-style: italic;
+  color: var(--warm-accent);
+  font-weight: 400;
+}
+
 .landing-warm__section-head h2 em,
 .landing-warm__why h2 em,
 .landing-warm__featured h2 em,
 .landing-warm__cta h2 em {
   font-style: italic;
   color: var(--warm-warm);
-  font-weight: 500;
-}
-
-.landing-warm__hero-underlined {
-  position: relative;
-  display: inline-block;
-  white-space: nowrap;
-}
-
-.landing-warm__hero-underlined::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -12px;
-  height: 16px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 18' preserveAspectRatio='none'%3E%3Cpath d='M2 10 Q 60 2, 120 10 T 240 10 T 360 10 L 398 8' fill='none' stroke='%237ea74b' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
+  font-weight: 400;
 }
 
 .landing-warm__hero-subtitle {
-  margin: 36px 0 0;
-  max-width: 620px;
-  font-size: 22px;
+  margin: 48px 0 0;
+  max-width: 540px;
+  font-size: 19px;
   font-weight: 400;
-  line-height: 1.4;
+  line-height: 1.55;
   color: var(--warm-ink-soft);
 }
 
 .landing-warm__search {
-  margin-top: 44px;
-  max-width: 760px;
+  margin-top: 48px;
+  max-width: 640px;
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   background: var(--warm-card);
-  border: 1.5px solid var(--warm-rule);
-  border-radius: 20px;
-  padding: 8px 8px 8px 24px;
-  box-shadow: 0 18px 42px rgba(110, 95, 72, 0.14);
+  border: 1px solid var(--warm-rule);
+  border-radius: 999px;
+  padding: 6px 6px 6px 22px;
+  box-shadow: 0 8px 24px rgba(42, 38, 32, 0.06);
 }
 
 .landing-warm__search-icon {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   color: var(--warm-ink-soft);
   display: inline-flex;
 }
 
 .landing-warm__search-icon svg {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
 }
 
 .landing-warm__search input {
@@ -12666,7 +12660,7 @@ html[data-rs-theme="night"] .onboarding-install__image {
   background: transparent;
   color: var(--warm-ink);
   font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  font-size: 19px;
+  font-size: 16px;
   padding: 14px 0;
 }
 
@@ -12676,14 +12670,13 @@ html[data-rs-theme="night"] .onboarding-install__image {
 
 .landing-warm__search button {
   border: 0;
-  border-radius: 14px;
+  border-radius: 999px;
   background: var(--warm-accent);
   color: #fff;
-  font-size: 16px;
-  font-weight: 700;
-  padding: 14px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 13px 26px;
   cursor: pointer;
-  box-shadow: 0 10px 22px rgba(126, 167, 75, 0.27);
   transition: transform 0.2s ease, filter 0.2s ease;
 }
 
@@ -12698,13 +12691,14 @@ html[data-rs-theme="night"] .onboarding-install__image {
 .landing-warm__chips {
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 18px;
+  gap: 8px;
+  margin-top: 20px;
 }
 
 .landing-warm__chips-label {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--warm-ink-soft);
 }
 
@@ -12714,7 +12708,7 @@ html[data-rs-theme="night"] .onboarding-install__image {
   border-radius: 999px;
   padding: 6px 12px;
   color: var(--warm-ink-soft);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
 }
@@ -12725,27 +12719,84 @@ html[data-rs-theme="night"] .onboarding-install__image {
 }
 
 .landing-warm__stats {
-  display: flex;
-  gap: 56px;
-  max-width: 900px;
   margin-top: 64px;
-  padding-top: 32px;
-  border-top: 1px solid var(--warm-rule);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 820px;
+}
+
+.landing-warm__stat {
+  padding: 24px 20px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  box-shadow: 0 8px 28px rgba(42, 38, 32, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .landing-warm__stat p {
   margin: 0;
-  font-family: 'Fraunces', 'Source Serif Pro', Georgia, serif;
-  font-size: 44px;
-  font-weight: 500;
+  font-family: 'DM Serif Display', 'Fraunces', 'Source Serif Pro', Georgia, serif;
+  font-size: 40px;
+  font-weight: 400;
   line-height: 1;
+  letter-spacing: -0.5px;
 }
 
 .landing-warm__stat span {
   display: block;
-  margin-top: 8px;
+  margin-top: 10px;
   color: var(--warm-ink-soft);
-  font-size: 14px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.landing-warm__hero-scroll {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--warm-ink-soft);
+}
+
+.landing-warm__hero-scroll-line {
+  width: 1px;
+  height: 36px;
+  background: linear-gradient(to bottom, transparent, var(--warm-rule) 30%, var(--warm-ink-soft));
+  animation: landingWarmScrollHint 2.2s ease-in-out infinite;
+  transform-origin: top;
+}
+
+.landing-warm__hero-scroll svg {
+  width: 14px;
+  height: 14px;
+}
+
+.landing-warm__hero-scroll path {
+  stroke: var(--warm-ink-soft);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@keyframes landingWarmScrollHint {
+  0%,
+  100% {
+    transform: scaleY(0.4);
+    opacity: 0.4;
+  }
+
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
 }
 
 .landing-warm__dishes {
@@ -12765,9 +12816,9 @@ html[data-rs-theme="night"] .onboarding-install__image {
 .landing-warm__section-head h2 {
   margin: 0;
   max-width: 560px;
-  font-family: 'Fraunces', 'Source Serif Pro', Georgia, serif;
+  font-family: 'DM Serif Display', 'Fraunces', 'Source Serif Pro', Georgia, serif;
   font-size: clamp(34px, 4.3vw, 48px);
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.05;
   letter-spacing: -1px;
 }
@@ -12808,9 +12859,9 @@ html[data-rs-theme="night"] .onboarding-install__image {
 
 .landing-warm__dish-head h3 {
   margin: 4px 0 0;
-  font-family: 'Fraunces', 'Source Serif Pro', Georgia, serif;
+  font-family: 'DM Serif Display', 'Fraunces', 'Source Serif Pro', Georgia, serif;
   font-size: 22px;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.2;
   letter-spacing: -0.3px;
 }
@@ -12899,57 +12950,72 @@ html[data-rs-theme="night"] .onboarding-install__image {
 }
 
 .landing-warm__why {
-  padding-top: 80px;
-  padding-bottom: 80px;
+  padding-top: 100px;
+  padding-bottom: 100px;
   background: var(--warm-ink);
   color: var(--warm-bg-soft);
-  display: grid;
-  grid-template-columns: 1.2fr 2fr;
-  gap: 48px;
 }
 
-.landing-warm__why-title-wrap h2 {
+.landing-warm__why-head {
+  text-align: center;
+  max-width: 620px;
+  margin: 0 auto 72px;
+}
+
+.landing-warm__why-head h2 {
   margin: 0;
-  font-family: 'Fraunces', 'Source Serif Pro', Georgia, serif;
-  font-size: clamp(32px, 4vw, 44px);
-  font-weight: 500;
+  font-family: 'DM Serif Display', 'Fraunces', 'Source Serif Pro', Georgia, serif;
+  font-size: clamp(42px, 5.2vw, 56px);
+  font-weight: 400;
   line-height: 1.05;
-  letter-spacing: -1px;
+  letter-spacing: -1.5px;
 }
 
 .landing-warm__why-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  gap: 24px;
+  max-width: 960px;
+  margin: 0 auto;
 }
 
 .landing-warm__why-card {
-  padding: 28px;
+  padding: 36px 32px;
+  border: 1px solid var(--warm-rule-strong);
+  border-radius: 18px;
+  background: transparent;
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
 }
 
-.landing-warm__why-card--1,
-.landing-warm__why-card--2 {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+.landing-warm__why-card:nth-child(3n + 1) {
+  background: rgba(212, 122, 58, 0.06);
 }
 
-.landing-warm__why-card--1,
-.landing-warm__why-card--3 {
-  border-right: 1px solid rgba(255, 255, 255, 0.15);
+.landing-warm__why-card--stagger {
+  margin-top: 40px;
+}
+
+.landing-warm__why-mark {
+  width: 96px;
+  height: 96px;
+  margin-bottom: 24px;
 }
 
 .landing-warm__why-card h3 {
   margin: 0;
   color: var(--warm-warm);
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 700;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.4px;
 }
 
 .landing-warm__why-card p {
-  margin: 10px 0 0;
+  margin: 12px 0 0;
   color: #c7bfae;
   font-size: 14px;
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
 .landing-warm__featured {
@@ -12965,9 +13031,9 @@ html[data-rs-theme="night"] .onboarding-install__image {
 
 .landing-warm__featured h2 {
   margin: 0;
-  font-family: 'Fraunces', 'Source Serif Pro', Georgia, serif;
+  font-family: 'DM Serif Display', 'Fraunces', 'Source Serif Pro', Georgia, serif;
   font-size: clamp(34px, 5vw, 56px);
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.05;
   letter-spacing: -1px;
 }
@@ -12990,9 +13056,9 @@ html[data-rs-theme="night"] .onboarding-install__image {
 }
 
 .landing-warm__featured-row span {
-  font-family: 'Fraunces', 'Source Serif Pro', Georgia, serif;
+  font-family: 'DM Serif Display', 'Fraunces', 'Source Serif Pro', Georgia, serif;
   font-size: 22px;
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: -0.2px;
 }
 
@@ -13082,9 +13148,9 @@ html[data-rs-theme="night"] .onboarding-install__image {
 
 .landing-warm__map-overlay h3 {
   margin: 0;
-  font-family: 'Fraunces', 'Source Serif Pro', Georgia, serif;
+  font-family: 'DM Serif Display', 'Fraunces', 'Source Serif Pro', Georgia, serif;
   font-size: 22px;
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: -0.3px;
 }
 
@@ -13116,9 +13182,9 @@ html[data-rs-theme="night"] .onboarding-install__image {
 
 .landing-warm__cta h2 {
   margin: 0;
-  font-family: 'Fraunces', 'Source Serif Pro', Georgia, serif;
+  font-family: 'DM Serif Display', 'Fraunces', 'Source Serif Pro', Georgia, serif;
   font-size: clamp(40px, 6vw, 72px);
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1;
   letter-spacing: -2px;
 }
@@ -13261,13 +13327,16 @@ html[data-rs-theme="night"] .onboarding-install__image {
     align-items: flex-start;
   }
 
-  .landing-warm__why {
-    grid-template-columns: 1fr;
-    gap: 32px;
+  .landing-warm__stats {
+    gap: 12px;
   }
 
-  .landing-warm__stats {
-    gap: 28px;
+  .landing-warm__why-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-warm__why-card--stagger {
+    margin-top: 0;
   }
 }
 
@@ -13285,65 +13354,62 @@ html[data-rs-theme="night"] .onboarding-install__image {
   }
 
   .landing-warm__hero {
-    padding-top: 36px;
-    padding-bottom: 30px;
+    padding-top: 72px;
+    padding-bottom: 56px;
   }
 
   .landing-warm__hero-title {
-    font-size: clamp(48px, 14vw, 56px);
-    letter-spacing: -1.6px;
-  }
-
-  .landing-warm__hero-underlined::after {
-    bottom: -9px;
-    height: 13px;
+    font-size: clamp(46px, 13vw, 56px);
+    letter-spacing: -1.2px;
   }
 
   .landing-warm__hero-subtitle {
-    margin-top: 24px;
+    margin-top: 30px;
     font-size: 18px;
   }
 
   .landing-warm__search {
-    margin-top: 24px;
-    padding: 8px 10px 8px 14px;
+    margin-top: 30px;
+    padding: 6px 10px 6px 14px;
     gap: 10px;
     flex-wrap: wrap;
+    border-radius: 20px;
   }
 
   .landing-warm__search input {
     width: 100%;
     padding: 8px 0 0;
-    font-size: 17px;
+    font-size: 16px;
+    order: 2;
   }
 
   .landing-warm__search button {
     width: 100%;
     padding: 12px 18px;
+    order: 3;
   }
 
   .landing-warm__stats {
     margin-top: 40px;
-    padding-top: 22px;
-    flex-direction: column;
-    gap: 18px;
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .landing-warm__stat p {
     font-size: 36px;
   }
 
-  .landing-warm__why-grid {
-    grid-template-columns: 1fr;
+  .landing-warm__why {
+    padding-top: 72px;
+    padding-bottom: 72px;
+  }
+
+  .landing-warm__why-head {
+    margin-bottom: 40px;
   }
 
   .landing-warm__why-card {
-    border-right: 0 !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
-  }
-
-  .landing-warm__why-card:last-child {
-    border-bottom: 0 !important;
+    min-height: auto;
   }
 
   .landing-warm__featured-columns {

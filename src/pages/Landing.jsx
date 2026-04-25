@@ -70,18 +70,22 @@ const VALUE_CARDS = [
   {
     title: 'До 40% точнее',
     description: 'Чем усредненные калькуляторы калорий: данные от ресторанов.',
+    icon: 'arc',
   },
   {
     title: '< 5 секунд',
     description: 'Время на поиск ресторана и подходящего блюда.',
+    icon: 'stopwatch',
   },
   {
     title: 'Цели без компромиссов',
     description: 'Выбирайте меню под вашу норму по фильтрам в 2 клика.',
+    icon: 'target',
   },
   {
-    title: 'Все в одном месте',
+    title: 'Всё в одном месте',
     description: 'Ставь цели, добавляй любимые блюда и места в избранное, веди дневник, делись с друзьями.',
+    icon: 'stack',
   },
 ]
 
@@ -284,20 +288,20 @@ export default function Landing() {
               </Link>
             )}
             <Link to="/onboarding/welcome" className="landing-warm__nav-cta">
-              Попробовать бесплатно
+              Попробовать
             </Link>
           </div>
         </header>
 
         <section className="landing-warm__hero" id="top">
           <h1 className="landing-warm__hero-title">
-            Ешь <em>вкусно</em>,
+            Ешь вкусно,
             <br />
-            выбирай <span className="landing-warm__hero-underlined">осознанно</span>.
+            выбирай <em className="landing-warm__hero-focus">осознанно</em>
           </h1>
 
           <p className="landing-warm__hero-subtitle">
-            Все меню ресторанов с КБЖУ и составом блюд
+            Все меню ресторанов с КБЖУ и составом блюд - выбирайте то, что подходит именно вам
           </p>
 
           <form className="landing-warm__search" onSubmit={handleSearchSubmit}>
@@ -331,16 +335,23 @@ export default function Landing() {
           <div className="landing-warm__stats">
             <div className="landing-warm__stat">
               <p>{resolvedStats.restaurants}</p>
-              <span>ресторанов в базе</span>
+              <span>ресторанов</span>
             </div>
             <div className="landing-warm__stat">
               <p>{resolvedStats.dishes.toLocaleString('ru-RU')}</p>
-              <span>блюд с полным КБЖУ</span>
+              <span>блюд с КБЖУ</span>
             </div>
             <div className="landing-warm__stat">
               <p>+{resolvedStats.weeklyAdded}</p>
-              <span>новых за эту неделю</span>
+              <span>за эту неделю</span>
             </div>
+          </div>
+
+          <div className="landing-warm__hero-scroll" aria-hidden="true">
+            <div className="landing-warm__hero-scroll-line" />
+            <svg viewBox="0 0 14 14">
+              <path d="M3 5 L7 9 L11 5" />
+            </svg>
           </div>
         </section>
 
@@ -394,14 +405,18 @@ export default function Landing() {
         </section>
 
         <section className="landing-warm__why" id="why">
-          <div className="landing-warm__why-title-wrap">
-            <h2>
-              Рестораны не предавая <em>цели</em>
-            </h2>
+          <div className="landing-warm__why-head">
+            <h2>Рестораны не предавая <em>цели</em></h2>
           </div>
           <div className="landing-warm__why-grid">
             {VALUE_CARDS.map((item, index) => (
-              <article key={item.title} className={`landing-warm__why-card landing-warm__why-card--${index + 1}`}>
+              <article
+                key={item.title}
+                className={`landing-warm__why-card ${index === 0 || index === 3 ? 'landing-warm__why-card--stagger' : ''}`}
+              >
+                <div className="landing-warm__why-mark" aria-hidden="true">
+                  <WhyMark type={item.icon} />
+                </div>
                 <h3>{item.title}</h3>
                 <p>{item.description}</p>
               </article>
@@ -412,7 +427,7 @@ export default function Landing() {
         <section className="landing-warm__featured" id="restaurants-list">
           <div className="landing-warm__featured-head">
             <h2>
-              От камерных бистро до <em>звездных</em> ресторанов
+              От камерных бистро до <em>звёздных</em> ресторанов
             </h2>
           </div>
 
@@ -425,7 +440,7 @@ export default function Landing() {
             ))}
           </div>
 
-          <p className="landing-warm__featured-caption">- и еще 400+ заведений Москвы -</p>
+          <p className="landing-warm__featured-caption">- и ещё 400+ заведений Москвы -</p>
 
           <div className="landing-warm__suggest" ref={suggestZoneRef}>
             <button
@@ -515,7 +530,7 @@ export default function Landing() {
           <h2>
             Попробуйте <em>бесплатно</em>.
           </h2>
-          <p>Первые 7 дней - доступ ко всей базе ресторанов.</p>
+          <p>Первые 7 дней - доступ ко всей базе ресторанов</p>
           <div className="landing-warm__cta-actions">
             <Link to="/onboarding/welcome" className="landing-warm__cta-primary">Начать бесплатно</Link>
             <Link to="/restaurants" className="landing-warm__cta-secondary">Посмотреть меню</Link>
@@ -635,6 +650,68 @@ function KbzhuBars({ p, f, c }) {
         <span><b style={{ color: 'var(--warm-c)' }}>●</b> У {c}г</span>
       </div>
     </div>
+  )
+}
+
+function WhyMark({ type }) {
+  if (type === 'arc') {
+    return (
+      <svg width="96" height="96" viewBox="0 0 96 96" fill="none">
+        <circle cx="48" cy="48" r="38" stroke="var(--warm-rule-strong)" strokeWidth="2" strokeDasharray="2 4" />
+        <circle
+          cx="48"
+          cy="48"
+          r="38"
+          stroke="var(--warm-warm)"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeDasharray="95 239"
+          transform="rotate(-90 48 48)"
+        />
+        <circle cx="48" cy="48" r="3" fill="var(--warm-warm)" />
+      </svg>
+    )
+  }
+
+  if (type === 'stopwatch') {
+    return (
+      <svg width="96" height="96" viewBox="0 0 96 96" fill="none">
+        <circle cx="48" cy="52" r="34" stroke="var(--warm-warm)" strokeWidth="2" />
+        <line x1="48" y1="18" x2="48" y2="12" stroke="var(--warm-warm)" strokeWidth="3" strokeLinecap="round" />
+        <line x1="40" y1="10" x2="56" y2="10" stroke="var(--warm-warm)" strokeWidth="3" strokeLinecap="round" />
+        <line x1="48" y1="52" x2="48" y2="30" stroke="var(--warm-bg-soft)" strokeWidth="2.5" strokeLinecap="round" />
+        <line x1="48" y1="52" x2="62" y2="60" stroke="var(--warm-warm)" strokeWidth="2.5" strokeLinecap="round" />
+        <circle cx="48" cy="52" r="3" fill="var(--warm-warm)" />
+        <line x1="48" y1="22" x2="48" y2="26" stroke="var(--warm-rule-strong)" strokeWidth="2" />
+        <line x1="74" y1="52" x2="70" y2="52" stroke="var(--warm-rule-strong)" strokeWidth="2" />
+        <line x1="48" y1="82" x2="48" y2="78" stroke="var(--warm-rule-strong)" strokeWidth="2" />
+        <line x1="22" y1="52" x2="26" y2="52" stroke="var(--warm-rule-strong)" strokeWidth="2" />
+      </svg>
+    )
+  }
+
+  if (type === 'target') {
+    return (
+      <svg width="96" height="96" viewBox="0 0 96 96" fill="none">
+        <circle cx="48" cy="48" r="38" stroke="var(--warm-rule-strong)" strokeWidth="1.5" />
+        <circle cx="48" cy="48" r="26" stroke="var(--warm-rule-strong)" strokeWidth="1.5" />
+        <circle cx="48" cy="48" r="14" stroke="var(--warm-warm)" strokeWidth="2" />
+        <circle cx="48" cy="48" r="4" fill="var(--warm-warm)" />
+        <line x1="48" y1="4" x2="48" y2="16" stroke="var(--warm-rule-strong)" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="48" y1="80" x2="48" y2="92" stroke="var(--warm-rule-strong)" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="4" y1="48" x2="16" y2="48" stroke="var(--warm-rule-strong)" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="80" y1="48" x2="92" y2="48" stroke="var(--warm-rule-strong)" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    )
+  }
+
+  return (
+    <svg width="96" height="96" viewBox="0 0 96 96" fill="none">
+      <rect x="16" y="28" width="50" height="38" rx="6" stroke="var(--warm-rule-strong)" strokeWidth="1.5" />
+      <rect x="26" y="38" width="50" height="38" rx="6" stroke="var(--warm-rule-strong)" strokeWidth="1.5" fill="var(--warm-ink)" />
+      <rect x="36" y="48" width="50" height="38" rx="6" stroke="var(--warm-warm)" strokeWidth="2" fill="var(--warm-ink)" />
+      <circle cx="61" cy="67" r="3" fill="var(--warm-warm)" />
+    </svg>
   )
 }
 
