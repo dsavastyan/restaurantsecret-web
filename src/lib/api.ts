@@ -49,6 +49,13 @@ export type SearchResult = {
   dishes: SearchDish[];
 };
 
+export type LandingStats = {
+  restaurants: number;
+  dishes: number;
+  weeklyAdded: number;
+  asOf?: string;
+};
+
 export type SuggestRequest = {
   name: string;
   dish_name?: string | null;
@@ -338,6 +345,10 @@ export async function searchFull(query: string): Promise<SearchResult> {
   return publicGet<SearchResult>(
     `/search?query=${encodeURIComponent(query)}`
   );
+}
+
+export async function getLandingStats(): Promise<LandingStats> {
+  return publicGet<LandingStats>("/landing/stats");
 }
 // Goals
 export type UserGoalData = {

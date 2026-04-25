@@ -3,17 +3,17 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import RestaurantMap from '@/components/RestaurantMap'
 import { CookieSettingsModal } from '@/components/CookieSettingsModal'
-import { postSuggest } from '@/lib/api'
+import { getLandingStats, postSuggest } from '@/lib/api'
 import { isMoscowDaytime } from '@/lib/moscowDaytime'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
 import { analytics } from '@/services/analytics'
 
 const STATS_FALLBACK = {
-  restaurants: 412,
-  dishes: 38240,
+  restaurants: 0,
+  dishes: 0,
   points: 1080,
-  weeklyAdded: 17,
+  weeklyAdded: 0,
 }
 
 const POPULAR_QUERIES = ['Том ям', 'боул с лососем', 'салат цезарь', 'стейк', 'паста']
@@ -106,7 +106,8 @@ export default function Landing() {
   const accessTokenOrUndefined = accessToken || undefined
 
   const [themeMode, setThemeMode] = useState(resolveThemeMode)
-  const [stats, setStats] = useState({ restaurants: 0, points: 0, weeklyAdded: 0 })
+  const [heroStats, setHeroStats] = useState({ restaurants: 0, dishes: 0, weeklyAdded: 0 })
+  const [mapStats, setMapStats] = useState({ points: 0 })
   const [query, setQuery] = useState('')
   const [likedDishIds, setLikedDishIds] = useState(() => new Set())
   const [suggestOpen, setSuggestOpen] = useState(false)
@@ -120,15 +121,46 @@ export default function Landing() {
   const suggestZoneRef = useRef(null)
 
   const resolvedStats = useMemo(() => ({
-    restaurants: stats.restaurants > 0 ? stats.restaurants : STATS_FALLBACK.restaurants,
-    dishes: STATS_FALLBACK.dishes,
-    points: stats.points > 0 ? stats.points : STATS_FALLBACK.points,
-    weeklyAdded: stats.weeklyAdded > 0 ? stats.weeklyAdded : STATS_FALLBACK.weeklyAdded,
-  }), [stats.points, stats.restaurants, stats.weeklyAdded])
+    restaurants: heroStats.restaurants > 0 ? heroStats.restaurants : STATS_FALLBACK.restaurants,
+    dishes: heroStats.dishes > 0 ? heroStats.dishes : STATS_FALLBACK.dishes,
+    points: mapStats.points > 0 ? mapStats.points : STATS_FALLBACK.points,
+    weeklyAdded: heroStats.weeklyAdded > 0 ? heroStats.weeklyAdded : STATS_FALLBACK.weeklyAdded,
+  }), [heroStats.dishes, heroStats.restaurants, heroStats.weeklyAdded, mapStats.points])
+
+  const restaurantsLabel = resolvedStats.restaurants > 0
+    ? resolvedStats.restaurants.toLocaleString('ru-RU')
+    : '—'
+  const dishesLabel = resolvedStats.dishes > 0
+    ? resolvedStats.dishes.toLocaleString('ru-RU')
+    : '—'
+  const weeklyAddedLabel = resolvedStats.weeklyAdded > 0
+    ? `+${resolvedStats.weeklyAdded}`
+    : '—'
 
   useEffect(() => {
     analytics.track('landing_open')
     analytics.trackLandingAttribution().catch(() => { })
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+
+    getLandingStats()
+      .then((payload) => {
+        if (cancelled) return
+        setHeroStats({
+          restaurants: Number(payload?.restaurants ?? 0),
+          dishes: Number(payload?.dishes ?? 0),
+          weeklyAdded: Number(payload?.weeklyAdded ?? 0),
+        })
+      })
+      .catch((error) => {
+        console.error('Failed to load landing stats', error)
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {
@@ -334,15 +366,15 @@ export default function Landing() {
 
           <div className="landing-warm__stats">
             <div className="landing-warm__stat">
-              <p>{resolvedStats.restaurants}</p>
+              <p>{restaurantsLabel}</p>
               <span>ресторанов</span>
             </div>
             <div className="landing-warm__stat">
-              <p>{resolvedStats.dishes.toLocaleString('ru-RU')}</p>
+              <p>{dishesLabel}</p>
               <span>блюд с КБЖУ</span>
             </div>
             <div className="landing-warm__stat">
-              <p>+{resolvedStats.weeklyAdded}</p>
+              <p>{weeklyAddedLabel}</p>
               <span>за эту неделю</span>
             </div>
           </div>
@@ -515,7 +547,9 @@ export default function Landing() {
             <RestaurantMap
               themeMode={themeMode}
               showSummaryHeader={false}
-              onStatsChange={setStats}
+              onStatsChange={(next) => {
+                setMapStats({ points: Number(next?.points ?? 0) })
+              }}
             />
 
             <aside className="landing-warm__map-overlay">
