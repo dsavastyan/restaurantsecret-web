@@ -12,7 +12,7 @@ import { analytics } from '@/services/analytics'
 const STATS_FALLBACK = {
   restaurants: 0,
   dishes: 0,
-  points: 1080,
+  points: 0,
   weeklyAdded: 0,
 }
 
@@ -135,6 +135,9 @@ export default function Landing() {
     : '—'
   const weeklyAddedLabel = resolvedStats.weeklyAdded > 0
     ? `+${resolvedStats.weeklyAdded}`
+    : '—'
+  const pointsLabel = resolvedStats.points > 0
+    ? resolvedStats.points.toLocaleString('ru-RU')
     : '—'
 
   useEffect(() => {
@@ -553,7 +556,7 @@ export default function Landing() {
             />
 
             <aside className="landing-warm__map-overlay">
-              <h3>{resolvedStats.points.toLocaleString('ru-RU')} точек на карте Москвы</h3>
+              <h3>{pointsLabel} точек на карте Москвы</h3>
               <p>Посмотрите ближайшие рестораны и их меню.</p>
               <Link to="/catalog">Открыть карту →</Link>
             </aside>
