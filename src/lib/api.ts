@@ -30,6 +30,10 @@ export type Restaurant = {
   dishesCount: number;
 };
 
+export type RestaurantListResponse = {
+  items: Restaurant[];
+};
+
 export type SearchRestaurant = {
   id: number;
   slug: string;
@@ -349,6 +353,10 @@ export async function searchFull(query: string): Promise<SearchResult> {
 
 export async function getLandingStats(): Promise<LandingStats> {
   return publicGet<LandingStats>("/landing/stats");
+}
+
+export async function getRestaurants(limit = 2000): Promise<RestaurantListResponse> {
+  return publicGet<RestaurantListResponse>(`/restaurants?limit=${limit}`);
 }
 // Goals
 export type UserGoalData = {

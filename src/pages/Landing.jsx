@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import RestaurantMap from '@/components/RestaurantMap'
 import { CookieSettingsModal } from '@/components/CookieSettingsModal'
-import { getLandingStats, postSuggest } from '@/lib/api'
+import { getLandingStats, getRestaurants, postSuggest } from '@/lib/api'
 import { isMoscowDaytime } from '@/lib/moscowDaytime'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
@@ -15,6 +15,7 @@ const STATS_FALLBACK = {
   points: 0,
   weeklyAdded: 0,
 }
+const FEATURED_RESTAURANTS_LIMIT = 12
 
 const POPULAR_QUERIES = ['Том ям', 'боул с лососем', 'салат цезарь', 'стейк', 'паста']
 
@@ -51,21 +52,6 @@ const SAMPLE_DISHES = [
   },
 ]
 
-const FEATURED_RESTAURANTS = [
-  { name: 'Cafe Pushkin', dishes: 18 },
-  { name: 'White Rabbit', dishes: 34 },
-  { name: 'Probka', dishes: 12 },
-  { name: 'Duo Asia', dishes: 56 },
-  { name: 'Bluefin', dishes: 28 },
-  { name: 'Torro Grill', dishes: 41 },
-  { name: 'Tanuki', dishes: 78 },
-  { name: 'Bjorn', dishes: 22 },
-  { name: 'Ruski', dishes: 15 },
-  { name: 'Twins Garden', dishes: 31 },
-  { name: 'Dr. Zhivago', dishes: 19 },
-  { name: 'Chicha', dishes: 44 },
-]
-
 const VALUE_CARDS = [
   {
     title: 'До 40% точнее',
@@ -93,6 +79,21 @@ function buildSearchUrl(query) {
   return `/search?q=${encodeURIComponent(query)}&type=dish`
 }
 
+function getRussianPluralWord(value, one, few, many) {
+  const abs = Math.abs(Number(value))
+  const mod10 = abs % 10
+  const mod100 = abs % 100
+  if (mod10 === 1 && mod100 !== 11) return one
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return few
+  return many
+}
+
+function formatDishesLabel(value) {
+  const amount = Number(value)
+  if (!Number.isFinite(amount) || amount <= 0) return '— блюд'
+  return `${amount.toLocaleString('ru-RU')} ${getRussianPluralWord(amount, 'блюдо', 'блюда', 'блюд')}`
+}
+
 function resolveThemeMode() {
   const htmlTheme = document.documentElement.getAttribute('data-rs-theme')
   if (htmlTheme === 'day' || htmlTheme === 'night') return htmlTheme
@@ -118,6 +119,8 @@ export default function Landing() {
   const [email, setEmail] = useState('')
   const [validationError, setValidationError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [featuredRestaurants, setFeaturedRestaurants] = useState([])
+  const [totalRestaurantsCount, setTotalRestaurantsCount] = useState(0)
   const suggestZoneRef = useRef(null)
 
   const resolvedStats = useMemo(() => ({
@@ -139,6 +142,10 @@ export default function Landing() {
   const pointsLabel = resolvedStats.points > 0
     ? resolvedStats.points.toLocaleString('ru-RU')
     : '—'
+  const extraRestaurantsCount = Math.max(totalRestaurantsCount - featuredRestaurants.length, 0)
+  const extraRestaurantsLabel = totalRestaurantsCount > 0
+    ? `- и ещё ${extraRestaurantsCount.toLocaleString('ru-RU')} заведений Москвы -`
+    : '- и ещё — заведений Москвы -'
 
   useEffect(() => {
     analytics.track('landing_open')
@@ -159,6 +166,37 @@ export default function Landing() {
       })
       .catch((error) => {
         console.error('Failed to load landing stats', error)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+
+    getRestaurants(2000)
+      .then((payload) => {
+        if (cancelled) return
+        const items = Array.isArray(payload?.items) ? payload.items : []
+        const normalized = items
+          .map((item) => ({
+            name: String(item?.name || '').trim(),
+            dishes: Number(item?.dishesCount ?? 0),
+          }))
+          .filter((item) => item.name.length > 0 && Number.isFinite(item.dishes) && item.dishes > 0)
+
+        const featured = normalized
+          .slice()
+          .sort((a, b) => b.dishes - a.dishes || a.name.localeCompare(b.name, 'ru'))
+          .slice(0, FEATURED_RESTAURANTS_LIMIT)
+
+        setFeaturedRestaurants(featured)
+        setTotalRestaurantsCount(normalized.length)
+      })
+      .catch((error) => {
+        console.error('Failed to load featured restaurants', error)
       })
 
     return () => {
@@ -467,15 +505,15 @@ export default function Landing() {
           </div>
 
           <div className="landing-warm__featured-columns">
-            {FEATURED_RESTAURANTS.map((restaurantItem) => (
+            {featuredRestaurants.map((restaurantItem) => (
               <div key={restaurantItem.name} className="landing-warm__featured-row">
                 <span>{restaurantItem.name}</span>
-                <small>{restaurantItem.dishes} блюд</small>
+                <small>{formatDishesLabel(restaurantItem.dishes)}</small>
               </div>
             ))}
           </div>
 
-          <p className="landing-warm__featured-caption">- и ещё 400+ заведений Москвы -</p>
+          <p className="landing-warm__featured-caption">{extraRestaurantsLabel}</p>
 
           <div className="landing-warm__suggest" ref={suggestZoneRef}>
             <button
