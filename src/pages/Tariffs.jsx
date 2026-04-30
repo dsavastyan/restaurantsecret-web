@@ -1,71 +1,161 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
+
+import { analytics } from '@/services/analytics'
+import { useAuth } from '@/store/auth'
+
+const freeFeatures = [
+  {
+    title: 'Превью 5 блюд без регистрации',
+    description: 'Посмотрите, как работает RestSecret, прежде чем перейти на полный доступ.',
+    included: true,
+  },
+  { title: 'Все рестораны и блюда', included: false },
+  { title: 'Дневник питания + цели по КБЖУ', included: false },
+  { title: 'Избранные рестораны и блюда', included: false },
+  { title: 'Полный поиск по меню и осознанный выбор без ограничений', included: false },
+]
+
+const proFeatures = [
+  'Все рестораны и блюда',
+  'Дневник питания + цели по КБЖУ',
+  'Избранные рестораны и блюда',
+  'Полный поиск по меню и осознанный выбор без ограничений',
+]
 
 export default function Tariffs() {
+  const location = useLocation()
+  const accessToken = useAuth((state) => state.accessToken)
+  const proTo = accessToken ? '/account/subscription' : '/login'
+  const proState = accessToken ? undefined : { from: '/account/subscription' }
+
+  const handleProClick = () => {
+    analytics.track('cta_clicked', { location: 'tariffs', text: 'Попробовать Pro' })
+  }
+
   return (
-    <div className="tariffs-page">
-      <div className="container">
-        <header className="tariffs-hero">
-          <p className="tariffs-eyebrow">Подписка RestaurantSecret</p>
-          <h1 className="tariffs-title">Доступ ко всему меню — без ограничений</h1>
-        </header>
-
-        <section className="tariffs-benefits" aria-label="Что даёт подписка">
-          <h2 className="tariffs-section-title">Что даёт подписка</h2>
-          <ul className="tariffs-benefits__list">
-            <li className="tariffs-benefits__item">Доступ к расширенному поиску по меню ресторанов</li>
-            <li className="tariffs-benefits__item">Просмотр подробного КБЖУ и порций</li>
-            <li className="tariffs-benefits__item">Расширенные фильтры по калориям, БЖУ</li>
-          </ul>
-        </section>
-
-        <section className="tariffs-plans" aria-label="Варианты подписки">
-          <div className="tariffs-plans__header">
-            <h2 className="tariffs-section-title">Тарифы</h2>
-            <p className="tariffs-note">* Продлевается автоматически до отмены.</p>
-          </div>
-          <div className="tariffs-cards">
-            <div className="tariff-card">
-              <div className="tariff-card__badge">Попробовать</div>
-              <div className="tariff-card__body">
-                <h3 className="tariff-card__title">Месяц</h3>
-                <p className="tariff-card__price">99 ₽</p>
-                <p className="tariff-card__footnote">/мес*</p>
-                <p className="tariff-card__desc">
-                  Подходит, чтобы оценить удобство сервиса и подобрать ресторан под ваши цели.
-                </p>
-              </div>
-            </div>
-
-            <div className="tariff-card tariff-card--featured">
-              <div className="tariff-card__badge">Выгодно</div>
-              <div className="tariff-card__body">
-                <h3 className="tariff-card__title">Год</h3>
-                <p className="tariff-card__price">999 ₽</p>
-                <p className="tariff-card__footnote">/год*</p>
-                <p className="tariff-card__tagline">2 месяца бесплатно</p>
-                <p className="tariff-card__desc">
-                  Лучший выбор для тех, кто регулярно заказывает или следит за КБЖУ ресторанных блюд.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="tariffs-cta" aria-label="Оформление подписки">
-          <p className="tariffs-cta__lead">Оформление подписки доступно после входа в личный кабинет.</p>
-          <Link
-            className="btn btn--primary tariffs-cta__button"
-            to="/login"
-            state={{ from: "/account/subscription" }}
-          >
-            Войти
+    <main className="tariffs-page">
+      <header className="tariffs-nav">
+        <div className="tariffs-nav__left">
+          <Link to="/" className="tariffs-nav__brand-link" aria-label="RestaurantSecret">
+            <img src="/assets/logo.png" alt="" aria-hidden="true" className="tariffs-nav__logo" />
+            <span className="tariffs-nav__brand">RestSecret</span>
           </Link>
-          <p className="tariffs-cta__legal">
-            Подробные условия — в <Link to="/legal">Пользовательском соглашении</Link>.
-          </p>
-        </section>
-      </div>
-    </div>
+        </div>
+
+        <nav className="tariffs-nav__center" aria-label="Разделы">
+          <Link to="/#restaurants-list">Рестораны</Link>
+          <Link to="/#why">Как работает</Link>
+          <Link to="/tariffs" className="is-active">Тарифы</Link>
+          <a href="https://t.me/RestSecretSupport_bot" target="_blank" rel="noopener noreferrer">Поддержка</a>
+        </nav>
+
+        <div className="tariffs-nav__right">
+          <Link
+            to={accessToken ? '/account' : '/login'}
+            state={accessToken ? undefined : { from: location.pathname + location.search }}
+            className="tariffs-nav__login-link"
+          >
+            Личный кабинет
+          </Link>
+          <Link
+            to={proTo}
+            state={proState}
+            className="tariffs-nav__cta"
+            onClick={handleProClick}
+          >
+            Попробовать Pro
+          </Link>
+        </div>
+      </header>
+
+      <section className="tariffs-hero" aria-labelledby="tariffs-title">
+        <p className="tariffs-eyebrow">Тарифы RestSecret</p>
+        <h1 className="tariffs-title" id="tariffs-title">
+          Выберите тариф <em>под свою цель</em>
+        </h1>
+        <p className="tariffs-subtitle">
+          Меньше умственной боли, больше контроля - без долгих поисков и дневника вручную.
+        </p>
+
+        <div className="tariffs-cards" aria-label="Варианты тарифов">
+          <article className="tariff-card tariff-card--free">
+            <div className="tariff-card__body">
+              <h2 className="tariff-card__title">Бесплатно</h2>
+              <div className="tariff-card__price-row">
+                <span className="tariff-card__price">0 ₽</span>
+              </div>
+              <p className="tariff-card__desc">Для знакомства с сервисом</p>
+
+              <ul className="tariff-card__features" aria-label="Возможности бесплатного тарифа">
+                {freeFeatures.map((feature) => (
+                  <li
+                    className={`tariff-card__feature${feature.included ? '' : ' tariff-card__feature--muted'}`}
+                    key={feature.title}
+                  >
+                    <span className="tariff-card__feature-icon" aria-hidden="true" />
+                    <span>
+                      <strong>{feature.title}</strong>
+                      {feature.description && <small>{feature.description}</small>}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <Link className="tariff-card__secondary-button" to="/">
+                Начать бесплатно
+              </Link>
+            </div>
+          </article>
+
+          <article className="tariff-card tariff-card--pro">
+            <div className="tariff-card__body">
+              <span className="tariff-card__pro-badge">Pro</span>
+              <h2 className="tariff-card__title">Pro</h2>
+              <p className="tariff-card__desc">Полный доступ к RestSecret</p>
+
+              <div className="tariff-card__price-option tariff-card__price-option--month">
+                <div>
+                  <span className="tariff-card__price">199 ₽</span>
+                  <span className="tariff-card__period">/мес</span>
+                </div>
+                <span className="tariff-card__note">дешевле стаканчика кофе</span>
+              </div>
+
+              <div className="tariff-card__price-option tariff-card__price-option--year">
+                <span className="tariff-card__best-badge">★ Самый выгодный</span>
+                <div className="tariff-card__annual-price">
+                  <span className="tariff-card__price">1 490 ₽</span>
+                  <span className="tariff-card__period">/год</span>
+                </div>
+                <div className="tariff-card__monthly-equivalent">
+                  <strong>124 ₽</strong>
+                  <span>/мес</span>
+                  <s>199 ₽/мес</s>
+                </div>
+              </div>
+
+              <ul className="tariff-card__features tariff-card__features--pro" aria-label="Возможности Pro">
+                {proFeatures.map((feature) => (
+                  <li className="tariff-card__feature" key={feature}>
+                    <span className="tariff-card__feature-icon" aria-hidden="true" />
+                    <strong>{feature}</strong>
+                  </li>
+                ))}
+              </ul>
+
+              <Link
+                className="tariff-card__primary-button"
+                to={proTo}
+                state={proState}
+                onClick={handleProClick}
+              >
+                Попробовать Pro
+              </Link>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
   )
 }

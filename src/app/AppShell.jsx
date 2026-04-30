@@ -224,10 +224,12 @@ export default function AppShell() {
 
   const isContact = location.pathname.startsWith('/contact')
   const isLanding = location.pathname === '/'
+  const isTariffsPage = location.pathname === '/tariffs'
   const isLoginPage = location.pathname === '/login'
   const isOnboardingPage = location.pathname.startsWith('/onboarding')
   const isAccountPage = location.pathname.startsWith('/account')
   const isImmersivePage = isLoginPage || isOnboardingPage || isAccountPage
+  const isMarketingPage = isLanding || isTariffsPage
   const isRestaurantMenuPage = /^\/(?:restaurants|r)\/[^/]+\/menu\/?$/.test(location.pathname)
 
   useEffect(() => {
@@ -310,11 +312,11 @@ export default function AppShell() {
 
   return (
     <div className={`min-h-screen flex flex-col app-theme app-theme--${isDayTheme ? 'day' : 'night'}`}>
-      {!isLanding && !isImmersivePage && <NavBar />}
+      {!isMarketingPage && !isImmersivePage && <NavBar />}
       <DishCardModal />
-      {!isLanding && !isImmersivePage && <DiaryFloatingButton />}
+      {!isMarketingPage && !isImmersivePage && <DiaryFloatingButton />}
       <main className="flex-1">
-        {isLanding ? (
+        {isMarketingPage ? (
           <Outlet context={outletContext} />
         ) : isImmersivePage ? (
           <Outlet context={outletContext} />
@@ -335,7 +337,7 @@ export default function AppShell() {
           </div>
         )}
       </main>
-      {!isImmersivePage && !isLanding && <Footer />}
+      {!isImmersivePage && !isMarketingPage && <Footer />}
     </div>
   )
 }
