@@ -6,7 +6,7 @@ import { useAuth } from '@/store/auth'
 
 const freeFeatures = [
   {
-    title: 'Превью 5 блюд без регистрации',
+    title: 'Просмотр 5 блюд без регистрации',
     description: 'Посмотрите, как работает RestSecret, прежде чем перейти на полный доступ.',
     included: true,
   },
@@ -39,7 +39,7 @@ export default function Tariffs() {
         <div className="tariffs-nav__left">
           <Link to="/" className="tariffs-nav__brand-link" aria-label="RestaurantSecret">
             <img src="/assets/logo.png" alt="" aria-hidden="true" className="tariffs-nav__logo" />
-            <span className="tariffs-nav__brand">RestSecret</span>
+            <span className="tariffs-nav__brand">RestaurantSecret</span>
           </Link>
         </div>
 
@@ -70,13 +70,9 @@ export default function Tariffs() {
       </header>
 
       <section className="tariffs-hero" aria-labelledby="tariffs-title">
-        <p className="tariffs-eyebrow">Тарифы RestSecret</p>
         <h1 className="tariffs-title" id="tariffs-title">
           Выберите тариф <em>под свою цель</em>
         </h1>
-        <p className="tariffs-subtitle">
-          Меньше умственной боли, больше контроля - без долгих поисков и дневника вручную.
-        </p>
 
         <div className="tariffs-cards" aria-label="Варианты тарифов">
           <article className="tariff-card tariff-card--free">
@@ -110,8 +106,7 @@ export default function Tariffs() {
 
           <article className="tariff-card tariff-card--pro">
             <div className="tariff-card__body">
-              <span className="tariff-card__pro-badge">Pro</span>
-              <h2 className="tariff-card__title">Pro</h2>
+              <h2 className="tariff-card__title">Премиум</h2>
               <p className="tariff-card__desc">Полный доступ к RestSecret</p>
 
               <div className="tariff-card__price-option tariff-card__price-option--month">
@@ -135,7 +130,7 @@ export default function Tariffs() {
                 </div>
               </div>
 
-              <ul className="tariff-card__features tariff-card__features--pro" aria-label="Возможности Pro">
+              <ul className="tariff-card__features tariff-card__features--pro" aria-label="Возможности тарифа Премиум">
                 {proFeatures.map((feature) => (
                   <li className="tariff-card__feature" key={feature}>
                     <span className="tariff-card__feature-icon" aria-hidden="true" />

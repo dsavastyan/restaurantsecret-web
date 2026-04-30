@@ -2305,15 +2305,11 @@ body {
 }
 
 .tariffs-nav {
-  min-height: 80px;
-  padding: 12px clamp(18px, 4vw, 56px);
-  display: grid;
-  grid-template-columns: minmax(180px, 1fr) auto minmax(240px, 1fr);
+  padding: 24px 56px;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 24px;
-  border-bottom: 1px solid rgba(120, 104, 78, 0.16);
-  background: rgba(255, 252, 246, 0.48);
-  backdrop-filter: blur(10px);
 }
 
 .tariffs-nav__brand-link,
@@ -2322,69 +2318,66 @@ body {
   align-items: center;
 }
 
+.tariffs-nav__left {
+  min-width: 0;
+}
+
 .tariffs-nav__brand-link {
-  width: fit-content;
+  display: inline-flex;
   gap: 10px;
 }
 
 .tariffs-nav__logo {
-  width: 48px;
-  height: 48px;
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
   object-fit: cover;
   display: block;
 }
 
 .tariffs-nav__brand {
-  font-family: 'DM Serif Display', 'Fraunces', Georgia, serif;
-  font-size: 31px;
-  line-height: 1;
+  font-family: 'DM Serif Display', 'Fraunces', 'Source Serif Pro', Georgia, serif;
+  font-size: 20px;
   font-weight: 400;
+  letter-spacing: -0.2px;
 }
 
 .tariffs-nav__center {
   display: flex;
   align-items: center;
+  gap: 28px;
+  min-width: 0;
   justify-content: center;
-  gap: clamp(22px, 3.4vw, 46px);
 }
 
 .tariffs-nav__center a {
-  position: relative;
-  padding: 6px 0;
+  border: 0;
+  background: transparent;
   color: var(--tariffs-ink);
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: 2px;
+  font: 500 12px/1 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
+  cursor: pointer;
+  padding: 0 0 3px;
+  border-bottom: 1px solid var(--tariffs-rule);
   white-space: nowrap;
 }
 
-.tariffs-nav__center a:hover,
-.tariffs-nav__center a.is-active {
+.tariffs-nav__center a:hover {
   color: var(--tariffs-green-dark);
 }
 
-.tariffs-nav__center a.is-active::after {
-  content: "";
-  position: absolute;
-  left: 14px;
-  right: 14px;
-  bottom: -3px;
-  height: 3px;
-  border-radius: 999px;
-  background: var(--tariffs-green);
-}
-
 .tariffs-nav__right {
+  min-width: 0;
+  flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 18px;
+  gap: 10px;
 }
 
 .tariffs-nav__login-link {
-  font-size: 16px;
-  font-weight: 700;
+  color: var(--tariffs-ink);
+  font-size: 13px;
+  font-weight: 500;
   white-space: nowrap;
 }
 
@@ -2393,25 +2386,30 @@ body {
 }
 
 .tariffs-nav__cta {
-  min-height: 50px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 26px;
+  border: 0;
+  padding: 10px 18px;
   border-radius: 999px;
-  background: linear-gradient(180deg, #879d5c 0%, #5f783a 100%);
+  background: var(--tariffs-ink);
   color: #fff !important;
-  font-size: 16px;
-  font-weight: 800;
+  font-size: 13px;
+  font-weight: 500;
   white-space: nowrap;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.22) inset,
-    0 10px 24px rgba(66, 82, 41, 0.2);
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.tariffs-nav__cta,
+.tariffs-nav__cta:visited,
+.tariffs-nav__cta:hover,
+.tariffs-nav__cta:active {
+  color: #fff !important;
 }
 
 .tariffs-nav__cta:hover,
 .tariff-card__primary-button:hover {
-  filter: brightness(1.04);
+  filter: brightness(1.07);
 }
 
 .tariffs-nav__cta:active,
@@ -2421,26 +2419,17 @@ body {
 }
 
 .tariffs-hero {
-  width: min(1320px, calc(100% - 32px));
+  width: min(1240px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 30px 0 42px;
+  padding: 28px 0 32px;
   text-align: center;
-}
-
-.tariffs-eyebrow {
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--tariffs-green-dark);
-  margin: 0 0 10px;
 }
 
 .tariffs-title {
   margin: 0;
   color: var(--tariffs-ink);
   font-family: 'DM Serif Display', 'Fraunces', Georgia, serif;
-  font-size: clamp(46px, 5.2vw, 78px);
+  font-size: clamp(42px, 4.5vw, 66px);
   font-weight: 400;
   line-height: 1.05;
 }
@@ -2452,21 +2441,12 @@ body {
   font-weight: 400;
 }
 
-.tariffs-subtitle {
-  width: min(560px, 100%);
-  margin: 16px auto 0;
-  color: var(--tariffs-muted);
-  font-size: 21px;
-  font-weight: 600;
-  line-height: 1.45;
-}
-
 .tariffs-cards {
-  width: min(1008px, 100%);
-  margin: 20px auto 0;
+  width: min(960px, 100%);
+  margin: 22px auto 0;
   display: grid;
   grid-template-columns: minmax(320px, 0.9fr) minmax(420px, 1.38fr);
-  gap: 24px;
+  gap: 20px;
   align-items: stretch;
 }
 
@@ -2487,47 +2467,28 @@ body {
 
 .tariff-card__body {
   min-height: 100%;
-  padding: clamp(26px, 3vw, 42px);
+  padding: clamp(22px, 2.4vw, 34px);
   display: flex;
   flex-direction: column;
-}
-
-.tariff-card--pro .tariff-card__body {
-  padding-top: 20px;
-}
-
-.tariff-card__pro-badge {
-  align-self: flex-start;
-  margin-bottom: 12px;
-  padding: 7px 15px 6px;
-  border-radius: 8px;
-  background: linear-gradient(180deg, #8da25d 0%, #617b3d 100%);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  box-shadow: 0 7px 14px rgba(73, 91, 46, 0.18);
 }
 
 .tariff-card__title {
   margin: 0;
   font-family: 'DM Serif Display', 'Fraunces', Georgia, serif;
   color: var(--tariffs-ink);
-  font-size: clamp(34px, 3vw, 44px);
+  font-size: clamp(30px, 2.6vw, 38px);
   font-weight: 400;
   line-height: 1;
 }
 
 .tariff-card__price-row {
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 .tariff-card__price {
   color: var(--tariffs-ink);
   font-family: 'DM Serif Display', 'Fraunces', Georgia, serif;
-  font-size: clamp(42px, 4.2vw, 54px);
+  font-size: clamp(36px, 3.6vw, 48px);
   font-weight: 400;
   line-height: 1;
   white-space: nowrap;
@@ -2535,41 +2496,41 @@ body {
 
 .tariff-card__period {
   color: var(--tariffs-ink);
-  font-size: 25px;
+  font-size: 22px;
   font-weight: 700;
   white-space: nowrap;
 }
 
 .tariff-card__desc {
-  margin: 8px 0 0;
+  margin: 7px 0 0;
   color: var(--tariffs-muted);
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 700;
   line-height: 1.35;
 }
 
 .tariff-card__features {
-  margin: 18px 0 0;
-  padding: 18px 0 0;
+  margin: 14px 0 0;
+  padding: 14px 0 0;
   border-top: 1px dashed rgba(120, 104, 78, 0.26);
   list-style: none;
   display: grid;
-  gap: 13px;
+  gap: 9px;
 }
 
 .tariff-card__features--pro {
-  margin-top: 14px;
-  padding-top: 16px;
-  gap: 11px;
+  margin-top: 12px;
+  padding-top: 14px;
+  gap: 9px;
 }
 
 .tariff-card__feature {
   display: grid;
   grid-template-columns: 26px 1fr;
-  gap: 13px;
+  gap: 11px;
   align-items: flex-start;
   color: var(--tariffs-ink);
-  font-size: 17px;
+  font-size: 15px;
   line-height: 1.35;
 }
 
@@ -2578,8 +2539,8 @@ body {
 }
 
 .tariff-card__feature-icon {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   margin-top: 1px;
   display: inline-flex;
   align-items: center;
@@ -2587,7 +2548,7 @@ body {
   border-radius: 999px;
   background: #e8ecd8;
   color: var(--tariffs-green);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 900;
 }
 
@@ -2614,7 +2575,7 @@ body {
   display: block;
   margin-top: 5px;
   color: var(--tariffs-muted);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   line-height: 1.45;
 }
@@ -2625,19 +2586,19 @@ body {
 
 .tariff-card__secondary-button,
 .tariff-card__primary-button {
-  min-height: 50px;
+  min-height: 44px;
   margin-top: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 800;
   transition: transform 0.04s ease, filter 0.2s ease, background 0.2s ease;
 }
 
 .tariff-card__secondary-button {
-  margin-top: 20px;
+  margin-top: 16px;
   border: 2px solid var(--tariffs-rule-strong);
   color: var(--tariffs-green-dark);
   background: rgba(255, 255, 255, 0.34);
@@ -2648,7 +2609,7 @@ body {
 }
 
 .tariff-card__primary-button {
-  margin-top: 18px;
+  margin-top: 14px;
   background: linear-gradient(180deg, #7d964f 0%, #5d7838 100%);
   color: #fff !important;
   box-shadow: 0 14px 26px rgba(74, 91, 45, 0.2);
@@ -2656,53 +2617,53 @@ body {
 
 .tariff-card__price-option {
   position: relative;
-  margin-top: 16px;
+  margin-top: 12px;
   border-radius: 8px;
   background: rgba(255, 250, 241, 0.58);
   border: 2px solid var(--tariffs-rule);
 }
 
 .tariff-card__price-option--month {
-  min-height: 76px;
-  padding: 12px 20px;
+  min-height: 64px;
+  padding: 10px 18px;
   display: grid;
   grid-template-columns: minmax(150px, max-content) minmax(160px, 1fr);
   align-items: center;
-  gap: 16px;
+  gap: 18px;
 }
 
 .tariff-card__note {
   justify-self: end;
-  width: min(240px, 100%);
-  padding: 12px 18px;
+  width: min(230px, 100%);
+  padding: 10px 16px;
   border-radius: 8px;
   background: rgba(235, 229, 216, 0.55);
   color: #4f4b42;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 800;
   text-align: center;
 }
 
 .tariff-card__price-option--year {
-  min-height: 88px;
-  padding: 17px 20px 13px;
+  min-height: 78px;
+  padding: 16px 20px 12px;
   display: grid;
-  grid-template-columns: minmax(190px, max-content) 1fr;
+  grid-template-columns: minmax(220px, max-content) 1fr;
   align-items: center;
-  gap: 20px;
+  column-gap: 38px;
   border-color: var(--tariffs-rule-strong);
 }
 
 .tariff-card__best-badge {
   position: absolute;
-  left: 26px;
+  left: 22px;
   top: -2px;
   transform: translateY(-50%);
-  padding: 7px 14px;
+  padding: 6px 13px;
   border-radius: 0 0 8px 8px;
   background: linear-gradient(180deg, #e49243 0%, #d9772f 100%);
   color: #fff;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 900;
   line-height: 1;
   text-transform: uppercase;
@@ -2718,83 +2679,73 @@ body {
 .tariff-card__monthly-equivalent {
   justify-content: flex-end;
   color: var(--tariffs-green-dark);
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
   white-space: nowrap;
 }
 
 .tariff-card__monthly-equivalent strong {
   font-family: 'DM Serif Display', 'Fraunces', Georgia, serif;
-  font-size: clamp(34px, 3.5vw, 45px);
+  font-size: clamp(30px, 3vw, 39px);
   font-weight: 400;
   line-height: 1;
 }
 
 .tariff-card__monthly-equivalent s {
-  margin-left: 12px;
+  margin-left: 10px;
   color: #9a9285;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 700;
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 1200px) {
   .tariffs-nav {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    gap: 14px;
+    padding-left: 32px;
+    padding-right: 32px;
   }
+}
 
-  .tariffs-nav__right {
-    justify-content: center;
-  }
-
+@media (max-width: 1080px) {
   .tariffs-cards {
     grid-template-columns: 1fr;
     width: min(680px, 100%);
   }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 1024px) {
   .tariffs-nav {
-    min-height: 0;
-    padding: 14px 16px 18px;
-  }
-
-  .tariffs-nav__brand {
-    font-size: 25px;
-  }
-
-  .tariffs-nav__logo {
-    width: 38px;
-    height: 38px;
+    flex-wrap: wrap;
+    row-gap: 14px;
   }
 
   .tariffs-nav__center {
+    order: 3;
     width: 100%;
     justify-content: flex-start;
-    gap: 18px;
     overflow-x: auto;
-    padding: 2px 2px 8px;
+    scrollbar-width: none;
   }
 
-  .tariffs-nav__center a {
-    font-size: 12px;
-    letter-spacing: 1.4px;
+  .tariffs-nav__center::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .tariffs-nav {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+@media (max-width: 720px) {
+  .tariffs-nav {
+    padding-top: 18px;
+    padding-bottom: 18px;
   }
 
   .tariffs-nav__right {
-    width: 100%;
     gap: 10px;
-  }
-
-  .tariffs-nav__login-link,
-  .tariffs-nav__cta {
-    font-size: 14px;
-  }
-
-  .tariffs-nav__cta {
-    min-height: 44px;
-    padding: 0 18px;
   }
 
   .tariffs-hero {
@@ -2802,17 +2753,8 @@ body {
     padding-top: 24px;
   }
 
-  .tariffs-eyebrow {
-    font-size: 12px;
-    letter-spacing: 2.4px;
-  }
-
   .tariffs-title {
     font-size: clamp(38px, 12vw, 54px);
-  }
-
-  .tariffs-subtitle {
-    font-size: 17px;
   }
 
   .tariff-card__body {
@@ -2841,6 +2783,35 @@ body {
 
   .tariff-card__best-badge {
     left: 18px;
+  }
+}
+
+@media (max-width: 420px) {
+  .tariffs-nav {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .tariffs-nav__brand {
+    font-size: 18px;
+  }
+
+  .tariffs-nav__logo {
+    width: 28px;
+    height: 28px;
+  }
+
+  .tariffs-nav__center {
+    gap: 16px;
+  }
+
+  .tariffs-nav__login-link {
+    display: none;
+  }
+
+  .tariffs-nav__cta {
+    padding: 8px 14px;
+    font-size: 12px;
   }
 }
 
