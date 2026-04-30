@@ -4,6 +4,9 @@ import logoIcon from '@/assets/intro screens/RestSecret logo.png'
 import { fetchCurrentUser } from '@/lib/api'
 import { useAuth } from '@/store/auth'
 
+// NOTE: Этот экран временно убран из текущего onboarding-флоу (после OTP),
+// чтобы не снижать конверсию на раннем шаге. Код сохранен для возможного
+// переиспользования в аккаунте (например, как баннер установки PWA).
 type IntroLocationState = {
   next?: unknown;
   from?: unknown;

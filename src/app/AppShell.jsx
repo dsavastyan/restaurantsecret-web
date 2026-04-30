@@ -308,9 +308,9 @@ export default function AppShell() {
 
   return (
     <div className={`min-h-screen flex flex-col app-theme app-theme--${isDayTheme ? 'day' : 'night'}`}>
-      {!isLanding && <NavBar />}
+      {!isLanding && !isImmersivePage && <NavBar />}
       <DishCardModal />
-      {!isLanding && <DiaryFloatingButton />}
+      {!isLanding && !isImmersivePage && <DiaryFloatingButton />}
       <main className="flex-1">
         {isLanding ? (
           <Outlet context={outletContext} />
