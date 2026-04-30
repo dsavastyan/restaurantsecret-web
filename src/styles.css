@@ -13498,6 +13498,9 @@ html[data-rs-theme="night"] .onboarding-install__image {
   gap: 12px;
   padding: 16px 0;
   border-bottom: 1px solid var(--warm-rule);
+  color: inherit;
+  text-decoration: none;
+  transition: color 180ms ease, border-color 180ms ease;
 }
 
 .landing-warm__featured-row span {
@@ -13506,6 +13509,12 @@ html[data-rs-theme="night"] .onboarding-install__image {
   font-size: 22px;
   font-weight: 400;
   letter-spacing: -0.2px;
+}
+
+.landing-warm__featured-row:hover,
+.landing-warm__featured-row:focus-visible {
+  color: var(--warm-accent);
+  border-bottom-color: color-mix(in srgb, var(--warm-accent) 45%, var(--warm-rule));
 }
 
 .landing-warm__featured-row small {
@@ -13517,11 +13526,19 @@ html[data-rs-theme="night"] .onboarding-install__image {
 }
 
 .landing-warm__featured-caption {
+  display: block;
   margin: 40px 0 0;
   text-align: center;
   font-size: 14px;
   font-style: italic;
   color: var(--warm-ink-soft);
+  text-decoration: none;
+  transition: color 180ms ease;
+}
+
+.landing-warm__featured-caption:hover,
+.landing-warm__featured-caption:focus-visible {
+  color: var(--warm-accent);
 }
 
 .landing-warm__suggest {
@@ -14861,6 +14878,186 @@ html[data-rs-theme="night"] .account-profile-card__identity p,
 html[data-rs-theme="night"] .account-profile-card__identity span,
 html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
   color: #b9beb4;
+}
+
+/* Final requested account overrides. Keep this after the account mockup blocks. */
+.account-brand {
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
+.account-brand__tagline {
+  max-width: none !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  line-height: 1.18 !important;
+}
+
+.account-brand__tagline-line {
+  display: block;
+}
+
+@media (min-width: 900px) {
+  .account-subscription-panel .account-panel-v2__header {
+    display: none !important;
+    margin: 0 !important;
+  }
+
+  .account-payment-panel .account-panel-v2__header,
+  .account-panel__header {
+    justify-content: flex-end !important;
+    margin-bottom: 0 !important;
+  }
+
+  .account-panel-v2__title,
+  .account-panel__title,
+  .friends-header .account-section-title,
+  .favorites-header .account-section-title,
+  .goals-hero__title,
+  .ndsTitle {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  .friends-header {
+    gap: 0 !important;
+  }
+
+  .ndsHeader {
+    justify-content: flex-end !important;
+  }
+}
+
+/* Account polish: requested sidebar and desktop section-title behavior. */
+.account-brand {
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
+.account-brand:focus-visible {
+  outline: 2px solid rgba(109, 135, 60, 0.55);
+  outline-offset: 6px;
+  border-radius: 18px;
+}
+
+.account-brand__tagline {
+  max-width: none !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  line-height: 1.18 !important;
+}
+
+.account-brand__tagline-line {
+  display: block;
+}
+
+.account__title-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.account-premium-crown {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #d89a2b;
+  border: 1px solid rgba(216, 154, 43, 0.34);
+  border-radius: 50%;
+  background: rgba(255, 247, 224, 0.72);
+  cursor: help;
+}
+
+.account-premium-crown svg {
+  width: 25px;
+  height: 25px;
+}
+
+.account-premium-crown__tooltip {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 10px);
+  z-index: 30;
+  transform: translateX(-50%) translateY(-4px);
+  width: max-content;
+  max-width: 220px;
+  padding: 8px 11px;
+  border-radius: 10px;
+  background: rgba(17, 24, 39, 0.94);
+  color: #ffffff;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s ease, transform 0.16s ease;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.18);
+}
+
+.account-premium-crown:hover .account-premium-crown__tooltip,
+.account-premium-crown:focus-visible .account-premium-crown__tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.account-premium-crown:focus-visible {
+  outline: 2px solid rgba(216, 154, 43, 0.55);
+  outline-offset: 3px;
+}
+
+@media (min-width: 900px) {
+  .account-subscription-panel .account-panel-v2__header {
+    display: none !important;
+    margin: 0 !important;
+  }
+
+  .account-payment-panel .account-panel-v2__header,
+  .account-panel__header {
+    justify-content: flex-end !important;
+    margin-bottom: 0 !important;
+  }
+
+  .account-panel-v2__title,
+  .account-panel__title,
+  .friends-header .account-section-title,
+  .favorites-header .account-section-title,
+  .goals-hero__title,
+  .ndsTitle {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  .friends-header {
+    gap: 0 !important;
+  }
+
+  .ndsHeader {
+    justify-content: flex-end !important;
+  }
 }
 
 /* Final account fit pass: keep the desktop profile inside regular browser viewports. */

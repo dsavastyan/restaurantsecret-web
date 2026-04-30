@@ -184,9 +184,10 @@ export default function Landing() {
         const normalized = items
           .map((item) => ({
             name: String(item?.name || '').trim(),
+            slug: String(item?.slug || '').trim(),
             dishes: Number(item?.dishesCount ?? 0),
           }))
-          .filter((item) => item.name.length > 0 && Number.isFinite(item.dishes) && item.dishes > 0)
+          .filter((item) => item.name.length > 0 && item.slug.length > 0 && Number.isFinite(item.dishes) && item.dishes > 0)
 
         const featured = normalized
           .slice()
@@ -507,14 +508,21 @@ export default function Landing() {
 
           <div className="landing-warm__featured-columns">
             {featuredRestaurants.map((restaurantItem) => (
-              <div key={restaurantItem.name} className="landing-warm__featured-row">
+              <Link
+                key={restaurantItem.slug}
+                className="landing-warm__featured-row"
+                to={`/r/${restaurantItem.slug}/menu`}
+                aria-label={`Открыть меню ресторана ${restaurantItem.name}`}
+              >
                 <span>{restaurantItem.name}</span>
                 <small>{formatDishesLabel(restaurantItem.dishes)}</small>
-              </div>
+              </Link>
             ))}
           </div>
 
-          <p className="landing-warm__featured-caption">{extraRestaurantsLabel}</p>
+          <Link className="landing-warm__featured-caption" to="/restaurants">
+            {extraRestaurantsLabel}
+          </Link>
 
           <div className="landing-warm__suggest" ref={suggestZoneRef}>
             <button

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { NavLink, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { apiGet, apiPostAuth, isUnauthorizedError } from "@/lib/api";
 import { useAuth } from "@/store/auth";
 import logo from "@/assets/login/Icon.png";
@@ -171,11 +171,13 @@ export default function AccountLayout() {
   }, []);
 
   const sub = me?.user?.subscription || null;
+  const hasPremium = Boolean(sub && sub.status !== "none" && !sub.expired);
+  const showPremiumUpsell = !loading && Boolean(me?.user) && !hasPremium;
   const isAccountRoot = location.pathname === "/account";
 
   const navItems = [
     { to: "/account", label: "Профиль", end: true },
-    { to: "/account/subscription", label: (!sub || sub.status === "none") ? "Оформить подписку" : "Управлять подпиской" },
+    { to: "/account/subscription", label: hasPremium ? "Управлять подпиской" : "Оформить подписку" },
     { to: "/account/payment-methods", label: "Способы оплаты" },
     { to: "/account/goals", label: "Мои цели" },
     { to: "/account/statistics", label: "Дневник питания" },
@@ -234,13 +236,16 @@ export default function AccountLayout() {
       <div className="account__inner">
         <div className="account__layout">
           <aside className="account__sidebar">
-            <div className="account-brand" aria-label="RestSecret">
+            <Link className="account-brand" to="/" aria-label="На главную страницу RestSecret">
               <img className="account-brand__logo" src={logo} alt="" />
               <div className="account-brand__copy">
                 <span className="account-brand__name">RestSecret</span>
-                <span className="account-brand__tagline">Ешь вкусно - выбирай осознанно</span>
+                <span className="account-brand__tagline">
+                  <span className="account-brand__tagline-line">Ешь вкусно -</span>
+                  <span className="account-brand__tagline-line">выбирай осознанно</span>
+                </span>
               </div>
-            </div>
+            </Link>
 
             <nav className="account-nav" aria-label="Навигация по личному кабинету">
               {navItems.map((item) => (
@@ -259,30 +264,43 @@ export default function AccountLayout() {
               ))}
             </nav>
 
-            <div className="account-premium-card">
-              <span className="account-premium-card__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                  <path d="m3.5 9 3.8 2.7L12 4l4.7 7.7L20.5 9l-2 9.5h-13L3.5 9Z" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M6.5 21h11" strokeLinecap="round" />
-                </svg>
-              </span>
-              <div className="account-premium-card__copy">
-                <strong>RestSecret Premium</strong>
-                <span>Больше возможностей<br />для осознанного выбора</span>
+            {showPremiumUpsell && (
+              <div className="account-premium-card">
+                <span className="account-premium-card__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <path d="m3.5 9 3.8 2.7L12 4l4.7 7.7L20.5 9l-2 9.5h-13L3.5 9Z" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M6.5 21h11" strokeLinecap="round" />
+                  </svg>
+                </span>
+                <div className="account-premium-card__copy">
+                  <strong>RestSecret Premium</strong>
+                  <span>Больше возможностей<br />для осознанного выбора</span>
+                </div>
+                <NavLink className="account-premium-card__link" to="/account/subscription">
+                  <span>Узнать больше</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </NavLink>
               </div>
-              <NavLink className="account-premium-card__link" to="/account/subscription">
-                <span>Узнать больше</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </NavLink>
-            </div>
+            )}
           </aside>
 
           <div className="account__main">
             <header className="account__header">
               <div className="account__header-desktop">
-                <h1 className="account__title">Личный кабинет</h1>
+                <div className="account__title-row">
+                  <h1 className="account__title">Личный кабинет</h1>
+                  {hasPremium && (
+                    <span className="account-premium-crown" tabIndex={0} aria-label="Премиум пользователь">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
+                        <path d="m3.5 9 3.8 2.7L12 4l4.7 7.7L20.5 9l-2 9.5h-13L3.5 9Z" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M6.5 21h11" strokeLinecap="round" />
+                      </svg>
+                      <span className="account-premium-crown__tooltip" role="tooltip">Премиум пользователь</span>
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="account__header-mobile">
                 {isAccountRoot ? (
