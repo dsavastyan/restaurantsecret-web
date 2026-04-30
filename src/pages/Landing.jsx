@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
+import CityMapBackground from '@/components/CityMapBackground'
 import RestaurantMap from '@/components/RestaurantMap'
 import SearchInput from '@/components/SearchInput'
 import { CookieSettingsModal } from '@/components/CookieSettingsModal'
@@ -369,7 +370,8 @@ export default function Landing() {
           </div>
         </header>
 
-        <section className="landing-warm__hero" id="top">
+        <section className="landing-warm__hero" id="top" style={{ position: 'relative' }}>
+          <CityMapBackground themeMode={themeMode} />
           <h1 className="landing-warm__hero-title">
             Ешь вкусно,
             <br />

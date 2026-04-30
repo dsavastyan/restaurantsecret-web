@@ -14208,6 +14208,12 @@ html[data-rs-theme="night"] .onboarding-install__image {
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: hidden;
+}
+
+.landing-warm__hero > *:not(canvas) {
+  position: relative;
+  z-index: 1;
 }
 
 .landing-warm__hero-title {
