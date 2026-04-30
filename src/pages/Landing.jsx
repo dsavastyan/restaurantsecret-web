@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import RestaurantMap from '@/components/RestaurantMap'
+import SearchInput from '@/components/SearchInput'
 import { CookieSettingsModal } from '@/components/CookieSettingsModal'
 import { getLandingStats, getRestaurants, postSuggest } from '@/lib/api'
 import { isMoscowDaytime } from '@/lib/moscowDaytime'
@@ -383,14 +384,8 @@ export default function Landing() {
             <span className="landing-warm__search-icon" aria-hidden="true">
               <SearchIcon />
             </span>
-            <input
-              type="text"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Ресторан, блюдо или кухня..."
-              aria-label="Поиск ресторана или блюда"
-            />
-            <button type="submit">Найти</button>
+            <SearchInput value={query} onChange={setQuery} />
+            <button type="submit" className="landing-warm__search-submit">Найти</button>
           </form>
 
           <div className="landing-warm__chips" aria-label="Популярные запросы">
