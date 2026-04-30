@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { NavLink, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { apiGet, apiPostAuth, isUnauthorizedError } from "@/lib/api";
 import { useAuth } from "@/store/auth";
+import logo from "@/assets/login/Icon.png";
 
 export type Sub = {
   plan: string;
@@ -231,93 +232,125 @@ export default function AccountLayout() {
   return (
     <div className="account">
       <div className="account__inner">
-        <header className="account__header">
-          <div className="account__header-desktop">
-            <h1 className="account__title">Личный кабинет</h1>
-          </div>
-          <div className="account__header-mobile">
-            {isAccountRoot ? (
-              <span className="account__mobile-placeholder" aria-hidden="true" />
-            ) : (
-              <button
-                type="button"
-                className="account__mobile-back"
-                onClick={() => navigate("/account")}
-                aria-label="Назад в личный кабинет"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                  <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <span>Назад в личный кабинет</span>
-              </button>
-            )}
-            <div className="account__mobile-controls">
-              <button
-                type="button"
-                className="account-logout-btn account-logout-btn--mobile"
-                onClick={handleOpenLogoutModal}
-                title="Выйти"
-                aria-label="Выйти"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <div className="account__header-actions">
-            <button
-              type="button"
-              className="account-theme-toggle"
-              onClick={handleToggleTheme}
-              title={isNightTheme ? "Включить дневную тему" : "Включить ночную тему"}
-              aria-label={isNightTheme ? "Включить дневную тему" : "Включить ночную тему"}
-            >
-              {isNightTheme ? (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="4.5" />
-                  <path d="M12 2.8v2.2M12 19v2.2M21.2 12h-2.2M5 12H2.8M18.9 5.1l-1.6 1.6M6.7 17.3l-1.6 1.6M18.9 18.9l-1.6-1.6M6.7 6.7L5.1 5.1" strokeLinecap="round" />
-                </svg>
-              ) : (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 14.2A9 9 0 1 1 9.8 3a7.2 7.2 0 0 0 11.2 11.2Z" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              )}
-            </button>
-            <button
-              type="button"
-              className="account-logout-btn"
-              onClick={handleOpenLogoutModal}
-              title="Выйти"
-            >
-              <span className="account-logout-btn__label">Выйти</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          </div>
-        </header>
-
         <div className="account__layout">
-          <nav className="account-nav" aria-label="Навигация по личному кабинету">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) =>
-                  `account-nav__link${isActive ? " account-nav__link--active" : ""}`
-                }
-              >
-                <span className="account-nav__label">{item.label}</span>
-                {item.badge ? <span className="account-nav__badge">{item.badge}</span> : null}
-              </NavLink>
-            ))}
-          </nav>
+          <aside className="account__sidebar">
+            <div className="account-brand" aria-label="RestSecret">
+              <img className="account-brand__logo" src={logo} alt="" />
+              <div className="account-brand__copy">
+                <span className="account-brand__name">RestSecret</span>
+                <span className="account-brand__tagline">Ешь вкусно - выбирай осознанно</span>
+              </div>
+            </div>
 
-          <div className="account__content">
-            <Outlet context={outletContext} />
+            <nav className="account-nav" aria-label="Навигация по личному кабинету">
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end}
+                  className={({ isActive }) =>
+                    `account-nav__link${isActive ? " account-nav__link--active" : ""}`
+                  }
+                >
+                  <AccountNavIcon label={item.label} />
+                  <span className="account-nav__label">{item.label}</span>
+                  {item.badge ? <span className="account-nav__badge">{item.badge}</span> : null}
+                </NavLink>
+              ))}
+            </nav>
+
+            <div className="account-premium-card">
+              <span className="account-premium-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="m3.5 9 3.8 2.7L12 4l4.7 7.7L20.5 9l-2 9.5h-13L3.5 9Z" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M6.5 21h11" strokeLinecap="round" />
+                </svg>
+              </span>
+              <div className="account-premium-card__copy">
+                <strong>RestSecret Premium</strong>
+                <span>Больше возможностей<br />для осознанного выбора</span>
+              </div>
+              <NavLink className="account-premium-card__link" to="/account/subscription">
+                <span>Узнать больше</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </NavLink>
+            </div>
+          </aside>
+
+          <div className="account__main">
+            <header className="account__header">
+              <div className="account__header-desktop">
+                <h1 className="account__title">Личный кабинет</h1>
+              </div>
+              <div className="account__header-mobile">
+                {isAccountRoot ? (
+                  <span className="account__mobile-placeholder" aria-hidden="true" />
+                ) : (
+                  <button
+                    type="button"
+                    className="account__mobile-back"
+                    onClick={() => navigate("/account")}
+                    aria-label="Назад в личный кабинет"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                      <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <span>Назад в личный кабинет</span>
+                  </button>
+                )}
+                <div className="account__mobile-controls">
+                  <button
+                    type="button"
+                    className="account-logout-btn account-logout-btn--mobile"
+                    onClick={handleOpenLogoutModal}
+                    title="Выйти"
+                    aria-label="Выйти"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div className="account__header-actions">
+                <button
+                  type="button"
+                  className="account-theme-toggle"
+                  onClick={handleToggleTheme}
+                  title={isNightTheme ? "Включить дневную тему" : "Включить ночную тему"}
+                  aria-label={isNightTheme ? "Включить дневную тему" : "Включить ночную тему"}
+                >
+                  {isNightTheme ? (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="4.5" />
+                      <path d="M12 2.8v2.2M12 19v2.2M21.2 12h-2.2M5 12H2.8M18.9 5.1l-1.6 1.6M6.7 17.3l-1.6 1.6M18.9 18.9l-1.6-1.6M6.7 6.7L5.1 5.1" strokeLinecap="round" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 14.2A9 9 0 1 1 9.8 3a7.2 7.2 0 0 0 11.2 11.2Z" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className="account-logout-btn"
+                  onClick={handleOpenLogoutModal}
+                  title="Выйти"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <span className="account-logout-btn__label">Выйти</span>
+                </button>
+              </div>
+            </header>
+
+            <div className="account__content">
+              <Outlet context={outletContext} />
+            </div>
           </div>
         </div>
       </div>
@@ -359,5 +392,63 @@ export default function AccountLayout() {
         </div>
       )}
     </div>
+  );
+}
+
+function AccountNavIcon({ label }: { label: string }) {
+  if (label === "Профиль") {
+    return (
+      <svg className="account-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <circle cx="12" cy="8" r="3.4" />
+        <path d="M5 20c1.35-3.6 3.7-5.4 7-5.4s5.65 1.8 7 5.4" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (label.includes("подписк")) {
+    return (
+      <svg className="account-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <rect x="4" y="6" width="16" height="14" rx="2" />
+        <path d="M8 4v4M16 4v4M4 11h16M8 15h4" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (label === "Способы оплаты") {
+    return (
+      <svg className="account-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <rect x="3.5" y="6.5" width="17" height="11" rx="2" />
+        <path d="M3.5 10h17M7 14h4" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (label === "Мои цели") {
+    return (
+      <svg className="account-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M4 17.5 8.2 13l3.1 3.2 5.2-7.4 3.5 4.2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="m15.8 8.8 2.7-.5.5 2.7" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  if (label === "Дневник питания") {
+    return (
+      <svg className="account-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <rect x="5" y="4" width="14" height="16" rx="2" />
+        <path d="M9 4v3M15 4v3M9 12h6M9 16h4" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (label === "Избранное") {
+    return (
+      <svg className="account-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M12 20s-7-4.3-8.4-9.1C2.7 7.6 4.7 5 7.6 5c1.8 0 3.2.9 4.4 2.4C13.2 5.9 14.6 5 16.4 5c2.9 0 4.9 2.6 4 5.9C19 15.7 12 20 12 20Z" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  return (
+    <svg className="account-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <circle cx="9" cy="8" r="3" />
+      <circle cx="17" cy="10" r="2.2" />
+      <path d="M3.5 19c1.1-3 3-4.5 5.5-4.5s4.4 1.5 5.5 4.5" strokeLinecap="round" />
+      <path d="M14.8 18.4c.7-1.8 1.9-2.7 3.5-2.7 1.3 0 2.3.5 3.2 1.6" strokeLinecap="round" />
+    </svg>
   );
 }

@@ -13770,3 +13770,836 @@ html[data-rs-theme="night"] .onboarding-install__image {
     font-size: 19px;
   }
 }
+
+/* Account profile mockup */
+.account {
+  --account-olive: #6d873c;
+  --account-olive-dark: #4d6721;
+  --account-border: rgba(31, 31, 28, 0.11);
+  --account-ink: #12110f;
+  --account-muted: #6f7379;
+  --account-wash: #f6f2e9;
+  min-height: 100vh;
+  padding: 0;
+  background:
+    radial-gradient(900px 520px at 74% 12%, rgba(221, 210, 184, 0.28), transparent 58%),
+    radial-gradient(640px 520px at 3% 82%, rgba(224, 203, 158, 0.18), transparent 58%),
+    #fbfaf7;
+  color: var(--account-ink);
+}
+
+.account__inner {
+  max-width: none;
+  min-height: 100vh;
+  padding: 0;
+  gap: 0;
+}
+
+.account__layout {
+  display: grid;
+  grid-template-columns: 468px minmax(0, 1fr);
+  gap: 0;
+  min-height: 100vh;
+}
+
+.account__sidebar {
+  min-height: 100vh;
+  padding: 44px 36px 42px;
+  border-right: 1px solid rgba(31, 31, 28, 0.08);
+  background: rgba(251, 250, 247, 0.72);
+  display: flex;
+  flex-direction: column;
+}
+
+.account__main {
+  min-width: 0;
+  padding: 44px 28px 32px 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 42px;
+}
+
+.account__header {
+  min-height: 74px;
+  padding: 0 10px 0 8px;
+  gap: 24px;
+}
+
+.account__title {
+  font-family: "DM Serif Display", "Playfair Display", Georgia, serif;
+  font-size: clamp(42px, 3.2vw, 58px);
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: #050505;
+}
+
+.account__header-actions {
+  gap: 16px;
+}
+
+.account-theme-toggle {
+  display: none;
+}
+
+.account-logout-btn {
+  min-width: 204px;
+  min-height: 72px;
+  justify-content: center;
+  gap: 14px;
+  padding: 18px 30px;
+  border: 1.5px solid rgba(109, 135, 60, 0.55);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.42);
+  box-shadow: none;
+  color: var(--account-olive-dark);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.account-logout-btn:hover {
+  background: rgba(244, 245, 236, 0.86);
+  border-color: rgba(109, 135, 60, 0.78);
+  color: var(--account-olive-dark);
+  box-shadow: none;
+}
+
+.account-logout-btn svg {
+  width: 29px;
+  height: 29px;
+}
+
+.account-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 10px 50px;
+}
+
+.account-brand__logo {
+  width: 82px;
+  height: 82px;
+  border-radius: 20px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.account-brand__copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.account-brand__name {
+  font-family: "DM Serif Display", "Playfair Display", Georgia, serif;
+  font-size: 42px;
+  line-height: 1;
+  color: #0a0a09;
+}
+
+.account-brand__tagline {
+  color: #4f5358;
+  font-size: 17px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.account-nav {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  gap: 8px;
+  border-radius: 0;
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+.account-nav__link {
+  min-height: 66px;
+  padding: 16px 24px;
+  border-radius: 24px;
+  gap: 24px;
+  color: #191b20;
+  font-size: 23px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.account-nav__link:hover {
+  background: rgba(236, 232, 217, 0.74);
+}
+
+.account-nav__link--active {
+  background: linear-gradient(90deg, rgba(225, 223, 205, 0.84), rgba(238, 235, 220, 0.68));
+  color: var(--account-olive-dark);
+  box-shadow: none;
+}
+
+.account-nav__link--active:hover {
+  color: var(--account-olive-dark);
+}
+
+.account-nav__icon {
+  width: 26px;
+  height: 26px;
+  color: #898d94;
+  flex-shrink: 0;
+}
+
+.account-nav__link--active .account-nav__icon {
+  color: var(--account-olive-dark);
+}
+
+.account-nav__badge {
+  min-width: 32px;
+  height: 24px;
+  background: rgba(109, 135, 60, 0.12);
+  border-color: rgba(109, 135, 60, 0.24);
+  color: var(--account-olive-dark);
+}
+
+.account-premium-card {
+  margin-top: auto;
+  min-height: 226px;
+  border: 1px solid rgba(218, 179, 112, 0.36);
+  border-radius: 22px;
+  background:
+    radial-gradient(180px 160px at 12% 8%, rgba(255, 187, 78, 0.22), transparent 60%),
+    rgba(252, 248, 238, 0.78);
+  padding: 30px 31px 28px;
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 0 18px;
+  align-items: start;
+}
+
+.account-premium-card__icon {
+  width: 52px;
+  height: 52px;
+  color: #e7a43a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.account-premium-card__icon svg {
+  width: 42px;
+  height: 42px;
+}
+
+.account-premium-card__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.account-premium-card__copy strong {
+  font-size: 23px;
+  line-height: 1.2;
+  color: #18191c;
+}
+
+.account-premium-card__copy span {
+  color: #7a7d83;
+  font-size: 17px;
+  line-height: 1.55;
+  font-weight: 600;
+}
+
+.account-premium-card__link {
+  grid-column: 2;
+  justify-self: start;
+  margin-top: 24px;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 1px solid rgba(109, 135, 60, 0.42);
+  border-radius: 14px;
+  color: var(--account-olive-dark);
+  background: rgba(255, 255, 255, 0.48);
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  font-size: 17px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.account-premium-card__link svg {
+  width: 22px;
+  height: 22px;
+}
+
+.account__content {
+  display: block;
+}
+
+.account-panel.account-overview {
+  padding: 0;
+  gap: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.account-overview-form {
+  display: block;
+}
+
+.account-overview-desktop {
+  display: grid;
+  grid-template-columns: minmax(420px, 560px) minmax(540px, 1fr);
+  gap: 34px;
+}
+
+.account-profile-card,
+.account-about-card,
+.account-benefits-strip {
+  border: 1px solid var(--account-border);
+  background: rgba(255, 255, 255, 0.68);
+  box-shadow: 0 18px 42px rgba(30, 25, 16, 0.06);
+  backdrop-filter: blur(14px);
+}
+
+.account-profile-card,
+.account-about-card {
+  min-height: 574px;
+  border-radius: 14px;
+}
+
+.account-profile-card {
+  display: grid;
+  grid-template-rows: 244px 1fr;
+}
+
+.account-profile-card__hero {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  padding: 48px 44px 40px;
+  border-bottom: 1px solid rgba(31, 31, 28, 0.08);
+}
+
+.account-profile-card__avatar {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background:
+    radial-gradient(circle at 35% 22%, rgba(149, 172, 94, 0.82), transparent 42%),
+    linear-gradient(145deg, #6f873e, #9db36a);
+  color: #ffffff;
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: 78px;
+  line-height: 1;
+  box-shadow: inset 0 0 22px rgba(55, 76, 31, 0.16);
+}
+
+.account-profile-card__camera {
+  position: absolute;
+  right: -6px;
+  bottom: -4px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(188, 196, 154, 0.68);
+  background: #f6f5e9;
+  color: var(--account-olive-dark);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.account-profile-card__camera svg {
+  width: 24px;
+  height: 24px;
+}
+
+.account-profile-card__identity {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.account-profile-card__identity h2 {
+  margin: 0;
+  font-family: "DM Serif Display", "Playfair Display", Georgia, serif;
+  font-size: 40px;
+  line-height: 1.05;
+  font-weight: 400;
+  color: #11110f;
+}
+
+.account-profile-card__identity p,
+.account-profile-card__identity span {
+  margin: 0;
+  color: #73777e;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.account-profile-card__body {
+  display: flex;
+  flex-direction: column;
+  padding: 50px 44px 46px;
+}
+
+.account-profile-card__label {
+  margin-bottom: 18px;
+  color: #69707a;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.account-profile-card__body p {
+  margin: 0;
+  color: #111318;
+  font-size: 24px;
+  line-height: 1.5;
+}
+
+.account-profile-card__edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: auto;
+  min-height: 64px;
+  border: 1px solid rgba(31, 31, 28, 0.14);
+  border-radius: 23px;
+  background: rgba(255, 255, 255, 0.52);
+  color: var(--account-olive-dark);
+  font: inherit;
+  font-size: 22px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.account-profile-card__edit:hover {
+  background: rgba(246, 248, 238, 0.92);
+}
+
+.account-about-card {
+  padding: 44px 44px 40px;
+}
+
+.account-about-card__header {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 36px;
+}
+
+.account-about-card__header h3 {
+  margin: 0;
+  font-family: "DM Serif Display", "Playfair Display", Georgia, serif;
+  font-size: 36px;
+  line-height: 1.05;
+  font-weight: 400;
+  color: #050505;
+}
+
+.account-about-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.account-about-card__save {
+  min-height: 42px;
+  border: 1px solid rgba(109, 135, 60, 0.44);
+  border-radius: 12px;
+  background: rgba(244, 246, 236, 0.88);
+  color: var(--account-olive-dark);
+  padding: 0 18px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.account-about-card__save:disabled {
+  opacity: 0.68;
+  cursor: progress;
+}
+
+.account-about-card .stats-grid {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 42px;
+  row-gap: 34px;
+}
+
+.account-about-card .form-group {
+  gap: 14px;
+}
+
+.account-about-card .form-group.full {
+  grid-column: 1 / -1;
+}
+
+.account-about-card .form-group label {
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #696f79;
+}
+
+.account-about-card .form-group input,
+.account-about-card .form-group select {
+  height: 64px;
+  border-radius: 18px;
+  border: 1px solid rgba(31, 31, 28, 0.11);
+  background: rgba(255, 255, 255, 0.55);
+  color: #111318;
+  padding: 0 24px;
+  font-size: 22px;
+  box-shadow: inset 0 1px 2px rgba(24, 24, 20, 0.02);
+}
+
+.account-about-card .form-group select {
+  background-color: rgba(255, 255, 255, 0.55);
+  background-position: right 18px center;
+  background-size: 22px 22px;
+}
+
+.account-about-card .form-group input:focus,
+.account-about-card .form-group select:focus {
+  border-color: rgba(109, 135, 60, 0.46);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 0 0 4px rgba(109, 135, 60, 0.10);
+}
+
+.activity-segmented {
+  height: 64px;
+  padding: 4px;
+  border-radius: 18px;
+  background: rgba(232, 229, 220, 0.64);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+}
+
+.activity-segmented__option {
+  border: 0;
+  border-radius: 18px;
+  background: transparent;
+  color: #111318;
+  font: inherit;
+  font-size: 21px;
+  cursor: pointer;
+}
+
+.activity-segmented__option.is-active {
+  background: linear-gradient(145deg, #7d9648, #6f873d);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(76, 96, 39, 0.22);
+}
+
+.account-benefits-strip {
+  grid-column: 1 / -1;
+  min-height: 166px;
+  border-radius: 14px;
+  padding: 30px 44px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  gap: 30px;
+}
+
+.account-benefit {
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr);
+  gap: 30px;
+  align-items: center;
+}
+
+.account-benefit__icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: rgba(239, 239, 222, 0.82);
+  border: 1px solid rgba(109, 135, 60, 0.14);
+  color: var(--account-olive-dark);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.account-benefit__icon svg {
+  width: 34px;
+  height: 34px;
+}
+
+.account-benefit div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.account-benefit strong {
+  color: #0d0f14;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.account-benefit span:not(.account-benefit__icon) {
+  color: #6f7379;
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 500;
+}
+
+@media (max-width: 1420px) {
+  .account__layout {
+    grid-template-columns: 360px minmax(0, 1fr);
+  }
+
+  .account__sidebar {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .account__main {
+    padding-left: 32px;
+  }
+
+  .account-brand__name {
+    font-size: 34px;
+  }
+
+  .account-brand__tagline {
+    font-size: 14px;
+  }
+
+  .account-nav__link {
+    font-size: 18px;
+    gap: 16px;
+  }
+
+  .account-overview-desktop {
+    grid-template-columns: minmax(360px, 0.85fr) minmax(480px, 1.15fr);
+  }
+}
+
+@media (max-width: 1180px) {
+  .account__layout {
+    grid-template-columns: 300px minmax(0, 1fr);
+  }
+
+  .account__main {
+    padding: 32px 20px 28px;
+  }
+
+  .account-overview-desktop {
+    grid-template-columns: 1fr;
+  }
+
+  .account-benefits-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .account-profile-card,
+  .account-about-card {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 899px) {
+  .account {
+    padding-top: 8px;
+    padding-bottom: 24px;
+    min-height: 100vh;
+  }
+
+  .account__inner {
+    min-height: 0;
+    padding: 0 8px;
+  }
+
+  .account__layout {
+    display: block;
+    min-height: 0;
+  }
+
+  .account__sidebar {
+    display: none;
+  }
+
+  .account__main {
+    padding: 0;
+    gap: 10px;
+  }
+
+  .account__header {
+    min-height: 0;
+    padding: 0 8px 8px;
+  }
+
+  .account-logout-btn {
+    min-width: 0;
+    min-height: 40px;
+    padding: 0;
+    border-radius: 12px;
+    font-size: 0;
+  }
+
+  .account-logout-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .account-overview-form {
+    display: none;
+  }
+
+  .account-overview-form.is-open {
+    display: block;
+    margin-top: 6px;
+  }
+
+  .account-overview-form.is-open .account-overview-desktop {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .account-profile-card,
+  .account-about-card,
+  .account-benefits-strip {
+    border-radius: 18px;
+  }
+
+  .account-profile-card {
+    grid-template-rows: auto auto;
+  }
+
+  .account-profile-card__hero {
+    padding: 18px;
+    gap: 14px;
+  }
+
+  .account-profile-card__avatar {
+    width: 72px;
+    height: 72px;
+    font-size: 38px;
+  }
+
+  .account-profile-card__camera {
+    width: 30px;
+    height: 30px;
+  }
+
+  .account-profile-card__camera svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .account-profile-card__identity h2 {
+    font-size: 28px;
+  }
+
+  .account-profile-card__identity p,
+  .account-profile-card__identity span,
+  .account-profile-card__body p,
+  .account-profile-card__label {
+    font-size: 15px;
+  }
+
+  .account-profile-card__body,
+  .account-about-card,
+  .account-benefits-strip {
+    padding: 18px;
+  }
+
+  .account-about-card .stats-grid {
+    grid-template-columns: 1fr;
+    row-gap: 16px;
+  }
+
+  .account-about-card .form-group input,
+  .account-about-card .form-group select,
+  .activity-segmented {
+    height: 52px;
+    font-size: 16px;
+  }
+
+  .activity-segmented__option {
+    font-size: 15px;
+  }
+
+  .account-benefits-strip {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .account-benefit {
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .account-benefit__icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .account-benefit__icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .account-benefit strong {
+    font-size: 16px;
+  }
+
+  .account-benefit span:not(.account-benefit__icon) {
+    font-size: 13px;
+  }
+}
+
+html[data-rs-theme="night"] .account {
+  background:
+    radial-gradient(900px 520px at 72% 10%, rgba(102, 119, 67, 0.16), transparent 58%),
+    #111512;
+}
+
+html[data-rs-theme="night"] .account__sidebar,
+html[data-rs-theme="night"] .account-profile-card,
+html[data-rs-theme="night"] .account-about-card,
+html[data-rs-theme="night"] .account-benefits-strip {
+  border-color: rgba(226, 232, 240, 0.14);
+  background: rgba(21, 27, 23, 0.78);
+}
+
+html[data-rs-theme="night"] .account__title,
+html[data-rs-theme="night"] .account-brand__name,
+html[data-rs-theme="night"] .account-profile-card__identity h2,
+html[data-rs-theme="night"] .account-about-card__header h3,
+html[data-rs-theme="night"] .account-benefit strong,
+html[data-rs-theme="night"] .account-profile-card__body p {
+  color: #f5f2ea;
+}
+
+html[data-rs-theme="night"] .account-brand__tagline,
+html[data-rs-theme="night"] .account-profile-card__identity p,
+html[data-rs-theme="night"] .account-profile-card__identity span,
+html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
+  color: #b9beb4;
+}

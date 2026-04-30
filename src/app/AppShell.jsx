@@ -226,7 +226,8 @@ export default function AppShell() {
   const isLanding = location.pathname === '/'
   const isLoginPage = location.pathname === '/login'
   const isOnboardingPage = location.pathname.startsWith('/onboarding')
-  const isImmersivePage = isLoginPage || isOnboardingPage
+  const isAccountPage = location.pathname.startsWith('/account')
+  const isImmersivePage = isLoginPage || isOnboardingPage || isAccountPage
   const isRestaurantMenuPage = /^\/restaurants\/[^/]+\/menu\/?$/.test(location.pathname)
 
   useEffect(() => {
