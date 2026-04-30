@@ -228,7 +228,7 @@ export default function AppShell() {
   const isOnboardingPage = location.pathname.startsWith('/onboarding')
   const isAccountPage = location.pathname.startsWith('/account')
   const isImmersivePage = isLoginPage || isOnboardingPage || isAccountPage
-  const isRestaurantMenuPage = /^\/restaurants\/[^/]+\/menu\/?$/.test(location.pathname)
+  const isRestaurantMenuPage = /^\/(?:restaurants|r)\/[^/]+\/menu\/?$/.test(location.pathname)
 
   useEffect(() => {
     if (!accessToken || isOnboardingPage || isLoginPage) return
