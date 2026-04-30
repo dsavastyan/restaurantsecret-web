@@ -14596,6 +14596,305 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
   color: #b9beb4;
 }
 
+/* Final account fit pass: keep the desktop profile inside regular browser viewports. */
+.account {
+  overflow-x: hidden !important;
+}
+
+.account__layout {
+  grid-template-columns: minmax(250px, 300px) minmax(0, 1fr) !important;
+}
+
+.account__sidebar {
+  padding: 26px 20px 24px !important;
+  overflow: hidden !important;
+}
+
+.account__main {
+  padding: 26px 24px 24px 30px !important;
+  gap: 24px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.account__header {
+  min-height: 52px !important;
+}
+
+.account__title {
+  font-size: clamp(36px, 3vw, 50px) !important;
+}
+
+.account-logout-btn {
+  min-width: 142px !important;
+  min-height: 48px !important;
+  padding: 10px 18px !important;
+  gap: 10px !important;
+  font-size: 18px !important;
+}
+
+.account-logout-btn svg {
+  width: 22px !important;
+  height: 22px !important;
+}
+
+.account-brand {
+  gap: 10px !important;
+  margin: 0 0 30px !important;
+}
+
+.account-brand__logo {
+  width: 54px !important;
+  height: 54px !important;
+  border-radius: 15px !important;
+}
+
+.account-brand__name {
+  font-size: 30px !important;
+}
+
+.account-brand__tagline {
+  max-width: 210px !important;
+  font-size: 12px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.account-nav {
+  gap: 6px !important;
+}
+
+.account-nav__link {
+  min-height: 48px !important;
+  padding: 10px 16px !important;
+  border-radius: 17px !important;
+  gap: 14px !important;
+  font-size: 17px !important;
+}
+
+.account-nav__icon {
+  width: 21px !important;
+  height: 21px !important;
+}
+
+.account-premium-card {
+  min-height: 126px !important;
+  padding: 18px !important;
+  grid-template-columns: 34px minmax(0, 1fr) !important;
+  gap: 0 12px !important;
+}
+
+.account-premium-card__icon {
+  width: 34px !important;
+  height: 34px !important;
+}
+
+.account-premium-card__icon svg {
+  width: 28px !important;
+  height: 28px !important;
+}
+
+.account-premium-card__copy {
+  gap: 6px !important;
+}
+
+.account-premium-card__copy strong {
+  font-size: 17px !important;
+}
+
+.account-premium-card__copy span {
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+}
+
+.account-premium-card__link {
+  min-height: 34px !important;
+  margin-top: 10px !important;
+  padding: 0 12px !important;
+  gap: 10px !important;
+  font-size: 12px !important;
+}
+
+.account-overview-desktop {
+  grid-template-columns: minmax(270px, 0.9fr) minmax(320px, 1.1fr) !important;
+  gap: 20px !important;
+  min-width: 0 !important;
+}
+
+.account-profile-card,
+.account-about-card {
+  min-width: 0 !important;
+  min-height: 430px !important;
+}
+
+.account-profile-card {
+  grid-template-rows: 158px 1fr !important;
+}
+
+.account-profile-card__hero {
+  gap: 18px !important;
+  padding: 24px 24px 20px !important;
+}
+
+.account-profile-card__avatar {
+  width: 86px !important;
+  height: 86px !important;
+  font-size: 48px !important;
+}
+
+.account-profile-card__camera {
+  width: 30px !important;
+  height: 30px !important;
+}
+
+.account-profile-card__camera svg {
+  width: 15px !important;
+  height: 15px !important;
+}
+
+.account-profile-card__identity {
+  gap: 9px !important;
+}
+
+.account-profile-card__identity h2 {
+  font-size: 30px !important;
+}
+
+.account-profile-card__identity p,
+.account-profile-card__identity span {
+  font-size: 15px !important;
+  line-height: 1.18 !important;
+  overflow-wrap: anywhere !important;
+}
+
+.account-profile-card__body {
+  padding: 28px 24px 24px !important;
+}
+
+.account-profile-card__label {
+  margin-bottom: 12px !important;
+  font-size: 17px !important;
+}
+
+.account-profile-card__body p {
+  font-size: 17px !important;
+  line-height: 1.45 !important;
+}
+
+.account-profile-card__edit {
+  min-height: 46px !important;
+  border-radius: 18px !important;
+  font-size: 16px !important;
+}
+
+.account-about-card {
+  padding: 28px 28px 24px !important;
+}
+
+.account-about-card__header {
+  min-height: 40px !important;
+  margin-bottom: 22px !important;
+}
+
+.account-about-card__header h3 {
+  font-size: 30px !important;
+}
+
+.account-about-card .stats-grid {
+  column-gap: 20px !important;
+  row-gap: 20px !important;
+}
+
+.account-about-card .form-group {
+  gap: 9px !important;
+}
+
+.account-about-card .form-group label {
+  font-size: 13px !important;
+}
+
+.account-about-card .form-group input,
+.account-about-card .form-group select {
+  height: 46px !important;
+  border-radius: 14px !important;
+  padding: 0 16px !important;
+  font-size: 16px !important;
+}
+
+.activity-segmented {
+  height: 46px !important;
+  border-radius: 14px !important;
+}
+
+.activity-segmented__option {
+  border-radius: 13px !important;
+  font-size: 15px !important;
+}
+
+.account-benefits-strip {
+  min-height: 98px !important;
+  padding: 18px 24px !important;
+  gap: 16px !important;
+}
+
+.account-benefit {
+  grid-template-columns: 42px minmax(0, 1fr) !important;
+  gap: 12px !important;
+}
+
+.account-benefit__icon {
+  width: 42px !important;
+  height: 42px !important;
+}
+
+.account-benefit__icon svg {
+  width: 21px !important;
+  height: 21px !important;
+}
+
+.account-benefit strong {
+  font-size: 15px !important;
+}
+
+.account-benefit span:not(.account-benefit__icon) {
+  font-size: 12px !important;
+}
+
+@media (max-width: 1500px) {
+  .account__layout {
+    grid-template-columns: 270px minmax(0, 1fr) !important;
+  }
+
+  .account__main {
+    padding-left: 24px !important;
+    padding-right: 18px !important;
+  }
+
+  .account-overview-desktop {
+    grid-template-columns: minmax(250px, 0.88fr) minmax(300px, 1.12fr) !important;
+    gap: 16px !important;
+  }
+
+  .account-about-card {
+    padding-left: 22px !important;
+    padding-right: 22px !important;
+  }
+
+  .account-about-card .stats-grid {
+    column-gap: 14px !important;
+  }
+
+  .activity-segmented__option {
+    font-size: 14px !important;
+  }
+}
+
+@media (max-width: 1220px) {
+  .account-overview-desktop {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* Account profile mockup */
 .account {
   --account-olive: #6d873c;
