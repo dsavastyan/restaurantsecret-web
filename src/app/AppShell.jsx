@@ -231,6 +231,7 @@ export default function AppShell() {
   const isImmersivePage = isLoginPage || isOnboardingPage || isAccountPage
   const isMarketingPage = isLanding || isTariffsPage
   const isRestaurantMenuPage = /^\/(?:restaurants|r)\/[^/]+\/menu\/?$/.test(location.pathname)
+  const isRestaurantsCatalogPage = location.pathname === '/restaurants'
 
   useEffect(() => {
     if (!accessToken || isOnboardingPage || isLoginPage) return
@@ -262,7 +263,7 @@ export default function AppShell() {
   // Restaurant menu pages intentionally stay in the light reference style.
   useEffect(() => {
     const resolveTheme = () => {
-      if (isRestaurantMenuPage) return 'day'
+      if (isRestaurantMenuPage || isRestaurantsCatalogPage) return 'day'
 
       const saved = window.localStorage.getItem(THEME_PREFERENCE_KEY)
       if (saved === 'day' || saved === 'night') {
@@ -290,7 +291,7 @@ export default function AppShell() {
       window.clearInterval(id)
       window.removeEventListener('storage', onStorage)
     }
-  }, [isRestaurantMenuPage])
+  }, [isRestaurantMenuPage, isRestaurantsCatalogPage])
 
   const showGlobalSearch = useMemo(() => {
     const allowedPrefixes = ['/catalog', '/app']
@@ -314,7 +315,7 @@ export default function AppShell() {
   }, [location.pathname])
 
   return (
-    <div className={`min-h-screen flex flex-col app-theme app-theme--${isRestaurantMenuPage || isDayTheme ? 'day' : 'night'}`}>
+    <div className={`min-h-screen flex flex-col app-theme app-theme--${isRestaurantMenuPage || isRestaurantsCatalogPage || isDayTheme ? 'day' : 'night'}`}>
       {!isMarketingPage && !isImmersivePage && <NavBar />}
       <DishCardModal />
       {!isMarketingPage && !isImmersivePage && <DiaryFloatingButton />}
@@ -328,7 +329,7 @@ export default function AppShell() {
             <Outlet context={outletContext} />
           </div>
         ) : (
-          <div className={`${showPaywall ? 'container locked' : 'container'}${isRestaurantMenuPage ? ' container--menu' : ''}`}>
+          <div className={`${showPaywall ? 'container locked' : 'container'}${isRestaurantMenuPage ? ' container--menu' : ''}${isRestaurantsCatalogPage ? ' container--catalog' : ''}`}>
             {showGlobalSearch && (
               <div className="app-shell__search">
                 <div className="app-shell__search-inner">

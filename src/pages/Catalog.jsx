@@ -1,5 +1,5 @@
 // Catalog page showing the full list of restaurants with lightweight filters.
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { api } from '../api/client.js'
 import CuisineFilter from '../components/CuisineFilter.jsx'
@@ -11,7 +11,27 @@ import { getRussianPluralWord } from '@/lib/text'
 
 // Fetch a large number to emulate "all" items since backend pagination seems flaky
 const FETCH_LIMIT = 1000;
-const VISIBLE_CHUNK_SIZE = 20;
+const PAGE_SIZE = 8;
+
+const CuisineIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M7 3v8" />
+    <path d="M5 3v8" />
+    <path d="M9 3v8" />
+    <path d="M5 11h4" />
+    <path d="M7 11v10" />
+    <path d="M16 3v18" />
+    <path d="M16 3c2.4 1.5 3.6 3.4 3.6 5.8 0 2.5-1.2 4.1-3.6 4.9" />
+  </svg>
+)
+
+const MetroIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M4 19 11 5c.4-.8 1.6-.8 2 0l7 14" />
+    <path d="M8.2 14h7.6" />
+    <path d="M10.1 10h3.8" />
+  </svg>
+)
 
 const normalizeInstagramUrl = (rawUrl) => {
   if (!rawUrl) return null
@@ -35,9 +55,7 @@ export default function Catalog() {
   const [selectedMetro, setSelectedMetro] = useState('')
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
-
-  // Client-side pagination state
-  const [visibleCount, setVisibleCount] = useState(VISIBLE_CHUNK_SIZE)
+  const [currentPage, setCurrentPage] = useState(1)
 
   const navigate = useNavigate()
   const { access, requireAccess, requestPaywall } = useOutletContext() || {}
@@ -69,9 +87,6 @@ export default function Catalog() {
     }
     await toggleFavorite(accessToken, slug);
   }, [accessToken, isFavorite, navigate, toggleFavorite]);
-
-  // Infinite scroll observer target
-  const loaderRef = useRef(null)
 
   useEffect(() => {
     const handle = setTimeout(() => {
@@ -171,40 +186,25 @@ export default function Catalog() {
     })
   }, [debouncedQuery, allItems, selectedCuisines, selectedMetro])
 
-  // Reset visible count when filters change
+  // Reset pagination when filters change
   useEffect(() => {
-    setVisibleCount(VISIBLE_CHUNK_SIZE)
+    setCurrentPage(1)
   }, [debouncedQuery, selectedCuisines, selectedMetro])
 
-  // Slice for display
-  const visibleItems = useMemo(() => {
-    return filteredItems.slice(0, visibleCount)
-  }, [filteredItems, visibleCount])
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE))
 
-  const hasMore = visibleCount < filteredItems.length
+  const visibleItems = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE
+    return filteredItems.slice(start, start + PAGE_SIZE)
+  }, [currentPage, filteredItems])
+
   const isInitialLoading = loading && !allItems.length
 
-  // Infinite Scroll Observer
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      const first = entries[0]
-      if (first.isIntersecting && hasMore) {
-        setVisibleCount(prev => prev + VISIBLE_CHUNK_SIZE)
-      }
-    }, {
-      root: null,
-      rootMargin: '200px',
-      threshold: 0.1
-    })
-
-    const el = loaderRef.current
-    if (el) observer.observe(el)
-
-    return () => {
-      if (el) observer.unobserve(el)
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages)
     }
-  }, [hasMore])
-
+  }, [currentPage, totalPages])
 
   // Options are memoized so the filter chips do not re-render unnecessarily.
   const cuisineOptions = useMemo(() => {
@@ -246,35 +246,82 @@ export default function Catalog() {
   }, [])
 
   const getInitials = useCallback((name = '') => {
-    return name
+    const trimmed = String(name || '').trim()
+    const numeric = trimmed.match(/^(\d+\s*(?:см|cm|°)?)/i)
+    if (numeric) return numeric[1].replace(/\s+/g, '').toUpperCase()
+
+    const firstWord = trimmed.split(/\s+/).find(Boolean) || ''
+    if (/^[A-Za-zА-Яа-яЁё]{2,4}$/.test(firstWord)) return firstWord.toUpperCase()
+
+    return trimmed
       .split(' ')
       .filter(Boolean)
-      .slice(0, 2)
+      .slice(0, 3)
       .map((part) => part[0])
       .join('')
       .toUpperCase() || 'RS'
   }, [])
 
+  const getMetroName = useCallback((restaurant) => {
+    return [
+      restaurant?.metro,
+      restaurant?.metro_name,
+      restaurant?.metroName,
+      restaurant?.metro_station,
+      restaurant?.metroStation,
+    ].find(Boolean) || ''
+  }, [])
+
+  const shownFrom = filteredItems.length ? ((currentPage - 1) * PAGE_SIZE) + 1 : 0
+  const shownTo = Math.min(currentPage * PAGE_SIZE, filteredItems.length)
+  const totalRestaurantCount = allItems.length || Number(rawData?.total ?? rawData?.count ?? 0)
+
   const handleSubmit = useCallback((event) => {
     event.preventDefault()
-    // Trigger reset via debounce (already handled) or immediate if needed, 
-    // but here we just ensure keyboard dismiss or similar
-  }, [])
+    setDebouncedQuery(query.trim())
+    setCurrentPage(1)
+  }, [query])
 
   return (
     <div className="catalog-page">
-      <section className="catalog-hero">
+      <header className="catalog-heading">
+        <div>
+          <h1 className="catalog-heading__title">Рестораны</h1>
+        </div>
+        <div className="catalog-heading__stat" aria-label={`${totalRestaurantCount} ресторанов`}>
+          <div className="catalog-heading__stat-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path d="M5 20h14" />
+              <path d="M7 20V9.8c0-.9.7-1.6 1.6-1.6h6.8c.9 0 1.6.7 1.6 1.6V20" />
+              <path d="M9.2 8.2a2.8 2.8 0 0 1 5.6 0" />
+              <path d="M10 12h4" />
+              <path d="M10 15h4" />
+              <path d="M12 4.5V3" />
+            </svg>
+          </div>
+          <div>
+            <strong>{totalRestaurantCount.toLocaleString('ru-RU')}</strong>
+            <span>{getRussianPluralWord(totalRestaurantCount, 'ресторан', 'ресторана', 'ресторанов')}</span>
+          </div>
+        </div>
+      </header>
+
+      <section className="catalog-hero" aria-label="Поиск и фильтры ресторанов">
         <div className="catalog-hero__inner">
           <form className="catalog-search" onSubmit={handleSubmit}>
             <label className="sr-only" htmlFor="restaurant-search">Поиск по ресторанам</label>
             <div className="catalog-search__field">
+              <svg className="catalog-search__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m16.2 16.2 4.1 4.1" />
+              </svg>
               <input
                 id="restaurant-search"
                 className="catalog-search__input"
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Поиск по названию ресторана"
+                placeholder="Найти ресторан"
                 autoComplete="off"
               />
               {query && (
@@ -288,36 +335,35 @@ export default function Catalog() {
                 </button>
               )}
             </div>
-            {/* Submit button is visually there but search is instant */}
-            <button type="submit" className="btn btn--primary catalog-search__submit">Искать</button>
+            <div className="catalog-filter">
+              <div className="catalog-filter__label">Кухня</div>
+              <div className="catalog-filter__control">
+                <CuisineFilter
+                  cuisines={cuisineOptions}
+                  selectedCuisines={selectedCuisines}
+                  onChange={setSelectedCuisines}
+                />
+              </div>
+            </div>
+            <div className="catalog-filter">
+              <div className="catalog-filter__label">Метро</div>
+              <div className="catalog-filter__select-wrap">
+                <select
+                  className="catalog-metro-select"
+                  value={selectedMetro}
+                  onChange={(e) => setSelectedMetro(e.target.value)}
+                  disabled={!metroOptions.length}
+                >
+                  <option value="">Любое метро</option>
+                  {metroOptions.map((metroName) => (
+                    <option key={metroName} value={metroName.toLowerCase()}>
+                      {metroName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </form>
-
-          <div className="catalog-filters">
-            <div className="catalog-filter">
-              <div className="catalog-filter__label">Фильтр кухни</div>
-              <CuisineFilter
-                cuisines={cuisineOptions}
-                selectedCuisines={selectedCuisines}
-                onChange={setSelectedCuisines}
-              />
-            </div>
-            <div className="catalog-filter">
-              <div className="catalog-filter__label">Фильтр по метро</div>
-              <select
-                className="catalog-metro-select"
-                value={selectedMetro}
-                onChange={(e) => setSelectedMetro(e.target.value)}
-                disabled={!metroOptions.length}
-              >
-                <option value="">Любое метро</option>
-                {metroOptions.map((metroName) => (
-                  <option key={metroName} value={metroName.toLowerCase()}>
-                    {metroName}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -342,8 +388,24 @@ export default function Catalog() {
               <li key={`${r.slug || r.name}-${i}`} className="catalog-card" role="group" aria-label={r?.name ?? 'Ресторан'}>
                 <div className="catalog-card__top">
                   <div className="catalog-card__identity">
-                    <div className="catalog-card__badge" aria-hidden="true">{getInitials(r?.name)}</div>
-                    <h3 className="catalog-card__title">{r.name}</h3>
+                    <div className={`catalog-card__badge catalog-card__badge--tone-${i % 4}`} aria-hidden="true">{getInitials(r?.name)}</div>
+                    <div className="catalog-card__copy">
+                      <h3 className="catalog-card__title">{r.name}</h3>
+                      <div className="catalog-card__meta">
+                        {r?.cuisine && (
+                          <span className="catalog-card__meta-item">
+                            <CuisineIcon />
+                            {r.cuisine}
+                          </span>
+                        )}
+                        {getMetroName(r) && (
+                          <span className="catalog-card__meta-item">
+                            <MetroIcon />
+                            {getMetroName(r)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                   <div className="catalog-card__top-actions">
                     {instagramUrl && (
@@ -389,10 +451,31 @@ export default function Catalog() {
           })}
         </ul>
 
-        {/* Sentinel for Infinite Scroll */}
-        <div ref={loaderRef} className="catalog-loader" style={{ height: '50px', display: 'flex', justifyContent: 'center', alignItems: 'center', opacity: 1, visibility: hasMore ? 'visible' : 'hidden' }}>
-          {hasMore && <span>Загрузка...</span>}
-        </div>
+        {!isInitialLoading && filteredItems.length > 0 && (
+          <nav className="catalog-pagination" aria-label="Навигация по ресторанам">
+            <button
+              type="button"
+              className="catalog-pagination__button"
+              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+              disabled={currentPage === 1}
+              aria-label="Предыдущая страница"
+            >
+              ‹
+            </button>
+            <span className="catalog-pagination__text">
+              Показано {shownFrom}–{shownTo} из {filteredItems.length} {getRussianPluralWord(filteredItems.length, 'ресторан', 'ресторана', 'ресторанов')}
+            </span>
+            <button
+              type="button"
+              className="catalog-pagination__button"
+              onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+              disabled={currentPage === totalPages}
+              aria-label="Следующая страница"
+            >
+              ›
+            </button>
+          </nav>
+        )}
       </section>
     </div>
   )
