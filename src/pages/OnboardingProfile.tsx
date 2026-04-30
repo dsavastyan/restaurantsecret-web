@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 import logoIcon from "@/assets/intro screens/RestSecret logo.png";
+import dayThemeBackground from "@/assets/intro screens/day_theme.png";
 import { completeOnboarding, fetchCurrentUser } from "@/lib/api";
 import { analytics } from "@/services/analytics";
 import { useAuth } from "@/store/auth";
@@ -9,6 +10,7 @@ import { useGoalsStore } from "@/store/goals";
 type IntroLocationState = {
   next?: unknown;
   from?: unknown;
+  profileName?: unknown;
 };
 
 type StepKey = "step-1" | "step-2";
@@ -26,6 +28,10 @@ function toInternalPath(value: unknown) {
   return typeof value === "string" && value.startsWith("/") ? value : null;
 }
 
+function toProfileName(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
 function parseNumberOrNull(value: string) {
   const normalized = value.replace(",", ".").trim();
   if (!normalized) return null;
@@ -38,6 +44,9 @@ export default function OnboardingProfilePage() {
   const location = useLocation();
   const { step: rawStep } = useParams();
   const accessToken = useAuth((state) => state.accessToken);
+  const previewParam = new URLSearchParams(location.search).get("preview");
+  const isDevPreview =
+    import.meta.env.DEV && typeof previewParam === "string" && previewParam.startsWith("1");
 
   const { data: goals, fetch, updateStats } = useGoalsStore((state) => ({
     data: state.data,
@@ -46,7 +55,9 @@ export default function OnboardingProfilePage() {
   }));
 
   const step = rawStep === "step-2" ? "step-2" : "step-1";
-  const [isOnboardingAllowed, setIsOnboardingAllowed] = useState<boolean | null>(null);
+  const [isOnboardingAllowed, setIsOnboardingAllowed] = useState<boolean | null>(
+    isDevPreview ? true : null
+  );
   const [profileName, setProfileName] = useState("");
   const [isSavingStep, setIsSavingStep] = useState(false);
   const [isSkipping, setIsSkipping] = useState(false);
@@ -73,12 +84,30 @@ export default function OnboardingProfilePage() {
     return resolved;
   }, [location.state]);
 
-  useEffect(() => {
-    if (!accessToken) return;
-    fetch(accessToken);
-  }, [accessToken, fetch]);
+  const previewProfileName = useMemo(() => {
+    const state = (location.state || {}) as IntroLocationState;
+    const fromState = toProfileName(state.profileName);
+    if (fromState) return fromState;
+    if (typeof window === "undefined") return "";
+    try {
+      return window.sessionStorage.getItem("rs_onboarding_preview_name")?.trim() || "";
+    } catch {
+      return "";
+    }
+  }, [location.state]);
 
   useEffect(() => {
+    if (isDevPreview) return;
+    if (!accessToken) return;
+    fetch(accessToken);
+  }, [accessToken, fetch, isDevPreview]);
+
+  useEffect(() => {
+    if (isDevPreview) {
+      setProfileName(previewProfileName);
+      setIsOnboardingAllowed(true);
+      return;
+    }
     if (!accessToken) return;
     let isCancelled = false;
 
@@ -101,7 +130,7 @@ export default function OnboardingProfilePage() {
     return () => {
       isCancelled = true;
     };
-  }, [accessToken]);
+  }, [accessToken, isDevPreview, previewProfileName]);
 
   useEffect(() => {
     if (!goals) {
@@ -125,12 +154,18 @@ export default function OnboardingProfilePage() {
     });
   }, [goals]);
 
-  if (!accessToken) {
+  if (!accessToken && !isDevPreview) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
   if (rawStep !== "step-1" && rawStep !== "step-2") {
-    return <Navigate to="/onboarding/profile/step-1" replace state={{ next: nextPath }} />;
+    return (
+      <Navigate
+        to={`/onboarding/profile/step-1${isDevPreview ? "?preview=1" : ""}`}
+        replace
+        state={{ next: nextPath }}
+      />
+    );
   }
 
   if (isOnboardingAllowed === null) {
@@ -168,6 +203,19 @@ export default function OnboardingProfilePage() {
   const handleContinue = async () => {
     if (isSavingStep || isSkipping) return;
 
+    if (isDevPreview) {
+      if (step === "step-1") {
+        navigate("/onboarding/profile/step-2?preview=1", {
+          replace: true,
+          state: { next: nextPath, profileName },
+        });
+        return;
+      }
+
+      navigate(nextPath, { replace: true });
+      return;
+    }
+
     try {
       setIsSavingStep(true);
       setError(null);
@@ -177,7 +225,7 @@ export default function OnboardingProfilePage() {
         analytics.track("onboarding_profile_step_completed", { step: 1 });
         navigate("/onboarding/profile/step-2", {
           replace: true,
-          state: { next: nextPath },
+          state: { next: nextPath, profileName },
         });
         return;
       }
@@ -196,6 +244,12 @@ export default function OnboardingProfilePage() {
 
   const handleSkip = () => {
     if (isSkipping) return;
+
+    if (isDevPreview) {
+      navigate(nextPath, { replace: true });
+      return;
+    }
+
     setIsSkipping(true);
     setError(null);
     (async () => {
@@ -215,16 +269,45 @@ export default function OnboardingProfilePage() {
 
   const handleBack = () => {
     if (step === "step-1") {
-      navigate("/onboarding/install-app", { replace: true, state: { next: nextPath } });
+      navigate(`/onboarding/welcome${isDevPreview ? "?preview=1" : ""}`, {
+        replace: true,
+        state: { next: nextPath, profileName },
+      });
       return;
     }
 
-    navigate("/onboarding/profile/step-1", { replace: true, state: { next: nextPath } });
+    navigate(`/onboarding/profile/step-1${isDevPreview ? "?preview=1" : ""}`, {
+      replace: true,
+      state: { next: nextPath, profileName },
+    });
   };
 
   return (
-    <section className="onboarding-flow" aria-labelledby="onboarding-profile-title">
+    <section
+      className="onboarding-flow"
+      aria-labelledby="onboarding-profile-title"
+      style={
+        {
+          "--intro-bg-mobile": `url(${dayThemeBackground})`,
+          "--intro-bg-desktop": `url(${dayThemeBackground})`,
+        } as CSSProperties
+      }
+    >
       <div className="onboarding-flow__inner">
+        <ol className="intro__progress onboarding-flow__progress" aria-label="Прогресс онбординга">
+          <li className="intro__progress-step intro__progress-step--active">
+            <span>1</span>
+          </li>
+          <li className="intro__progress-line intro__progress-line--active" aria-hidden="true" />
+          <li className={`intro__progress-step ${step === "step-1" ? "intro__progress-step--active" : ""}`}>
+            <span>2</span>
+          </li>
+          <li className={`intro__progress-line ${step === "step-2" ? "intro__progress-line--active" : ""}`} aria-hidden="true" />
+          <li className={`intro__progress-step ${step === "step-2" ? "intro__progress-step--active" : ""}`}>
+            <span>3</span>
+          </li>
+        </ol>
+
         <button
           type="button"
           className="onboarding-flow__back"
@@ -237,10 +320,21 @@ export default function OnboardingProfilePage() {
         <img src={logoIcon} alt="" className="onboarding-flow__logo" aria-hidden="true" />
 
         <h1 id="onboarding-profile-title" className="onboarding-flow__title">
-          Приятно познакомиться{profileName ? `, ${profileName}` : ""}
+          {step === "step-1" ? (
+            <span>Приятно познакомиться{profileName ? `, ${profileName}` : ""}</span>
+          ) : (
+            <>
+              <span>Почти</span>
+              <span>готово</span>
+            </>
+          )}
         </h1>
 
-        <p className="onboarding-flow__subtitle">Чтобы я был тебе более полезен, расскажи о себе</p>
+        <p className="onboarding-flow__subtitle">
+          {step === "step-1"
+            ? "Чтобы я был тебе полезнее, расскажи о себе"
+            : "Добавь параметры, для персонального расчета КБЖУ"}
+        </p>
 
         <form className="onboarding-flow__form" onSubmit={(event) => event.preventDefault()}>
           {step === "step-1" ? (
@@ -342,8 +436,27 @@ export default function OnboardingProfilePage() {
               onClick={handleContinue}
               disabled={isSavingStep || isSkipping}
             >
-              {isSavingStep ? "Сохраняем..." : "Продолжить"}
+              <span>{isSavingStep ? "Сохраняем..." : "Продолжить"}</span>
+              <svg className="onboarding-flow__action-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M5 12h14m-6-6 6 6-6 6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                />
+              </svg>
             </button>
+          </div>
+
+          <div className="intro__divider onboarding-flow__divider" aria-hidden="true">
+            <span />
+            <b>или</b>
+            <span />
+          </div>
+
+          <div className="onboarding-flow__actions onboarding-flow__actions--secondary">
             <button
               type="button"
               className="onboarding-flow__action onboarding-flow__action--secondary"
@@ -355,15 +468,6 @@ export default function OnboardingProfilePage() {
           </div>
         </form>
 
-        <p className="onboarding-flow__legal">
-          <a href="/legal" target="_blank" rel="noopener noreferrer">
-            Пользовательское соглашение
-          </a>
-          <span aria-hidden="true">•</span>
-          <a href="/privacy" target="_blank" rel="noopener noreferrer">
-            Политика конфиденциальности
-          </a>
-        </p>
       </div>
     </section>
   );
