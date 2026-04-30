@@ -231,7 +231,12 @@ function calculateRestaurantStats(restaurants) {
   }
 }
 
-export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSummaryHeader = true }) {
+export default function RestaurantMap({
+  themeMode = 'day',
+  onStatsChange,
+  showSummaryHeader = true,
+  openFullscreenSignal = 0,
+}) {
   const [restaurants, setRestaurants] = useState([])
   const [loading, setLoading] = useState(true)
   const [metroData, setMetroData] = useState({ lines: [], stations: [] })
@@ -357,6 +362,11 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
       document.removeEventListener('keydown', onKeyDown)
     }
   }, [isFullscreen])
+
+  useEffect(() => {
+    if (!openFullscreenSignal) return
+    setIsFullscreen(true)
+  }, [openFullscreenSignal])
 
   const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 

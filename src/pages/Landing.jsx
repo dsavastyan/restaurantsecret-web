@@ -121,6 +121,7 @@ export default function Landing() {
   const [submitting, setSubmitting] = useState(false)
   const [featuredRestaurants, setFeaturedRestaurants] = useState([])
   const [totalRestaurantsCount, setTotalRestaurantsCount] = useState(0)
+  const [openMapFullscreenSignal, setOpenMapFullscreenSignal] = useState(0)
   const suggestZoneRef = useRef(null)
 
   const resolvedStats = useMemo(() => ({
@@ -588,6 +589,7 @@ export default function Landing() {
             <RestaurantMap
               themeMode={themeMode}
               showSummaryHeader={false}
+              openFullscreenSignal={openMapFullscreenSignal}
               onStatsChange={(next) => {
                 setMapStats({ points: Number(next?.points ?? 0) })
               }}
@@ -596,7 +598,12 @@ export default function Landing() {
             <aside className="landing-warm__map-overlay">
               <h3>{pointsLabel} точек на карте Москвы</h3>
               <p>Посмотрите ближайшие рестораны и их меню.</p>
-              <Link to="/catalog">Открыть карту →</Link>
+              <button
+                type="button"
+                onClick={() => setOpenMapFullscreenSignal(Date.now())}
+              >
+                Открыть карту →
+              </button>
             </aside>
           </div>
         </section>
