@@ -13160,7 +13160,8 @@ html[data-rs-theme="night"] .onboarding-install__image {
   color: var(--warm-ink-soft);
 }
 
-.landing-warm__map-overlay a {
+.landing-warm__map-overlay a,
+.landing-warm__map-overlay button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -13170,6 +13171,9 @@ html[data-rs-theme="night"] .onboarding-install__image {
   border-radius: 12px;
   font-size: 14px;
   font-weight: 600;
+  border: 0;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .landing-warm__cta {
