@@ -1400,18 +1400,18 @@ body {
   padding: 0;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
+  gap: 12px;
 }
 
 .menu-card {
-  border: 2px solid #e1d4bd;
-  border-radius: 30px;
-  padding: 28px 40px 32px;
+  border: 1.5px solid #e1d4bd;
+  border-radius: 18px;
+  padding: 16px;
   background: #fffdfb;
-  box-shadow: 0 12px 26px rgba(119, 98, 61, 0.1);
+  box-shadow: 0 8px 18px rgba(119, 98, 61, 0.08);
   display: flex;
   flex-direction: column;
-  gap: 26px;
+  gap: 14px;
   color: #302b27;
   transition: transform .16s ease, box-shadow .2s ease, border-color .2s ease;
 }
@@ -1422,14 +1422,14 @@ body {
 
 .menu-card.is-interactive:hover {
   border-color: #d6c6aa;
-  box-shadow: 0 16px 34px rgba(119, 98, 61, 0.14);
+  box-shadow: 0 12px 24px rgba(119, 98, 61, 0.12);
   transform: translateY(-1px);
 }
 
 .menu-card__top {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 14px;
   min-height: 100%;
 }
 
@@ -1441,11 +1441,11 @@ body {
 }
 
 .menu-card__title {
-  margin: 8px 0 0;
+  margin: 5px 0 0;
   font-family: "DM Serif Display", Georgia, serif;
-  font-size: clamp(30px, 4.5vw, 44px);
+  font-size: 27px;
   font-weight: 400;
-  line-height: 1.03;
+  line-height: 1.06;
   color: #2f2b28;
   letter-spacing: 0;
 }
@@ -1456,22 +1456,22 @@ body {
 
 .menu-card__restaurant {
   color: #766f62;
-  font-size: 24px;
+  font-size: 16px;
   font-weight: 600;
   line-height: 1.1;
 }
 
 .menu-card__price {
-  margin-top: 8px;
+  margin-top: 5px;
   font-weight: 700;
   color: #847866;
-  font-size: 16px;
+  font-size: 13px;
 }
 
 .menu-card__nutrition {
   display: grid;
-  grid-template-columns: 176px minmax(0, 1fr);
-  gap: 28px;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 12px;
   align-items: center;
 }
 
@@ -1479,7 +1479,7 @@ body {
   --protein-color: #8ca16d;
   --fat-color: #f3a253;
   --carbs-color: #dd755c;
-  width: 176px;
+  width: 84px;
   aspect-ratio: 1;
   border-radius: 50%;
   display: grid;
@@ -1506,7 +1506,7 @@ body {
 .menu-card__kcal-core strong {
   display: block;
   color: #302b27;
-  font-size: 34px;
+  font-size: 22px;
   font-weight: 800;
   line-height: .9;
 }
@@ -1514,7 +1514,7 @@ body {
 .menu-card__kcal-core span {
   display: block;
   color: #766f62;
-  font-size: 20px;
+  font-size: 12px;
   font-weight: 800;
   line-height: 1;
   text-transform: uppercase;
@@ -1526,7 +1526,7 @@ body {
 
 .menu-card__macro-bar {
   width: 100%;
-  height: 16px;
+  height: 10px;
   border-radius: 999px;
   overflow: hidden;
   display: flex;
@@ -1554,19 +1554,19 @@ body {
 }
 
 .menu-card__macro-list {
-  margin-top: 16px;
+  margin-top: 10px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 6px;
   color: #69645e;
-  font-size: 22px;
+  font-size: 14px;
   font-weight: 700;
 }
 
 .menu-card__macro-item {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
   min-width: 0;
   white-space: nowrap;
 }
@@ -1576,8 +1576,8 @@ body {
 }
 
 .menu-card__macro-dot {
-  width: 18px;
-  height: 18px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   flex: 0 0 auto;
 }
@@ -1587,24 +1587,24 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  border-top: 2px dashed #dfcfb5;
-  padding-top: 30px;
+  gap: 10px;
+  border-top: 1.5px dashed #dfcfb5;
+  padding-top: 13px;
 }
 
 .menu-card__diary-btn {
-  min-height: 68px;
-  border: 2px solid #302b27;
+  min-height: 42px;
+  border: 1.5px solid #302b27;
   border-radius: 999px;
   background: transparent;
   color: #302b27;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 0 28px;
+  gap: 6px;
+  padding: 0 16px;
   font: inherit;
-  font-size: 26px;
+  font-size: 16px;
   font-weight: 800;
   cursor: pointer;
   transition: transform .08s ease, background .2s ease, color .2s ease;
@@ -1690,17 +1690,14 @@ body {
   }
 
   .menu-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
   }
+}
 
-  .menu-card {
-    padding: 28px 40px 32px;
-    gap: 26px;
-  }
-
-  .menu-card__title {
-    font-size: clamp(34px, 3.8vw, 44px);
+@media (min-width: 700px) and (max-width: 959px) {
+  .menu-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -7377,8 +7374,8 @@ body:has(.account--sheet-open) {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
+  width: 34px;
+  height: 34px;
   transition: color 0.2s ease, transform 0.08s ease;
 }
 
@@ -7392,8 +7389,8 @@ body:has(.account--sheet-open) {
 }
 
 .menu-card__fav-btn svg {
-  width: 42px;
-  height: 42px;
+  width: 34px;
+  height: 34px;
 }
 
 /* Favorites Page */
@@ -9828,61 +9825,61 @@ body:has(.account--sheet-open) {
   }
 
   .menu-card {
-    padding: 22px;
-    border-radius: 24px;
-    gap: 22px;
+    padding: 14px;
+    border-radius: 18px;
+    gap: 13px;
   }
 
   .menu-card__top {
-    gap: 22px;
+    gap: 13px;
   }
 
   .menu-card__title {
-    font-size: 32px;
-    line-height: 1.05;
+    font-size: 25px;
+    line-height: 1.07;
   }
 
   .menu-card__restaurant {
-    font-size: 19px;
+    font-size: 15px;
   }
 
   .menu-card__nutrition {
-    grid-template-columns: 112px minmax(0, 1fr);
-    gap: 16px;
+    grid-template-columns: 78px minmax(0, 1fr);
+    gap: 10px;
   }
 
   .menu-card__kcal-ring {
-    width: 112px;
+    width: 78px;
   }
 
   .menu-card__kcal-core strong {
-    font-size: 25px;
+    font-size: 20px;
   }
 
   .menu-card__kcal-core span {
-    font-size: 14px;
+    font-size: 11px;
   }
 
   .menu-card__macro-bar {
-    height: 12px;
+    height: 9px;
   }
 
   .menu-card__macro-list {
-    grid-template-columns: 1fr;
-    gap: 7px;
-    font-size: 17px;
-    margin-top: 12px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px;
+    font-size: 13px;
+    margin-top: 8px;
   }
 
   .menu-card__macro-dot {
-    width: 14px;
-    height: 14px;
+    width: 9px;
+    height: 9px;
   }
 
   .menu-card__footer {
-    gap: 12px;
+    gap: 10px;
     align-items: center;
-    padding-top: 22px;
+    padding-top: 12px;
   }
 
   .menu-card__price {
@@ -9890,9 +9887,9 @@ body:has(.account--sheet-open) {
   }
 
   .menu-card__diary-btn {
-    min-height: 52px;
-    padding: 0 22px;
-    font-size: 20px;
+    min-height: 40px;
+    padding: 0 15px;
+    font-size: 15px;
   }
 
   .menu-hero__badge {
@@ -9991,27 +9988,27 @@ body:has(.account--sheet-open) {
 
 @media (max-width: 420px) {
   .menu-card {
-    padding: 18px;
-    border-radius: 22px;
+    padding: 13px;
+    border-radius: 16px;
   }
 
   .menu-card__title {
-    font-size: 28px;
+    font-size: 23px;
   }
 
   .menu-card__nutrition {
-    grid-template-columns: 96px minmax(0, 1fr);
-    gap: 12px;
+    grid-template-columns: 74px minmax(0, 1fr);
+    gap: 9px;
   }
 
   .menu-card__kcal-ring {
-    width: 96px;
+    width: 74px;
   }
 
   .menu-card__diary-btn {
-    min-height: 48px;
-    padding: 0 18px;
-    font-size: 18px;
+    min-height: 38px;
+    padding: 0 14px;
+    font-size: 14px;
   }
 }
 
