@@ -228,6 +228,7 @@ export default function AppShell() {
   const isOnboardingPage = location.pathname.startsWith('/onboarding')
   const isAccountPage = location.pathname.startsWith('/account')
   const isImmersivePage = isLoginPage || isOnboardingPage || isAccountPage
+  const isRestaurantMenuPage = /^\/restaurants\/[^/]+\/menu\/?$/.test(location.pathname)
 
   useEffect(() => {
     if (!accessToken || isOnboardingPage || isLoginPage) return
@@ -322,7 +323,7 @@ export default function AppShell() {
             <Outlet context={outletContext} />
           </div>
         ) : (
-          <div className={showPaywall ? 'container locked' : 'container'}>
+          <div className={`${showPaywall ? 'container locked' : 'container'}${isRestaurantMenuPage ? ' container--menu' : ''}`}>
             {showGlobalSearch && (
               <div className="app-shell__search">
                 <div className="app-shell__search-inner">
