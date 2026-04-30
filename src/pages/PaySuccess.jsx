@@ -90,10 +90,13 @@ export default function PaySuccess() {
         setExpiresAt(detail.expiresAt)
         setMessage('Доступ подтверждён.')
 
-        // Analytics
+        // Analytics — read plan stored before payment redirect
         import('@/services/analytics').then(({ analytics }) => {
-          analytics.track("subscription_activated", { plan: "unknown_from_success" });
-          analytics.track("payment_success", { plan: "unknown_from_success" });
+          const plan = sessionStorage.getItem("rs_checkout_plan") || "unknown";
+          sessionStorage.removeItem("rs_checkout_plan");
+          analytics.track("subscription_activated", { plan });
+          analytics.track("payment_success", { plan });
+          try { ym(108992733, 'reachGoal', 'payment_success'); } catch { /* ym not loaded */ }
         });
       } else {
         setStatus('inactive')
