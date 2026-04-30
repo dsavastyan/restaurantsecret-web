@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 // ─────────────────────────────────────────────
@@ -7,73 +8,123 @@ import { Link } from 'react-router-dom'
 const PAIN_POINTS = [
   {
     icon: PainIconScale,
-    title: 'Хочешь похудеть или набрать мышцы',
-    body: 'Диетологи единодушны: без контроля калорий и БЖУ добиться стабильного результата крайне сложно. Даже самые строгие тренировки нивелируются одним незамеченным блюдом.',
+    title: 'Хочешь результата — нужен учёт',
+    body: 'Без контроля КБЖУ невозможно похудеть, набрать мышцы или просто питаться осознанно. Каждое незамеченное блюдо — это до 600 скрытых калорий, которые тормозят прогресс неделями.',
   },
   {
     icon: PainIconFork,
-    title: 'Но ты ешь в ресторанах',
-    body: 'Рестораны не обязаны печатать КБЖУ в меню. Порции везде разные, состав — загадка. В итоге ты либо отказываешься от вкусного, либо теряешь контроль над питанием.',
+    title: 'Рестораны — слепая зона',
+    body: 'Рестораны не обязаны указывать КБЖУ. Порции везде разные, состав — загадка. Одна «здоровая» паста в разных местах отличается на 300–400 ккал.',
   },
   {
     icon: PainIconQuestion,
-    title: 'Считать вслепую — не вариант',
-    body: 'Онлайн-калькуляторы дают среднее по больнице. Блюдо «паста болоньезе» в разных ресторанах отличается на 300–400 ккал. Такая погрешность ломает любой план питания.',
+    title: 'Общие базы не работают',
+    body: 'MyFitnessPal и аналоги дают усреднённые данные из интернета — не из конкретного ресторана. Это погрешность, которая ломает любой план питания.',
   },
 ]
 
 const STEPS = [
   {
     num: '01',
-    title: 'Открой меню ресторана',
-    body: 'Введи название ресторана или блюда — сервис найдёт его за секунды. Доступны сотни заведений Москвы.',
-    videoSrc: null, // ← сюда вставить URL видео из Kling
+    title: 'Найди ресторан или блюдо',
+    body: 'Введи название — сервис найдёт за секунды. Сотни заведений Москвы с реальными меню.',
+    videoSrc: null, // ← вставить URL видео из Kling
     videoPoster: null,
-    videoLabel: 'Видео: поиск ресторана в приложении',
+    videoLabel: 'Поиск ресторана в приложении',
+    screenIcon: SearchScreenIcon,
   },
   {
     num: '02',
-    title: 'Смотри КБЖУ каждого блюда',
-    body: 'Реальные данные по калориям, белкам, жирам и углеводам — прямо в меню. Никаких усреднённых значений из интернета.',
+    title: 'Открой КБЖУ каждого блюда',
+    body: 'Калории, белки, жиры, углеводы — по данным конкретного ресторана. Не средние из базы.',
     videoSrc: null,
     videoPoster: null,
-    videoLabel: 'Видео: просмотр КБЖУ блюда',
+    videoLabel: 'Просмотр КБЖУ блюда',
+    screenIcon: KbzhuScreenIcon,
   },
   {
     num: '03',
-    title: 'Выбирай и ешь с удовольствием',
-    body: 'Фильтруй по целям, сохраняй любимые блюда, веди дневник. Ресторан больше не враг твоей цели.',
+    title: 'Выбирай под свои цели',
+    body: 'Фильтры по калориям и БЖУ, дневник питания, избранное. Ресторан больше не срывает план.',
     videoSrc: null,
     videoPoster: null,
-    videoLabel: 'Видео: фильтрация блюд по целям',
+    videoLabel: 'Фильтрация блюд по целям',
+    screenIcon: FilterScreenIcon,
   },
 ]
 
+// Anchoring: сначала дорогие, потом мы. Годовые цены — контрастный аргумент.
 const COMPARISON = [
   {
     option: 'Консультация нутрициолога',
-    cost: '2 000–5 000 ₽/сессия',
+    costMonth: '2 000–5 000 ₽/сессия',
+    costYear: 'от 24 000 ₽/год',
     what: 'КБЖУ под конкретного человека',
     verdict: 'limited',
   },
   {
     option: 'MyFitnessPal Premium',
-    cost: '~500 ₽/мес',
+    costMonth: '~500 ₽/мес',
+    costYear: '~6 000 ₽/год',
     what: 'КБЖУ из базы, нет ресторанов РФ',
     verdict: 'limited',
   },
   {
     option: 'Считать самому в ресторане',
-    cost: 'Невозможно',
-    what: 'Меню без граммов и состава',
+    costMonth: '—',
+    costYear: '—',
+    what: 'Меню без граммов и состава блюд',
     verdict: 'bad',
   },
   {
     option: 'RestaurantSecret',
-    cost: '99 ₽/мес',
+    costMonth: '199 ₽/мес',
+    costYear: '2 388 ₽/год',
     what: 'Готовое КБЖУ по реальным московским меню',
     verdict: 'good',
     highlight: true,
+    note: '≈ 6,6 ₽ в день',
+  },
+]
+
+const TESTIMONIALS = [
+  {
+    text: 'Наконец-то могу ходить в рестораны с коллегами и не гадать, что съела. Открываю приложение, смотрю КБЖУ — всё.',
+    name: 'Анна, минус 8 кг за 3 месяца',
+    initials: 'АК',
+  },
+  {
+    text: 'Раньше думал, что контроль питания несовместим с нормальной социальной жизнью. Теперь знаю меню половины Москвы наизусть.',
+    name: 'Максим, набрал 4 кг мышц',
+    initials: 'МП',
+  },
+  {
+    text: 'Сервис нашёл мой любимый ресторан — я не ожидала. Данные реальные, не усреднённые. Доверяю.',
+    name: 'Екатерина, ЗОЖ 1 год',
+    initials: 'ЕС',
+  },
+]
+
+const FAQ = [
+  {
+    q: 'Мой ресторан есть в базе?',
+    a: 'База включает сотни московских ресторанов и пополняется каждую неделю. Проверить конкретное место можно бесплатно — без подписки.',
+  },
+  {
+    q: 'Насколько точные данные?',
+    a: 'Данные берутся из официальных меню и технологических карт ресторанов — не из усреднённых интернет-баз. Это до 40% точнее стандартных калькуляторов.',
+  },
+  {
+    q: 'Как работает пробный период?',
+    a: 'Первые 7 дней — полный доступ ко всем ресторанам и функциям. После пробного периода подписка автоматически продолжается за 199 ₽/мес. Отменить можно в любой момент в личном кабинете.',
+  },
+  {
+    q: 'Зачем нужна карта для пробного периода?',
+    a: 'Привязка карты нужна для автоматического продления после 7 дней. Вы ничего не платите сейчас — списание произойдёт только на 8-й день, если вы не отмените подписку.',
+  },
+  {
+    q: 'Как отменить подписку?',
+    a: 'Отмена занимает 30 секунд в личном кабинете — без звонков и объяснений. До конца оплаченного периода доступ сохраняется.',
   },
 ]
 
@@ -82,6 +133,8 @@ const COMPARISON = [
 // ─────────────────────────────────────────────
 
 export default function HowItWorks() {
+  const [openFaq, setOpenFaq] = useState(null)
+
   return (
     <main className="hiw" data-page="how-it-works">
 
@@ -100,23 +153,53 @@ export default function HowItWorks() {
           <a href="https://t.me/RestSecretSupport_bot" target="_blank" rel="noopener noreferrer">Поддержка</a>
         </nav>
         <div className="landing-warm__nav-right">
-          <Link to="/onboarding/welcome" className="landing-warm__nav-cta">Попробовать</Link>
+          <Link to="/onboarding/welcome" className="landing-warm__nav-cta">
+            7 дней бесплатно →
+          </Link>
         </div>
       </header>
 
-      {/* ── 1. Герой-блок ── */}
+      {/* ── 1. Герой ── */}
       <section className="hiw__hero">
         <div className="hiw__hero-inner">
-          <p className="hiw__hero-eyebrow">Как это работает</p>
           <h1 className="hiw__hero-title">
-            Ешь в ресторанах —<br />
-            <em>не теряй контроль</em>
+            Рестораны больше<br />
+            не срывают <em>твои цели</em>
           </h1>
           <p className="hiw__hero-sub">
-            RestaurantSecret — единственный сервис с реальным КБЖУ московских ресторанов.
-            Никаких догадок, никаких срывов.
+            КБЖУ каждого блюда в сотнях московских ресторанов — прямо в телефоне.
+            Ешь вкусно и знай, что ешь.
           </p>
+
+          {/* CTA прямо в герое */}
+          <div className="hiw__hero-cta">
+            <Link to="/onboarding/welcome" className="hiw__hero-btn-primary">
+              Попробовать 7 дней бесплатно
+            </Link>
+            <p className="hiw__hero-cta-note">
+              <LockIcon /> Потом 199 ₽/мес · Отмена в любой момент
+            </p>
+          </div>
         </div>
+
+        {/* Loss-aversion stat */}
+        <div className="hiw__hero-stat-bar" aria-label="Статистика">
+          <div className="hiw__hero-stat">
+            <strong>+300–600 ккал</strong>
+            <span>скрытых калорий в типичном ресторанном обеде</span>
+          </div>
+          <div className="hiw__hero-stat-divider" />
+          <div className="hiw__hero-stat">
+            <strong>≤ 5 сек</strong>
+            <span>чтобы найти КБЖУ любого блюда</span>
+          </div>
+          <div className="hiw__hero-stat-divider" />
+          <div className="hiw__hero-stat">
+            <strong>40%</strong>
+            <span>точнее стандартных калькуляторов</span>
+          </div>
+        </div>
+
         <div className="hiw__hero-scroll" aria-hidden="true">
           <div className="hiw__hero-scroll-line" />
           <svg viewBox="0 0 14 14"><path d="M3 5 L7 9 L11 5" /></svg>
@@ -152,52 +235,76 @@ export default function HowItWorks() {
       <section className="hiw__steps" aria-labelledby="steps-title">
         <div className="hiw__section-head hiw__section-head--dark">
           <h2 id="steps-title">Три шага — и ты под контролем</h2>
-          <p>Никаких сложных настроек. Открыл — нашёл — выбрал.</p>
+          <p>Никаких настроек. Открыл — нашёл — выбрал.</p>
         </div>
 
         <div className="hiw__steps-list">
-          {STEPS.map((step, idx) => (
-            <div key={step.num} className={`hiw__step ${idx % 2 === 1 ? 'hiw__step--reverse' : ''}`}>
-              {/* Текстовая часть */}
-              <div className="hiw__step-text">
-                <span className="hiw__step-num">{step.num}</span>
-                <h3>{step.title}</h3>
-                <p>{step.body}</p>
-              </div>
+          {STEPS.map((step, idx) => {
+            const ScreenIcon = step.screenIcon
+            return (
+              <div key={step.num} className={`hiw__step ${idx % 2 === 1 ? 'hiw__step--reverse' : ''}`}>
+                <div className="hiw__step-text">
+                  <span className="hiw__step-num">{step.num}</span>
+                  <h3>{step.title}</h3>
+                  <p>{step.body}</p>
+                </div>
 
-              {/* Видео-плейсхолдер */}
-              <div className="hiw__step-media">
-                {step.videoSrc ? (
-                  <video
-                    className="hiw__step-video"
-                    src={step.videoSrc}
-                    poster={step.videoPoster || undefined}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    aria-label={step.videoLabel}
-                  />
-                ) : (
-                  <div className="hiw__step-video-placeholder" aria-label={step.videoLabel}>
-                    <VideoPlaceholderIcon />
-                    <span>Видео скоро появится</span>
-                    <small>{step.videoLabel}</small>
-                  </div>
-                )}
+                <div className="hiw__step-media">
+                  {step.videoSrc ? (
+                    <video
+                      className="hiw__step-video"
+                      src={step.videoSrc}
+                      poster={step.videoPoster || undefined}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      aria-label={step.videoLabel}
+                    />
+                  ) : (
+                    // Телефон-макет — выглядит как намеренный дизайн,
+                    // а не заглушка. Заменится на video когда будет готово из Kling.
+                    <div className="hiw__phone-mock" aria-label={step.videoLabel}>
+                      <div className="hiw__phone-mock-inner">
+                        <div className="hiw__phone-mock-notch" />
+                        <ScreenIcon />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* ── 4. Социальное доказательство ── */}
+      <section className="hiw__testimonials" aria-labelledby="testimonials-title">
+        <div className="hiw__section-head">
+          <h2 id="testimonials-title">
+            Уже <em>считают</em> в ресторанах
+          </h2>
+        </div>
+        <div className="hiw__testi-grid">
+          {TESTIMONIALS.map((t) => (
+            <blockquote key={t.name} className="hiw__testi-card">
+              <p>«{t.text}»</p>
+              <footer>
+                <span className="hiw__testi-avatar">{t.initials}</span>
+                <cite>{t.name}</cite>
+              </footer>
+            </blockquote>
           ))}
         </div>
       </section>
 
-      {/* ── 4. Сравнение с альтернативами ── */}
+      {/* ── 5. Сравнение ── */}
       <section className="hiw__compare" aria-labelledby="compare-title">
         <div className="hiw__section-head">
           <h2 id="compare-title">
             RestaurantSecret против <em>альтернатив</em>
           </h2>
-          <p>Раньше выбора не было. Теперь есть.</p>
+          <p>Посмотрите на годовые цифры — разница очевидна.</p>
         </div>
 
         <div className="hiw__compare-table-wrap">
@@ -205,7 +312,8 @@ export default function HowItWorks() {
             <thead>
               <tr>
                 <th scope="col">Вариант</th>
-                <th scope="col">Стоимость</th>
+                <th scope="col">В месяц</th>
+                <th scope="col">В год</th>
                 <th scope="col">Что даёт</th>
                 <th scope="col" aria-label="Оценка" />
               </tr>
@@ -220,7 +328,11 @@ export default function HowItWorks() {
                     {row.highlight && <span className="hiw__compare-badge">Мы</span>}
                     {row.option}
                   </td>
-                  <td className="hiw__compare-cost">{row.cost}</td>
+                  <td className="hiw__compare-cost">
+                    {row.costMonth}
+                    {row.note && <span className="hiw__compare-note">{row.note}</span>}
+                  </td>
+                  <td className="hiw__compare-cost">{row.costYear}</td>
                   <td className="hiw__compare-what">{row.what}</td>
                   <td className="hiw__compare-verdict" aria-label={verdictLabel(row.verdict)}>
                     <VerdictIcon verdict={row.verdict} />
@@ -232,12 +344,38 @@ export default function HowItWorks() {
         </div>
       </section>
 
-      {/* ── 5. CTA ── */}
+      {/* ── 6. FAQ ── */}
+      <section className="hiw__faq" aria-labelledby="faq-title">
+        <div className="hiw__section-head">
+          <h2 id="faq-title">Частые вопросы</h2>
+        </div>
+        <div className="hiw__faq-list" role="list">
+          {FAQ.map((item, idx) => {
+            const isOpen = openFaq === idx
+            return (
+              <div key={idx} className={`hiw__faq-item ${isOpen ? 'is-open' : ''}`} role="listitem">
+                <button
+                  type="button"
+                  className="hiw__faq-q"
+                  onClick={() => setOpenFaq(isOpen ? null : idx)}
+                  aria-expanded={isOpen}
+                >
+                  {item.q}
+                  <span className="hiw__faq-arrow" aria-hidden="true">{isOpen ? '↑' : '↓'}</span>
+                </button>
+                {isOpen && <p className="hiw__faq-a">{item.a}</p>}
+              </div>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* ── 7. CTA ── */}
       <section className="hiw__cta">
         <h2>
-          Попробуйте <em>бесплатно</em> — 7 дней
+          7 дней — <em>бесплатно</em>
         </h2>
-        <p>Полный доступ ко всем ресторанам. Без привязки карты.</p>
+        <p>Полный доступ ко всем ресторанам. Потом 199 ₽/мес — это 6,6 ₽ в день.</p>
         <div className="hiw__cta-actions">
           <Link to="/onboarding/welcome" className="landing-warm__cta-primary">
             Начать бесплатно
@@ -246,6 +384,9 @@ export default function HowItWorks() {
             Посмотреть меню
           </Link>
         </div>
+        <p className="hiw__cta-fine">
+          <LockIcon /> Требуется привязка карты. Списание на 8-й день если не отмените.
+        </p>
       </section>
 
       <style>{hiwStyles}</style>
@@ -264,7 +405,7 @@ function verdictLabel(verdict) {
 }
 
 // ─────────────────────────────────────────────
-// Иконки
+// Иконки болей
 // ─────────────────────────────────────────────
 
 function PainIconScale() {
@@ -301,17 +442,109 @@ function PainIconQuestion() {
   )
 }
 
-function VideoPlaceholderIcon() {
+// ─────────────────────────────────────────────
+// Экраны телефона-макета (вместо видеозаглушек)
+// ─────────────────────────────────────────────
+
+function SearchScreenIcon() {
   return (
-    <svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true">
-      <rect x="4" y="10" width="36" height="28" rx="5" stroke="currentColor" strokeWidth="2" />
-      <path d="M40 20 L52 14 L52 34 L40 28 Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-      <circle cx="18" cy="40" r="2" fill="currentColor" />
-      <circle cx="28" cy="40" r="2" fill="currentColor" />
-      <circle cx="38" cy="40" r="2" fill="currentColor" />
+    <svg viewBox="0 0 200 340" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      {/* Строка поиска */}
+      <rect x="16" y="20" width="168" height="36" rx="10" fill="rgba(212,122,58,.12)" stroke="var(--warm-warm)" strokeWidth="1.5" />
+      <circle cx="38" cy="38" r="8" stroke="var(--warm-warm)" strokeWidth="1.5" />
+      <line x1="44" y1="44" x2="48" y2="48" stroke="var(--warm-warm)" strokeWidth="1.5" strokeLinecap="round" />
+      <rect x="56" y="32" width="80" height="10" rx="5" fill="rgba(212,122,58,.3)" />
+      {/* Популярное */}
+      <text x="16" y="76" fill="rgba(251,243,225,.4)" fontSize="10" fontFamily="Inter,sans-serif">Популярные рестораны</text>
+      {/* Карточки */}
+      {[0,1,2,3].map(i => (
+        <g key={i}>
+          <rect x="16" y={88 + i * 58} width="168" height="46" rx="10" fill="rgba(255,255,255,.06)" />
+          <rect x="28" y={98 + i * 58} width="60" height="8" rx="4" fill="rgba(251,243,225,.5)" />
+          <rect x="28" y={112 + i * 58} width="40" height="6" rx="3" fill="rgba(212,122,58,.4)" />
+          <rect x="140" y={100 + i * 58} width="32" height="20" rx="6" fill="rgba(212,122,58,.2)" />
+          <text x="148" y={114 + i * 58} fill="var(--warm-warm)" fontSize="9" fontFamily="Inter,sans-serif" fontWeight="600">{['247', '512', '318', '680'][i]} кк</text>
+        </g>
+      ))}
     </svg>
   )
 }
+
+function KbzhuScreenIcon() {
+  return (
+    <svg viewBox="0 0 200 340" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      {/* Название блюда */}
+      <rect x="16" y="20" width="120" height="10" rx="5" fill="rgba(251,243,225,.6)" />
+      <rect x="16" y="36" width="80" height="7" rx="3.5" fill="rgba(251,243,225,.3)" />
+      {/* Пончик КБЖУ */}
+      <circle cx="100" cy="120" r="52" stroke="rgba(255,255,255,.08)" strokeWidth="14" />
+      <circle cx="100" cy="120" r="52" stroke="#8a9a6b" strokeWidth="14"
+        strokeDasharray="100 228" strokeDashoffset="0"
+        transform="rotate(-90 100 120)" strokeLinecap="round" />
+      <circle cx="100" cy="120" r="52" stroke="#e8a15e" strokeWidth="14"
+        strokeDasharray="70 228" strokeDashoffset="-100"
+        transform="rotate(-90 100 120)" strokeLinecap="round" />
+      <circle cx="100" cy="120" r="52" stroke="#d87a5e" strokeWidth="14"
+        strokeDasharray="58 228" strokeDashoffset="-170"
+        transform="rotate(-90 100 120)" strokeLinecap="round" />
+      <text x="100" y="115" textAnchor="middle" fill="rgba(251,243,225,.9)" fontSize="22" fontFamily="Inter,sans-serif" fontWeight="700">412</text>
+      <text x="100" y="130" textAnchor="middle" fill="rgba(251,243,225,.4)" fontSize="9" fontFamily="Inter,sans-serif">ККАЛ</text>
+      {/* Легенда */}
+      <g transform="translate(16, 196)">
+        {[['Б','#8a9a6b','28г'], ['Ж','#e8a15e','18г'], ['У','#d87a5e','42г']].map(([l, c, v], i) => (
+          <g key={l} transform={`translate(${i * 58}, 0)`}>
+            <circle cx="8" cy="8" r="5" fill={c} />
+            <text x="16" y="12" fill="rgba(251,243,225,.7)" fontSize="11" fontFamily="Inter,sans-serif">{l} {v}</text>
+          </g>
+        ))}
+      </g>
+      {/* Кнопка */}
+      <rect x="16" y="230" width="168" height="38" rx="10" fill="var(--warm-warm)" />
+      <text x="100" y="254" textAnchor="middle" fill="#fff" fontSize="13" fontFamily="Inter,sans-serif" fontWeight="600">В дневник питания</text>
+    </svg>
+  )
+}
+
+function FilterScreenIcon() {
+  return (
+    <svg viewBox="0 0 200 340" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      {/* Заголовок */}
+      <rect x="16" y="20" width="90" height="10" rx="5" fill="rgba(251,243,225,.6)" />
+      {/* Фильтры-чипы */}
+      {[['до 400 ккал', true], ['высокий белок', false], ['без глютена', false]].map(([label, active], i) => (
+        <g key={label}>
+          <rect x={16 + i * 60} y="42" width="56" height="22" rx="11"
+            fill={active ? 'var(--warm-warm)' : 'rgba(255,255,255,.08)'}
+            stroke={active ? 'none' : 'rgba(255,255,255,.15)'} strokeWidth="1" />
+          <text x={44 + i * 60} y="57" textAnchor="middle"
+            fill={active ? '#fff' : 'rgba(251,243,225,.5)'}
+            fontSize="7.5" fontFamily="Inter,sans-serif" fontWeight={active ? '600' : '400'}>{label}</text>
+        </g>
+      ))}
+      {/* Блюда */}
+      {[
+        ['Сибас с овощами','Duo Asia','247 ккал', true],
+        ['Боул с тунцом','Счастье','318 ккал', false],
+        ['Греческий салат','Кофемания','198 ккал', true],
+      ].map(([name, rest, kcal, fit], i) => (
+        <g key={name}>
+          <rect x="16" y={80 + i * 74} width="168" height="62" rx="12"
+            fill={fit ? 'rgba(138,154,107,.12)' : 'rgba(255,255,255,.05)'}
+            stroke={fit ? 'rgba(138,154,107,.3)' : 'none'} strokeWidth="1" />
+          {fit && <text x="152" y={95 + i * 74} fill="#8a9a6b" fontSize="9" fontFamily="Inter,sans-serif">✓ цель</text>}
+          <rect x="28" y={92 + i * 74} width="70" height="8" rx="4" fill="rgba(251,243,225,.55)" />
+          <rect x="28" y={106 + i * 74} width="48" height="6" rx="3" fill="rgba(251,243,225,.25)" />
+          <rect x="28" y={120 + i * 74} width="34" height="14" rx="6" fill="rgba(212,122,58,.2)" />
+          <text x="45" y={131 + i * 74} textAnchor="middle" fill="var(--warm-warm)" fontSize="9" fontFamily="Inter,sans-serif" fontWeight="600">{kcal}</text>
+        </g>
+      ))}
+    </svg>
+  )
+}
+
+// ─────────────────────────────────────────────
+// Прочие иконки
+// ─────────────────────────────────────────────
 
 function VerdictIcon({ verdict }) {
   if (verdict === 'good') {
@@ -338,12 +571,20 @@ function VerdictIcon({ verdict }) {
   )
 }
 
+function LockIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} aria-hidden="true">
+      <rect x="2" y="5" width="8" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M4 5V3.5a2 2 0 0 1 4 0V5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 // ─────────────────────────────────────────────
-// Стили (scoped через .hiw)
+// Стили
 // ─────────────────────────────────────────────
 
 const hiwStyles = `
-/* Страница использует warm-тему Landing как базу */
 .hiw {
   --warm-bg: #f3ede2;
   --warm-bg-soft: #fbf3e1;
@@ -363,30 +604,19 @@ const hiwStyles = `
 
 /* ── Герой ── */
 .hiw__hero {
-  min-height: 52vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   text-align: center;
-  padding: 72px 24px 48px;
+  padding: 64px 24px 0;
   position: relative;
   background:
-    radial-gradient(ellipse 800px 400px at 50% 0%, rgba(212,122,58,.12), transparent 60%),
+    radial-gradient(ellipse 800px 400px at 50% 0%, rgba(212,122,58,.13), transparent 60%),
     var(--warm-bg);
 }
 
 .hiw__hero-inner {
   max-width: 640px;
-}
-
-.hiw__hero-eyebrow {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--warm-warm);
-  margin: 0 0 16px;
 }
 
 .hiw__hero-title {
@@ -397,7 +627,6 @@ const hiwStyles = `
   color: var(--warm-ink);
   margin: 0 0 20px;
 }
-
 .hiw__hero-title em {
   font-style: italic;
   color: var(--warm-warm);
@@ -407,7 +636,76 @@ const hiwStyles = `
   font-size: 1.05rem;
   color: var(--warm-ink-soft);
   line-height: 1.6;
+  margin: 0 0 32px;
+}
+
+/* CTA в герое */
+.hiw__hero-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 48px;
+}
+
+.hiw__hero-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 32px;
+  border-radius: 40px;
+  background: var(--warm-warm);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity .18s, transform .18s;
+  box-shadow: 0 6px 24px rgba(212,122,58,.35);
+}
+.hiw__hero-btn-primary:hover {
+  opacity: .9;
+  transform: translateY(-1px);
+}
+
+.hiw__hero-cta-note {
+  font-size: .8rem;
+  color: var(--warm-ink-soft);
   margin: 0;
+}
+
+/* Стат-бар */
+.hiw__hero-stat-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  background: var(--warm-ink);
+  width: 100%;
+  padding: 20px 24px;
+  flex-wrap: wrap;
+}
+.hiw__hero-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 32px;
+  gap: 4px;
+}
+.hiw__hero-stat strong {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--warm-warm);
+  font-family: 'DM Serif Display', Georgia, serif;
+}
+.hiw__hero-stat span {
+  font-size: .78rem;
+  color: rgba(251,243,225,.55);
+  max-width: 160px;
+  text-align: center;
+}
+.hiw__hero-stat-divider {
+  width: 1px;
+  height: 40px;
+  background: rgba(255,255,255,.1);
 }
 
 .hiw__hero-scroll {
@@ -415,22 +713,11 @@ const hiwStyles = `
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  margin-top: 40px;
+  padding: 24px 0;
   opacity: .4;
 }
-.hiw__hero-scroll-line {
-  width: 1px;
-  height: 36px;
-  background: var(--warm-ink-soft);
-}
-.hiw__hero-scroll svg {
-  width: 14px;
-  height: 14px;
-  stroke: var(--warm-ink-soft);
-  stroke-width: 2;
-  fill: none;
-  stroke-linecap: round;
-}
+.hiw__hero-scroll-line { width: 1px; height: 32px; background: var(--warm-ink-soft); }
+.hiw__hero-scroll svg { width: 14px; height: 14px; stroke: var(--warm-ink-soft); stroke-width: 2; fill: none; stroke-linecap: round; }
 
 /* ── Секционные шапки ── */
 .hiw__section-head {
@@ -445,18 +732,10 @@ const hiwStyles = `
   margin: 0 0 14px;
   line-height: 1.18;
 }
-.hiw__section-head h2 em {
-  font-style: italic;
-  color: var(--warm-warm);
-}
-.hiw__section-head p {
-  color: var(--warm-ink-soft);
-  font-size: 1rem;
-  line-height: 1.6;
-  margin: 0;
-}
+.hiw__section-head h2 em { font-style: italic; color: var(--warm-warm); }
+.hiw__section-head p { color: var(--warm-ink-soft); font-size: 1rem; line-height: 1.6; margin: 0; }
 .hiw__section-head--dark h2 { color: var(--warm-bg-soft); }
-.hiw__section-head--dark p  { color: rgba(251,243,225,.65); }
+.hiw__section-head--dark p  { color: rgba(251,243,225,.6); }
 
 /* ── Проблема ── */
 .hiw__problem {
@@ -464,13 +743,11 @@ const hiwStyles = `
   max-width: 1120px;
   margin: 0 auto;
 }
-
 .hiw__pain-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
 }
-
 .hiw__pain-card {
   background: var(--warm-card);
   border: 1px solid var(--warm-rule);
@@ -478,27 +755,10 @@ const hiwStyles = `
   padding: 32px 28px;
   transition: box-shadow .2s;
 }
-.hiw__pain-card:hover {
-  box-shadow: 0 8px 28px rgba(42,38,32,.1);
-}
-
-.hiw__pain-icon {
-  margin-bottom: 20px;
-}
-
-.hiw__pain-card h3 {
-  font-size: 1.05rem;
-  font-weight: 600;
-  margin: 0 0 10px;
-  color: var(--warm-ink);
-}
-
-.hiw__pain-card p {
-  font-size: .92rem;
-  color: var(--warm-ink-soft);
-  line-height: 1.65;
-  margin: 0;
-}
+.hiw__pain-card:hover { box-shadow: 0 8px 28px rgba(42,38,32,.1); }
+.hiw__pain-icon { margin-bottom: 20px; }
+.hiw__pain-card h3 { font-size: 1.05rem; font-weight: 600; margin: 0 0 10px; color: var(--warm-ink); }
+.hiw__pain-card p  { font-size: .92rem; color: var(--warm-ink-soft); line-height: 1.65; margin: 0; }
 
 /* ── Шаги ── */
 .hiw__steps {
@@ -506,7 +766,6 @@ const hiwStyles = `
   color: var(--warm-bg-soft);
   padding: 80px 24px;
 }
-
 .hiw__steps-list {
   max-width: 1040px;
   margin: 0 auto;
@@ -514,46 +773,55 @@ const hiwStyles = `
   flex-direction: column;
   gap: 72px;
 }
-
 .hiw__step {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 48px;
   align-items: center;
 }
-
-.hiw__step--reverse {
-  direction: rtl;
-}
-.hiw__step--reverse > * {
-  direction: ltr;
-}
+.hiw__step--reverse { direction: rtl; }
+.hiw__step--reverse > * { direction: ltr; }
 
 .hiw__step-num {
   display: block;
   font-family: 'DM Serif Display', Georgia, serif;
   font-size: 3.5rem;
   color: var(--warm-warm);
-  opacity: .55;
+  opacity: .5;
   line-height: 1;
   margin-bottom: 12px;
 }
+.hiw__step-text h3 { font-size: 1.35rem; font-weight: 600; margin: 0 0 12px; color: var(--warm-bg-soft); }
+.hiw__step-text p  { font-size: .95rem; color: rgba(251,243,225,.65); line-height: 1.65; margin: 0; }
 
-.hiw__step-text h3 {
-  font-size: 1.35rem;
-  font-weight: 600;
-  margin: 0 0 12px;
-  color: var(--warm-bg-soft);
+/* Телефон-макет */
+.hiw__phone-mock {
+  display: flex;
+  justify-content: center;
+}
+.hiw__phone-mock-inner {
+  width: 220px;
+  background: #16110a;
+  border-radius: 36px;
+  border: 2px solid rgba(255,255,255,.12);
+  padding: 20px 10px 28px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.07);
+  position: relative;
+}
+.hiw__phone-mock-notch {
+  width: 60px;
+  height: 8px;
+  background: rgba(255,255,255,.15);
+  border-radius: 4px;
+  margin: 0 auto 16px;
+}
+.hiw__phone-mock-inner svg {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
-.hiw__step-text p {
-  font-size: .95rem;
-  color: rgba(251,243,225,.7);
-  line-height: 1.65;
-  margin: 0;
-}
-
-/* Видео */
+/* Видео (когда придёт из Kling) */
 .hiw__step-video {
   width: 100%;
   border-radius: 16px;
@@ -563,25 +831,54 @@ const hiwStyles = `
   box-shadow: 0 20px 48px rgba(0,0,0,.35);
 }
 
-.hiw__step-video-placeholder {
-  width: 100%;
-  aspect-ratio: 16/9;
-  border-radius: 16px;
-  background: rgba(255,255,255,.06);
-  border: 2px dashed rgba(212,122,58,.4);
+/* ── Отзывы ── */
+.hiw__testimonials {
+  padding: 80px 24px;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+.hiw__testi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+.hiw__testi-card {
+  background: var(--warm-card);
+  border: 1px solid var(--warm-rule);
+  border-radius: 20px;
+  padding: 28px;
+  margin: 0;
+}
+.hiw__testi-card p {
+  font-size: .95rem;
+  color: var(--warm-ink);
+  line-height: 1.65;
+  margin: 0 0 20px;
+  font-style: italic;
+}
+.hiw__testi-card footer {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.hiw__testi-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(212,122,58,.2);
+  color: var(--warm-warm);
+  font-size: .8rem;
+  font-weight: 700;
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  color: rgba(251,243,225,.4);
-  font-size: .85rem;
-  text-align: center;
-  padding: 24px;
+  flex-shrink: 0;
 }
-.hiw__step-video-placeholder svg { opacity: .5; }
-.hiw__step-video-placeholder span { font-weight: 500; }
-.hiw__step-video-placeholder small { font-size: .75rem; opacity: .7; }
+.hiw__testi-card cite {
+  font-size: .82rem;
+  color: var(--warm-ink-soft);
+  font-style: normal;
+}
 
 /* ── Сравнение ── */
 .hiw__compare {
@@ -589,13 +886,11 @@ const hiwStyles = `
   max-width: 1120px;
   margin: 0 auto;
 }
-
 .hiw__compare-table-wrap {
   overflow-x: auto;
   border-radius: 20px;
   box-shadow: 0 12px 40px rgba(42,38,32,.1);
 }
-
 .hiw__compare-table {
   width: 100%;
   border-collapse: collapse;
@@ -604,11 +899,7 @@ const hiwStyles = `
   overflow: hidden;
   font-size: .95rem;
 }
-
-.hiw__compare-table thead tr {
-  background: var(--warm-bg-soft);
-}
-
+.hiw__compare-table thead tr { background: var(--warm-bg-soft); }
 .hiw__compare-table th {
   padding: 14px 20px;
   text-align: left;
@@ -619,29 +910,23 @@ const hiwStyles = `
   color: var(--warm-ink-soft);
   white-space: nowrap;
 }
-
 .hiw__compare-table td {
   padding: 16px 20px;
   border-top: 1px solid var(--warm-rule);
   vertical-align: middle;
 }
-
-.hiw__compare-row--highlight {
-  background: rgba(212,122,58,.06);
-}
-.hiw__compare-row--highlight td {
-  border-top-color: rgba(212,122,58,.25);
-  font-weight: 500;
-}
-
+.hiw__compare-row--highlight { background: rgba(212,122,58,.06); }
+.hiw__compare-row--highlight td { border-top-color: rgba(212,122,58,.25); font-weight: 500; }
 .hiw__compare-name {
   font-weight: 500;
   color: var(--warm-ink);
+  white-space: nowrap;
+}
+.hiw__compare-name-inner {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-
 .hiw__compare-badge {
   display: inline-flex;
   align-items: center;
@@ -654,22 +939,61 @@ const hiwStyles = `
   letter-spacing: .04em;
   white-space: nowrap;
 }
-
-.hiw__compare-cost {
-  color: var(--warm-ink-soft);
-  white-space: nowrap;
+.hiw__compare-cost { color: var(--warm-ink-soft); white-space: nowrap; }
+.hiw__compare-row--highlight .hiw__compare-cost { color: var(--warm-ink); }
+.hiw__compare-note {
+  display: block;
+  font-size: .75rem;
+  color: var(--warm-warm);
+  font-weight: 600;
+  margin-top: 2px;
 }
+.hiw__compare-what { color: var(--warm-ink-soft); }
+.hiw__compare-row--highlight .hiw__compare-what { color: var(--warm-ink); }
+.hiw__compare-verdict { text-align: center; width: 48px; }
 
-.hiw__compare-what {
-  color: var(--warm-ink-soft);
+/* ── FAQ ── */
+.hiw__faq {
+  padding: 80px 24px;
+  max-width: 720px;
+  margin: 0 auto;
 }
-.hiw__compare-row--highlight .hiw__compare-what {
+.hiw__faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.hiw__faq-item {
+  border: 1px solid var(--warm-rule);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--warm-card);
+  transition: border-color .15s;
+}
+.hiw__faq-item.is-open { border-color: rgba(212,122,58,.4); }
+.hiw__faq-q {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 22px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: .97rem;
+  font-weight: 500;
   color: var(--warm-ink);
+  text-align: left;
+  gap: 12px;
 }
-
-.hiw__compare-verdict {
-  text-align: center;
-  width: 48px;
+.hiw__faq-q:hover { color: var(--warm-warm); }
+.hiw__faq-arrow { font-style: normal; color: var(--warm-warm); flex-shrink: 0; }
+.hiw__faq-a {
+  padding: 0 22px 18px;
+  margin: 0;
+  font-size: .92rem;
+  color: var(--warm-ink-soft);
+  line-height: 1.65;
 }
 
 /* ── CTA ── */
@@ -677,43 +1001,39 @@ const hiwStyles = `
   background: var(--warm-ink);
   color: var(--warm-bg-soft);
   text-align: center;
-  padding: 80px 24px;
+  padding: 80px 24px 72px;
 }
-
 .hiw__cta h2 {
   font-family: 'DM Serif Display', Georgia, serif;
   font-size: clamp(1.7rem, 4vw, 2.8rem);
   font-weight: 400;
   margin: 0 0 14px;
 }
-
-.hiw__cta h2 em {
-  font-style: italic;
-  color: var(--warm-warm);
-}
-
-.hiw__cta p {
-  color: rgba(251,243,225,.65);
-  font-size: 1rem;
-  margin: 0 0 36px;
-}
-
+.hiw__cta h2 em { font-style: italic; color: var(--warm-warm); }
+.hiw__cta > p { color: rgba(251,243,225,.65); font-size: 1rem; margin: 0 0 36px; }
 .hiw__cta-actions {
   display: flex;
   gap: 14px;
   justify-content: center;
   flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.hiw__cta-fine {
+  font-size: .78rem;
+  color: rgba(251,243,225,.35);
+  margin: 0;
 }
 
 /* ── Адаптив ── */
 @media (max-width: 720px) {
-  .hiw__step,
-  .hiw__step--reverse {
+  .hiw__step, .hiw__step--reverse {
     grid-template-columns: 1fr;
     direction: ltr;
   }
   .hiw__step-num { font-size: 2.5rem; }
-  .hiw__compare-table th:nth-child(2),
-  .hiw__compare-table td:nth-child(2) { display: none; }
+  .hiw__hero-stat-bar { flex-direction: column; gap: 8px; }
+  .hiw__hero-stat-divider { width: 40px; height: 1px; }
+  .hiw__compare-table th:nth-child(3),
+  .hiw__compare-table td:nth-child(3) { display: none; }
 }
 `

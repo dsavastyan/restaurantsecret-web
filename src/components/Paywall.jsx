@@ -22,9 +22,10 @@ export default function Paywall({ onRefresh }) {
           <div className="rs-card-body">
             <div className="rs-term">1 месяц</div>
             <div className="rs-price">
-              <span className="rs-price-value">99</span>
+              <span className="rs-price-value">199</span>
               <span className="rs-price-rub">₽ /мес*</span>
             </div>
+            <div className="rs-save" style={{ visibility: 'hidden' }}>—</div>
             <Link className="rs-btn" to="/account/subscription" state={{ from: window.location.pathname + window.location.search }}>
               Оформить подписку
             </Link>
@@ -37,10 +38,10 @@ export default function Paywall({ onRefresh }) {
           <div className="rs-card-body">
             <div className="rs-term">1 год</div>
             <div className="rs-price">
-              <span className="rs-price-value">999</span>
+              <span className="rs-price-value">1 490</span>
               <span className="rs-price-rub">₽ /год*</span>
             </div>
-            <div className="rs-save">Выгоднее на 16&nbsp;%</div>
+            <div className="rs-save">Выгоднее на 38&nbsp;% · 124&nbsp;₽/мес</div>
             <Link className="rs-btn" to="/account/subscription" state={{ from: window.location.pathname + window.location.search }}>
               Оформить подписку
             </Link>
