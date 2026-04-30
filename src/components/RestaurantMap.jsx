@@ -237,6 +237,7 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
   const [metroData, setMetroData] = useState({ lines: [], stations: [] })
   const [cuisines, setCuisines] = useState([])
   const [filters, setFilters] = useState({ cuisines: [], excludeFastFood: false })
+  const [selectedMetroStation, setSelectedMetroStation] = useState(null)
   const [focusTarget, setFocusTarget] = useState(null)
   const [isDefaultView, setIsDefaultView] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -249,10 +250,18 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
     () => new Set(Array.from(favoriteLookup || []).map((slug) => String(slug).trim().toLowerCase())),
     [favoriteLookup],
   )
+  const selectedMetroStationName = useMemo(
+    () => String(selectedMetroStation?.name_ru || '').trim().toLowerCase(),
+    [selectedMetroStation],
+  )
   const visibleRestaurants = useMemo(() => {
-    if (!filters.excludeFastFood) return restaurants
-    return restaurants.filter((restaurant) => !isFastFoodCuisine(restaurant?.cuisine))
-  }, [restaurants, filters.excludeFastFood])
+    return restaurants.filter((restaurant) => {
+      if (filters.excludeFastFood && isFastFoodCuisine(restaurant?.cuisine)) return false
+      if (!selectedMetroStationName) return true
+      const metroName = String(restaurant?.metro || '').trim().toLowerCase()
+      return metroName === selectedMetroStationName
+    })
+  }, [restaurants, filters.excludeFastFood, selectedMetroStationName])
   const { restaurants: uniqueRestaurantCount, weeklyAdded } = calculateRestaurantStats(visibleRestaurants)
   const isNight = themeMode === 'night'
   const hasOverlayMapButton = !showSummaryHeader
@@ -349,9 +358,7 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
     }
   }, [isFullscreen])
 
-  const tileUrl = isNight
-    ? 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-    : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+  const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 
   return (
     <div className={`restaurant-map-container ${showSummaryHeader ? '' : 'is-landing'} ${isNight ? 'is-night' : 'is-day'} ${isFullscreen ? 'is-fullscreen' : ''}`}>
@@ -377,6 +384,9 @@ export default function RestaurantMap({ themeMode = 'day', onStatsChange, showSu
         <div className="filters-row">
           <MetroFilter
             metroData={metroData}
+            selectedStationName={selectedMetroStation?.name_ru || ''}
+            onSelectStation={(station) => setSelectedMetroStation(station)}
+            onClearStation={() => setSelectedMetroStation(null)}
             onJumpToStation={(station) =>
               setFocusTarget({
                 lat: station.lat,

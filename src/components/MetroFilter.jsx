@@ -1,6 +1,12 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 
-export default function MetroFilter({ metroData, onJumpToStation }) {
+export default function MetroFilter({
+    metroData,
+    onJumpToStation,
+    selectedStationName = '',
+    onSelectStation,
+    onClearStation,
+}) {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const containerRef = useRef(null);
@@ -68,7 +74,9 @@ export default function MetroFilter({ metroData, onJumpToStation }) {
             >
                 <div className="trigger-text-wrapper">
                     <span className="metro-icon">🚇</span>
-                    <span className="placeholder-text">Станции метро</span>
+                    <span className="placeholder-text">
+                        {selectedStationName || 'Станции метро'}
+                    </span>
                 </div>
                 <div className={`chevron ${isOpen ? 'up' : 'down'}`}></div>
             </div>
@@ -86,6 +94,18 @@ export default function MetroFilter({ metroData, onJumpToStation }) {
                                 autoFocus
                             />
                         </div>
+                        {selectedStationName && (
+                            <button
+                                type="button"
+                                className="clear-filter-btn"
+                                onClick={() => {
+                                    if (typeof onClearStation === 'function') onClearStation();
+                                    setIsOpen(false);
+                                }}
+                            >
+                                Сбросить фильтр
+                            </button>
+                        )}
                     </div>
 
                     <div className="options-list">
@@ -95,22 +115,25 @@ export default function MetroFilter({ metroData, onJumpToStation }) {
                             filteredStations.map((station) => (
                                 <div key={station.name_ru} className="option-item">
                                     <span className="station-name">{station.name_ru}</span>
-                                    {typeof onJumpToStation === 'function' && Number.isFinite(station.lat) && Number.isFinite(station.lon) && (
-                                        <button
-                                            className="jump-btn"
-                                            type="button"
-                                            onClick={() => {
+                                    <button
+                                        className="jump-btn"
+                                        type="button"
+                                        onClick={() => {
+                                            if (typeof onSelectStation === 'function') {
+                                                onSelectStation(station);
+                                            }
+                                            if (typeof onJumpToStation === 'function' && Number.isFinite(station.lat) && Number.isFinite(station.lon)) {
                                                 onJumpToStation({
                                                     name_ru: station.name_ru,
                                                     lat: station.lat,
                                                     lon: station.lon
                                                 });
-                                                setIsOpen(false);
-                                            }}
-                                        >
-                                            Перейти
-                                        </button>
-                                    )}
+                                            }
+                                            setIsOpen(false);
+                                        }}
+                                    >
+                                        Показать
+                                    </button>
                                 </div>
                             ))
                         )}
@@ -211,6 +234,23 @@ export default function MetroFilter({ metroData, onJumpToStation }) {
                 .search-box {
                     padding: 12px;
                     border-bottom: 1px solid var(--app-border, #f1f5f9);
+                }
+                .clear-filter-btn {
+                    margin-top: 8px;
+                    border: 1px solid var(--app-border, #cbd5e1);
+                    background: var(--app-surface, #fff);
+                    color: var(--app-text, #334155);
+                    border-radius: 8px;
+                    font-size: 12px;
+                    font-weight: 600;
+                    padding: 6px 10px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                }
+                .clear-filter-btn:hover {
+                    border-color: #94a3b8;
+                    color: #0f172a;
+                    background: rgba(148, 163, 184, 0.12);
                 }
                 .search-input-wrapper {
                     position: relative;
