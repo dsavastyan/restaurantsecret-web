@@ -345,7 +345,7 @@ export default function Landing() {
           </div>
 
           <nav className="landing-warm__nav-center" aria-label="Разделы">
-            <button type="button" onClick={() => scrollToSection('restaurants-list')}>Рестораны</button>
+            <Link to="/restaurants">Рестораны</Link>
             <button type="button" onClick={() => scrollToSection('why')}>Как работает</button>
             <Link to="/tariffs">Тарифы</Link>
             <a href="https://t.me/RestSecretSupport_bot" target="_blank" rel="noopener noreferrer">Поддержка</a>

@@ -2438,6 +2438,13 @@ body {
   letter-spacing: 0;
 }
 
+.catalog-heading__metrics {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 12px;
+  margin-right: clamp(16px, 4vw, 64px);
+}
+
 .catalog-heading__stat {
   min-width: 178px;
   display: inline-flex;
@@ -2448,6 +2455,19 @@ body {
   border-radius: 12px;
   background: rgba(255, 252, 246, 0.72);
   box-shadow: 0 12px 28px rgba(97, 78, 54, 0.1);
+}
+
+.catalog-heading__weekly {
+  min-width: 156px;
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 16px 18px;
+  border: 1px solid rgba(104, 134, 63, 0.24);
+  border-radius: 12px;
+  background: rgba(244, 248, 234, 0.78);
+  box-shadow: 0 12px 28px rgba(97, 78, 54, 0.08);
 }
 
 .catalog-heading__stat-icon {
@@ -2483,12 +2503,28 @@ body {
   letter-spacing: 0;
 }
 
+.catalog-heading__weekly strong {
+  display: block;
+  color: #607b3d;
+  font-family: "Playfair Display", "DM Serif Display", Georgia, serif;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
 .catalog-heading__stat span {
   display: block;
   margin-top: 4px;
   color: #5f574d;
   font-size: 14px;
   line-height: 1.2;
+}
+
+.catalog-heading__weekly span {
+  display: block;
+  color: #5f574d;
+  font-size: 13px;
+  line-height: 1.25;
 }
 
 .catalog-page .catalog-hero {
@@ -2847,6 +2883,10 @@ body {
     min-height: 112px;
   }
 
+  .catalog-heading__metrics {
+    margin-right: 0;
+  }
+
   .catalog-page .catalog-search {
     grid-template-columns: 1fr 1fr;
   }
@@ -2875,6 +2915,15 @@ body {
 
   .catalog-heading__stat {
     width: 100%;
+    min-width: 0;
+  }
+
+  .catalog-heading__metrics {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .catalog-heading__weekly {
     min-width: 0;
   }
 

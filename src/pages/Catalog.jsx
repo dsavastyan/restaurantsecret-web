@@ -8,6 +8,7 @@ import { useFavoriteRestaurantsStore } from '@/store/favoriteRestaurants'
 import { useAuth } from '@/store/auth'
 import { analytics } from '@/services/analytics'
 import { getRussianPluralWord } from '@/lib/text'
+import { getLandingStats } from '@/lib/api'
 
 // Fetch a large number to emulate "all" items since backend pagination seems flaky
 const FETCH_LIMIT = 1000;
@@ -51,6 +52,7 @@ const normalizeInstagramUrl = (rawUrl) => {
 
 export default function Catalog() {
   const { data: filters } = useSWRLite('filters', () => api.filters())
+  const { data: landingStats } = useSWRLite('landing-stats', () => getLandingStats())
   const [selectedCuisines, setSelectedCuisines] = useState([])
   const [selectedMetro, setSelectedMetro] = useState('')
   const [query, setQuery] = useState('')
@@ -284,6 +286,7 @@ export default function Catalog() {
   const shownFrom = filteredItems.length ? ((currentPage - 1) * PAGE_SIZE) + 1 : 0
   const shownTo = Math.min(currentPage * PAGE_SIZE, filteredItems.length)
   const totalRestaurantCount = allItems.length || Number(rawData?.total ?? rawData?.count ?? 0)
+  const weeklyAdded = Number(landingStats?.weeklyAdded ?? 0)
 
   const handleSubmit = useCallback((event) => {
     event.preventDefault()
@@ -297,21 +300,29 @@ export default function Catalog() {
         <div>
           <h1 className="catalog-heading__title">Рестораны</h1>
         </div>
-        <div className="catalog-heading__stat" aria-label={`${totalRestaurantCount} ресторанов`}>
-          <div className="catalog-heading__stat-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" focusable="false">
-              <path d="M5 20h14" />
-              <path d="M7 20V9.8c0-.9.7-1.6 1.6-1.6h6.8c.9 0 1.6.7 1.6 1.6V20" />
-              <path d="M9.2 8.2a2.8 2.8 0 0 1 5.6 0" />
-              <path d="M10 12h4" />
-              <path d="M10 15h4" />
-              <path d="M12 4.5V3" />
-            </svg>
+        <div className="catalog-heading__metrics">
+          <div className="catalog-heading__stat" aria-label={`${totalRestaurantCount} ресторанов`}>
+            <div className="catalog-heading__stat-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M5 20h14" />
+                <path d="M7 20V9.8c0-.9.7-1.6 1.6-1.6h6.8c.9 0 1.6.7 1.6 1.6V20" />
+                <path d="M9.2 8.2a2.8 2.8 0 0 1 5.6 0" />
+                <path d="M10 12h4" />
+                <path d="M10 15h4" />
+                <path d="M12 4.5V3" />
+              </svg>
+            </div>
+            <div>
+              <strong>{totalRestaurantCount.toLocaleString('ru-RU')}</strong>
+              <span>{getRussianPluralWord(totalRestaurantCount, 'ресторан', 'ресторана', 'ресторанов')}</span>
+            </div>
           </div>
-          <div>
-            <strong>{totalRestaurantCount.toLocaleString('ru-RU')}</strong>
-            <span>{getRussianPluralWord(totalRestaurantCount, 'ресторан', 'ресторана', 'ресторанов')}</span>
-          </div>
+          {weeklyAdded > 0 && (
+            <div className="catalog-heading__weekly" aria-label={`Добавлено на этой неделе: ${weeklyAdded}`}>
+              <strong>+{weeklyAdded.toLocaleString('ru-RU')}</strong>
+              <span>добавлено на этой неделе</span>
+            </div>
+          )}
         </div>
       </header>
 
