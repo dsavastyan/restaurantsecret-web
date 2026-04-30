@@ -1,38 +1,41 @@
 import { useEffect, useRef } from 'react'
 
 /**
- * Animated city-map background — street grid + location pins.
- * Pure Canvas, GPU-composited (transform/opacity only), pointer-events: none.
- * Drop it inside any `position: relative` container.
+ * Animated city-map background.
+ * - Proper rounded map-pin shapes (circle head + smooth teardrop)
+ * - Dynamic connection lines that draw themselves between pins
+ * - Pulse rings on active pins
+ * - Street grid with slight city angle
  */
 export default function CityMapBackground({ themeMode = 'day' }) {
   const canvasRef = useRef(null)
-  const themeRef = useRef(themeMode)
+  const themeRef  = useRef(themeMode)
   themeRef.current = themeMode
 
   useEffect(() => {
     const cv = canvasRef.current
     if (!cv) return
-
     const ctx = cv.getContext('2d')
+
     let rafId
-    let W = 0
-    let H = 0
+    let W = 0, H = 0
     let streets = []
     let pins = []
+    let connections = []
+    let nextSpawnT = 1.5
 
-    /* ---- colours (recalculated each frame so theme switches live) ---- */
-    function colors() {
+    /* ---- theme colours ---- */
+    function clr() {
       const dark = themeRef.current === 'night'
       return {
-        street: dark ? 'rgba(210,190,155,0.10)' : 'rgba(160,140,110,0.16)',
-        pin:    dark ? 'rgba(205,175,125,ALPHA)' : 'rgba(75,60,40,ALPHA)',
-        dot:    dark ? 'rgba(20,18,14,0.90)'     : 'rgba(242,236,226,0.90)',
-        pulse:  dark ? 'rgba(205,175,125,PALPHA)' : 'rgba(75,60,40,PALPHA)',
+        street:  dark ? 'rgba(210,190,160,0.09)' : 'rgba(140,120,90,0.14)',
+        pin:     dark ? [205, 178, 130] : [85, 68, 46],
+        pinDot:  dark ? 'rgba(18,16,12,0.92)'    : 'rgba(244,239,231,0.96)',
+        conn:    dark ? [205, 178, 130] : [95, 76, 52],
       }
     }
 
-    /* ---- resize ---- */
+    /* ---- resize + rebuild ---- */
     function resize() {
       W = cv.offsetWidth
       H = cv.offsetHeight
@@ -40,18 +43,17 @@ export default function CityMapBackground({ themeMode = 'day' }) {
       cv.width  = W * dpr
       cv.height = H * dpr
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      streets = buildStreets()
-      pins    = buildPins()
+      streets     = buildStreets()
+      pins        = buildPins()
+      connections = []
     }
 
-    /* ---- street grid (slightly rotated like a real city) ---- */
+    /* ---- street grid ---- */
     function buildStreets() {
-      const result = []
-      const angle = -0.10
-      const cos = Math.cos(angle)
-      const sin = Math.sin(angle)
-      const cx = W / 2
-      const cy = H / 2
+      const out = []
+      const angle = -0.09
+      const cos = Math.cos(angle), sin = Math.sin(angle)
+      const cx = W / 2, cy = H / 2
 
       function rot(x, y) {
         return [
@@ -60,133 +62,220 @@ export default function CityMapBackground({ themeMode = 'day' }) {
         ]
       }
 
-      // horizontal
-      const hSteps = [30, 22, 52, 26, 48, 24, 38, 44, 28, 55, 32, 46, 22, 52, 34]
-      let y = -15
+      const hSteps = [26, 20, 48, 24, 44, 20, 36, 40, 25, 52, 28, 44, 20, 50, 30]
+      let y = -12
       for (const s of hSteps) {
         y += s
-        if (y > H + 15) break
-        result.push({ p1: rot(-20, y), p2: rot(W + 20, y), w: s > 45 ? 1.1 : 0.55 })
+        if (y > H + 12) break
+        out.push({ p1: rot(-20, y), p2: rot(W + 20, y), w: s > 44 ? 1.0 : 0.5 })
       }
 
-      // vertical
-      const vSteps = [42, 28, 58, 32, 44, 24, 52, 36, 46, 28, 40, 55, 26, 48]
-      let x = -15
+      const vSteps = [38, 24, 54, 28, 42, 22, 50, 32, 44, 24, 38, 52, 22, 46]
+      let x = -12
       for (const s of vSteps) {
         x += s
-        if (x > W + 15) break
-        result.push({ p1: rot(x, -20), p2: rot(x, H + 20), w: s > 48 ? 1.1 : 0.55 })
+        if (x > W + 12) break
+        out.push({ p1: rot(x, -20), p2: rot(x, H + 20), w: s > 46 ? 1.0 : 0.5 })
       }
 
       // diagonal boulevards
-      result.push({ p1: [W * 0.07, -10], p2: [W * 0.48, H + 10], w: 0.85 })
-      result.push({ p1: [W * 0.42, -10], p2: [W * 0.92, H + 10], w: 0.85 })
-      result.push({ p1: [-10, H * 0.18], p2: [W + 10, H * 0.58], w: 0.70 })
+      out.push({ p1: [W * 0.06, -10], p2: [W * 0.47, H + 10], w: 0.85 })
+      out.push({ p1: [W * 0.40, -10], p2: [W * 0.92, H + 10], w: 0.85 })
+      out.push({ p1: [-10, H * 0.17], p2: [W + 10, H * 0.57], w: 0.65 })
 
-      return result
+      return out
     }
 
-    /* ---- location pins (clustered by district) ---- */
+    /* ---- pins (clustered like real districts) ---- */
     function buildPins() {
       const districts = [
-        { cx: 0.22, cy: 0.40, count: 6, spread: 0.10 },
-        { cx: 0.60, cy: 0.26, count: 5, spread: 0.08 },
-        { cx: 0.76, cy: 0.66, count: 7, spread: 0.11 },
-        { cx: 0.36, cy: 0.72, count: 4, spread: 0.07 },
-        { cx: 0.52, cy: 0.50, count: 3, spread: 0.05 },
+        { cx: 0.20, cy: 0.38, count: 5, spread: 0.09 },
+        { cx: 0.55, cy: 0.24, count: 5, spread: 0.08 },
+        { cx: 0.77, cy: 0.62, count: 6, spread: 0.10 },
+        { cx: 0.34, cy: 0.70, count: 4, spread: 0.08 },
+        { cx: 0.50, cy: 0.50, count: 3, spread: 0.05 },
+        { cx: 0.88, cy: 0.28, count: 3, spread: 0.06 },
+        { cx: 0.08, cy: 0.72, count: 3, spread: 0.06 },
       ]
-      const result = []
+      const out = []
       for (const d of districts) {
         for (let i = 0; i < d.count; i++) {
-          const a = Math.random() * Math.PI * 2
-          const r = Math.random() * d.spread
-          result.push({
-            x: d.cx + Math.cos(a) * r,
-            y: d.cy + Math.sin(a) * r,
-            size:   0.55 + Math.random() * 0.65,
-            pulse:  Math.random() > 0.68,
-            phase:  Math.random() * Math.PI * 2,
-            speed:  0.45 + Math.random() * 0.60,
-            active: Math.random() > 0.82,
+          const a  = Math.random() * Math.PI * 2
+          const rr = Math.random() * d.spread
+          out.push({
+            x:          Math.max(0.04, Math.min(0.96, d.cx + Math.cos(a) * rr)),
+            y:          Math.max(0.04, Math.min(0.96, d.cy + Math.sin(a) * rr)),
+            size:       0.62 + Math.random() * 0.58,
+            breathPhase: Math.random() * Math.PI * 2,
+            breathSpeed: 0.28 + Math.random() * 0.40,
+            pulsePhase:  Math.random() * Math.PI * 2,
+            hasPulse:    Math.random() > 0.60,
+            active:      Math.random() > 0.80,
           })
         }
       }
       // scattered loners
       for (let i = 0; i < 8; i++) {
-        result.push({
+        out.push({
           x: 0.05 + Math.random() * 0.90,
           y: 0.05 + Math.random() * 0.90,
-          size:   0.35 + Math.random() * 0.40,
-          pulse:  false,
-          phase:  Math.random() * Math.PI * 2,
-          speed:  0.38,
-          active: false,
+          size: 0.38 + Math.random() * 0.38,
+          breathPhase:  Math.random() * Math.PI * 2,
+          breathSpeed:  0.25,
+          pulsePhase:   Math.random() * Math.PI * 2,
+          hasPulse:     false,
+          active:       false,
         })
       }
-      return result
+      return out
     }
 
-    /* ---- draw helpers ---- */
-    function drawPin(cx, cy, size, alpha, isActive, c) {
-      const r   = size * 5.5
-      const top = cy - r * 0.32           // centre of circular head
-      const tipY = top + r * 2.0          // bottom tip
+    /* ---- draw a proper rounded map pin ---- */
+    function drawPin(px, py, size, alpha, isActive, c) {
+      const r      = size * 5.8           // head radius
+      const headCY = py - r * 0.48        // centre of the circle head (raised)
+      const tipY   = headCY + r * 2.55    // bottom tip
 
-      const fill = (isActive
-        ? c.pin.replace('ALPHA', '0.80')
-        : c.pin.replace('ALPHA', String(alpha.toFixed(2)))
-      )
+      const [pr, pg, pb] = c.pin
+      const a = isActive ? Math.min(alpha * 1.9, 0.80) : alpha
+      const fill = `rgba(${pr},${pg},${pb},${a})`
 
       ctx.save()
 
-      // head circle
+      // --- full circle head ---
       ctx.beginPath()
-      ctx.arc(cx, top, r, 0, Math.PI * 2)
+      ctx.arc(px, headCY, r, 0, Math.PI * 2)
       ctx.fillStyle = fill
       ctx.fill()
 
-      // teardrop body
+      // --- teardrop body: two smooth quadratic curves down to the tip ---
       ctx.beginPath()
-      ctx.moveTo(cx - r * 0.66, top + r * 0.72)
-      ctx.quadraticCurveTo(cx - r * 0.26, (top + r * 0.72 + tipY) * 0.55, cx, tipY)
-      ctx.quadraticCurveTo(cx + r * 0.26, (top + r * 0.72 + tipY) * 0.55, cx + r * 0.66, top + r * 0.72)
+      ctx.moveTo(px - r * 0.58, headCY + r * 0.80)
+      ctx.quadraticCurveTo(px - r * 0.22, tipY - r * 0.28, px, tipY)
+      ctx.quadraticCurveTo(px + r * 0.22, tipY - r * 0.28, px + r * 0.58, headCY + r * 0.80)
       ctx.closePath()
       ctx.fillStyle = fill
       ctx.fill()
 
-      // inner dot
+      // --- inner dot (hole) ---
       ctx.beginPath()
-      ctx.arc(cx, top, r * 0.36, 0, Math.PI * 2)
-      ctx.fillStyle = c.dot
+      ctx.arc(px, headCY, r * 0.38, 0, Math.PI * 2)
+      ctx.fillStyle = c.pinDot
       ctx.fill()
 
       ctx.restore()
     }
 
-    function drawPulse(cx, cy, size, t, phase, speed, c) {
-      const maxR    = size * 22
-      const progress = ((t * speed + phase) % (Math.PI * 2)) / (Math.PI * 2)
-      const r       = progress * maxR
-      const alpha   = (1 - progress) * 0.22
+    /* ---- pulse ring around pin head ---- */
+    function drawPulse(px, py, size, t, pulsePhase, c) {
+      const headCY  = py - size * 5.8 * 0.48
+      const progress = ((t * 0.55 + pulsePhase) % (Math.PI * 2)) / (Math.PI * 2)
+      const r        = progress * size * 26
+      const alpha    = (1 - progress) * 0.20
       if (alpha < 0.005) return
 
-      const top = cy - size * 5.5 * 0.32
+      const [pr, pg, pb] = c.pin
       ctx.save()
       ctx.beginPath()
-      ctx.arc(cx, top, r, 0, Math.PI * 2)
-      ctx.strokeStyle = c.pulse.replace('PALPHA', alpha.toFixed(3))
+      ctx.arc(px, headCY, r, 0, Math.PI * 2)
+      ctx.strokeStyle = `rgba(${pr},${pg},${pb},${alpha})`
       ctx.lineWidth = 0.75
       ctx.stroke()
       ctx.restore()
     }
 
-    /* ---- animation loop ---- */
+    /* ---- connection lines ---- */
+    const MAX_CONN = 6
+
+    function spawnConnection(t) {
+      if (connections.length >= MAX_CONN) return
+      if (t < nextSpawnT) return
+
+      // collect candidates in range
+      const cands = []
+      for (let i = 0; i < pins.length; i++) {
+        for (let j = i + 1; j < pins.length; j++) {
+          const dx = (pins[i].x - pins[j].x) * W
+          const dy = (pins[i].y - pins[j].y) * H
+          const d  = Math.sqrt(dx * dx + dy * dy)
+          if (d > 55 && d < 230) cands.push({ i, j, d })
+        }
+      }
+      if (!cands.length) return
+
+      // avoid duplicate pairs
+      const active = new Set(connections.map(c => `${c.from}-${c.to}`))
+      const fresh  = cands.filter(c => !active.has(`${c.i}-${c.j}`))
+      if (!fresh.length) return
+
+      const pick = fresh[Math.floor(Math.random() * fresh.length)]
+      connections.push({
+        from:      pick.i,
+        to:        pick.j,
+        progress:  0,
+        alpha:     0,
+        phase:     'in',      // in → hold → out
+        holdLeft:  55 + Math.random() * 90,
+        drawSpeed: 0.007 + Math.random() * 0.007,
+      })
+
+      nextSpawnT = t + 0.9 + Math.random() * 1.4
+    }
+
+    function tickConnections() {
+      for (let i = connections.length - 1; i >= 0; i--) {
+        const cn = connections[i]
+        if (cn.phase === 'in') {
+          cn.progress = Math.min(1, cn.progress + cn.drawSpeed)
+          cn.alpha    = Math.min(0.26, cn.alpha + 0.014)
+          if (cn.progress >= 1) cn.phase = 'hold'
+        } else if (cn.phase === 'hold') {
+          cn.holdLeft--
+          if (cn.holdLeft <= 0) cn.phase = 'out'
+        } else {
+          cn.alpha -= 0.009
+          if (cn.alpha <= 0) connections.splice(i, 1)
+        }
+      }
+    }
+
+    function drawConnection(cn, c) {
+      const A  = pins[cn.from]
+      const B  = pins[cn.to]
+      const x1 = A.x * W,  y1 = A.y * H - A.size * 5.8 * 0.48
+      const x2 = B.x * W,  y2 = B.y * H - B.size * 5.8 * 0.48
+
+      // current tip (animated endpoint while drawing in)
+      const ex = x1 + (x2 - x1) * cn.progress
+      const ey = y1 + (y2 - y1) * cn.progress
+
+      const [lr, lg, lb] = c.conn
+      ctx.save()
+
+      ctx.beginPath()
+      ctx.moveTo(x1, y1)
+      ctx.lineTo(ex, ey)
+      ctx.strokeStyle = `rgba(${lr},${lg},${lb},${cn.alpha})`
+      ctx.lineWidth   = 0.85
+      ctx.stroke()
+
+      // small travelling dot at the leading edge (only while drawing)
+      if (cn.phase === 'in' && cn.progress < 0.98) {
+        ctx.beginPath()
+        ctx.arc(ex, ey, 2.0, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(${lr},${lg},${lb},${Math.min(cn.alpha * 2, 0.55)})`
+        ctx.fill()
+      }
+
+      ctx.restore()
+    }
+
+    /* ---- main loop ---- */
     let t = 0
 
     function frame() {
       ctx.clearRect(0, 0, W, H)
-
-      const c = colors()
+      const c = clr()
 
       // streets
       for (const s of streets) {
@@ -198,14 +287,19 @@ export default function CityMapBackground({ themeMode = 'day' }) {
         ctx.stroke()
       }
 
+      // connections
+      spawnConnection(t)
+      tickConnections()
+      for (const cn of connections) drawConnection(cn, c)
+
       // pins
       for (const p of pins) {
-        const px = p.x * W
-        const py = p.y * H
-        const baseAlpha = 0.20 + 0.12 * Math.sin(t * p.speed + p.phase)
-        const alpha = p.active ? 0.72 : baseAlpha
+        const px    = p.x * W
+        const py    = p.y * H
+        const breath = 0.16 + 0.10 * Math.sin(t * p.breathSpeed + p.breathPhase)
+        const alpha  = p.active ? 0.68 : breath
 
-        if (p.pulse) drawPulse(px, py, p.size, t, p.phase, p.speed, c)
+        if (p.hasPulse) drawPulse(px, py, p.size, t, p.pulsePhase, c)
         drawPin(px, py, p.size, alpha, p.active, c)
       }
 
@@ -223,7 +317,7 @@ export default function CityMapBackground({ themeMode = 'day' }) {
       cancelAnimationFrame(rafId)
       ro.disconnect()
     }
-  }, []) // run once — themeMode read via ref inside frame()
+  }, [])
 
   return (
     <canvas
