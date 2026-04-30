@@ -327,25 +327,25 @@ export default function Menu() {
             </button>
             <div className="menu-hero__pill">
               <span>Меню ресторана</span>
-              <button
-                type="button"
-                className={`menu-hero__pill-fav ${isFavoriteRestaurant ? 'is-active' : ''}`}
-                onClick={handleToggleRestaurantFavorite}
-                aria-label={isFavoriteRestaurant ? 'Удалить ресторан из избранного' : 'Добавить ресторан в избранное'}
-                title={isFavoriteRestaurant ? 'В избранном' : 'Добавить в избранное'}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
-                  <path
-                    d="M12 21.35 10.55 20.03C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3 9.24 3 10.91 3.81 12 5.09 13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35Z"
-                    fill={isFavoriteRestaurant ? '#E11D48' : 'none'}
-                    stroke={isFavoriteRestaurant ? '#E11D48' : 'currentColor'}
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
             </div>
+            <button
+              type="button"
+              className={`menu-hero__pill-fav ${isFavoriteRestaurant ? 'is-active' : ''}`}
+              onClick={handleToggleRestaurantFavorite}
+              aria-label={isFavoriteRestaurant ? 'Удалить ресторан из избранного' : 'Добавить ресторан в избранное'}
+              title={isFavoriteRestaurant ? 'В избранном' : 'Добавить в избранное'}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path
+                  d="M12 21.35 10.55 20.03C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3 9.24 3 10.91 3.81 12 5.09 13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35Z"
+                  fill={isFavoriteRestaurant ? '#E11D48' : 'none'}
+                  stroke={isFavoriteRestaurant ? '#E11D48' : 'currentColor'}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
           </div>
           <button
             type="button"
@@ -381,6 +381,27 @@ export default function Menu() {
               </div>
             </div>
             {!!capturedAt && <div className="menu__captured-at">Меню добавлено: {capturedAt}</div>}
+            <div className="menu-hero__meta-row">
+              <button
+                type="button"
+                className="menu-hero__map-mobile-btn"
+                onClick={openMapInBrowser}
+              >
+                Показать на карте
+              </button>
+              <div className="menu-hero__badge">
+                <span className="menu-hero__badge-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" focusable="false">
+                    <path d="M7 2v8m4-8v8M7 2H5v8a4 4 0 0 0 8 0V2h-2M9 14v8M17 2v20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+                <span>
+                  {filtered.length
+                    ? `${filtered.length} ${getRussianPluralWord(filtered.length, 'блюдо', 'блюда', 'блюд')}`
+                    : 'Ничего не найдено'}
+                </span>
+              </div>
+            </div>
           </div>
 
           <button
@@ -398,23 +419,6 @@ export default function Menu() {
               title={`Карта ресторана ${menu?.name || slug}`}
             />
           </button>
-
-          <div className="menu-hero__meta-row">
-            <button
-              type="button"
-              className="menu-hero__map-mobile-btn"
-              onClick={openMapInBrowser}
-            >
-              Показать на карте
-            </button>
-            <div className="menu-hero__badge">
-              <span>
-                {filtered.length
-                  ? `${filtered.length} ${getRussianPluralWord(filtered.length, 'блюдо', 'блюда', 'блюд')}`
-                  : 'Ничего не найдено'}
-              </span>
-            </div>
-          </div>
         </div>
       </header>
 
@@ -436,36 +440,36 @@ export default function Menu() {
         </div>
       ) : null}
 
-      <section className="menu-category-filter" aria-label="Фильтр по категории">
-        <label className="sr-only" htmlFor="menu-category-select">Категория меню</label>
-        <select
-          id="menu-category-select"
-          className="menu-category-filter__select"
-          value={selectedCategory}
-          onChange={(event) => setSelectedCategory(event.target.value)}
-        >
-          <option value="all">Категории</option>
-          {categoryOptions.map((name) => (
-            <option key={name} value={name}>{name}</option>
-          ))}
-        </select>
-      </section>
-
       <section className="menu-filters" aria-label="Фильтры блюд">
-        <div className="menu-filters__search">
-          <label className="sr-only" htmlFor="menu-search">Поиск по названию блюда</label>
-          <input
-            id="menu-search"
-            className="menu-filters__input"
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Поиск по блюду или составу"
-            aria-label="Поиск блюда"
-          />
-        </div>
+        <div className="menu-filters__primary-row">
+          <div className="menu-filters__search">
+            <label className="sr-only" htmlFor="menu-search">Поиск по названию блюда</label>
+            <input
+              id="menu-search"
+              className="menu-filters__input"
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Поиск по блюду или составу"
+              aria-label="Поиск блюда"
+            />
+          </div>
 
-        <div className="menu-filters__macro-row">
+          <div className="menu-category-filter" aria-label="Фильтр по категории">
+            <label className="sr-only" htmlFor="menu-category-select">Категория меню</label>
+            <select
+              id="menu-category-select"
+              className="menu-category-filter__select"
+              value={selectedCategory}
+              onChange={(event) => setSelectedCategory(event.target.value)}
+            >
+              <option value="all">Категории</option>
+              {categoryOptions.map((name) => (
+                <option key={name} value={name}>{name}</option>
+              ))}
+            </select>
+          </div>
+
           <button
             type="button"
             className={`menu-filters__toggle-btn ${isAdvancedFiltersOpen ? 'is-active' : ''}`}

@@ -1,6 +1,6 @@
 // Shared layout for authenticated areas. Manages subscription state and toggles
 // the paywall overlay when required.
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import NavBar from '@/components/NavBar'
 import SearchInput from '@/components/SearchInput'
@@ -66,7 +66,7 @@ export default function AppShell() {
   }, [])
 
   // Persist subscription state so that a refresh keeps the paywall status.
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (typeof window === 'undefined') return
     try {
       window.localStorage.setItem('rs_access_state', JSON.stringify(access))
@@ -259,8 +259,11 @@ export default function AppShell() {
   }, [accessToken, isLoginPage, isOnboardingPage, location.pathname, location.search, navigate])
 
   // Sync global UI theme by Moscow sunrise/sunset and expose it via html/body dataset.
+  // Restaurant menu pages intentionally stay in the light reference style.
   useEffect(() => {
     const resolveTheme = () => {
+      if (isRestaurantMenuPage) return 'day'
+
       const saved = window.localStorage.getItem(THEME_PREFERENCE_KEY)
       if (saved === 'day' || saved === 'night') {
         return saved
@@ -287,7 +290,7 @@ export default function AppShell() {
       window.clearInterval(id)
       window.removeEventListener('storage', onStorage)
     }
-  }, [])
+  }, [isRestaurantMenuPage])
 
   const showGlobalSearch = useMemo(() => {
     const allowedPrefixes = ['/catalog', '/app']
@@ -311,7 +314,7 @@ export default function AppShell() {
   }, [location.pathname])
 
   return (
-    <div className={`min-h-screen flex flex-col app-theme app-theme--${isDayTheme ? 'day' : 'night'}`}>
+    <div className={`min-h-screen flex flex-col app-theme app-theme--${isRestaurantMenuPage || isDayTheme ? 'day' : 'night'}`}>
       {!isMarketingPage && !isImmersivePage && <NavBar />}
       <DishCardModal />
       {!isMarketingPage && !isImmersivePage && <DiaryFloatingButton />}
