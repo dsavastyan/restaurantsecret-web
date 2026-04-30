@@ -13119,14 +13119,36 @@ html[data-rs-theme="night"] .onboarding-install__image {
   min-height: 320px !important;
 }
 
+.landing-warm .landing-warm__map-frame .restaurant-map-container.is-fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 3000 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+}
+
 .landing-warm .landing-warm__map-frame .map-wrapper {
   height: 100%;
   border-top: 0 !important;
 }
 
+.landing-warm .landing-warm__map-frame .restaurant-map-container.is-fullscreen .map-wrapper {
+  height: auto !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+}
+
 .landing-warm .landing-warm__map-frame .restaurant-map {
   height: 320px !important;
   min-height: 320px !important;
+}
+
+.landing-warm .landing-warm__map-frame .restaurant-map-container.is-fullscreen .restaurant-map {
+  height: 100% !important;
+  min-height: 0 !important;
 }
 
 .landing-warm .landing-warm__map-frame .map-expand-btn--overlay {

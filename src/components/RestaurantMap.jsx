@@ -391,36 +391,46 @@ export default function RestaurantMap({
       )}
 
       {isFullscreen && (
-        <div className="filters-row">
-          <MetroFilter
-            metroData={metroData}
-            selectedStationName={selectedMetroStation?.name_ru || ''}
-            onSelectStation={(station) => setSelectedMetroStation(station)}
-            onClearStation={() => setSelectedMetroStation(null)}
-            onJumpToStation={(station) =>
-              setFocusTarget({
-                lat: station.lat,
-                lon: station.lon,
-                key: `${station.name_ru}-${Date.now()}`,
-              })
-            }
-          />
-          <MapCuisineFilter
-            cuisines={cuisines}
-            selectedCuisines={filters.cuisines}
-            onChange={(f) => setFilters((prev) => ({ ...prev, cuisines: f.cuisines }))}
-          />
-          <label className="map-fastfood-filter" htmlFor="exclude-fastfood-checkbox">
-            <input
-              id="exclude-fastfood-checkbox"
-              type="checkbox"
-              checked={filters.excludeFastFood}
-              onChange={(event) =>
-                setFilters((prev) => ({ ...prev, excludeFastFood: event.target.checked }))
+        <div className="fullscreen-topbar">
+          <div className="filters-row">
+            <MetroFilter
+              metroData={metroData}
+              selectedStationName={selectedMetroStation?.name_ru || ''}
+              onSelectStation={(station) => setSelectedMetroStation(station)}
+              onClearStation={() => setSelectedMetroStation(null)}
+              onJumpToStation={(station) =>
+                setFocusTarget({
+                  lat: station.lat,
+                  lon: station.lon,
+                  key: `${station.name_ru}-${Date.now()}`,
+                })
               }
             />
-            <span>Исключить сети фастфуд</span>
-          </label>
+            <MapCuisineFilter
+              cuisines={cuisines}
+              selectedCuisines={filters.cuisines}
+              onChange={(f) => setFilters((prev) => ({ ...prev, cuisines: f.cuisines }))}
+            />
+            <label className="map-fastfood-filter" htmlFor="exclude-fastfood-checkbox">
+              <input
+                id="exclude-fastfood-checkbox"
+                type="checkbox"
+                checked={filters.excludeFastFood}
+                onChange={(event) =>
+                  setFilters((prev) => ({ ...prev, excludeFastFood: event.target.checked }))
+                }
+              />
+              <span>Исключить сети фастфуд</span>
+            </label>
+          </div>
+          <button
+            type="button"
+            className="map-close-btn"
+            aria-label="Свернуть карту"
+            onClick={() => setIsFullscreen(false)}
+          >
+            ×
+          </button>
         </div>
       )}
 
@@ -434,20 +444,11 @@ export default function RestaurantMap({
             Развернуть карту
           </button>
         )}
-        {isFullscreen && !showSummaryHeader && (
-          <button
-            type="button"
-            className="map-expand-btn map-expand-btn--overlay"
-            onClick={() => setIsFullscreen(false)}
-          >
-            Свернуть карту
-          </button>
-        )}
         {loading && <div className="map-overlay">Загрузка...</div>}
         {!isDefaultView && (
           <button
             type="button"
-            className={`show-city-btn ${hasOverlayMapButton ? 'show-city-btn--stacked' : ''}`}
+            className={`show-city-btn ${hasOverlayMapButton && !isFullscreen ? 'show-city-btn--stacked' : ''}`}
             onClick={() =>
               setFocusTarget({
                 lat: defaultCenter[0],
@@ -575,6 +576,45 @@ export default function RestaurantMap({
           gap: 10px;
           padding: 0 10px 10px;
           align-items: flex-start;
+        }
+
+        .fullscreen-topbar {
+          position: relative;
+          z-index: 1201;
+          padding: 10px 12px 8px;
+          border-bottom: 1px solid rgba(148, 163, 184, 0.24);
+          background: rgba(255, 255, 255, 0.92);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+        }
+
+        .fullscreen-topbar .filters-row {
+          padding: 0;
+          padding-right: 52px;
+        }
+
+        .map-close-btn {
+          position: absolute;
+          top: 10px;
+          right: 12px;
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
+          border: 1px solid rgba(148, 163, 184, 0.35);
+          background: rgba(255, 255, 255, 0.92);
+          color: #0f172a;
+          font-size: 24px;
+          line-height: 1;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
+          box-shadow: 0 8px 20px rgba(148, 163, 184, 0.24);
+        }
+
+        .map-close-btn:hover {
+          background: rgba(255, 255, 255, 1);
         }
 
         .filters-row .metro-filter-container,
@@ -782,10 +822,33 @@ export default function RestaurantMap({
           border-radius: 0;
           border: none;
           margin: 0;
+          width: 100vw;
+          height: 100dvh;
+          min-height: 100dvh;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .restaurant-map-container.is-night .fullscreen-topbar {
+          background: rgba(15, 23, 42, 0.9);
+          border-bottom-color: rgba(148, 163, 184, 0.3);
+        }
+
+        .restaurant-map-container.is-night .map-close-btn {
+          background: rgba(71, 85, 105, 0.42);
+          border-color: rgba(148, 163, 184, 0.45);
+          color: #e2e8f0;
+        }
+
+        .restaurant-map-container.is-fullscreen .map-wrapper {
+          flex: 1;
+          min-height: 0;
+          border-top: 0;
         }
 
         .restaurant-map-container.is-fullscreen .restaurant-map {
-          height: calc(100dvh - 110px);
+          height: 100%;
+          min-height: 0;
         }
 
         @media (max-width: 768px) {
@@ -810,6 +873,11 @@ export default function RestaurantMap({
             flex-direction: column;
           }
 
+          .fullscreen-topbar .filters-row {
+            padding-right: 0;
+            padding-top: 40px;
+          }
+
           .filters-row .metro-filter-container,
           .filters-row .cuisine-filter-container,
           .filters-row .map-fastfood-filter {
@@ -826,7 +894,7 @@ export default function RestaurantMap({
           }
 
           .restaurant-map-container.is-fullscreen .restaurant-map {
-            height: calc(100dvh - 170px);
+            height: 100%;
           }
         }
       `}</style>
