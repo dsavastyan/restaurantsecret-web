@@ -23,6 +23,7 @@ import AccountLayout from '../pages/account/Layout.tsx'
 import AccountOverview from '../pages/account/Overview.tsx'
 import AccountSubscription from '../pages/account/Subscription.tsx'
 import Feedback from '../pages/Feedback.jsx'
+import HowItWorks from '../pages/HowItWorks.jsx'
 
 import SubscriptionHistoryPage from '../pages/account/SubscriptionHistoryPage.tsx'
 import Favorites from '../pages/account/Favorites.tsx'
@@ -49,6 +50,7 @@ function AppRoutes() {
         <Route path="licenses" element={<Licenses />} />
         <Route path="contact" element={<Contact />} />
         <Route path="feedback" element={<Feedback />} />
+        <Route path="how-it-works" element={<HowItWorks />} />
         <Route path="account" element={<AccountLayout />}>
           <Route index element={<AccountOverview />} />
           <Route path="profile" element={<AccountOverview />} />
