@@ -17,6 +17,56 @@ const shiftDateByDays = (dateStr: string, delta: number) => {
     return date.toISOString().slice(0, 10);
 };
 
+const getProgress = (value: number, target?: number | null) => {
+    if (!target || target <= 0) return 0;
+    return Math.min(100, Math.max(0, (value / target) * 100));
+};
+
+const formatTarget = (value?: number | null, unit = '') => {
+    if (!value || value <= 0) return '—';
+    return `${Math.round(value)}${unit}`;
+};
+
+const NutritionIcon = ({ type }: { type: 'calories' | 'protein' | 'fat' | 'carbs' }) => {
+    if (type === 'calories') {
+        return (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12.3 21c-4.1 0-7.3-2.9-7.3-7 0-2.8 1.4-4.7 3.3-6.5.6 2.1 1.8 3.1 3.1 3.5-.5-3.2.8-5.9 3.2-8 1 3.2 4.4 5.3 4.4 10.5 0 4.4-3.1 7.5-6.7 7.5Z" />
+                <path d="M12 18.5c-1.9 0-3.4-1.3-3.4-3.3 0-1.4.7-2.4 1.6-3.2.3 1 .9 1.5 1.6 1.7-.3-1.5.4-2.8 1.5-3.8.5 1.5 2.1 2.5 2.1 5 0 2.1-1.5 3.6-3.4 3.6Z" />
+            </svg>
+        );
+    }
+
+    if (type === 'protein') {
+        return (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M5.3 18.7c4.7-.2 8.4-2.1 11-5.8 2-2.9 2.4-5.7 2.4-7.6-4.2.3-7.7 1.9-10.4 4.7-2.4 2.5-3.3 5.5-3 8.7Z" />
+                <path d="M5.3 18.7 18 6" />
+                <path d="M8.5 15.6 5 12.1" />
+            </svg>
+        );
+    }
+
+    if (type === 'fat') {
+        return (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 21a7 7 0 0 1-7-7c0-4.4 5.6-9.9 6.7-10.9a.4.4 0 0 1 .6 0C13.4 4.1 19 9.6 19 14a7 7 0 0 1-7 7Z" />
+            </svg>
+        );
+    }
+
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M7.2 18.8c5.1-.5 8.4-3.3 10.1-8.3.8-2.3.9-4.4.8-5.7-3.8.4-6.8 2.1-8.9 5-1.7 2.3-2.4 5.3-2 9Z" />
+            <path d="M6.5 19.5 18 5" />
+            <path d="M9.2 15.1 5.6 13" />
+            <path d="m11.6 11.9-3.3-2" />
+            <path d="m12.2 11.4 4 .3" />
+            <path d="m9.8 14.7 4.5.5" />
+        </svg>
+    );
+};
+
 export default function Statistics() {
     const token = useAuth(s => s.accessToken);
     const {
@@ -85,18 +135,26 @@ export default function Statistics() {
         setIsAdding(false);
     };
 
-    const remaining = {
-        calories: (goalData?.target_calories || 0) - dayStats.calories,
-        protein: (goalData?.target_protein || 0) - dayStats.protein,
-        fat: (goalData?.target_fat || 0) - dayStats.fat,
-        carbs: (goalData?.target_carbs || 0) - dayStats.carbs,
+    const targets = {
+        calories: goalData?.target_calories || 0,
+        protein: goalData?.target_protein || 0,
+        fat: goalData?.target_fat || 0,
+        carbs: goalData?.target_carbs || 0,
     };
 
+    const progress = {
+        calories: getProgress(dayStats.calories, targets.calories),
+        protein: getProgress(dayStats.protein, targets.protein),
+        fat: getProgress(dayStats.fat, targets.fat),
+        carbs: getProgress(dayStats.carbs, targets.carbs),
+    };
+
+    const remainingCalories = Math.max(0, Math.round(targets.calories - dayStats.calories));
+
     return (
-        <div className="account-section">
+        <div className="account-section statistics-section">
             <div className="nds">
                 <div className="ndsHeader">
-                    <h2 className="ndsTitle">Дневник питания</h2>
                     <div className="ndsDateWrap">
                         <button className="ndsDateBtn" type="button" onClick={() => handleShiftDate(-1)} aria-label="Предыдущий день">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -129,60 +187,104 @@ export default function Statistics() {
                 </div>
 
                 <div className="ndsCard ndsCardMain">
-                    <div className="ndsCardTop">
-
-                        <div className="ndsCardValue">
-                            {Math.round(dayStats.calories)}
-                            <span className="ndsMuted">/ {goalData?.target_calories || '—'}</span>
+                    <div className="ndsMetricLayout">
+                        <span className="ndsMetricIcon ndsMetricIcon--calories">
+                            <NutritionIcon type="calories" />
+                        </span>
+                        <div className="ndsMetricBody">
+                            <div className="ndsMetricTopline">
+                                <div>
+                                    <div className="ndsStrong">Калории</div>
+                                    <div className="ndsCardValue">
+                                        {Math.round(dayStats.calories)}
+                                        <span className="ndsMuted">/ {formatTarget(targets.calories)}</span>
+                                    </div>
+                                </div>
+                                {targets.calories > 0 && (
+                                    <div className="ndsRemaining">Осталось <strong>{remainingCalories} ккал</strong></div>
+                                )}
+                            </div>
+                            <div className="ndsProgressRow">
+                                <div className="ndsBar">
+                                    <div
+                                        className="ndsBarFill ndsBarFillGreen"
+                                        style={{ width: `${progress.calories}%` }}
+                                    ></div>
+                                </div>
+                                <span className="ndsPercent">{Math.round(progress.calories)}%</span>
+                            </div>
                         </div>
-                    </div>
-                    <div className="ndsStrong">Калории</div>
-                    <div className="ndsBar">
-                        <div
-                            className="ndsBarFill ndsBarFillGreen"
-                            style={{ width: `${Math.min(100, (dayStats.calories / (goalData?.target_calories || 1)) * 100)}%` }}
-                        ></div>
                     </div>
                 </div>
 
                 <div className="ndsTiles">
-                    <div className="ndsTile">
-                        <div className="ndsTileHead">Б</div>
-                        <div className="ndsTileNums">
-                            <span className="ndsStrong">{Math.round(dayStats.protein)}</span>
-                            <span className="ndsMuted">/ {goalData?.target_protein || '—'} г</span>
+                    <div className="ndsTile ndsTile--protein">
+                        <div className="ndsTileMain">
+                            <span className="ndsMetricIcon ndsMetricIcon--protein">
+                                <NutritionIcon type="protein" />
+                            </span>
+                            <div>
+                                <div className="ndsTileHead">Белки</div>
+                                <div className="ndsTileNums">
+                                    <span className="ndsStrong">{Math.round(dayStats.protein)}</span>
+                                    <span className="ndsMuted">/ {formatTarget(targets.protein, ' г')}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="ndsBar ndsBarSmall">
-                            <div
-                                className="ndsBarFill toneGreen"
-                                style={{ width: `${Math.min(100, (dayStats.protein / (goalData?.target_protein || 1)) * 100)}%` }}
-                            ></div>
-                        </div>
-                    </div>
-                    <div className="ndsTile">
-                        <div className="ndsTileHead">Ж</div>
-                        <div className="ndsTileNums">
-                            <span className="ndsStrong">{Math.round(dayStats.fat)}</span>
-                            <span className="ndsMuted">/ {goalData?.target_fat || '—'} г</span>
-                        </div>
-                        <div className="ndsBar ndsBarSmall">
-                            <div
-                                className="ndsBarFill toneAmber"
-                                style={{ width: `${Math.min(100, (dayStats.fat / (goalData?.target_fat || 1)) * 100)}%` }}
-                            ></div>
+                        <div className="ndsProgressRow">
+                            <div className="ndsBar ndsBarSmall">
+                                <div
+                                    className="ndsBarFill toneGreen"
+                                    style={{ width: `${progress.protein}%` }}
+                                ></div>
+                            </div>
+                            <span className="ndsPercent">{Math.round(progress.protein)}%</span>
                         </div>
                     </div>
-                    <div className="ndsTile">
-                        <div className="ndsTileHead">У</div>
-                        <div className="ndsTileNums">
-                            <span className="ndsStrong">{Math.round(dayStats.carbs)}</span>
-                            <span className="ndsMuted">/ {goalData?.target_carbs || '—'} г</span>
+                    <div className="ndsTile ndsTile--fat">
+                        <div className="ndsTileMain">
+                            <span className="ndsMetricIcon ndsMetricIcon--fat">
+                                <NutritionIcon type="fat" />
+                            </span>
+                            <div>
+                                <div className="ndsTileHead">Жиры</div>
+                                <div className="ndsTileNums">
+                                    <span className="ndsStrong">{Math.round(dayStats.fat)}</span>
+                                    <span className="ndsMuted">/ {formatTarget(targets.fat, ' г')}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="ndsBar ndsBarSmall">
-                            <div
-                                className="ndsBarFill toneBlue"
-                                style={{ width: `${Math.min(100, (dayStats.carbs / (goalData?.target_carbs || 1)) * 100)}%` }}
-                            ></div>
+                        <div className="ndsProgressRow">
+                            <div className="ndsBar ndsBarSmall">
+                                <div
+                                    className="ndsBarFill toneAmber"
+                                    style={{ width: `${progress.fat}%` }}
+                                ></div>
+                            </div>
+                            <span className="ndsPercent">{Math.round(progress.fat)}%</span>
+                        </div>
+                    </div>
+                    <div className="ndsTile ndsTile--carbs">
+                        <div className="ndsTileMain">
+                            <span className="ndsMetricIcon ndsMetricIcon--carbs">
+                                <NutritionIcon type="carbs" />
+                            </span>
+                            <div>
+                                <div className="ndsTileHead">Углеводы</div>
+                                <div className="ndsTileNums">
+                                    <span className="ndsStrong">{Math.round(dayStats.carbs)}</span>
+                                    <span className="ndsMuted">/ {formatTarget(targets.carbs, ' г')}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="ndsProgressRow">
+                            <div className="ndsBar ndsBarSmall">
+                                <div
+                                    className="ndsBarFill tonePurple"
+                                    style={{ width: `${progress.carbs}%` }}
+                                ></div>
+                            </div>
+                            <span className="ndsPercent">{Math.round(progress.carbs)}%</span>
                         </div>
                     </div>
                 </div>
@@ -249,7 +351,26 @@ export default function Statistics() {
             {/* Diary List */}
             <div className="diary-list">
                 {isLoading && <p>Загрузка...</p>}
-                {!isLoading && entries.length === 0 && <p className="text-muted">Добавляйте блюда на страницах ресторанов или введите вручную</p>}
+                {!isLoading && entries.length === 0 && (
+                    <div className="diary-empty">
+                        <div className="diary-empty__plate" aria-hidden="true">
+                            <svg viewBox="0 0 160 160" fill="none">
+                                <circle cx="74" cy="82" r="52" fill="#EEF4E7" />
+                                <circle cx="74" cy="82" r="36" fill="#F8FAF3" />
+                                <path d="M39 49v69M29 51v27c0 8 5 13 10 13s10-5 10-13V51M112 48c13 14 13 32 0 46v25" stroke="#88A96F" strokeWidth="7" strokeLinecap="round" />
+                                <rect x="56" y="51" width="48" height="62" rx="9" fill="#FFFDF7" stroke="#D9E2CE" strokeWidth="3" />
+                                <path d="M67 68h27M67 82h27M67 96h20" stroke="#D2DDC3" strokeWidth="5" strokeLinecap="round" />
+                                <path d="M105 95c15-4 26-15 31-31 8 18 2 36-14 47-8 5-17 7-26 6 3-9 6-16 9-22Z" fill="#6DA466" />
+                                <path d="M110 99c10-2 18-9 23-20" stroke="#4F8A52" strokeWidth="4" strokeLinecap="round" />
+                            </svg>
+                        </div>
+                        <div className="diary-empty__content">
+                            <h3>Пока здесь пусто</h3>
+                            <p>Добавляйте блюда на страницах ресторанов или внесите их вручную.</p>
+                            <p>Мы поможем отслеживать калории и баланс БЖУ каждый день.</p>
+                        </div>
+                    </div>
+                )}
 
                 {entries.map(entry => (
                     <div key={entry.id} className="diary-item">

@@ -8308,15 +8308,18 @@ body:has(.account--sheet-open) {
 
 .nds {
   width: 100%;
-  max-width: 980px;
+  max-width: 1040px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .ndsHeader {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 16px;
-  margin-bottom: 18px;
+  margin-bottom: 4px;
 }
 
 .ndsTitle {
@@ -8331,29 +8334,33 @@ body:has(.account--sheet-open) {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-left: auto;
 }
 
 .ndsDateBtn {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  border: 1px solid rgba(16, 24, 40, 0.1);
-  background: rgba(255, 255, 255, 0.75);
-  box-shadow: 0 10px 24px rgba(16, 24, 40, 0.06);
-  color: #475467;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  border: 1px solid rgba(16, 24, 40, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 10px 26px rgba(16, 24, 40, 0.08);
+  color: #101828;
   display: grid;
   place-items: center;
   cursor: pointer;
   padding: 0;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
 }
 
 .ndsDateBtn svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 
 .ndsDateBtn:hover {
-  background: rgba(255, 255, 255, 0.95);
+  background: #ffffff;
+  box-shadow: 0 14px 30px rgba(16, 24, 40, 0.12);
+  transform: translateY(-1px);
 }
 
 .ndsDatePill {
@@ -8361,22 +8368,25 @@ body:has(.account--sheet-open) {
   align-items: center;
   gap: 10px;
   height: 46px;
-  padding: 0 16px;
+  padding: 0 18px;
   border-radius: 14px;
-  border: 1px solid rgba(16, 24, 40, 0.1);
-  background: rgba(255, 255, 255, 0.75);
-  box-shadow: 0 12px 28px rgba(16, 24, 40, 0.06);
+  border: 1px solid rgba(16, 24, 40, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 10px 26px rgba(16, 24, 40, 0.08);
   color: #101828;
   cursor: pointer;
   position: relative;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
 }
 
 .ndsDatePill:hover {
-  background: rgba(255, 255, 255, 0.95);
+  background: #ffffff;
+  box-shadow: 0 14px 30px rgba(16, 24, 40, 0.12);
+  transform: translateY(-1px);
 }
 
 .ndsCalIcon {
-  color: #667085;
+  color: #101828;
   display: grid;
   place-items: center;
 }
@@ -8388,7 +8398,7 @@ body:has(.account--sheet-open) {
 
 .ndsDateText {
   font-weight: 700;
-  font-size: 18px;
+  font-size: 17px;
   letter-spacing: -0.01em;
   white-space: nowrap;
 }
@@ -8407,25 +8417,33 @@ body:has(.account--sheet-open) {
 }
 
 .ndsCard {
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(240, 253, 244, 0.4) 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+  border-radius: 18px;
+  border: 1px solid rgba(234, 229, 218, 0.78);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 18px 42px rgba(20, 29, 42, 0.08);
 }
 
 .ndsCardMain {
-  padding: 16px 20px;
-  margin-bottom: 12px;
+  padding: 26px 28px;
 }
 
-.ndsCardTop {
+.ndsMetricLayout {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+}
+
+.ndsMetricBody {
+  min-width: 0;
+}
+
+.ndsMetricTopline {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
 }
 
 .ndsCardLabel {
@@ -8435,13 +8453,15 @@ body:has(.account--sheet-open) {
 }
 
 .ndsCardValue {
-  font-size: 32px;
+  font-size: 34px;
   font-weight: 800;
   letter-spacing: -0.03em;
   color: #101828;
   display: flex;
   align-items: baseline;
   gap: 8px;
+  line-height: 1.08;
+  margin-top: 8px;
 }
 
 .ndsStrong {
@@ -8454,16 +8474,76 @@ body:has(.account--sheet-open) {
   font-weight: 700;
 }
 
-.ndsBar {
-  height: 10px;
+.ndsMetricIcon {
+  width: 62px;
+  height: 62px;
   border-radius: 999px;
-  background: rgba(16, 24, 40, 0.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.ndsMetricIcon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.ndsMetricIcon--calories,
+.ndsMetricIcon--protein {
+  color: #5c8b43;
+  background: #eef2e7;
+}
+
+.ndsMetricIcon--fat {
+  color: #ee9b17;
+  background: #fff3d9;
+}
+
+.ndsMetricIcon--carbs {
+  color: #7454a6;
+  background: #eee7f5;
+}
+
+.ndsRemaining {
+  align-self: center;
+  padding: 10px 16px;
+  border-radius: 999px;
+  color: #778094;
+  background: #f5f5f6;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ndsRemaining strong {
+  color: #667085;
+}
+
+.ndsProgressRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.ndsPercent {
+  color: #8b94a6;
+  font-size: 15px;
+  font-weight: 700;
+  min-width: 34px;
+  text-align: right;
+}
+
+.ndsBar {
+  height: 12px;
+  border-radius: 999px;
+  background: #f0f1f3;
   overflow: hidden;
-  margin-top: 8px;
 }
 
 .ndsBarSmall {
-  height: 8px;
+  height: 10px;
 }
 
 .ndsBarFill {
@@ -8478,85 +8558,144 @@ body:has(.account--sheet-open) {
 }
 
 .toneAmber {
-  background: linear-gradient(90deg, #f4c07b 0%, #e59a3a 100%);
+  background: linear-gradient(90deg, #ffc64d 0%, #f1a316 100%);
 }
 
-.toneBlue {
-  background: linear-gradient(90deg, #9bd3e8 0%, #4aa6c7 100%);
+.tonePurple {
+  background: linear-gradient(90deg, #b59ad8 0%, #7b61b6 100%);
 }
 
 .ndsTiles {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 14px;
 }
 
 .ndsTile {
   border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-  padding: 16px;
+  border: 1px solid rgba(234, 229, 218, 0.78);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 16px 34px rgba(20, 29, 42, 0.07);
+  padding: 22px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 20px;
+  justify-content: space-between;
+}
+
+.ndsTileMain {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+}
+
+.ndsTileMain .ndsMetricIcon {
+  width: 50px;
+  height: 50px;
+}
+
+.ndsTileMain .ndsMetricIcon svg {
+  width: 27px;
+  height: 27px;
 }
 
 .ndsTileHead {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
-  color: #475467;
-  margin-bottom: 4px;
+  color: #2d3440;
+  margin-bottom: 6px;
 }
 
 .ndsTileNums {
-  font-size: 20px;
+  font-size: 22px;
   letter-spacing: -0.02em;
-  margin-bottom: 8px;
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  gap: 6px;
 }
 
 @media (max-width: 860px) {
   .ndsHeader {
-    flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 12px;
+  }
+
+  .ndsDateWrap {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .ndsDatePill {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .ndsMetricLayout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .ndsMetricTopline {
+    align-items: flex-start;
+  }
+
+  .ndsMetricIcon--calories {
+    width: 58px;
+    height: 58px;
   }
 
   .ndsCardValue {
     font-size: 28px;
   }
 
-  /* Compact grid for mobile */
   .ndsTiles {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
 
   .ndsTile {
-    padding: 10px 8px;
-    border-radius: 14px;
+    padding: 18px;
+    border-radius: 16px;
+    gap: 16px;
   }
 
   .ndsTileHead {
-    font-size: 14px;
-    text-align: center;
-    margin-bottom: 2px;
+    font-size: 16px;
   }
 
   .ndsTileNums {
-    font-size: 16px;
-    justify-content: center;
-    margin-bottom: 6px;
+    font-size: 20px;
     flex-wrap: wrap;
   }
 
   .ndsTileNums .ndsMuted {
-    display: none;
+    display: inline;
+  }
+}
+
+@media (max-width: 520px) {
+  .ndsCardMain {
+    padding: 20px;
+  }
+
+  .ndsDateBtn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .ndsMetricTopline {
+    flex-direction: column;
+  }
+
+  .ndsRemaining {
+    align-self: flex-start;
+    font-size: 14px;
+  }
+
+  .ndsProgressRow {
+    gap: 10px;
   }
 }
 
@@ -8764,11 +8903,12 @@ body:has(.account--sheet-open) {
 }
 
 .manual-entry-form {
-  background: #f8fafc;
-  padding: 16px;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 22px;
+  border-radius: 18px;
   margin: 24px 0;
-  border: 1px solid #e2e8f0;
+  border: 1px solid rgba(234, 229, 218, 0.78);
+  box-shadow: 0 16px 34px rgba(20, 29, 42, 0.07);
 }
 
 .manual-entry-form .form-title {
@@ -8778,7 +8918,7 @@ body:has(.account--sheet-open) {
 }
 
 .diary-list {
-  margin-top: 32px;
+  margin-top: 30px;
 }
 
 .diary-title {
@@ -8791,18 +8931,18 @@ body:has(.account--sheet-open) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  padding: 16px 18px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(234, 229, 218, 0.78);
+  border-radius: 16px;
   margin-bottom: 12px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 12px 28px rgba(20, 29, 42, 0.06);
 }
 
 .diary-item:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: rgba(195, 187, 171, 0.9);
+  box-shadow: 0 18px 36px rgba(20, 29, 42, 0.1);
   transform: translateY(-2px);
 }
 
@@ -8816,18 +8956,87 @@ body:has(.account--sheet-open) {
 
 .diary-item-name {
   font-weight: 600;
-  color: var(--rs-text-primary);
+  color: #101828;
   font-size: 15px;
   margin-bottom: 4px;
 }
 
 .diary-item-meta {
   font-size: 13px;
-  color: #64748b;
+  color: #667085;
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.diary-empty {
+  min-height: 190px;
+  padding: 28px clamp(22px, 4vw, 54px);
+  border-radius: 18px;
+  border: 1px solid rgba(230, 219, 199, 0.95);
+  background:
+    radial-gradient(circle at 92% 92%, rgba(139, 169, 111, 0.12), transparent 26%),
+    rgba(255, 255, 255, 0.82);
+  box-shadow: 0 16px 34px rgba(20, 29, 42, 0.05);
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(24px, 5vw, 58px);
+  overflow: hidden;
+  position: relative;
+}
+
+.diary-empty::after {
+  content: "";
+  position: absolute;
+  right: -42px;
+  bottom: -64px;
+  width: 230px;
+  height: 150px;
+  border-top: 2px dashed rgba(139, 169, 111, 0.22);
+  border-radius: 50%;
+  transform: rotate(-12deg);
+  pointer-events: none;
+}
+
+.diary-empty__plate {
+  width: 160px;
+  height: 160px;
+  justify-self: center;
+  opacity: 0.96;
+}
+
+.diary-empty__plate svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.diary-empty__content {
+  position: relative;
+  z-index: 1;
+  max-width: 520px;
+}
+
+.diary-empty h3 {
+  margin: 0 0 12px;
+  color: #101828;
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: clamp(28px, 3vw, 36px);
+  font-weight: 600;
+  line-height: 1.05;
+}
+
+.diary-empty p {
+  margin: 0;
+  color: #667085;
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+.diary-empty p+p {
+  margin-top: 14px;
 }
 
 .badge-restaurant {
@@ -8866,27 +9075,27 @@ body:has(.account--sheet-open) {
 }
 
 .btn-add-product {
-  background: linear-gradient(135deg, #2f8f5b 0%, #27774c 100%);
+  background: linear-gradient(135deg, #4d9849 0%, #347f38 100%);
   color: white;
   border: none;
   border-radius: 12px;
-  padding: 14px 24px;
-  font-size: 15px;
-  font-weight: 600;
+  padding: 16px 24px;
+  font-size: 17px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(47, 143, 91, 0.2);
+  box-shadow: 0 8px 18px rgba(47, 143, 91, 0.28);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 14px;
   margin: 24px 0;
 }
 
 .btn-add-product:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(47, 143, 91, 0.3);
-  background: linear-gradient(135deg, #27774c 0%, #1e5f3a 100%);
+  box-shadow: 0 12px 26px rgba(47, 143, 91, 0.34);
+  background: linear-gradient(135deg, #3f8c41 0%, #2f7131 100%);
 }
 
 .btn-add-product:active {
@@ -8895,9 +9104,36 @@ body:has(.account--sheet-open) {
 }
 
 .btn-add-product__icon {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 34px;
+  font-weight: 300;
   line-height: 1;
+}
+
+@media (max-width: 720px) {
+  .diary-empty {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 12px;
+    padding: 24px 18px;
+  }
+
+  .diary-empty__plate {
+    width: 128px;
+    height: 128px;
+  }
+
+  .diary-empty h3 {
+    font-size: 28px;
+  }
+
+  .diary-empty p {
+    font-size: 15px;
+  }
+
+  .btn-add-product {
+    font-size: 15px;
+    padding: 15px 18px;
+  }
 }
 
 .w-full {
@@ -12451,7 +12687,9 @@ html[data-rs-theme="night"] .manual-entry-form .form-title {
 
 html[data-rs-theme="night"] .ndsMuted,
 html[data-rs-theme="night"] .diary-item-meta,
-html[data-rs-theme="night"] .macro-subtext {
+html[data-rs-theme="night"] .macro-subtext,
+html[data-rs-theme="night"] .ndsPercent,
+html[data-rs-theme="night"] .diary-empty p {
   color: #9fb0c5;
 }
 
@@ -12469,9 +12707,31 @@ html[data-rs-theme="night"] .ndsTile {
   box-shadow: 0 12px 26px rgba(2, 6, 23, 0.35);
 }
 
+html[data-rs-theme="night"] .ndsRemaining {
+  background: rgba(148, 163, 184, 0.14);
+  color: #b7c4d8;
+}
+
+html[data-rs-theme="night"] .ndsRemaining strong {
+  color: #e2e8f0;
+}
+
 html[data-rs-theme="night"] .ndsBar,
 html[data-rs-theme="night"] .mini-progress-bar {
   background: rgba(148, 163, 184, 0.22);
+}
+
+html[data-rs-theme="night"] .ndsMetricIcon--calories,
+html[data-rs-theme="night"] .ndsMetricIcon--protein {
+  background: rgba(94, 139, 68, 0.22);
+}
+
+html[data-rs-theme="night"] .ndsMetricIcon--fat {
+  background: rgba(238, 155, 23, 0.18);
+}
+
+html[data-rs-theme="night"] .ndsMetricIcon--carbs {
+  background: rgba(116, 84, 166, 0.22);
 }
 
 html[data-rs-theme="night"] .manual-entry-form {
@@ -12496,6 +12756,17 @@ html[data-rs-theme="night"] .btn-add-product {
 html[data-rs-theme="night"] .diary-item {
   background: linear-gradient(180deg, rgba(17, 30, 49, 0.96), rgba(10, 20, 36, 0.96));
   border-color: rgba(148, 163, 184, 0.28);
+}
+
+html[data-rs-theme="night"] .diary-empty {
+  background:
+    radial-gradient(circle at 92% 92%, rgba(139, 169, 111, 0.14), transparent 26%),
+    linear-gradient(180deg, rgba(17, 30, 49, 0.96), rgba(10, 20, 36, 0.96));
+  border-color: rgba(148, 163, 184, 0.28);
+}
+
+html[data-rs-theme="night"] .diary-empty h3 {
+  color: #e7eef9;
 }
 
 html[data-rs-theme="night"] .badge-restaurant {
