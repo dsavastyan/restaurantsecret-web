@@ -129,6 +129,12 @@ export default function AccountOverview() {
     return "success";
   }, [profileCompletion]);
   const isProfileDetailsPage = location.pathname === "/account/profile";
+  const activityOptions = [
+    { value: "min", label: "Низкая" },
+    { value: "avg", label: "Умеренная" },
+    { value: "high", label: "Высокая" },
+  ];
+  const desktopActivity = form.activity === "light" ? "min" : form.activity;
 
   return (
     <section
@@ -277,84 +283,125 @@ export default function AccountOverview() {
         id="account-overview-form"
         className={`account-overview-form${isProfileDetailsPage ? " is-open" : ""}`}
       >
-        <div className="account-profile-info">
-          {profileName && (
-            <div className="account-profile-info__item">
-              <label className="account-profile-info__label">Имя</label>
-              <span className="account-profile-info__value">{profileName}</span>
+        <div className="account-overview-desktop">
+          <article className="account-profile-card" aria-labelledby="account-profile-heading">
+            <div className="account-profile-card__hero">
+              <div className="account-profile-card__avatar" aria-hidden="true">
+                {profileInitial}
+                <span className="account-profile-card__camera">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+                    <path d="M8.5 7.5 10 5.5h4l1.5 2H18a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9.5a2 2 0 0 1 2-2h2.5Z" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="12" cy="13" r="3" />
+                  </svg>
+                </span>
+              </div>
+              <div className="account-profile-card__identity">
+                <h2 id="account-profile-heading">{profileName || "Профиль"}</h2>
+                <p>{me?.user?.email || "—"}</p>
+                {createdAt && <span>С нами с {createdAt}</span>}
+              </div>
             </div>
-          )}
-          <div className="account-profile-info__item">
-            <label className="account-profile-info__label">Электронная почта</label>
-            <span className="account-profile-info__value">{me?.user?.email || "—"}</span>
-          </div>
-          {createdAt && (
-            <div className="account-profile-info__item">
-              <label className="account-profile-info__label">С нами с</label>
-              <span className="account-profile-info__value">{createdAt}</span>
+            <div className="account-profile-card__body">
+              <span className="account-profile-card__label">О себе</span>
+              <p>Люблю пробовать новое и<br />выбирать осознанно 🌿</p>
+              <Link to="/account/profile" className="account-profile-card__edit">
+                Редактировать профиль
+              </Link>
             </div>
-          )}
-        </div>
+          </article>
 
-        <div className="account-divider"></div>
+          <article className="account-about-card" aria-labelledby="account-about-heading">
+            <div className="account-about-card__header">
+              <h3 id="account-about-heading">О вас</h3>
+              <div className="account-about-card__actions">
+                {saveStatus === 'saved' && <span className="text-success">Сохранено</span>}
+                {isFormDirty && (
+                  <button
+                    className="account-about-card__save"
+                    onClick={saveStats}
+                    disabled={saveStatus === 'saving'}
+                  >
+                    {saveStatus === 'saving' ? '...' : 'Сохранить'}
+                  </button>
+                )}
+              </div>
+            </div>
 
-        <div className="account-panel__header">
-          <div className="account-panel__intro">
-            <h3 className="account-panel__title">О Вас</h3>
-          </div>
-          <div className="account-panel__actions">
-            {saveStatus === 'saved' && <span className="text-success">Сохранено</span>}
-            {isFormDirty && (
-              <button
-                className="account-button account-button--primary"
-                onClick={saveStats}
-                disabled={saveStatus === 'saving'}
-              >
-                {saveStatus === 'saving' ? '...' : 'Сохранить'}
-              </button>
-            )}
-          </div>
-        </div>
+            <div className="stats-grid">
+              <div className="form-group">
+                <label>Пол</label>
+                <select value={form.gender} onChange={e => handleStatChange('gender', e.target.value)}>
+                  <option value="">Не указывать</option>
+                  <option value="male">Мужской</option>
+                  <option value="female">Женский</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Возраст (лет)</label>
+                <input type="number" value={form.age} onChange={e => handleStatChange('age', e.target.value)} placeholder="25" />
+              </div>
+              <div className="form-group">
+                <label>Вес (кг)</label>
+                <input type="text" inputMode="decimal" value={form.weight} onChange={e => handleStatChange('weight', e.target.value)} placeholder="52,00" />
+              </div>
+              <div className="form-group">
+                <label>Рост (см)</label>
+                <input type="text" inputMode="decimal" value={form.height} onChange={e => handleStatChange('height', e.target.value)} placeholder="164,00" />
+              </div>
+              <div className="form-group form-group--activity full">
+                <label>Активность</label>
+                <div className="activity-segmented" role="group" aria-label="Активность">
+                  {activityOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      className={`activity-segmented__option${desktopActivity === option.value ? " is-active" : ""}`}
+                      onClick={() => handleStatChange("activity", option.value)}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </article>
 
-        <div className="stats-grid">
-          <div className="form-group">
-            <label>Пол</label>
-            <select value={form.gender} onChange={e => handleStatChange('gender', e.target.value)}>
-              <option value="">Не указывать</option>
-              <option value="male">Мужской</option>
-              <option value="female">Женский</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label>Возраст (лет)</label>
-            <input type="number" value={form.age} onChange={e => handleStatChange('age', e.target.value)} placeholder="30" />
-          </div>
-          <div className="form-group">
-            <label>Вес (кг)</label>
-            <input type="number" value={form.weight} onChange={e => handleStatChange('weight', e.target.value)} placeholder="80" />
-          </div>
-          <div className="form-group">
-            <label>Рост (см)</label>
-            <input type="number" value={form.height} onChange={e => handleStatChange('height', e.target.value)} placeholder="180" />
-          </div>
-          <div className="form-group full">
-            <label>Активность</label>
-            <select value={form.activity} onChange={e => handleStatChange('activity', e.target.value)}>
-              <option value="">Не указывать</option>
-              <option value="min">Минимальная (сидячая работа)</option>
-              <option value="light">Лёгкая (1-3 тренировки)</option>
-              <option value="avg">Средняя (3-5 тренировок)</option>
-              <option value="high">Высокая (6-7 тренировок)</option>
-            </select>
-          </div>
-          <div className="form-group full">
-            <label>Цель</label>
-            <select value={form.goal} onChange={e => handleStatChange('goal', e.target.value)}>
-              <option value="">Не указывать</option>
-              <option value="lose">Похудение</option>
-              <option value="maintain">Поддержание формы</option>
-              <option value="gain">Набор массы</option>
-            </select>
+          <div className="account-benefits-strip" aria-label="Возможности RestSecret">
+            <div className="account-benefit">
+              <span className="account-benefit__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M5 14c4.3-1.2 7.3-4.2 9-9 3 1.5 4.4 3.6 4.2 6.1-.2 3.2-2.7 5.4-6.2 5.7" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M4 20c2.7-4.2 6-6.3 10-6.3M14.5 7.5l3-3M17.7 7.7h2.6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              <div>
+                <strong>Умный подбор блюд</strong>
+                <span>Фильтруем по КБЖУ и ингредиентам</span>
+              </div>
+            </div>
+            <div className="account-benefit">
+              <span className="account-benefit__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <circle cx="12" cy="13" r="7" />
+                  <path d="M12 6V3M9 3h6M12 13V9M12 13h3" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              <div>
+                <strong>Экономия времени</strong>
+                <span>Найдите идеальное за 10 секунд</span>
+              </div>
+            </div>
+            <div className="account-benefit">
+              <span className="account-benefit__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M12 20s-7-4.3-8.4-9.1C2.7 7.6 4.7 5 7.6 5c1.8 0 3.2.9 4.4 2.4C13.2 5.9 14.6 5 16.4 5c2.9 0 4.9 2.6 4 5.9C19 15.7 12 20 12 20Z" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              <div>
+                <strong>Осознанный выбор</strong>
+                <span>Контроль без ограничений</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
