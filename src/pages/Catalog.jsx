@@ -262,6 +262,15 @@ export default function Catalog() {
       .toUpperCase() || 'RS'
   }, [])
 
+  const getBadgeClassName = useCallback((name) => {
+    const label = getInitials(name)
+    return [
+      'catalog-card__badge',
+      label.length >= 4 ? 'catalog-card__badge--long' : '',
+      label.length >= 5 ? 'catalog-card__badge--xlong' : '',
+    ].filter(Boolean).join(' ')
+  }, [getInitials])
+
   const getMetroName = useCallback((restaurant) => {
     return [
       restaurant?.metro,
@@ -384,11 +393,12 @@ export default function Catalog() {
             const dishesCount = typeof r?.dishesCount === 'number'
               ? r.dishesCount
               : allDishes.length
+            const badgeText = getInitials(r?.name)
             return (
               <li key={`${r.slug || r.name}-${i}`} className="catalog-card" role="group" aria-label={r?.name ?? 'Ресторан'}>
                 <div className="catalog-card__top">
                   <div className="catalog-card__identity">
-                    <div className={`catalog-card__badge catalog-card__badge--tone-${i % 4}`} aria-hidden="true">{getInitials(r?.name)}</div>
+                    <div className={`${getBadgeClassName(r?.name)} catalog-card__badge--tone-${i % 4}`} aria-hidden="true">{badgeText}</div>
                     <div className="catalog-card__copy">
                       <h3 className="catalog-card__title">{r.name}</h3>
                       <div className="catalog-card__meta">
