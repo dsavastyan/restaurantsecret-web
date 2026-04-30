@@ -540,7 +540,6 @@ export default function Menu() {
                         dish={dish}
                         restaurantSlug={slug}
                         restaurantName={menu?.name || slug}
-                        showRestaurantName={false}
                         isFreeAccess={isFreeAccess}
                         onClick={() => open({
                           id: dish.id,
