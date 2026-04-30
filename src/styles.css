@@ -14880,63 +14880,6 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
   color: #b9beb4;
 }
 
-/* Final requested account overrides. Keep this after the account mockup blocks. */
-.account-brand {
-  color: inherit !important;
-  text-decoration: none !important;
-}
-
-.account-brand__tagline {
-  max-width: none !important;
-  white-space: normal !important;
-  overflow: visible !important;
-  text-overflow: clip !important;
-  line-height: 1.18 !important;
-}
-
-.account-brand__tagline-line {
-  display: block;
-}
-
-@media (min-width: 900px) {
-  .account-subscription-panel .account-panel-v2__header {
-    display: none !important;
-    margin: 0 !important;
-  }
-
-  .account-payment-panel .account-panel-v2__header,
-  .account-panel__header {
-    justify-content: flex-end !important;
-    margin-bottom: 0 !important;
-  }
-
-  .account-panel-v2__title,
-  .account-panel__title,
-  .friends-header .account-section-title,
-  .favorites-header .account-section-title,
-  .goals-hero__title,
-  .ndsTitle {
-    position: absolute !important;
-    width: 1px !important;
-    height: 1px !important;
-    margin: -1px !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    clip: rect(0 0 0 0) !important;
-    clip-path: inset(50%) !important;
-    white-space: nowrap !important;
-    border: 0 !important;
-  }
-
-  .friends-header {
-    gap: 0 !important;
-  }
-
-  .ndsHeader {
-    justify-content: flex-end !important;
-  }
-}
-
 /* Account polish: requested sidebar and desktop section-title behavior. */
 .account-brand {
   color: inherit !important;
@@ -16190,4 +16133,61 @@ html[data-rs-theme="night"] .account-profile-card__identity p,
 html[data-rs-theme="night"] .account-profile-card__identity span,
 html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
   color: #b9beb4;
+}
+
+/* Final requested account overrides. Keep this after the account mockup blocks. */
+.account-brand {
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
+.account-brand__tagline {
+  max-width: none !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  line-height: 1.18 !important;
+}
+
+.account-brand__tagline-line {
+  display: block;
+}
+
+@media (min-width: 900px) {
+  .account-subscription-panel .account-panel-v2__header {
+    display: none !important;
+    margin: 0 !important;
+  }
+
+  .account-payment-panel .account-panel-v2__header,
+  .account-panel__header {
+    justify-content: flex-end !important;
+    margin-bottom: 0 !important;
+  }
+
+  .account-panel-v2__title,
+  .account-panel__title,
+  .friends-header .account-section-title,
+  .favorites-header .account-section-title,
+  .goals-hero__title,
+  .ndsTitle {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  .friends-header {
+    gap: 0 !important;
+  }
+
+  .ndsHeader {
+    justify-content: flex-end !important;
+  }
 }
