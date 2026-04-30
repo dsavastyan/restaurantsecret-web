@@ -361,7 +361,7 @@ export default function Landing() {
                 Войти
               </Link>
             )}
-            <Link to="/onboarding/welcome" className="landing-warm__nav-cta">
+            <Link to="/onboarding/welcome" className="landing-warm__nav-cta" onClick={() => analytics.track('cta_clicked', { location: 'nav', text: 'Попробовать' })}>
               Попробовать
             </Link>
           </div>
@@ -614,8 +614,8 @@ export default function Landing() {
           </h2>
           <p>Первые 7 дней - доступ ко всей базе ресторанов</p>
           <div className="landing-warm__cta-actions">
-            <Link to="/onboarding/welcome" className="landing-warm__cta-primary">Начать бесплатно</Link>
-            <Link to="/restaurants" className="landing-warm__cta-secondary">Посмотреть меню</Link>
+            <Link to="/onboarding/welcome" className="landing-warm__cta-primary" onClick={() => analytics.track('cta_clicked', { location: 'hero_bottom', text: 'Начать бесплатно' })}>Начать бесплатно</Link>
+            <Link to="/restaurants" className="landing-warm__cta-secondary" onClick={() => analytics.track('cta_clicked', { location: 'hero_bottom', text: 'Посмотреть меню' })}>Посмотреть меню</Link>
           </div>
         </section>
 

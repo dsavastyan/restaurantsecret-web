@@ -252,6 +252,7 @@ export default function AccountSubscription() {
       const apiPlan = mapUiPlanToApi(plan);
 
       analytics.track("checkout_started", { plan, source_page: "subscription_management" });
+      try { ym(108992733, 'reachGoal', 'checkout_started'); } catch { /* ym not loaded */ }
 
       try {
         const body: any = { plan: apiPlan, autopay_consent: true };
@@ -270,6 +271,8 @@ export default function AccountSubscription() {
             : null;
 
         if (confirmationUrl) {
+          // Persist plan so PaySuccess / PaymentResult can read it after redirect.
+          try { sessionStorage.setItem("rs_checkout_plan", plan); } catch { /* ignore */ }
           window.location.href = confirmationUrl;
           return;
         }
@@ -297,6 +300,7 @@ export default function AccountSubscription() {
 
   const handleSelectPlan = useCallback((plan: UiPlan) => {
     setSelectedPlan(plan);
+    analytics.track("plan_selected", { plan });
   }, []);
 
   const handleQuotePromo = useCallback(async (code: string) => {

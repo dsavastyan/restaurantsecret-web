@@ -22,12 +22,14 @@ export default function PaymentResult() {
 
   useEffect(() => {
     if (!status) return;
+    const plan = sessionStorage.getItem("rs_checkout_plan") || "unknown";
+    sessionStorage.removeItem("rs_checkout_plan");
     if (isSuccess) {
-      analytics.track("payment_success", { plan: "unknown_result_page" });
+      analytics.track("payment_success", { plan });
     } else if (status === 'canceled') {
-      analytics.track("payment_canceled", { plan: "unknown_result_page" });
+      analytics.track("payment_canceled", { plan });
     } else {
-      analytics.track("payment_failed", { plan: "unknown_result_page", reason: status });
+      analytics.track("payment_failed", { plan, reason: status });
     }
   }, [status, isSuccess]);
 
