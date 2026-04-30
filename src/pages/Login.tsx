@@ -221,7 +221,11 @@ export default function LoginPage() {
                   {timer > 0 ? `Отправить код ещё раз — через ${timer} сек` : "Отправить код ещё раз"}
                 </button>
 
-                <p className="login__hint">Код придёт с адреса <b>noreply@restaurantsecret.ru</b>.</p>
+                <p className="login__hint">
+                  Код придёт с адреса <b>noreply@restaurantsecret.ru</b>.
+                  <br />
+                  Не видите письмо? Проверьте папку Спам.
+                </p>
 
                 <p className="login__legal">
                   Продолжая, вы соглашаетесь на{" "}
