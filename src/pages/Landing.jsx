@@ -418,19 +418,28 @@ export default function Landing() {
 
           <div className="landing-warm__nav-right">
             {accessToken ? (
-              <Link to="/account" className="landing-warm__login-link">Личный кабинет</Link>
+              <Link to="/account" className="landing-warm__login-link landing-warm__desktop-action">Личный кабинет</Link>
             ) : (
               <Link
                 to="/login"
                 state={{ from: location.pathname + location.search }}
-                className="landing-warm__login-link"
+                className="landing-warm__login-link landing-warm__desktop-action"
               >
                 Войти
               </Link>
             )}
-            <Link to="/onboarding/welcome" className="landing-warm__nav-cta" onClick={() => analytics.track('cta_clicked', { location: 'nav', text: 'Попробовать' })}>
-              Попробовать
-            </Link>
+            {accessToken ? (
+              <>
+                <Link to="/account" className="landing-warm__nav-cta landing-warm__mobile-action">Личный кабинет</Link>
+                <Link to="/onboarding/welcome" className="landing-warm__nav-cta landing-warm__desktop-action" onClick={() => analytics.track('cta_clicked', { location: 'nav', text: 'Попробовать' })}>
+                  Попробовать
+                </Link>
+              </>
+            ) : (
+              <Link to="/onboarding/welcome" className="landing-warm__nav-cta" onClick={() => analytics.track('cta_clicked', { location: 'nav', text: 'Попробовать бесплатно' })}>
+                Попробовать бесплатно
+              </Link>
+            )}
           </div>
         </header>
 

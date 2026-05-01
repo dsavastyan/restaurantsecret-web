@@ -54,18 +54,32 @@ export default function Tariffs() {
           <Link
             to={accessToken ? '/account' : '/login'}
             state={accessToken ? undefined : { from: location.pathname + location.search }}
-            className="tariffs-nav__login-link"
+            className="tariffs-nav__login-link tariffs-nav__desktop-action"
           >
             Личный кабинет
           </Link>
-          <Link
-            to={proTo}
-            state={proState}
-            className="tariffs-nav__cta"
-            onClick={handleProClick}
-          >
-            Попробовать Pro
-          </Link>
+          {accessToken ? (
+            <>
+              <Link to="/account" className="tariffs-nav__cta tariffs-nav__mobile-action">Личный кабинет</Link>
+              <Link
+                to={proTo}
+                state={proState}
+                className="tariffs-nav__cta tariffs-nav__desktop-action"
+                onClick={handleProClick}
+              >
+                Попробовать Pro
+              </Link>
+            </>
+          ) : (
+            <Link
+              to={proTo}
+              state={proState}
+              className="tariffs-nav__cta"
+              onClick={handleProClick}
+            >
+              Попробовать бесплатно
+            </Link>
+          )}
         </div>
       </header>
 

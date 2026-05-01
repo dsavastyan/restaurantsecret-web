@@ -14296,6 +14296,11 @@ html[data-rs-theme="night"] .onboarding-install__image {
   transform: translateY(1px);
 }
 
+.landing-warm__mobile-action,
+.tariffs-nav__mobile-action {
+  display: none;
+}
+
 .landing-warm__hero {
   padding-top: 100px;
   padding-bottom: 80px;
@@ -16539,6 +16544,174 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
 
   .account-about-card .form-group label {
     font-size: 16px !important;
+  }
+}
+
+/* Mobile public navigation: landing, How it works, Tariffs. */
+@media (max-width: 760px) {
+  .landing-warm__nav,
+  .tariffs-nav {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 18px 12px;
+    padding: 18px 20px 0;
+    background: #fbf5eb;
+    border-bottom: 1px solid rgba(199, 188, 169, 0.74);
+  }
+
+  .landing-warm__nav-left,
+  .tariffs-nav__left {
+    min-width: 0;
+  }
+
+  .landing-warm__brand-link,
+  .tariffs-nav__brand-link {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .landing-warm__brand,
+  .tariffs-nav__brand {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .landing-warm__nav-right,
+  .tariffs-nav__right {
+    justify-self: end;
+    flex-wrap: nowrap;
+    gap: 0;
+  }
+
+  .landing-warm__desktop-action,
+  .tariffs-nav__desktop-action {
+    display: none;
+  }
+
+  .landing-warm__mobile-action,
+  .tariffs-nav__mobile-action {
+    display: inline-flex;
+  }
+
+  .landing-warm__nav-cta,
+  .tariffs-nav__cta {
+    min-height: 44px;
+    max-width: 48vw;
+    padding: 0 18px;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 999px;
+    background: #25221d;
+    color: #fff !important;
+    box-shadow: none;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .landing-warm__nav-center,
+  .tariffs-nav__center {
+    grid-column: 1 / -1;
+    order: 3;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: calc(100% + 40px);
+    margin: 0 -20px;
+    padding: 0 12px;
+    gap: 0;
+    overflow: visible;
+    border-top: 1px solid rgba(199, 188, 169, 0.42);
+  }
+
+  .landing-warm__nav-center a,
+  .landing-warm__nav-center button,
+  .tariffs-nav__center a {
+    display: flex;
+    min-width: 0;
+    min-height: 58px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    border-bottom: 3px solid transparent;
+    color: #3a352e;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.15;
+    text-align: center;
+    text-transform: none;
+    white-space: normal;
+  }
+
+  .landing-warm__nav-center a[aria-current="page"],
+  .tariffs-nav__center a.is-active {
+    border-bottom-color: #8fa36b;
+    color: #25221d;
+  }
+
+  .hiw .landing-warm__nav {
+    column-gap: 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  .landing-warm__nav,
+  .tariffs-nav {
+    padding: 16px 16px 0;
+    gap: 16px 10px;
+  }
+
+  .landing-warm__logo,
+  .tariffs-nav__logo {
+    width: 30px;
+    height: 30px;
+  }
+
+  .landing-warm__brand,
+  .tariffs-nav__brand {
+    font-size: 20px;
+  }
+
+  .landing-warm__nav-cta,
+  .tariffs-nav__cta {
+    max-width: 42vw;
+    min-height: 42px;
+    padding: 0 15px;
+    font-size: 14px;
+  }
+
+  .landing-warm__nav-center,
+  .tariffs-nav__center {
+    width: calc(100% + 32px);
+    margin: 0 -16px;
+    padding: 0 8px;
+  }
+
+  .landing-warm__nav-center a,
+  .landing-warm__nav-center button,
+  .tariffs-nav__center a {
+    min-height: 56px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 360px) {
+  .landing-warm__brand,
+  .tariffs-nav__brand {
+    font-size: 18px;
+  }
+
+  .landing-warm__nav-cta,
+  .tariffs-nav__cta {
+    max-width: 40vw;
+    padding: 0 12px;
+    font-size: 13px;
   }
 }
 

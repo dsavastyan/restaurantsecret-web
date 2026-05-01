@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { CookieSettingsModal } from '@/components/CookieSettingsModal'
+import { useAuth } from '@/store/auth'
 
 // ─────────────────────────────────────────────
 // Данные
@@ -117,6 +118,7 @@ const FAQ = [
 // ─────────────────────────────────────────────
 
 export default function HowItWorks() {
+  const accessToken = useAuth((state) => state.accessToken)
   const [openFaq, setOpenFaq] = useState(null)
   const [isCookieModalOpen, setIsCookieModalOpen] = useState(false)
 
@@ -139,10 +141,17 @@ export default function HowItWorks() {
           <a href="https://t.me/RestSecretSupport_bot" target="_blank" rel="noopener noreferrer">Поддержка</a>
         </nav>
         <div className="landing-warm__nav-right">
-          <Link to="/onboarding/welcome" className="landing-warm__nav-cta">
-            <span className="hiw__nav-cta-label hiw__nav-cta-label--desktop">Попробовать 7 дней бесплатно →</span>
-            <span className="hiw__nav-cta-label hiw__nav-cta-label--mobile">Попробовать бесплатно</span>
-          </Link>
+          {accessToken ? (
+            <Link to="/account" className="landing-warm__nav-cta">Личный кабинет</Link>
+          ) : (
+            <Link
+              to="/onboarding/welcome"
+              className="landing-warm__nav-cta"
+            >
+              <span className="hiw__nav-cta-label hiw__nav-cta-label--desktop">Попробовать 7 дней бесплатно →</span>
+              <span className="hiw__nav-cta-label hiw__nav-cta-label--mobile">Попробовать бесплатно</span>
+            </Link>
+          )}
         </div>
       </header>
 
