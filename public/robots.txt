@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Закрываем служебные маршруты
+Disallow: /account/
+Disallow: /onboarding/
+Disallow: /pay/
+Disallow: /payments/
+Disallow: /login
+Disallow: /app/
+
+# Ссылка на карту сайта
+Sitemap: https://restaurantsecret.ru/sitemap.xml
