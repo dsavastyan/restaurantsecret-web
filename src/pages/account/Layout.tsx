@@ -20,6 +20,7 @@ export type Me = {
     id: string;
     email: string;
     first_name?: string | null;
+    profile_about?: string | null;
     created_at: string;
     onboarding_completed?: boolean;
     onboarding_completed_at?: string | null;
@@ -183,6 +184,10 @@ export default function AccountLayout() {
     { to: "/account/statistics", label: "Дневник питания" },
     { to: "/account/favorites", label: "Избранное" },
     { to: "/account/friends", label: "Друзья", badge: incomingFriendRequestsCount > 0 ? `+${incomingFriendRequestsCount}` : null },
+  ];
+  const mobileTopNavItems = [
+    { to: "/account/subscription", label: "Управлять подпиской" },
+    { to: "/account/payment-methods", label: "Способы оплаты" },
   ];
   const mobileTabItems = [
     { to: "/catalog", label: "Поиск", icon: "search" },
@@ -381,11 +386,10 @@ export default function AccountLayout() {
                 <h1 className="account-mobile-dashboard__title">Личный кабинет</h1>
 
                 <nav className="account-mobile-nav" aria-label="Навигация по личному кабинету">
-                  {navItems.map((item) => (
+                  {mobileTopNavItems.map((item) => (
                     <NavLink
                       key={item.to}
                       to={item.to}
-                      end={item.end}
                       className={({ isActive }) =>
                         `account-mobile-nav__link${isActive ? " account-mobile-nav__link--active" : ""}`
                       }
@@ -394,7 +398,6 @@ export default function AccountLayout() {
                         <AccountNavIcon label={item.label} />
                       </span>
                       <span className="account-mobile-nav__label">{item.label}</span>
-                      {item.badge ? <span className="account-mobile-nav__badge">{item.badge}</span> : null}
                     </NavLink>
                   ))}
                 </nav>

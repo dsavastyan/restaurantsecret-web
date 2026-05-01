@@ -3,9 +3,10 @@ import { Link, useLocation, useOutletContext } from "react-router-dom";
 import type { AccountOutletContext } from "./Layout";
 import { useAuth } from "@/store/auth";
 import { useGoalsStore } from "@/store/goals";
+import { apiPut } from "@/lib/api";
 
 export default function AccountOverview() {
-  const { me, sub, isNightTheme, incomingFriendRequestsCount, toggleTheme } = useOutletContext<AccountOutletContext>();
+  const { me, sub, reload, isNightTheme, incomingFriendRequestsCount, toggleTheme } = useOutletContext<AccountOutletContext>();
   const location = useLocation();
   const { accessToken } = useAuth((state) => ({
     accessToken: state.accessToken,
@@ -29,10 +30,23 @@ export default function AccountOverview() {
   });
   const [isFormDirty, setIsFormDirty] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'' | 'saving' | 'saved'>('');
+  const [isProfileEditing, setIsProfileEditing] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    email: '',
+    profile_about: ''
+  });
+  const [profileSaveStatus, setProfileSaveStatus] = useState<'' | 'saving' | 'saved'>('');
 
   useEffect(() => {
     if (accessToken) fetchGoals(accessToken);
   }, [accessToken, fetchGoals]);
+
+  useEffect(() => {
+    setProfileForm({
+      email: me?.user?.email || '',
+      profile_about: me?.user?.profile_about || ''
+    });
+  }, [me?.user?.email, me?.user?.profile_about]);
 
   useEffect(() => {
     if (!goals) {
@@ -87,6 +101,31 @@ export default function AccountOverview() {
     }
   };
 
+  const handleProfileFieldChange = (field: "email" | "profile_about", value: string) => {
+    setProfileForm(prev => ({ ...prev, [field]: value }));
+    setProfileSaveStatus('');
+  };
+
+  const saveProfile = async () => {
+    if (!accessToken) return;
+    setProfileSaveStatus('saving');
+
+    try {
+      await apiPut<{ ok: boolean; user?: { email: string; profile_about?: string | null } }>("/users/me", {
+        email: profileForm.email.trim(),
+        profile_about: profileForm.profile_about.trim() || null,
+      }, accessToken);
+      await reload();
+      setProfileSaveStatus('saved');
+      setIsProfileEditing(false);
+      setTimeout(() => setProfileSaveStatus(''), 2000);
+    } catch (err: any) {
+      console.error(err);
+      setProfileSaveStatus('');
+      alert('Ошибка при сохранении профиля: ' + (err.message || 'Unknown error'));
+    }
+  };
+
   const createdAt = useMemo(() => {
     if (!me?.user?.created_at) return null;
     try {
@@ -135,6 +174,8 @@ export default function AccountOverview() {
     { value: "high", label: "Высокая" },
   ];
   const desktopActivity = form.activity === "light" ? "min" : form.activity;
+  const profileAbout = me?.user?.profile_about?.trim() || "";
+  const profileAboutPlaceholder = "Добавьте информацию";
 
   return (
     <section
@@ -303,10 +344,66 @@ export default function AccountOverview() {
             </div>
             <div className="account-profile-card__body">
               <span className="account-profile-card__label">О себе</span>
-              <p>Люблю пробовать новое и<br />выбирать осознанно 🌿</p>
-              <Link to="/account/profile" className="account-profile-card__edit">
-                Редактировать профиль
-              </Link>
+              {isProfileEditing ? (
+                <div className="account-profile-card__edit-form">
+                  <label className="account-profile-card__field">
+                    <span>Почта</span>
+                    <input
+                      type="email"
+                      value={profileForm.email}
+                      onChange={e => handleProfileFieldChange("email", e.target.value)}
+                      placeholder="email@example.com"
+                    />
+                  </label>
+                  <label className="account-profile-card__field">
+                    <span>О себе</span>
+                    <textarea
+                      value={profileForm.profile_about}
+                      onChange={e => handleProfileFieldChange("profile_about", e.target.value)}
+                      placeholder={profileAboutPlaceholder}
+                      rows={4}
+                    />
+                  </label>
+                  <div className="account-profile-card__edit-actions">
+                    <button
+                      type="button"
+                      className="account-profile-card__edit account-profile-card__edit--save"
+                      onClick={saveProfile}
+                      disabled={profileSaveStatus === 'saving'}
+                    >
+                      {profileSaveStatus === 'saving' ? 'Сохраняем...' : 'Сохранить'}
+                    </button>
+                    <button
+                      type="button"
+                      className="account-profile-card__edit account-profile-card__edit--ghost"
+                      onClick={() => {
+                        setProfileForm({
+                          email: me?.user?.email || '',
+                          profile_about: me?.user?.profile_about || ''
+                        });
+                        setIsProfileEditing(false);
+                      }}
+                      disabled={profileSaveStatus === 'saving'}
+                    >
+                      Отмена
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <p className={profileAbout ? "" : "account-profile-card__about-placeholder"}>
+                    {profileAbout || profileAboutPlaceholder}
+                  </p>
+                  <button
+                    type="button"
+                    className="account-profile-card__edit"
+                    onClick={() => setIsProfileEditing(true)}
+                  >
+                    Редактировать профиль
+                  </button>
+                </>
+              )}
+              {profileSaveStatus === 'saved' && <span className="account-profile-card__saved">Сохранено</span>}
             </div>
           </article>
 
@@ -376,7 +473,6 @@ export default function AccountOverview() {
               </span>
               <div>
                 <strong>Умный подбор блюд</strong>
-                <span>Фильтруем по КБЖУ и ингредиентам</span>
               </div>
             </div>
             <div className="account-benefit">
@@ -388,7 +484,6 @@ export default function AccountOverview() {
               </span>
               <div>
                 <strong>Экономия времени</strong>
-                <span>Найдите идеальное за 10 секунд</span>
               </div>
             </div>
             <div className="account-benefit">
@@ -399,7 +494,6 @@ export default function AccountOverview() {
               </span>
               <div>
                 <strong>Осознанный выбор</strong>
-                <span>Контроль без ограничений</span>
               </div>
             </div>
           </div>

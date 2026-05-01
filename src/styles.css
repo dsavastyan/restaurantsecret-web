@@ -16320,6 +16320,228 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
   }
 }
 
+/* Last account mobile overrides. Keep at EOF. */
+@media (max-width: 899px) {
+  .account {
+    min-height: 100dvh !important;
+    padding: 18px 0 calc(112px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .account__inner {
+    width: min(100%, 520px) !important;
+    min-height: 0 !important;
+    padding: 0 20px !important;
+  }
+
+  .account__layout,
+  .account__main {
+    display: block !important;
+    min-height: 0 !important;
+  }
+
+  .account__main {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .account__header {
+    min-height: 70px !important;
+    padding: 0 !important;
+  }
+
+  .account-mobile-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-auto-flow: row !important;
+  }
+
+  .account-mobile-nav__link {
+    justify-content: flex-start !important;
+    overflow: hidden !important;
+  }
+
+  .account-mobile-nav__link:nth-child(n + 5) {
+    grid-column: auto !important;
+  }
+
+  .account-overview-form {
+    display: block !important;
+  }
+
+  .account-overview-desktop {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+
+  .account-profile-card,
+  .account-about-card {
+    min-height: auto !important;
+  }
+
+  .account-profile-card {
+    display: block !important;
+    grid-template-rows: none !important;
+  }
+
+  .account-profile-card__hero {
+    padding: 28px 24px 18px !important;
+    gap: 24px !important;
+    border-bottom: 0 !important;
+  }
+
+  .account-profile-card__avatar {
+    width: 116px !important;
+    height: 116px !important;
+    font-size: 67px !important;
+  }
+
+  .account-profile-card__camera {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  .account-profile-card__camera svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .account-profile-card__identity h2 {
+    font-size: 32px !important;
+  }
+
+  .account-profile-card__identity p,
+  .account-profile-card__identity span {
+    font-size: 20px !important;
+  }
+
+  .account-profile-card__body {
+    padding: 0 24px 22px !important;
+  }
+
+  .account-profile-card__label {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+  }
+
+  .account-profile-card__body p {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-top: 8px !important;
+    text-align: left !important;
+    font-size: 21px !important;
+  }
+
+  .account-profile-card__edit {
+    min-height: 52px !important;
+    margin-top: 28px !important;
+    border-radius: 13px !important;
+    font-size: 19px !important;
+  }
+
+  .account-about-card {
+    padding: 24px !important;
+  }
+
+  .account-about-card .stats-grid {
+    grid-template-columns: 1fr !important;
+    row-gap: 16px !important;
+  }
+
+  .account-about-card .form-group {
+    display: grid !important;
+    grid-template-columns: 100px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 14px !important;
+  }
+
+  .account-about-card .form-group.full {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .account-about-card .form-group label {
+    font-size: 18px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+  }
+
+  .account-about-card .form-group input,
+  .account-about-card .form-group select {
+    height: 52px !important;
+    border-radius: 13px !important;
+    font-size: 18px !important;
+  }
+
+  .activity-segmented {
+    height: 54px !important;
+    border-radius: 24px !important;
+  }
+
+  .activity-segmented__option {
+    border-radius: 24px !important;
+    font-size: 16px !important;
+  }
+
+  .account-benefits-strip {
+    display: none !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .account__inner {
+    padding: 0 16px !important;
+  }
+
+  .account-profile-card__hero {
+    padding: 24px 20px 16px !important;
+    gap: 18px !important;
+  }
+
+  .account-profile-card__avatar {
+    width: 92px !important;
+    height: 92px !important;
+    font-size: 54px !important;
+  }
+
+  .account-profile-card__identity h2 {
+    font-size: 29px !important;
+  }
+
+  .account-profile-card__identity p,
+  .account-profile-card__identity span {
+    font-size: 16px !important;
+  }
+
+  .account-profile-card__body {
+    padding-inline: 20px !important;
+  }
+
+  .account-profile-card__body p {
+    margin-left: 0 !important;
+    font-size: 19px !important;
+  }
+
+  .account-about-card {
+    padding: 20px !important;
+  }
+
+  .account-about-card .form-group {
+    grid-template-columns: 92px minmax(0, 1fr) !important;
+  }
+
+  .account-about-card .form-group label {
+    font-size: 16px !important;
+  }
+}
+
 /* Final mobile account pass: this must stay after older account overrides. */
 @media (max-width: 899px) {
   .account {
@@ -16415,9 +16637,25 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
   }
 
   .account-profile-card__body p {
-    margin-left: 140px !important;
-    margin-top: -4px !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-top: 8px !important;
+    text-align: left !important;
     font-size: 21px !important;
+  }
+
+  .account-mobile-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-auto-flow: row !important;
+  }
+
+  .account-mobile-nav__link {
+    justify-content: flex-start !important;
+    overflow: hidden !important;
+  }
+
+  .account-mobile-nav__link:nth-child(n + 5) {
+    grid-column: auto !important;
   }
 
   .account-profile-card__edit {
@@ -16509,7 +16747,7 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
   }
 
   .account-profile-card__body p {
-    margin-left: 110px !important;
+    margin-left: 0 !important;
     font-size: 19px !important;
   }
 
@@ -16523,6 +16761,83 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
 
   .account-about-card .form-group label {
     font-size: 16px !important;
+  }
+}
+
+.account-profile-card__about-placeholder {
+  color: #8a8f97 !important;
+}
+
+.account-profile-card__edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.account-profile-card__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #69707a;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.account-profile-card__field input,
+.account-profile-card__field textarea {
+  width: 100%;
+  border: 1px solid rgba(31, 31, 28, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.6);
+  color: #111318;
+  font: inherit;
+  font-size: 17px;
+  padding: 13px 16px;
+  outline: none;
+}
+
+.account-profile-card__field textarea {
+  min-height: 112px;
+  resize: vertical;
+  line-height: 1.4;
+}
+
+.account-profile-card__field input:focus,
+.account-profile-card__field textarea:focus {
+  border-color: rgba(109, 135, 60, 0.46);
+  box-shadow: 0 0 0 4px rgba(109, 135, 60, 0.1);
+}
+
+.account-profile-card__edit-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.account-profile-card__edit-actions .account-profile-card__edit {
+  margin-top: 0;
+}
+
+.account-profile-card__edit--ghost {
+  color: #6b7079 !important;
+  border-color: rgba(31, 31, 28, 0.14) !important;
+}
+
+.account-profile-card__edit[disabled] {
+  cursor: progress;
+  opacity: 0.68;
+}
+
+.account-profile-card__saved {
+  margin-top: 12px;
+  color: var(--account-olive-dark);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+@media (max-width: 899px) {
+  .account-profile-card__edit-actions {
+    flex-direction: column;
   }
 }
 
@@ -18345,5 +18660,227 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
 
   .ndsHeader {
     justify-content: flex-end !important;
+  }
+}
+
+/* Last account mobile overrides. Keep at EOF. */
+@media (max-width: 899px) {
+  .account {
+    min-height: 100dvh !important;
+    padding: 18px 0 calc(112px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .account__inner {
+    width: min(100%, 520px) !important;
+    min-height: 0 !important;
+    padding: 0 20px !important;
+  }
+
+  .account__layout,
+  .account__main {
+    display: block !important;
+    min-height: 0 !important;
+  }
+
+  .account__main {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .account__header {
+    min-height: 70px !important;
+    padding: 0 !important;
+  }
+
+  .account-mobile-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-auto-flow: row !important;
+  }
+
+  .account-mobile-nav__link {
+    justify-content: flex-start !important;
+    overflow: hidden !important;
+  }
+
+  .account-mobile-nav__link:nth-child(n + 5) {
+    grid-column: auto !important;
+  }
+
+  .account-overview-form {
+    display: block !important;
+  }
+
+  .account-overview-desktop {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+
+  .account-profile-card,
+  .account-about-card {
+    min-height: auto !important;
+  }
+
+  .account-profile-card {
+    display: block !important;
+    grid-template-rows: none !important;
+  }
+
+  .account-profile-card__hero {
+    padding: 28px 24px 18px !important;
+    gap: 24px !important;
+    border-bottom: 0 !important;
+  }
+
+  .account-profile-card__avatar {
+    width: 116px !important;
+    height: 116px !important;
+    font-size: 67px !important;
+  }
+
+  .account-profile-card__camera {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  .account-profile-card__camera svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .account-profile-card__identity h2 {
+    font-size: 32px !important;
+  }
+
+  .account-profile-card__identity p,
+  .account-profile-card__identity span {
+    font-size: 20px !important;
+  }
+
+  .account-profile-card__body {
+    padding: 0 24px 22px !important;
+  }
+
+  .account-profile-card__label {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+  }
+
+  .account-profile-card__body p {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-top: 8px !important;
+    text-align: left !important;
+    font-size: 21px !important;
+  }
+
+  .account-profile-card__edit {
+    min-height: 52px !important;
+    margin-top: 28px !important;
+    border-radius: 13px !important;
+    font-size: 19px !important;
+  }
+
+  .account-about-card {
+    padding: 24px !important;
+  }
+
+  .account-about-card .stats-grid {
+    grid-template-columns: 1fr !important;
+    row-gap: 16px !important;
+  }
+
+  .account-about-card .form-group {
+    display: grid !important;
+    grid-template-columns: 100px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 14px !important;
+  }
+
+  .account-about-card .form-group.full {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .account-about-card .form-group label {
+    font-size: 18px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+  }
+
+  .account-about-card .form-group input,
+  .account-about-card .form-group select {
+    height: 52px !important;
+    border-radius: 13px !important;
+    font-size: 18px !important;
+  }
+
+  .activity-segmented {
+    height: 54px !important;
+    border-radius: 24px !important;
+  }
+
+  .activity-segmented__option {
+    border-radius: 24px !important;
+    font-size: 16px !important;
+  }
+
+  .account-benefits-strip {
+    display: none !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .account__inner {
+    padding: 0 16px !important;
+  }
+
+  .account-profile-card__hero {
+    padding: 24px 20px 16px !important;
+    gap: 18px !important;
+  }
+
+  .account-profile-card__avatar {
+    width: 92px !important;
+    height: 92px !important;
+    font-size: 54px !important;
+  }
+
+  .account-profile-card__identity h2 {
+    font-size: 29px !important;
+  }
+
+  .account-profile-card__identity p,
+  .account-profile-card__identity span {
+    font-size: 16px !important;
+  }
+
+  .account-profile-card__body {
+    padding-inline: 20px !important;
+  }
+
+  .account-profile-card__body p {
+    margin-left: 0 !important;
+    font-size: 19px !important;
+  }
+
+  .account-about-card {
+    padding: 20px !important;
+  }
+
+  .account-about-card .form-group {
+    grid-template-columns: 92px minmax(0, 1fr) !important;
+  }
+
+  .account-about-card .form-group label {
+    font-size: 16px !important;
   }
 }
