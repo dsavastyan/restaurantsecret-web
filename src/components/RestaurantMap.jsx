@@ -22,6 +22,8 @@ L.Icon.Default.mergeOptions({
 const defaultCenter = [55.751244, 37.618423]
 const defaultZoom = 10
 const defaultMarkerIconUrl = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png'
+const metroFilterRadiusM = 1200
+const earthRadiusM = 6371000
 
 const favoriteMarkerIcon = L.divIcon({
   className: 'map-fav-marker-wrapper',
@@ -50,6 +52,68 @@ function normalizeInstagramUrl(rawUrl) {
   } catch (_) {
     return null
   }
+}
+
+function normalizeStationName(value) {
+  return String(value || '').trim().toLowerCase()
+}
+
+function getMetroNames(restaurant) {
+  const rawNames = Array.isArray(restaurant?.metroNames)
+    ? restaurant.metroNames
+    : Array.isArray(restaurant?.metros)
+      ? restaurant.metros
+      : []
+
+  const names = rawNames
+    .map((name) => normalizeStationName(name))
+    .filter(Boolean)
+
+  const nearestName = normalizeStationName(restaurant?.metro)
+  if (nearestName) names.push(nearestName)
+
+  return Array.from(new Set(names))
+}
+
+function getStationPoints(station) {
+  const points = Array.isArray(station?.points) ? station.points : []
+  const normalizedPoints = points
+    .map((point) => ({
+      lat: Number(point?.lat),
+      lon: Number(point?.lon),
+    }))
+    .filter((point) => Number.isFinite(point.lat) && Number.isFinite(point.lon))
+
+  if (normalizedPoints.length > 0) return normalizedPoints
+
+  const lat = Number(station?.lat)
+  const lon = Number(station?.lon)
+  if (Number.isFinite(lat) && Number.isFinite(lon)) return [{ lat, lon }]
+
+  return []
+}
+
+function toRadians(degrees) {
+  return (degrees * Math.PI) / 180
+}
+
+function getDistanceMeters(from, to) {
+  const dLat = toRadians(to.lat - from.lat)
+  const dLon = toRadians(to.lon - from.lon)
+  const lat1 = toRadians(from.lat)
+  const lat2 = toRadians(to.lat)
+
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2
+  return 2 * earthRadiusM * Math.asin(Math.sqrt(a))
+}
+
+function isRestaurantNearStation(restaurant, stationPoints) {
+  const lat = Number(restaurant?.lat)
+  const lon = Number(restaurant?.lon)
+  if (!Number.isFinite(lat) || !Number.isFinite(lon) || stationPoints.length === 0) return false
+
+  return stationPoints.some((point) => getDistanceMeters({ lat, lon }, point) <= metroFilterRadiusM)
 }
 
 function ClusterLayer({ restaurants, favoriteSlugs }) {
@@ -256,17 +320,24 @@ export default function RestaurantMap({
     [favoriteLookup],
   )
   const selectedMetroStationName = useMemo(
-    () => String(selectedMetroStation?.name_ru || '').trim().toLowerCase(),
+    () => normalizeStationName(selectedMetroStation?.name_ru),
+    [selectedMetroStation],
+  )
+  const selectedMetroStationPoints = useMemo(
+    () => getStationPoints(selectedMetroStation),
     [selectedMetroStation],
   )
   const visibleRestaurants = useMemo(() => {
     return restaurants.filter((restaurant) => {
       if (filters.excludeFastFood && isFastFoodCuisine(restaurant?.cuisine)) return false
       if (!selectedMetroStationName) return true
-      const metroName = String(restaurant?.metro || '').trim().toLowerCase()
-      return metroName === selectedMetroStationName
+
+      const metroNames = getMetroNames(restaurant)
+      if (metroNames.includes(selectedMetroStationName)) return true
+
+      return isRestaurantNearStation(restaurant, selectedMetroStationPoints)
     })
-  }, [restaurants, filters.excludeFastFood, selectedMetroStationName])
+  }, [restaurants, filters.excludeFastFood, selectedMetroStationName, selectedMetroStationPoints])
   const { restaurants: uniqueRestaurantCount, weeklyAdded } = calculateRestaurantStats(visibleRestaurants)
   const isNight = themeMode === 'night'
   const hasOverlayMapButton = !showSummaryHeader
