@@ -124,6 +124,10 @@ function applySeoTags(baseHtml, route) {
     )
   }
 
+  if (route.fallbackHtml) {
+    html = html.replace('<div id="root"></div>', `<div id="root">${route.fallbackHtml}</div>`)
+  }
+
   return html
 }
 
@@ -183,6 +187,39 @@ function restaurantSchema(restaurant) {
   }
 }
 
+function fallbackPage({ title, description, links = [] }) {
+  const linkHtml = links
+    .map((link) => `<li><a href="${escapeHtml(link.href)}">${escapeHtml(link.label)}</a></li>`)
+    .join('')
+
+  return `<main style="font-family:Inter,system-ui,sans-serif;max-width:760px;margin:0 auto;padding:48px 20px;line-height:1.5">
+  <h1>${escapeHtml(title)}</h1>
+  <p>${escapeHtml(description)}</p>
+  ${linkHtml ? `<nav><ul>${linkHtml}</ul></nav>` : ''}
+</main>`
+}
+
+function restaurantFallback(restaurant) {
+  const slug = restaurant.slug
+  const name = getRestaurantName(restaurant)
+  const description = getRestaurantDescription(restaurant)
+  const cuisine = stripEmpty(restaurant.cuisine)
+  const metro = stripEmpty(restaurant.metro || restaurant.metroName || restaurant.metro_name)
+  const details = [
+    cuisine ? `Кухня: ${cuisine}` : '',
+    metro ? `Метро: ${metro}` : '',
+    Number.isFinite(Number(restaurant.dishesCount)) ? `Блюд в меню: ${Number(restaurant.dishesCount)}` : '',
+  ].filter(Boolean)
+
+  return `<main style="font-family:Inter,system-ui,sans-serif;max-width:760px;margin:0 auto;padding:48px 20px;line-height:1.5">
+  <h1>${escapeHtml(name)} — меню с КБЖУ</h1>
+  <p>${escapeHtml(description)}</p>
+  ${details.length ? `<ul>${details.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : ''}
+  <p><a href="/restaurants/${escapeHtml(slug)}/menu">Открыть меню ресторана</a></p>
+  <p><a href="/catalog">Вернуться в каталог ресторанов</a></p>
+</main>`
+}
+
 function websiteSchema() {
   return {
     '@context': 'https://schema.org',
@@ -210,30 +247,52 @@ function generateStaticRoutes(restaurants) {
       description: 'Все меню ресторанов Москвы с калориями, белками, жирами и углеводами. Фильтруйте по целям и выбирайте осознанно.',
       canonical: `${BASE_URL}/`,
       schema: websiteSchema(),
+      fallbackHtml: fallbackPage({
+        title: 'Меню ресторанов с КБЖУ',
+        description: 'RestaurantSecret помогает выбирать блюда в ресторанах Москвы по калориям, белкам, жирам и углеводам.',
+        links: [{ href: '/catalog', label: 'Открыть каталог ресторанов' }],
+      }),
     },
     {
       path: '/catalog',
       title: 'Каталог ресторанов с КБЖУ — RestaurantSecret',
       description: 'Все рестораны Москвы с полным меню и данными КБЖУ. Фильтрация по кухне, метро и целям питания.',
       canonical: `${BASE_URL}/catalog`,
+      fallbackHtml: fallbackPage({
+        title: 'Каталог ресторанов с КБЖУ',
+        description: 'Все рестораны Москвы с полным меню и данными КБЖУ. Фильтрация по кухне, метро и целям питания.',
+      }),
     },
     {
       path: '/how-it-works',
       title: 'Как это работает — RestaurantSecret',
       description: 'Узнайте, как RestaurantSecret помогает следить КБЖУ в ресторанах Москвы. Реальные данные из меню каждого заведения, фильтры по целям питания.',
       canonical: `${BASE_URL}/how-it-works`,
+      fallbackHtml: fallbackPage({
+        title: 'Как это работает',
+        description: 'RestaurantSecret собирает данные меню ресторанов и помогает находить блюда под ваши цели питания.',
+        links: [{ href: '/catalog', label: 'Посмотреть рестораны' }],
+      }),
     },
     {
       path: '/tariffs',
       title: 'Подписка и тарифы — RestaurantSecret',
       description: 'Бесплатный и премиум доступ к КБЖУ всех ресторанов Москвы. Пробный период 7 дней бесплатно.',
       canonical: `${BASE_URL}/tariffs`,
+      fallbackHtml: fallbackPage({
+        title: 'Подписка и тарифы',
+        description: 'Бесплатный и премиум доступ к КБЖУ всех ресторанов Москвы. Пробный период 7 дней бесплатно.',
+      }),
     },
     {
       path: '/contact',
       title: 'Контакты — RestaurantSecret',
       description: 'Контакты и реквизиты RestaurantSecret. Поддержка по подписке и общие вопросы.',
       canonical: `${BASE_URL}/contact`,
+      fallbackHtml: fallbackPage({
+        title: 'Контакты',
+        description: 'Контакты и реквизиты RestaurantSecret. Поддержка по подписке и общие вопросы.',
+      }),
     },
   ]
 
@@ -257,6 +316,7 @@ function generateStaticRoutes(restaurants) {
         description,
         canonical: `${BASE_URL}/restaurants/${slug}`,
         schema: restaurantSchema(restaurant),
+        fallbackHtml: restaurantFallback(restaurant),
       }),
     )
 
@@ -268,6 +328,7 @@ function generateStaticRoutes(restaurants) {
         canonical: `${BASE_URL}/restaurants/${slug}`,
         robots: 'noindex,follow',
         schema: restaurantSchema(restaurant),
+        fallbackHtml: restaurantFallback(restaurant),
       }),
     )
 
