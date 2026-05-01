@@ -45,7 +45,7 @@ const STEPS = [
   {
     num: '03',
     title: 'Выбирай под свои цели',
-    body: 'Фильтры по калориям и БЖУ, дневник питания, избранное. Ресторан больше не срывает план.',
+    body: 'Фильтры по калориям и БЖУ, дневник питания, избранное.',
     videoSrc: null,
     videoPoster: null,
     videoLabel: 'Фильтрация блюд по целям',
@@ -63,45 +63,27 @@ const COMPARISON = [
     verdict: 'limited',
   },
   {
-    option: 'MyFitnessPal Premium',
+    option: 'MyFitnessPal, FatSecret, LifeSum и др.',
     costMonth: '~500 ₽/мес',
     costYear: '~6 000 ₽/год',
-    what: 'КБЖУ из базы, нет ресторанов РФ',
+    what: 'КБЖУ из непроверенной базы, нет многих ресторанов РФ',
     verdict: 'limited',
   },
   {
     option: 'Считать самому в ресторане',
     costMonth: '—',
     costYear: '—',
-    what: 'Меню без граммов и состава блюд',
+    what: 'Недоступный/неудобный формат, длительный поиск, сложное принятие решения',
     verdict: 'bad',
   },
   {
     option: 'RestaurantSecret',
     costMonth: '199 ₽/мес',
-    costYear: '2 388 ₽/год',
-    what: 'Готовое КБЖУ по реальным московским меню',
+    costYear: '1 490 ₽/год',
+    what: 'КБЖУ по реальным меню с быстрым поиском и фильтрами',
     verdict: 'good',
     highlight: true,
     note: '≈ 6,6 ₽ в день',
-  },
-]
-
-const TESTIMONIALS = [
-  {
-    text: 'Наконец-то могу ходить в рестораны с коллегами и не гадать, что съела. Открываю приложение, смотрю КБЖУ — всё.',
-    name: 'Анна, минус 8 кг за 3 месяца',
-    initials: 'АК',
-  },
-  {
-    text: 'Раньше думал, что контроль питания несовместим с нормальной социальной жизнью. Теперь знаю меню половины Москвы наизусть.',
-    name: 'Максим, набрал 4 кг мышц',
-    initials: 'МП',
-  },
-  {
-    text: 'Сервис нашёл мой любимый ресторан — я не ожидала. Данные реальные, не усреднённые. Доверяю.',
-    name: 'Екатерина, ЗОЖ 1 год',
-    initials: 'ЕС',
   },
 ]
 
@@ -112,7 +94,7 @@ const FAQ = [
   },
   {
     q: 'Насколько точные данные?',
-    a: 'Данные берутся из официальных меню и технологических карт ресторанов — не из усреднённых интернет-баз. Это до 40% точнее стандартных калькуляторов.',
+    a: 'Данные берутся из официальных меню и технологических карт ресторанов — не из усреднённых интернет-баз и не из ИИ-угадывания по фото.',
   },
   {
     q: 'Как работает пробный период?',
@@ -154,35 +136,20 @@ export default function HowItWorks() {
         </nav>
         <div className="landing-warm__nav-right">
           <Link to="/onboarding/welcome" className="landing-warm__nav-cta">
-            7 дней бесплатно →
+            Попробовать 7 дней бесплатно →
           </Link>
         </div>
       </header>
 
-      {/* ── 1. Герой ── */}
-      <section className="hiw__hero">
-        <div className="hiw__hero-inner">
-          <h1 className="hiw__hero-title">
-            Рестораны больше<br />
-            не срывают <em>твои цели</em>
-          </h1>
-          <p className="hiw__hero-sub">
-            КБЖУ каждого блюда в сотнях московских ресторанов — прямо в телефоне.
-            Ешь вкусно и знай, что ешь.
-          </p>
-
-          {/* CTA прямо в герое */}
-          <div className="hiw__hero-cta">
-            <Link to="/onboarding/welcome" className="hiw__hero-btn-primary">
-              Попробовать 7 дней бесплатно
-            </Link>
-            <p className="hiw__hero-cta-note">
-              <LockIcon /> Потом 199 ₽/мес · Отмена в любой момент
-            </p>
-          </div>
+      {/* ── 1. Проблема ── */}
+      <section className="hiw__problem hiw__problem--intro" aria-labelledby="problem-title">
+        <div className="hiw__section-head">
+          <h2 id="problem-title">
+            Почему учёт КБЖУ — основа любой цели
+          </h2>
+          <p>Без понимания, что ты ешь, невозможно управлять результатом — будь то похудение, набор массы или просто здоровье.</p>
         </div>
 
-        {/* Loss-aversion stat */}
         <div className="hiw__hero-stat-bar" aria-label="Статистика">
           <div className="hiw__hero-stat">
             <strong>+300–600 ккал</strong>
@@ -190,30 +157,16 @@ export default function HowItWorks() {
           </div>
           <div className="hiw__hero-stat-divider" />
           <div className="hiw__hero-stat">
-            <strong>≤ 5 сек</strong>
-            <span>чтобы найти КБЖУ любого блюда</span>
+            <strong>90% ресторанов</strong>
+            <span>не имеют удобных КБЖУ меню</span>
           </div>
           <div className="hiw__hero-stat-divider" />
           <div className="hiw__hero-stat">
-            <strong>40%</strong>
-            <span>точнее стандартных калькуляторов</span>
+            <strong>до 40%*</strong>
+            <span>ошибка ИИ распознавания блюд против реальных данных</span>
           </div>
         </div>
-
-        <div className="hiw__hero-scroll" aria-hidden="true">
-          <div className="hiw__hero-scroll-line" />
-          <svg viewBox="0 0 14 14"><path d="M3 5 L7 9 L11 5" /></svg>
-        </div>
-      </section>
-
-      {/* ── 2. Проблема ── */}
-      <section className="hiw__problem" aria-labelledby="problem-title">
-        <div className="hiw__section-head">
-          <h2 id="problem-title">
-            Почему учёт КБЖУ — <em>основа</em> любой цели
-          </h2>
-          <p>Без понимания, что ты ешь, невозможно управлять результатом — будь то похудение, набор массы или просто здоровье.</p>
-        </div>
+        <p className="hiw__hero-stat-footnote">*Shonkoff et al., 2023, systematic review, 52 papers</p>
 
         <div className="hiw__pain-grid">
           {PAIN_POINTS.map((item) => {
@@ -231,7 +184,7 @@ export default function HowItWorks() {
         </div>
       </section>
 
-      {/* ── 3. Как работает: 3 шага ── */}
+      {/* ── 2. Как работает: 3 шага ── */}
       <section className="hiw__steps" aria-labelledby="steps-title">
         <div className="hiw__section-head hiw__section-head--dark">
           <h2 id="steps-title">Три шага — и ты под контролем</h2>
@@ -278,33 +231,12 @@ export default function HowItWorks() {
         </div>
       </section>
 
-      {/* ── 4. Социальное доказательство ── */}
-      <section className="hiw__testimonials" aria-labelledby="testimonials-title">
-        <div className="hiw__section-head">
-          <h2 id="testimonials-title">
-            Уже <em>считают</em> в ресторанах
-          </h2>
-        </div>
-        <div className="hiw__testi-grid">
-          {TESTIMONIALS.map((t) => (
-            <blockquote key={t.name} className="hiw__testi-card">
-              <p>«{t.text}»</p>
-              <footer>
-                <span className="hiw__testi-avatar">{t.initials}</span>
-                <cite>{t.name}</cite>
-              </footer>
-            </blockquote>
-          ))}
-        </div>
-      </section>
-
-      {/* ── 5. Сравнение ── */}
+      {/* ── 3. Сравнение ── */}
       <section className="hiw__compare" aria-labelledby="compare-title">
         <div className="hiw__section-head">
           <h2 id="compare-title">
             RestaurantSecret против <em>альтернатив</em>
           </h2>
-          <p>Посмотрите на годовые цифры — разница очевидна.</p>
         </div>
 
         <div className="hiw__compare-table-wrap">
@@ -344,7 +276,7 @@ export default function HowItWorks() {
         </div>
       </section>
 
-      {/* ── 6. FAQ ── */}
+      {/* ── 4. FAQ ── */}
       <section className="hiw__faq" aria-labelledby="faq-title">
         <div className="hiw__section-head">
           <h2 id="faq-title">Частые вопросы</h2>
@@ -370,22 +302,20 @@ export default function HowItWorks() {
         </div>
       </section>
 
-      {/* ── 7. CTA ── */}
+      {/* ── 5. CTA ── */}
       <section className="hiw__cta">
         <h2>
-          7 дней — <em>бесплатно</em>
+          Рестораны больше<br />
+          не срывают <em>твои цели</em>
         </h2>
-        <p>Полный доступ ко всем ресторанам. Потом 199 ₽/мес — это 6,6 ₽ в день.</p>
+        <p>КБЖУ каждого блюда в сотнях московских ресторанов — прямо в телефоне. Ешь вкусно и знай, что ешь.</p>
         <div className="hiw__cta-actions">
-          <Link to="/onboarding/welcome" className="landing-warm__cta-primary">
-            Начать бесплатно
-          </Link>
-          <Link to="/restaurants" className="landing-warm__cta-secondary">
-            Посмотреть меню
+          <Link to="/onboarding/welcome" className="hiw__hero-btn-primary">
+            Попробовать 7 дней бесплатно
           </Link>
         </div>
         <p className="hiw__cta-fine">
-          <LockIcon /> Требуется привязка карты. Списание на 8-й день если не отмените.
+          <LockIcon /> Потом 199 ₽/мес · Отмена в любой момент
         </p>
       </section>
 
@@ -594,12 +524,19 @@ const hiwStyles = `
   --warm-rule: #ded3bf;
   --warm-rule-strong: rgba(42, 38, 32, 0.15);
   --warm-warm: #d47a3a;
+  --warm-accent-dk: #a95725;
   --warm-p: #8a9a6b;
   --warm-f: #e8a15e;
   --warm-c: #d87a5e;
   color: var(--warm-ink);
   background: var(--warm-bg);
   font-family: Inter, system-ui, sans-serif;
+  width: 100%;
+  min-height: 100vh;
+}
+.hiw a {
+  color: inherit;
+  text-decoration: none;
 }
 
 /* ── Герой ── */
@@ -687,6 +624,7 @@ const hiwStyles = `
   display: flex;
   flex-direction: column;
   align-items: center;
+  flex: 1 1 240px;
   padding: 8px 32px;
   gap: 4px;
 }
@@ -699,13 +637,21 @@ const hiwStyles = `
 .hiw__hero-stat span {
   font-size: .78rem;
   color: rgba(251,243,225,.55);
-  max-width: 160px;
+  max-width: 230px;
   text-align: center;
 }
 .hiw__hero-stat-divider {
   width: 1px;
   height: 40px;
   background: rgba(255,255,255,.1);
+}
+.hiw__hero-stat-footnote {
+  width: 100%;
+  margin: 10px auto 0;
+  color: var(--warm-ink-soft);
+  font-size: .76rem;
+  line-height: 1.45;
+  text-align: center;
 }
 
 .hiw__hero-scroll {
@@ -739,14 +685,22 @@ const hiwStyles = `
 
 /* ── Проблема ── */
 .hiw__problem {
-  padding: 80px 24px;
-  max-width: 1120px;
+  padding: 96px 24px 80px;
+  width: 100%;
+  max-width: none;
   margin: 0 auto;
+}
+.hiw__problem--intro {
+  background:
+    radial-gradient(ellipse 900px 420px at 50% 0%, rgba(212,122,58,.13), transparent 60%),
+    var(--warm-bg);
 }
 .hiw__pain-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
+  max-width: 1120px;
+  margin: 56px auto 0;
 }
 .hiw__pain-card {
   background: var(--warm-card);
@@ -883,13 +837,15 @@ const hiwStyles = `
 /* ── Сравнение ── */
 .hiw__compare {
   padding: 80px 24px;
-  max-width: 1120px;
+  width: 100%;
+  max-width: none;
   margin: 0 auto;
 }
 .hiw__compare-table-wrap {
   overflow-x: auto;
   border-radius: 20px;
   box-shadow: 0 12px 40px rgba(42,38,32,.1);
+  width: 100%;
 }
 .hiw__compare-table {
   width: 100%;
@@ -1005,12 +961,19 @@ const hiwStyles = `
 }
 .hiw__cta h2 {
   font-family: 'DM Serif Display', Georgia, serif;
-  font-size: clamp(1.7rem, 4vw, 2.8rem);
+  font-size: clamp(2rem, 5vw, 3.4rem);
   font-weight: 400;
   margin: 0 0 14px;
+  line-height: 1.12;
 }
 .hiw__cta h2 em { font-style: italic; color: var(--warm-warm); }
-.hiw__cta > p { color: rgba(251,243,225,.65); font-size: 1rem; margin: 0 0 36px; }
+.hiw__cta > p {
+  color: rgba(251,243,225,.65);
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 640px;
+  margin: 0 auto 36px;
+}
 .hiw__cta-actions {
   display: flex;
   gap: 14px;

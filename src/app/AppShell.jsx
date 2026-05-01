@@ -225,11 +225,12 @@ export default function AppShell() {
   const isContact = location.pathname.startsWith('/contact')
   const isLanding = location.pathname === '/'
   const isTariffsPage = location.pathname === '/tariffs'
+  const isHowItWorksPage = location.pathname === '/how-it-works'
   const isLoginPage = location.pathname === '/login'
   const isOnboardingPage = location.pathname.startsWith('/onboarding')
   const isAccountPage = location.pathname.startsWith('/account')
   const isImmersivePage = isLoginPage || isOnboardingPage || isAccountPage
-  const isMarketingPage = isLanding || isTariffsPage
+  const isMarketingPage = isLanding || isTariffsPage || isHowItWorksPage
   const isRestaurantMenuPage = /^\/(?:restaurants|r)\/[^/]+\/menu\/?$/.test(location.pathname)
   const isRestaurantsCatalogPage = location.pathname === '/restaurants'
 
