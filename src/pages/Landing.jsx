@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import CityMapBackground from '@/components/CityMapBackground'
-import RestaurantMap from '@/components/RestaurantMap'
 import SearchInput from '@/components/SearchInput'
 import { CookieSettingsModal } from '@/components/CookieSettingsModal'
 import { getLandingStats, getRestaurants, postSuggest } from '@/lib/api'
@@ -20,6 +19,7 @@ const STATS_FALLBACK = {
   weeklyAdded: 0,
 }
 const FEATURED_RESTAURANTS_LIMIT = 12
+const RestaurantMap = lazy(() => import('@/components/RestaurantMap'))
 
 const POPULAR_QUERIES = ['бургер', 'боул с лососем', 'салат цезарь', 'стейк', 'паста']
 
@@ -132,7 +132,9 @@ export default function Landing() {
   const [featuredRestaurants, setFeaturedRestaurants] = useState([])
   const [totalRestaurantsCount, setTotalRestaurantsCount] = useState(0)
   const [openMapFullscreenSignal, setOpenMapFullscreenSignal] = useState(0)
+  const [shouldLoadMap, setShouldLoadMap] = useState(false)
   const suggestZoneRef = useRef(null)
+  const mapSectionRef = useRef(null)
 
   const resolvedStats = useMemo(() => ({
     restaurants: heroStats.restaurants > 0 ? heroStats.restaurants : STATS_FALLBACK.restaurants,
@@ -270,6 +272,27 @@ export default function Landing() {
     }
   }, [suggestOpen])
 
+  useEffect(() => {
+    if (shouldLoadMap) return undefined
+    const section = mapSectionRef.current
+    if (!section || !('IntersectionObserver' in window)) {
+      const id = window.setTimeout(() => setShouldLoadMap(true), 3000)
+      return () => window.clearTimeout(id)
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return
+        setShouldLoadMap(true)
+        observer.disconnect()
+      },
+      { rootMargin: '700px 0px' },
+    )
+
+    observer.observe(section)
+    return () => observer.disconnect()
+  }, [shouldLoadMap])
+
   function scrollToSection(sectionId) {
     const section = document.getElementById(sectionId)
     if (section) {
@@ -381,7 +404,7 @@ export default function Landing() {
         <header className="landing-warm__nav">
           <div className="landing-warm__nav-left">
             <Link to="/" className="landing-warm__brand-link" aria-label="RestaurantSecret">
-              <img src="/assets/logo.png" alt="" aria-hidden="true" className="landing-warm__logo" />
+              <img src="/assets/logo-64.png" width="32" height="32" alt="" aria-hidden="true" className="landing-warm__logo" />
               <span className="landing-warm__brand">RestaurantSecret</span>
             </Link>
           </div>
@@ -645,23 +668,32 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="landing-warm__map" id="map">
+        <section className="landing-warm__map" id="map" ref={mapSectionRef}>
           <div className="landing-warm__map-frame">
-            <RestaurantMap
-              themeMode={themeMode}
-              showSummaryHeader={false}
-              openFullscreenSignal={openMapFullscreenSignal}
-              onStatsChange={(next) => {
-                setMapStats({ points: Number(next?.points ?? 0) })
-              }}
-            />
+            {shouldLoadMap ? (
+              <Suspense fallback={<div className="landing-warm__map-placeholder" aria-hidden="true" />}>
+                <RestaurantMap
+                  themeMode={themeMode}
+                  showSummaryHeader={false}
+                  openFullscreenSignal={openMapFullscreenSignal}
+                  onStatsChange={(next) => {
+                    setMapStats({ points: Number(next?.points ?? 0) })
+                  }}
+                />
+              </Suspense>
+            ) : (
+              <div className="landing-warm__map-placeholder" aria-hidden="true" />
+            )}
 
             <aside className="landing-warm__map-overlay">
               <h3>{pointsLabel} точек на карте Москвы</h3>
               <p>Посмотрите ближайшие рестораны и их меню.</p>
               <button
                 type="button"
-                onClick={() => setOpenMapFullscreenSignal(Date.now())}
+                onClick={() => {
+                  setShouldLoadMap(true)
+                  setOpenMapFullscreenSignal(Date.now())
+                }}
               >
                 Открыть карту →
               </button>

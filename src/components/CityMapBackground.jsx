@@ -14,7 +14,8 @@ export default function CityMapBackground({ themeMode = 'day' }) {
     const cv = canvasRef.current
     if (!cv) return
     const ctx = cv.getContext('2d')
-    let rafId, W = 0, H = 0
+    let rafId = 0, W = 0, H = 0, t = 0
+    let stopped = false
 
     /* ---- orb definitions (normalised 0-1) ---- */
     const orbs = [
@@ -25,18 +26,17 @@ export default function CityMapBackground({ themeMode = 'day' }) {
       { x: 0.88, y: 0.72, r: 0.28, hue: 42,  sat: 46, speed: 0.30, phase: 1.90, dx: -0.011, dy: -0.007 },
     ]
 
-    function resize() {
-      W = cv.offsetWidth
-      H = cv.offsetHeight
+    function resize(entry) {
+      W = Math.round(entry?.contentRect?.width || cv.clientWidth)
+      H = Math.round(entry?.contentRect?.height || cv.clientHeight)
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
       cv.width  = W * dpr
       cv.height = H * dpr
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      draw()
     }
 
-    let t = 0
-
-    function frame() {
+    function draw() {
       ctx.clearRect(0, 0, W, H)
 
       const dark = themeRef.current === 'night'
@@ -66,18 +66,49 @@ export default function CityMapBackground({ themeMode = 'day' }) {
         ctx.fill()
       }
 
+    }
+
+    function frame() {
+      draw()
       t += 0.010
       rafId = requestAnimationFrame(frame)
     }
 
-    const ro = new ResizeObserver(resize)
+    function start() {
+      if (stopped || rafId || document.visibilityState === 'hidden') return
+      rafId = requestAnimationFrame(frame)
+    }
+
+    function stop() {
+      if (!rafId) return
+      cancelAnimationFrame(rafId)
+      rafId = 0
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'hidden') {
+        stop()
+      } else {
+        start()
+      }
+    }
+
+    const ro = new ResizeObserver(([entry]) => resize(entry))
     ro.observe(cv)
     resize()
-    frame()
+
+    const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    const startDelay = window.setTimeout(() => {
+      if (!prefersReducedMotion) start()
+    }, 1800)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
-      cancelAnimationFrame(rafId)
+      stopped = true
+      window.clearTimeout(startDelay)
+      stop()
       ro.disconnect()
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [])
 

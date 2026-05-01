@@ -7,7 +7,10 @@ import ToastViewport from './components/ui/ToastViewport.tsx'
 import MaintenanceScreen from './components/MaintenanceScreen.jsx'
 import { ConsentBanner } from './components/ConsentBanner.jsx'
 import { analytics } from './services/analytics'
+import { loadTelegramWebApp } from './lib/telegram'
 import './styles.css'
+
+loadTelegramWebApp().catch(() => { })
 
 // Register the service worker (if supported) once the page has fully loaded so
 // network caching can work in production. Errors are intentionally swallowed to
