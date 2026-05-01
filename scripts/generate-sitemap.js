@@ -4,11 +4,26 @@
 
 import { writeFileSync } from 'fs'
 
-const BASE_URL = 'https://restaurantsecret.ru'
-const API_URL = 'https://pd.restaurantsecret.ru'
+const BASE_URL = (process.env.SITEMAP_BASE_URL || 'https://restaurantsecret.ru').replace(/\/+$/, '')
+const API_URL = (
+  process.env.SITEMAP_API_URL ||
+  process.env.VITE_API_BASE_URL ||
+  process.env.VITE_API_BASE ||
+  process.env.VITE_API_URL ||
+  'https://api.restaurantsecret.ru/cf'
+).replace(/\/+$/, '')
+
+function escapeXml(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&apos;')
+}
 
 async function fetchAllRestaurants() {
-  const res = await fetch(`${API_URL}/catalog?limit=2000`)
+  const res = await fetch(`${API_URL}/restaurants?limit=2000`)
   if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`)
   const data = await res.json()
   return data.items ?? data ?? []
@@ -45,10 +60,10 @@ async function main() {
 ${allUrls
   .map(
     (u) => `  <url>
-    <loc>${u.loc}</loc>
-    <changefreq>${u.changefreq}</changefreq>
-    <priority>${u.priority}</priority>
-    <lastmod>${u.lastmod}</lastmod>
+    <loc>${escapeXml(u.loc)}</loc>
+    <changefreq>${escapeXml(u.changefreq)}</changefreq>
+    <priority>${escapeXml(u.priority)}</priority>
+    <lastmod>${escapeXml(u.lastmod)}</lastmod>
   </url>`,
   )
   .join('\n')}
