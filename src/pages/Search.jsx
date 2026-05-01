@@ -153,8 +153,8 @@ export default function Search() {
     <div className="search-page">
       <div className="search-page__hero">
         <h1 className="search-page__title">
-          Найдите рестораны
-          <span>и блюда осознанно</span>
+          Найдите любимые рестораны
+          <span>и блюда</span>
         </h1>
         <p className="search-page__hint">Ищите рестораны и блюда с учетом состава, КБЖУ и ваших целей</p>
       </div>
