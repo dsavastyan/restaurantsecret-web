@@ -1,17 +1,19 @@
 // Shared layout for authenticated areas. Manages subscription state and toggles
 // the paywall overlay when required.
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import React, { Suspense, lazy, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import NavBar from '@/components/NavBar'
-import SearchInput from '@/components/SearchInput'
-import DishCardModal from '@/components/DishCardModal'
-import DiaryFloatingButton from '@/components/DiaryFloatingButton'
-import Footer from '@/components/Footer.jsx'
 import { PD_API_BASE } from '@/config/api'
 import { fetchCurrentUser } from '@/lib/api'
 import { isMoscowDaytime } from '@/lib/moscowDaytime'
+import { loadTelegramWebApp } from '@/lib/telegram'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
+
+const NavBar = lazy(() => import('@/components/NavBar'))
+const SearchInput = lazy(() => import('@/components/SearchInput'))
+const DishCardModal = lazy(() => import('@/components/DishCardModal'))
+const DiaryFloatingButton = lazy(() => import('@/components/DiaryFloatingButton'))
+const Footer = lazy(() => import('@/components/Footer.jsx'))
 
 // Default shape for the subscription/access status persisted in localStorage.
 const defaultAccess = { ok: false, isActive: false, expiresAt: null, event: null }
@@ -130,12 +132,21 @@ export default function AppShell() {
 
   // Apply Telegram-specific tweaks when running inside the WebApp container.
   useEffect(() => {
-    const tg = window.Telegram?.WebApp
-    if (!tg) return
+    let isCancelled = false
 
-    tg.ready()
-    tg.expand()
-    tg.setHeaderColor('bg_color')
+    loadTelegramWebApp()
+      .then((tg) => {
+        if (isCancelled || !tg) return
+
+        tg.ready()
+        tg.expand()
+        tg.setHeaderColor('bg_color')
+      })
+      .catch(() => { })
+
+    return () => {
+      isCancelled = true
+    }
   }, [])
 
   useEffect(() => {
@@ -317,9 +328,11 @@ export default function AppShell() {
 
   return (
     <div className={`min-h-screen flex flex-col app-theme app-theme--${isRestaurantMenuPage || isRestaurantsCatalogPage || isDayTheme ? 'day' : 'night'}`}>
-      {!isMarketingPage && !isImmersivePage && <NavBar />}
-      <DishCardModal />
-      {!isMarketingPage && !isImmersivePage && <DiaryFloatingButton />}
+      <Suspense fallback={null}>
+        {!isMarketingPage && !isImmersivePage && <NavBar />}
+        {!isMarketingPage && <DishCardModal />}
+        {!isMarketingPage && !isImmersivePage && <DiaryFloatingButton />}
+      </Suspense>
       <main className="flex-1">
         {isMarketingPage ? (
           <Outlet context={outletContext} />
@@ -334,7 +347,9 @@ export default function AppShell() {
             {showGlobalSearch && (
               <div className="app-shell__search">
                 <div className="app-shell__search-inner">
-                  <SearchInput value={searchQuery} onChange={setSearchQuery} />
+                  <Suspense fallback={null}>
+                    <SearchInput value={searchQuery} onChange={setSearchQuery} />
+                  </Suspense>
                 </div>
               </div>
             )}
@@ -342,7 +357,9 @@ export default function AppShell() {
           </div>
         )}
       </main>
-      {!isImmersivePage && !isMarketingPage && <Footer />}
+      <Suspense fallback={null}>
+        {!isImmersivePage && !isMarketingPage && <Footer />}
+      </Suspense>
     </div>
   )
 }
