@@ -184,6 +184,13 @@ export default function AccountLayout() {
     { to: "/account/favorites", label: "Избранное" },
     { to: "/account/friends", label: "Друзья", badge: incomingFriendRequestsCount > 0 ? `+${incomingFriendRequestsCount}` : null },
   ];
+  const mobileTabItems = [
+    { to: "/catalog", label: "Поиск", icon: "search" },
+    { to: "/account/goals", label: "Мои цели", icon: "goals" },
+    { to: "/account/statistics", label: "Дневник", icon: "diary" },
+    { to: "/account/favorites", label: "Избранное", icon: "favorites" },
+    { to: "/account", label: "Профиль", icon: "profile", end: true },
+  ];
 
   const daysLeft = useMemo(() => {
     if (!sub?.expires_at) return null;
@@ -304,7 +311,10 @@ export default function AccountLayout() {
               </div>
               <div className="account__header-mobile">
                 {isAccountRoot ? (
-                  <span className="account__mobile-placeholder" aria-hidden="true" />
+                  <Link className="account-mobile-brand" to="/" aria-label="На главную страницу RestSecret">
+                    <img className="account-mobile-brand__logo" src={logo} alt="" />
+                    <span className="account-mobile-brand__name">RestSecret</span>
+                  </Link>
                 ) : (
                   <button
                     type="button"
@@ -366,6 +376,52 @@ export default function AccountLayout() {
               </div>
             </header>
 
+            {isAccountRoot && (
+              <div className="account-mobile-dashboard" aria-label="Личный кабинет">
+                <h1 className="account-mobile-dashboard__title">Личный кабинет</h1>
+
+                <nav className="account-mobile-nav" aria-label="Навигация по личному кабинету">
+                  {navItems.map((item) => (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      end={item.end}
+                      className={({ isActive }) =>
+                        `account-mobile-nav__link${isActive ? " account-mobile-nav__link--active" : ""}`
+                      }
+                    >
+                      <span className="account-mobile-nav__icon" aria-hidden="true">
+                        <AccountNavIcon label={item.label} />
+                      </span>
+                      <span className="account-mobile-nav__label">{item.label}</span>
+                      {item.badge ? <span className="account-mobile-nav__badge">{item.badge}</span> : null}
+                    </NavLink>
+                  ))}
+                </nav>
+
+                {showPremiumUpsell && (
+                  <div className="account-mobile-premium">
+                    <span className="account-mobile-premium__icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                        <path d="m3.5 9 3.8 2.7L12 4l4.7 7.7L20.5 9l-2 9.5h-13L3.5 9Z" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M6.5 21h11" strokeLinecap="round" />
+                      </svg>
+                    </span>
+                    <div className="account-mobile-premium__copy">
+                      <strong>RestSecret Premium</strong>
+                      <span>Больше возможностей<br />для осознанного выбора</span>
+                    </div>
+                    <NavLink className="account-mobile-premium__link" to="/account/subscription">
+                      <span>Узнать больше</span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </NavLink>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="account__content">
               <Outlet context={outletContext} />
             </div>
@@ -409,6 +465,22 @@ export default function AccountLayout() {
           </div>
         </div>
       )}
+
+      <nav className="account-mobile-tabbar" aria-label="Основная навигация">
+        {mobileTabItems.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className={({ isActive }) =>
+              `account-mobile-tabbar__link${isActive ? " account-mobile-tabbar__link--active" : ""}`
+            }
+          >
+            <AccountTabIcon icon={item.icon} />
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
+      </nav>
     </div>
   );
 }
@@ -467,6 +539,48 @@ function AccountNavIcon({ label }: { label: string }) {
       <circle cx="17" cy="10" r="2.2" />
       <path d="M3.5 19c1.1-3 3-4.5 5.5-4.5s4.4 1.5 5.5 4.5" strokeLinecap="round" />
       <path d="M14.8 18.4c.7-1.8 1.9-2.7 3.5-2.7 1.3 0 2.3.5 3.2 1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function AccountTabIcon({ icon }: { icon: string }) {
+  if (icon === "search") {
+    return (
+      <svg className="account-mobile-tabbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+        <circle cx="11" cy="11" r="7" />
+        <path d="m16.5 16.5 4 4" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (icon === "goals") {
+    return (
+      <svg className="account-mobile-tabbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+        <rect x="6" y="4" width="12" height="16" rx="2" />
+        <path d="M9 9h6M9 13h6M9 17h3" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (icon === "diary") {
+    return (
+      <svg className="account-mobile-tabbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+        <path d="M4 14h16" strokeLinecap="round" />
+        <path d="M7 14a5 5 0 0 1 10 0" />
+        <path d="M12 6V4" strokeLinecap="round" />
+        <path d="M5 18h14" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (icon === "favorites") {
+    return (
+      <svg className="account-mobile-tabbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+        <path d="M12 20s-7-4.3-8.4-9.1C2.7 7.6 4.7 5 7.6 5c1.8 0 3.2.9 4.4 2.4C13.2 5.9 14.6 5 16.4 5c2.9 0 4.9 2.6 4 5.9C19 15.7 12 20 12 20Z" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  return (
+    <svg className="account-mobile-tabbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+      <circle cx="12" cy="8" r="3.4" />
+      <path d="M5 20c1.35-3.6 3.7-5.4 7-5.4s5.65 1.8 7 5.4" strokeLinecap="round" />
     </svg>
   );
 }
