@@ -2,11 +2,8 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { apiPost } from "@/lib/api";
-import { isMoscowDaytime } from "@/lib/moscowDaytime";
 import { useAuth, selectSetToken } from "@/store/auth"; // <— меняем импорт
 import { analytics } from "@/services/analytics";
-import mobileNightBackground from "@/assets/login/Login background.png";
-import desktopNightBackground from "@/assets/login/Login background desctop.png";
 import mobileDayBackground from "@/assets/login/Login bacground mobile day.png";
 import desktopDayBackground from "@/assets/login/Login bachround desctop day.png";
 
@@ -22,7 +19,6 @@ export default function LoginPage() {
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [timer, setTimer] = useState(0);
-  const [isDayTheme, setIsDayTheme] = useState(() => isMoscowDaytime());
 
   const redirectTo = useMemo(() => {
     let from = location.state?.from;
@@ -43,13 +39,6 @@ export default function LoginPage() {
     const id = setInterval(() => setTimer((t) => t - 1), 1000);
     return () => clearInterval(id);
   }, [timer]);
-
-  useEffect(() => {
-    const updateTheme = () => setIsDayTheme(isMoscowDaytime());
-    updateTheme();
-    const id = setInterval(updateTheme, 60000);
-    return () => clearInterval(id);
-  }, []);
 
   const sendCode = async () => {
     setErr(null);
@@ -128,8 +117,8 @@ export default function LoginPage() {
       className="login"
       style={
         {
-          "--login-bg-mobile": `url(${isDayTheme ? mobileDayBackground : mobileNightBackground})`,
-          "--login-bg-desktop": `url(${isDayTheme ? desktopDayBackground : desktopNightBackground})`,
+          "--login-bg-mobile": `url(${mobileDayBackground})`,
+          "--login-bg-desktop": `url(${desktopDayBackground})`,
         } as CSSProperties
       }
     >

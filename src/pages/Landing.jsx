@@ -5,7 +5,6 @@ import CityMapBackground from '@/components/CityMapBackground'
 import SearchInput from '@/components/SearchInput'
 import { CookieSettingsModal } from '@/components/CookieSettingsModal'
 import { getLandingStats, getRestaurants, postSuggest } from '@/lib/api'
-import { isMoscowDaytime } from '@/lib/moscowDaytime'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
 import { useDiaryStore } from '@/store/diary'
@@ -103,12 +102,6 @@ function formatDishesLabel(value) {
   return `${amount.toLocaleString('ru-RU')} ${getRussianPluralWord(amount, 'блюдо', 'блюда', 'блюд')}`
 }
 
-function resolveThemeMode() {
-  const htmlTheme = document.documentElement.getAttribute('data-rs-theme')
-  if (htmlTheme === 'day' || htmlTheme === 'night') return htmlTheme
-  return isMoscowDaytime() ? 'day' : 'night'
-}
-
 export default function Landing() {
   useMeta({
     title: 'Меню ресторанов с КБЖУ — RestaurantSecret',
@@ -124,7 +117,7 @@ export default function Landing() {
   const isFavoriteDish = useFavoritesStore((state) => state.isFavorite)
   const toggleFavoriteDish = useFavoritesStore((state) => state.toggle)
 
-  const [themeMode, setThemeMode] = useState(resolveThemeMode)
+  const themeMode = 'day'
   const [heroStats, setHeroStats] = useState({ restaurants: 0, dishes: 0, weeklyAdded: 0 })
   const [mapStats, setMapStats] = useState({ points: 0 })
   const [query, setQuery] = useState('')
@@ -222,36 +215,6 @@ export default function Landing() {
 
     return () => {
       cancelled = true
-    }
-  }, [])
-
-  useEffect(() => {
-    const updateTheme = () => setThemeMode(resolveThemeMode())
-    updateTheme()
-    const id = window.setInterval(updateTheme, 60000)
-
-    const observer = new MutationObserver((changes) => {
-      if (changes.some((change) => change.attributeName === 'data-rs-theme')) {
-        updateTheme()
-      }
-    })
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['data-rs-theme'],
-    })
-
-    const onStorage = (event) => {
-      if (event.key === 'rs_theme_preference') {
-        updateTheme()
-      }
-    }
-    window.addEventListener('storage', onStorage)
-
-    return () => {
-      window.clearInterval(id)
-      observer.disconnect()
-      window.removeEventListener('storage', onStorage)
     }
   }, [])
 

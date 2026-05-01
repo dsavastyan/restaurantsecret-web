@@ -4686,6 +4686,11 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
   min-width: 200px;
 }
 
+.feedback-page-mock {
+  min-height: calc(100svh - 76px);
+  background: #000;
+}
+
 .contact-card--accent .feedback-form__label {
   color: rgba(226, 232, 240, 0.8);
 }

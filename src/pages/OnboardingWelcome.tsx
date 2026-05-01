@@ -4,7 +4,6 @@ import { completeOnboarding, fetchCurrentUser, saveOnboardingProfileName } from 
 import { useAuth } from "@/store/auth";
 import { analytics } from "@/services/analytics";
 import dayThemeBackground from "@/assets/intro screens/day_theme.png";
-import nightThemeBackground from "@/assets/intro screens/night_theme.png";
 import logoIcon from "@/assets/intro screens/RestSecret logo.png";
 
 type IntroLocationState = {
@@ -29,7 +28,6 @@ export default function OnboardingWelcomePage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSkipping, setIsSkipping] = useState(false);
-  const isDayTheme = true;
   const [isOnboardingAllowed, setIsOnboardingAllowed] = useState<boolean | null>(
     isDevPreview ? true : null
   );
@@ -158,11 +156,11 @@ export default function OnboardingWelcomePage() {
 
   return (
     <div
-      className={`intro ${isDayTheme ? "intro--day" : "intro--night"}`}
+      className="intro intro--day"
       style={
         {
-          "--intro-bg-mobile": `url(${isDayTheme ? dayThemeBackground : nightThemeBackground})`,
-          "--intro-bg-desktop": `url(${isDayTheme ? dayThemeBackground : nightThemeBackground})`,
+          "--intro-bg-mobile": `url(${dayThemeBackground})`,
+          "--intro-bg-desktop": `url(${dayThemeBackground})`,
         } as CSSProperties
       }
     >

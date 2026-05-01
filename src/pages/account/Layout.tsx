@@ -36,9 +36,7 @@ export type AccountOutletContext = {
   token: string | null;
   isLoading: boolean;
   error: string | null;
-  isNightTheme: boolean;
   incomingFriendRequestsCount: number;
-  toggleTheme: () => void;
 };
 
 export default function AccountLayout() {
@@ -55,11 +53,6 @@ export default function AccountLayout() {
 
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [isNightTheme, setIsNightTheme] = useState<boolean>(() => {
-    if (typeof document === "undefined") return false;
-    return document.documentElement.getAttribute("data-rs-theme") === "night";
-  });
-
   const handleOpenLogoutModal = useCallback(() => {
     setIsLogoutModalOpen(true);
   }, []);
@@ -205,14 +198,6 @@ export default function AccountLayout() {
     return Math.max(0, diff);
   }, [sub?.expires_at]);
 
-  const handleToggleTheme = useCallback(() => {
-    const nextTheme = isNightTheme ? "day" : "night";
-    document.documentElement.setAttribute("data-rs-theme", nextTheme);
-    document.body.setAttribute("data-rs-theme", nextTheme);
-    window.localStorage.setItem("rs_theme_preference", nextTheme);
-    setIsNightTheme(!isNightTheme);
-  }, [isNightTheme]);
-
   const outletContext: AccountOutletContext = useMemo(
     () => ({
       me,
@@ -222,23 +207,10 @@ export default function AccountLayout() {
       token: accessToken || null,
       isLoading: loading,
       error,
-      isNightTheme,
       incomingFriendRequestsCount,
-      toggleTheme: handleToggleTheme,
     }),
-    [me, sub, daysLeft, load, accessToken, loading, error, isNightTheme, incomingFriendRequestsCount, handleToggleTheme]
+    [me, sub, daysLeft, load, accessToken, loading, error, incomingFriendRequestsCount]
   );
-
-  useEffect(() => {
-    const syncThemeState = () => {
-      setIsNightTheme(document.documentElement.getAttribute("data-rs-theme") === "night");
-    };
-    syncThemeState();
-
-    const observer = new MutationObserver(syncThemeState);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-rs-theme"] });
-    return () => observer.disconnect();
-  }, []);
 
   if (!accessToken) {
     return <Navigate to="/login" replace state={{ from: location }} />;
@@ -350,24 +322,6 @@ export default function AccountLayout() {
               </div>
 
               <div className="account__header-actions">
-                <button
-                  type="button"
-                  className="account-theme-toggle"
-                  onClick={handleToggleTheme}
-                  title={isNightTheme ? "Включить дневную тему" : "Включить ночную тему"}
-                  aria-label={isNightTheme ? "Включить дневную тему" : "Включить ночную тему"}
-                >
-                  {isNightTheme ? (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="4.5" />
-                      <path d="M12 2.8v2.2M12 19v2.2M21.2 12h-2.2M5 12H2.8M18.9 5.1l-1.6 1.6M6.7 17.3l-1.6 1.6M18.9 18.9l-1.6-1.6M6.7 6.7L5.1 5.1" strokeLinecap="round" />
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M21 14.2A9 9 0 1 1 9.8 3a7.2 7.2 0 0 0 11.2 11.2Z" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  )}
-                </button>
                 <button
                   type="button"
                   className="account-logout-btn"

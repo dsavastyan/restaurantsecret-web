@@ -41,9 +41,9 @@ export default function NavBar() {
                 <Link
                   to="/onboarding/welcome"
                   className="navbar__trial-link"
-                  onClick={() => analytics.track("cta_clicked", { location: "nav", text: "Попробовать Pro" })}
+                  onClick={() => analytics.track("cta_clicked", { location: "nav", text: "Попробовать бесплатно" })}
                 >
-                  Попробовать Pro
+                  Попробовать бесплатно
                 </Link>
               </div>
             )}

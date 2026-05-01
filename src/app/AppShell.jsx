@@ -4,7 +4,6 @@ import React, { Suspense, lazy, useCallback, useEffect, useLayoutEffect, useMemo
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { PD_API_BASE } from '@/config/api'
 import { fetchCurrentUser } from '@/lib/api'
-import { isMoscowDaytime } from '@/lib/moscowDaytime'
 import { loadTelegramWebApp } from '@/lib/telegram'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
@@ -17,7 +16,6 @@ const Footer = lazy(() => import('@/components/Footer.jsx'))
 
 // Default shape for the subscription/access status persisted in localStorage.
 const defaultAccess = { ok: false, isActive: false, expiresAt: null, event: null }
-const THEME_PREFERENCE_KEY = 'rs_theme_preference'
 
 const accessEventMessages = {
   subscription_pending: {
@@ -55,7 +53,6 @@ export default function AppShell() {
     }
   })
   const [searchQuery, setSearchQuery] = useState('')
-  const [isDayTheme, setIsDayTheme] = useState(() => isMoscowDaytime())
   const lastAccessEventRef = useRef(null)
 
   // Merge new access info into state. A falsy value resets to defaults.
@@ -234,6 +231,7 @@ export default function AppShell() {
   }), [access, handleAccessUpdate, refreshAccess, requestPaywall, closePaywall, requireAccess])
 
   const isContact = location.pathname.startsWith('/contact')
+  const isFeedbackPage = location.pathname === '/feedback'
   const isLanding = location.pathname === '/'
   const isTariffsPage = location.pathname === '/tariffs'
   const isHowItWorksPage = location.pathname === '/how-it-works'
@@ -272,39 +270,16 @@ export default function AppShell() {
     }
   }, [accessToken, isLoginPage, isOnboardingPage, location.pathname, location.search, navigate])
 
-  // Sync global UI theme by Moscow sunrise/sunset and expose it via html/body dataset.
-  // Restaurant menu pages intentionally stay in the light reference style.
+  // Keep the app in the light theme and expose it via html/body dataset.
   useEffect(() => {
-    const resolveTheme = () => {
-      if (isRestaurantMenuPage || isRestaurantsCatalogPage || isSearchPage) return 'day'
-
-      const saved = window.localStorage.getItem(THEME_PREFERENCE_KEY)
-      if (saved === 'day' || saved === 'night') {
-        return saved
-      }
-      return isMoscowDaytime() ? 'day' : 'night'
+    document.documentElement.setAttribute('data-rs-theme', 'day')
+    document.body.setAttribute('data-rs-theme', 'day')
+    try {
+      window.localStorage.removeItem('rs_theme_preference')
+    } catch {
+      // Ignore storage errors in restricted browser contexts.
     }
-
-    const applyTheme = () => {
-      const theme = resolveTheme()
-      setIsDayTheme(theme === 'day')
-      document.documentElement.setAttribute('data-rs-theme', theme)
-      document.body.setAttribute('data-rs-theme', theme)
-    }
-
-    applyTheme()
-    const id = window.setInterval(applyTheme, 60000)
-    const onStorage = (event) => {
-      if (event.key === THEME_PREFERENCE_KEY) {
-        applyTheme()
-      }
-    }
-    window.addEventListener('storage', onStorage)
-    return () => {
-      window.clearInterval(id)
-      window.removeEventListener('storage', onStorage)
-    }
-  }, [isRestaurantMenuPage, isRestaurantsCatalogPage, isSearchPage])
+  }, [])
 
   const showGlobalSearch = useMemo(() => {
     const allowedPrefixes = ['/catalog', '/app']
@@ -328,7 +303,7 @@ export default function AppShell() {
   }, [location.pathname])
 
   return (
-    <div className={`min-h-screen flex flex-col app-theme app-theme--${isRestaurantMenuPage || isRestaurantsCatalogPage || isSearchPage || isDayTheme ? 'day' : 'night'}${isSearchPage ? ' app-theme--search' : ''}`}>
+    <div className={`min-h-screen flex flex-col app-theme app-theme--day${isSearchPage ? ' app-theme--search' : ''}`}>
       <Suspense fallback={null}>
         {!isMarketingPage && !isImmersivePage && <NavBar />}
         {!isMarketingPage && <DishCardModal />}
@@ -343,6 +318,8 @@ export default function AppShell() {
           <div className={showPaywall ? 'contact-wrapper locked' : 'contact-wrapper'}>
             <Outlet context={outletContext} />
           </div>
+        ) : isFeedbackPage ? (
+          <Outlet context={outletContext} />
         ) : (
           <div className={`${showPaywall ? 'container locked' : 'container'}${isRestaurantMenuPage ? ' container--menu' : ''}${isRestaurantsCatalogPage ? ' container--catalog' : ''}${isSearchPage ? ' container--search' : ''}`}>
             {showGlobalSearch && (
@@ -359,7 +336,7 @@ export default function AppShell() {
         )}
       </main>
       <Suspense fallback={null}>
-        {!isImmersivePage && !isMarketingPage && <Footer />}
+        {!isImmersivePage && !isMarketingPage && !isFeedbackPage && <Footer />}
       </Suspense>
     </div>
   )
