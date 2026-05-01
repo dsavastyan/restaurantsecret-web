@@ -1,5 +1,6 @@
 // Catalog page showing the full list of restaurants with lightweight filters.
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useMeta } from '@/lib/useMeta'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { api } from '../api/client.js'
 import CuisineFilter from '../components/CuisineFilter.jsx'
@@ -62,6 +63,12 @@ const normalizeInstagramUrl = (rawUrl) => {
 }
 
 export default function Catalog() {
+  useMeta({
+    title: 'Каталог ресторанов с КБЖУ — RestaurantSecret',
+    description: 'Все рестораны Москвы с полным меню и данными КБЖУ. Фильтрация по кухне, метро и целям питания.',
+    canonical: 'https://restaurantsecret.ru/catalog',
+  })
+
   const { data: filters } = useSWRLite('filters', () => api.filters())
   const { data: landingStats } = useSWRLite('landing-stats', () => getLandingStats())
   const [selectedCuisines, setSelectedCuisines] = useState([])

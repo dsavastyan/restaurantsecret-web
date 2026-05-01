@@ -11,6 +11,7 @@ import { useAuth } from '@/store/auth'
 import { useDiaryStore } from '@/store/diary'
 import { useFavoritesStore } from '@/store/favorites'
 import { analytics } from '@/services/analytics'
+import { useMeta } from '@/lib/useMeta'
 
 const STATS_FALLBACK = {
   restaurants: 0,
@@ -109,6 +110,12 @@ function resolveThemeMode() {
 }
 
 export default function Landing() {
+  useMeta({
+    title: 'Меню ресторанов с КБЖУ — RestaurantSecret',
+    description: 'Все меню ресторанов Москвы с калориями, белками, жирами и углеводами. Фильтруйте по целям и выбирайте осознанно.',
+    canonical: 'https://restaurantsecret.ru/',
+  })
+
   const navigate = useNavigate()
   const location = useLocation()
   const accessToken = useAuth((state) => state.accessToken)
@@ -745,8 +752,27 @@ export default function Landing() {
         isOpen={isCookieModalOpen}
         onClose={() => setIsCookieModalOpen(false)}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_SCHEMA) }}
+      />
     </>
   )
+}
+
+const WEBSITE_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'RestaurantSecret',
+  url: 'https://restaurantsecret.ru',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: 'https://restaurantsecret.ru/search?q={search_term_string}',
+    },
+    'query-input': 'required name=search_term_string',
+  },
 }
 
 function KbzhuDonut({ p, f, c, kcal }) {

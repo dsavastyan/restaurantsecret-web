@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { useMeta } from '@/lib/useMeta'
 
 import { CookieSettingsModal } from '@/components/CookieSettingsModal'
 import { postSuggest } from '@/lib/api'
@@ -122,6 +123,12 @@ const FAQ = [
 // ─────────────────────────────────────────────
 
 export default function HowItWorks() {
+  useMeta({
+    title: 'Как это работает — RestaurantSecret',
+    description: 'Узнайте, как RestaurantSecret помогает следить КБЖУ в ресторанах Москвы. Реальные данные из меню каждого заведения, фильтры по целям питания.',
+    canonical: 'https://restaurantsecret.ru/how-it-works',
+  })
+
   const location = useLocation()
   const accessToken = useAuth((state) => state.accessToken)
   const accessTokenOrUndefined = accessToken || undefined

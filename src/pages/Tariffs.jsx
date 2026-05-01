@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom'
 import Footer from '@/components/Footer'
 import { analytics } from '@/services/analytics'
 import { useAuth } from '@/store/auth'
+import { useMeta } from '@/lib/useMeta'
 
 const freeFeatures = [
   {
@@ -24,6 +25,12 @@ const proFeatures = [
 ]
 
 export default function Tariffs() {
+  useMeta({
+    title: 'Подписка и тарифы — RestaurantSecret',
+    description: 'Бесплатный и премиум доступ к КБЖУ всех ресторанов Москвы. Пробный период 7 дней бесплатно.',
+    canonical: 'https://restaurantsecret.ru/tariffs',
+  })
+
   const location = useLocation()
   const accessToken = useAuth((state) => state.accessToken)
   const proTo = accessToken ? '/account/subscription' : '/login'

@@ -10,6 +10,7 @@ import { useSubscriptionStore } from '@/store/subscription';
 import { MenuOutdatedModal } from '@/components/MenuOutdatedModal';
 import { analytics } from '@/services/analytics';
 import { useFavoriteRestaurantsStore } from '@/store/favoriteRestaurants';
+import { useMeta } from '@/lib/useMeta';
 
 // Assumption: subscription is active when you render this page
 // If you still keep useSubscription, you can gate this page by redirecting beforehand.
@@ -88,6 +89,16 @@ export default function RestaurantPage() {
     })();
     return () => { aborted = true; };
   }, [accessToken, fetchStatus, slug]);
+
+  useMeta({
+    title: menu
+      ? `${menu.name} — меню с КБЖУ | RestaurantSecret`
+      : 'Меню ресторана | RestaurantSecret',
+    description: menu
+      ? `Полное меню ресторана ${menu.name} с калориями, белками, жирами и углеводами каждого блюда. Фильтрация по целям питания.`
+      : undefined,
+    canonical: `https://restaurantsecret.ru/restaurants/${slug}`,
+  });
 
   const handleSubscribeClick = () => {
     if (accessToken) {
@@ -234,6 +245,7 @@ export default function RestaurantPage() {
         isOpen={isOutdatedOpen}
         onClose={() => setIsOutdatedOpen(false)}
       />
+      <RestaurantSchema menu={menu} slug={slug} />
     </main>
   );
 }
@@ -251,7 +263,56 @@ function inRange(value, min, max) {
 function normalizeMenu(raw) {
   // Expecting shape like { name, cuisine, categories:[{name, dishes:[{...}]}], ... }
   // Keep as-is; we normalize later when flatten.
-  return raw || {};
+  return raw || {}
+}
+
+
+function RestaurantSchema({ menu, slug }) {
+  if (!menu || !menu.name) return null
+
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'Restaurant',
+    name: menu.name,
+    url: `https://restaurantsecret.ru/restaurants/${slug}`,
+    servesCuisine: menu.cuisine || undefined,
+    address: menu.address
+      ? {
+          '@type': 'PostalAddress',
+          streetAddress: menu.address,
+          addressLocality: 'Москва',
+          addressCountry: 'RU',
+        }
+      : undefined,
+    hasMenu: {
+      '@type': 'Menu',
+      hasMenuSection: (menu.categories ?? []).map((cat) => ({
+        '@type': 'MenuSection',
+        name: cat.name,
+        hasMenuItem: (cat.dishes ?? []).slice(0, 10).map((dish) => ({
+          '@type': 'MenuItem',
+          name: dish.name,
+          offers: dish.price
+            ? { '@type': 'Offer', price: dish.price, priceCurrency: 'RUB' }
+            : undefined,
+          nutrition: {
+            '@type': 'NutritionInformation',
+            calories: `${dish.kcal} ккал`,
+            proteinContent: `${dish.protein} г`,
+            fatContent: `${dish.fat} г`,
+            carbohydrateContent: `${dish.carbs} г`,
+          },
+        })),
+      })),
+    },
+  }
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  )
 }
 
 
