@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import { CookieSettingsModal } from '@/components/CookieSettingsModal'
+
 // ─────────────────────────────────────────────
 // Данные
 // ─────────────────────────────────────────────
@@ -14,7 +16,7 @@ const PAIN_POINTS = [
   {
     icon: PainIconFork,
     title: 'Рестораны — слепая зона',
-    body: 'Рестораны не обязаны указывать КБЖУ. Порции везде разные, состав — загадка. Одна «здоровая» паста в разных местах отличается на 300–400 ккал.',
+    body: 'Рестораны не обязаны указывать КБЖУ. Порции везде разные, состав — загадка. Одна паста в разных заведениях отличается на 300–400 ккал.',
   },
   {
     icon: PainIconQuestion,
@@ -116,9 +118,11 @@ const FAQ = [
 
 export default function HowItWorks() {
   const [openFaq, setOpenFaq] = useState(null)
+  const [isCookieModalOpen, setIsCookieModalOpen] = useState(false)
 
   return (
-    <main className="hiw" data-page="how-it-works">
+    <>
+      <main className="hiw" data-page="how-it-works">
 
       {/* ── Навбар ── */}
       <header className="landing-warm__nav" style={{ position: 'sticky', top: 0, zIndex: 100 }}>
@@ -187,8 +191,8 @@ export default function HowItWorks() {
       {/* ── 2. Как работает: 3 шага ── */}
       <section className="hiw__steps" aria-labelledby="steps-title">
         <div className="hiw__section-head hiw__section-head--dark">
-          <h2 id="steps-title">Три шага — и ты под контролем</h2>
-          <p>Никаких настроек. Открыл — нашёл — выбрал.</p>
+          <h2 id="steps-title">Три шага к понятному выбору</h2>
+          <p>Без потери времени. Открыл — нашёл — выбрал.</p>
         </div>
 
         <div className="hiw__steps-list">
@@ -303,24 +307,49 @@ export default function HowItWorks() {
       </section>
 
       {/* ── 5. CTA ── */}
-      <section className="hiw__cta">
-        <h2>
-          Рестораны больше<br />
-          не срывают <em>твои цели</em>
-        </h2>
-        <p>КБЖУ каждого блюда в сотнях московских ресторанов — прямо в телефоне. Ешь вкусно и знай, что ешь.</p>
-        <div className="hiw__cta-actions">
-          <Link to="/onboarding/welcome" className="hiw__hero-btn-primary">
-            Попробовать 7 дней бесплатно
-          </Link>
-        </div>
-        <p className="hiw__cta-fine">
-          <LockIcon /> Потом 199 ₽/мес · Отмена в любой момент
-        </p>
-      </section>
+        <section className="hiw__cta">
+          <h2>
+            Рестораны больше<br />
+            не срывают <em>твои цели</em>
+          </h2>
+          <p>КБЖУ каждого блюда в сотнях московских ресторанов — прямо в телефоне. Ешь вкусно и знай, что ешь.</p>
+          <div className="hiw__cta-actions">
+            <Link to="/onboarding/welcome" className="hiw__hero-btn-primary">
+              Попробовать 7 дней бесплатно
+            </Link>
+          </div>
+          <p className="hiw__cta-fine">
+            <LockIcon /> Потом 199 ₽/мес · Отмена в любой момент
+          </p>
+        </section>
 
-      <style>{hiwStyles}</style>
-    </main>
+        <footer className="landing-warm__footer">
+          <div className="landing-warm__footer-links">
+            <Link to="/legal">Пользовательское соглашение</Link>
+            <Link to="/privacy">Политика конфиденциальности</Link>
+            <Link to="/tariffs">Тарифы</Link>
+            <Link to="/licenses">Лицензии</Link>
+            <button type="button" onClick={() => setIsCookieModalOpen(true)}>Настройки cookies</button>
+            <Link to="/contact">Контакты</Link>
+            <a href="https://t.me/RestSecretSupport_bot" target="_blank" rel="noopener noreferrer">Поддержка</a>
+            <Link to="/feedback">Оставить отзыв</Link>
+          </div>
+
+          <div className="landing-warm__footer-meta">
+            <span>© 2026 RestaurantSecret</span>
+            <span>•</span>
+            <span>Самозанятое лицо (НПД), Савастьян Дарья, ИНН 771007750946</span>
+          </div>
+        </footer>
+
+        <style>{hiwStyles}</style>
+      </main>
+
+      <CookieSettingsModal
+        isOpen={isCookieModalOpen}
+        onClose={() => setIsCookieModalOpen(false)}
+      />
+    </>
   )
 }
 
@@ -366,8 +395,8 @@ function PainIconQuestion() {
   return (
     <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
       <circle cx="24" cy="24" r="22" stroke="var(--warm-warm)" strokeWidth="2" />
-      <path d="M18 19c0-3.3 2.7-6 6-6s6 2.7 6 6c0 3-2 4.5-4 6v2" stroke="var(--warm-warm)" strokeWidth="2.2" strokeLinecap="round" />
-      <circle cx="24" cy="34" r="1.5" fill="var(--warm-warm)" />
+      <path d="M18.4 19.2c.4-3.8 2.9-6.2 6.5-6.2 3.7 0 6.3 2.4 6.3 5.8 0 3.1-1.8 4.6-4.1 6-2.1 1.3-2.8 2.2-2.8 4.2" stroke="var(--warm-warm)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="24.3" cy="35" r="1.7" fill="var(--warm-warm)" />
     </svg>
   )
 }
@@ -646,8 +675,8 @@ const hiwStyles = `
   background: rgba(255,255,255,.1);
 }
 .hiw__hero-stat-footnote {
-  width: 100%;
-  margin: 10px auto 0;
+  width: calc(100% / 3);
+  margin: 10px 0 0 auto;
   color: var(--warm-ink-soft);
   font-size: .76rem;
   line-height: 1.45;
@@ -996,6 +1025,7 @@ const hiwStyles = `
   .hiw__step-num { font-size: 2.5rem; }
   .hiw__hero-stat-bar { flex-direction: column; gap: 8px; }
   .hiw__hero-stat-divider { width: 40px; height: 1px; }
+  .hiw__hero-stat-footnote { width: 100%; margin: 10px auto 0; }
   .hiw__compare-table th:nth-child(3),
   .hiw__compare-table td:nth-child(3) { display: none; }
 }
