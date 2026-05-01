@@ -203,7 +203,10 @@ export default function HowItWorks() {
         </nav>
         <div className="landing-warm__nav-right">
           {accessToken ? (
-            <Link to="/account" className="landing-warm__nav-cta">Личный кабинет</Link>
+            <>
+              <Link to="/account" className="landing-warm__login-link landing-warm__desktop-action">Личный кабинет</Link>
+              <Link to="/account" className="landing-warm__nav-cta landing-warm__mobile-action">Личный кабинет</Link>
+            </>
           ) : (
             <Link
               to="/onboarding/welcome"
@@ -1262,35 +1265,42 @@ const hiwStyles = `
   }
   .hiw__step-num { font-size: 2.5rem; }
   .hiw__hero-stat-bar {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr;
     align-items: stretch;
-    gap: 14px;
-    padding: 24px 18px;
+    gap: 10px;
+    padding: 0;
+    background: transparent;
   }
   .hiw__hero-stat {
     flex: 0 0 auto;
-    padding: 0;
+    align-items: flex-start;
+    min-height: 0;
+    padding: 16px 18px;
     gap: 6px;
+    border-radius: 16px;
+    background: var(--warm-ink);
+    box-shadow: 0 10px 28px rgba(42, 38, 32, .12);
   }
   .hiw__hero-stat strong {
-    font-size: 1.65rem;
+    font-size: 1.42rem;
     line-height: 1.05;
   }
   .hiw__hero-stat span {
-    max-width: 280px;
-    margin: 0 auto;
+    max-width: none;
+    margin: 0;
     font-size: .82rem;
     line-height: 1.45;
+    text-align: left;
   }
   .hiw__hero-stat-divider {
-    width: 44px;
-    height: 1px;
-    margin: 0 auto;
+    display: none;
   }
   .hiw__hero-stat-footnote {
     width: 100%;
     margin: 10px auto 0;
     font-size: .7rem;
+    text-align: left;
   }
   .hiw__compare {
     padding: 56px 16px 36px;
@@ -1404,10 +1414,6 @@ const hiwStyles = `
 }
 
 @media (max-width: 420px) {
-  .hiw .landing-warm__nav-cta {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
   .hiw .landing-warm__brand {
     font-size: 17px;
   }
