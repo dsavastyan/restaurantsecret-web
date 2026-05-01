@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { CookieSettingsModal } from '@/components/CookieSettingsModal'
+import { postSuggest } from '@/lib/api'
+import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
 
 // ─────────────────────────────────────────────
@@ -12,17 +14,17 @@ const PAIN_POINTS = [
   {
     icon: PainIconScale,
     title: 'Хочешь результата — нужен учёт',
-    body: 'Без контроля КБЖУ невозможно похудеть, набрать мышцы или просто питаться осознанно. Каждое незамеченное блюдо — это до 600 скрытых калорий, которые тормозят прогресс неделями.',
+    body: 'Без контроля КБЖУ невозможно похудеть, набрать мышцы или просто питаться осознанно. Каждое незамеченное блюдо — это до 600 скрытых калорий, которые тормозят прогресс неделями',
   },
   {
     icon: PainIconFork,
     title: 'Рестораны — слепая зона',
-    body: 'Рестораны не обязаны указывать КБЖУ. Порции везде разные, состав — загадка. Одна паста в разных заведениях отличается на 300–400 ккал.',
+    body: 'Рестораны не обязаны указывать КБЖУ. Порции везде разные, состав — загадка. Одна паста в разных заведениях отличается на 300–400 ккал',
   },
   {
     icon: PainIconQuestion,
     title: 'Общие базы не работают',
-    body: 'MyFitnessPal и аналоги дают усреднённые данные из интернета — не из конкретного ресторана. Это погрешность, которая ломает любой план питания.',
+    body: 'MyFitnessPal и аналоги дают усреднённые данные из интернета — не из конкретного ресторана. Это погрешность, которая ломает любой план питания',
   },
 ]
 
@@ -30,7 +32,7 @@ const STEPS = [
   {
     num: '01',
     title: 'Найди ресторан или блюдо',
-    body: 'Введи название — сервис найдёт за секунды. Сотни заведений Москвы с реальными меню.',
+    body: 'Введи название — сервис найдёт за секунды. Сотни заведений Москвы с реальными меню',
     videoSrc: null, // ← вставить URL видео из Kling
     videoPoster: null,
     videoLabel: 'Поиск ресторана в приложении',
@@ -39,7 +41,7 @@ const STEPS = [
   {
     num: '02',
     title: 'Открой КБЖУ каждого блюда',
-    body: 'Калории, белки, жиры, углеводы — по данным конкретного ресторана. Не средние из базы.',
+    body: 'Калории, белки, жиры, углеводы — по данным конкретного ресторана. Не средние из базы',
     videoSrc: null,
     videoPoster: null,
     videoLabel: 'Просмотр КБЖУ блюда',
@@ -48,7 +50,7 @@ const STEPS = [
   {
     num: '03',
     title: 'Выбирай под свои цели',
-    body: 'Фильтры по калориям и БЖУ, дневник питания, избранное.',
+    body: 'Фильтры по калориям и БЖУ, дневник питания, избранное',
     videoSrc: null,
     videoPoster: null,
     videoLabel: 'Фильтрация блюд по целям',
@@ -66,7 +68,7 @@ const COMPARISON = [
     verdict: 'limited',
   },
   {
-    option: 'MyFitnessPal, FatSecret, LifeSum и др.',
+    option: 'MyFitnessPal, FatSecret, LifeSum и др',
     costMonth: '~500 ₽/мес',
     costYear: '~6 000 ₽/год',
     what: 'КБЖУ из непроверенной базы, нет многих ресторанов РФ',
@@ -93,23 +95,24 @@ const COMPARISON = [
 const FAQ = [
   {
     q: 'Мой ресторан есть в базе?',
-    a: 'База включает сотни московских ресторанов и пополняется каждую неделю. Проверить конкретное место можно бесплатно — без подписки.',
+    a: 'База включает сотни московских ресторанов и пополняется каждую неделю. Проверить конкретное место можно бесплатно — без подписки',
+    requestCta: true,
   },
   {
     q: 'Насколько точные данные?',
-    a: 'Данные берутся из официальных меню и технологических карт ресторанов — не из усреднённых интернет-баз и не из ИИ-угадывания по фото.',
+    a: 'Данные берутся из официальных меню и технологических карт ресторанов — не из усреднённых интернет-баз и не из ИИ-угадывания по фото',
   },
   {
     q: 'Как работает пробный период?',
-    a: 'Первые 7 дней — полный доступ ко всем ресторанам и функциям. После пробного периода подписка автоматически продолжается за 199 ₽/мес. Отменить можно в любой момент в личном кабинете.',
+    a: 'Первые 7 дней — полный доступ ко всем ресторанам и функциям. После пробного периода подписка автоматически продолжается за 199 ₽/мес. Отменить можно в любой момент в личном кабинете',
   },
   {
     q: 'Зачем нужна карта для пробного периода?',
-    a: 'Привязка карты нужна для автоматического продления после 7 дней. Вы ничего не платите сейчас — списание произойдёт только на 8-й день, если вы не отмените подписку.',
+    a: 'Привязка карты нужна для автоматического продления после 7 дней. Вы ничего не платите сейчас — списание произойдёт только на 8-й день, если вы не отмените подписку',
   },
   {
     q: 'Как отменить подписку?',
-    a: 'Отмена занимает 30 секунд в личном кабинете — без звонков и объяснений. До конца оплаченного периода доступ сохраняется.',
+    a: 'Отмена занимает 30 секунд в личном кабинете — без звонков и объяснений. До конца оплаченного периода доступ сохраняется',
   },
 ]
 
@@ -119,8 +122,66 @@ const FAQ = [
 
 export default function HowItWorks() {
   const accessToken = useAuth((state) => state.accessToken)
+  const accessTokenOrUndefined = accessToken || undefined
   const [openFaq, setOpenFaq] = useState(null)
   const [isCookieModalOpen, setIsCookieModalOpen] = useState(false)
+  const [suggestOpen, setSuggestOpen] = useState(false)
+  const [restaurant, setRestaurant] = useState('')
+  const [dish, setDish] = useState('')
+  const [city, setCity] = useState('')
+  const [email, setEmail] = useState('')
+  const [validationError, setValidationError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (!suggestOpen) return
+
+    function handleEscape(event) {
+      if (event.key === 'Escape') {
+        setSuggestOpen(false)
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [suggestOpen])
+
+  async function handleSuggestSubmit(event) {
+    event.preventDefault()
+    const trimmedRestaurant = restaurant.trim()
+    if (!trimmedRestaurant) {
+      setValidationError('Укажите название ресторана')
+      return
+    }
+
+    setValidationError('')
+    setSubmitting(true)
+
+    try {
+      await postSuggest(
+        {
+          name: trimmedRestaurant,
+          dish_name: dish.trim() || null,
+          city: city.trim() || null,
+          email: email.trim() || null,
+        },
+        accessTokenOrUndefined,
+      )
+      toast.success('Заявка отправлена')
+      setRestaurant('')
+      setDish('')
+      setCity('')
+      setEmail('')
+      setSuggestOpen(false)
+    } catch (error) {
+      console.error('Failed to submit suggestion', error)
+      toast.error('Не удалось отправить заявку. Попробуйте еще раз')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <>
@@ -159,9 +220,9 @@ export default function HowItWorks() {
       <section className="hiw__problem hiw__problem--intro" aria-labelledby="problem-title">
         <div className="hiw__section-head">
           <h2 id="problem-title">
-            Почему учёт КБЖУ — основа любой цели
+            Почему КБЖУ — основа любой цели
           </h2>
-          <p>Без понимания, что ты ешь, невозможно управлять результатом — будь то похудение, набор массы или просто здоровье.</p>
+          <p>Без понимания, что ты ешь, невозможно управлять результатом — будь то похудение, набор массы или просто здоровье</p>
         </div>
 
         <div className="hiw__hero-stat-bar" aria-label="Статистика">
@@ -202,7 +263,7 @@ export default function HowItWorks() {
       <section className="hiw__steps" aria-labelledby="steps-title">
         <div className="hiw__section-head hiw__section-head--dark">
           <h2 id="steps-title">Три шага к понятному выбору</h2>
-          <p>Без потери времени. Открыл — нашёл — выбрал.</p>
+          <p>Без потери времени. Открыл — нашёл — выбрал</p>
         </div>
 
         <div className="hiw__steps-list">
@@ -271,10 +332,12 @@ export default function HowItWorks() {
                   className={`hiw__compare-row ${row.highlight ? 'hiw__compare-row--highlight' : ''} hiw__compare-row--${row.verdict}`}
                 >
                   <td className="hiw__compare-name">
-                    {row.highlight && <span className="hiw__compare-badge">Мы</span>}
-                    {row.option}
+                    <span className="hiw__compare-name-inner">
+                      {row.highlight && <span className="hiw__compare-badge">Мы</span>}
+                      <span>{row.option}</span>
+                    </span>
                   </td>
-                  <td className="hiw__compare-cost">
+                  <td className={`hiw__compare-cost ${row.note ? 'hiw__compare-cost--with-note' : ''}`}>
                     <span className="hiw__compare-cell-label">В месяц</span>
                     <span className="hiw__compare-cell-value">{row.costMonth}</span>
                     {row.note && <span className="hiw__compare-note">{row.note}</span>}
@@ -316,7 +379,19 @@ export default function HowItWorks() {
                   {item.q}
                   <span className="hiw__faq-arrow" aria-hidden="true">{isOpen ? '↑' : '↓'}</span>
                 </button>
-                {isOpen && <p className="hiw__faq-a">{item.a}</p>}
+                {isOpen && (
+                  <p className="hiw__faq-a">
+                    {item.a}
+                    {item.requestCta && (
+                      <>
+                        {' '}
+                        <button type="button" className="hiw__faq-link" onClick={() => setSuggestOpen(true)}>
+                          Хотите запросить конкретный ресторан?
+                        </button>
+                      </>
+                    )}
+                  </p>
+                )}
               </div>
             )
           })}
@@ -329,7 +404,7 @@ export default function HowItWorks() {
             Рестораны больше<br />
             не срывают <em>твои цели</em>
           </h2>
-          <p>КБЖУ каждого блюда в сотнях московских ресторанов — прямо в телефоне. Ешь вкусно и знай, что ешь.</p>
+          <p>КБЖУ каждого блюда в сотнях московских ресторанов — прямо в телефоне. Ешь вкусно и знай, что ешь</p>
           <div className="hiw__cta-actions">
             <Link to="/onboarding/welcome" className="hiw__hero-btn-primary">
               Попробовать 7 дней бесплатно
@@ -361,6 +436,71 @@ export default function HowItWorks() {
 
         <style>{hiwStyles}</style>
       </main>
+
+      {suggestOpen && (
+        <div className="hiw__suggest-backdrop" role="presentation" onMouseDown={() => setSuggestOpen(false)}>
+          <div
+            className="suggest-popover hiw__suggest-dialog"
+            role="dialog"
+            aria-label="Форма заявки"
+            aria-modal="true"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="suggest-popover__header">
+              <p className="suggest-popover__title">Расскажите, что нужно добавить</p>
+              <button type="button" className="suggest-popover__close" onClick={() => setSuggestOpen(false)} aria-label="Закрыть">
+                ×
+              </button>
+            </div>
+            <form className="suggest-popover__form" onSubmit={handleSuggestSubmit} noValidate>
+              <label className="suggest-popover__field">
+                <span>Ресторан *</span>
+                <input
+                  type="text"
+                  value={restaurant}
+                  onChange={(event) => {
+                    setRestaurant(event.target.value)
+                    if (validationError) setValidationError('')
+                  }}
+                  placeholder="Например, Cafe Pushkin"
+                  required
+                  className={validationError ? 'is-invalid' : ''}
+                />
+              </label>
+
+              <label className="suggest-popover__field">
+                <span>Блюдо</span>
+                <input
+                  type="text"
+                  value={dish}
+                  onChange={(event) => setDish(event.target.value)}
+                  placeholder="Например, Том ям"
+                />
+              </label>
+
+              <label className="suggest-popover__field">
+                <span>Город</span>
+                <input type="text" value={city} onChange={(event) => setCity(event.target.value)} placeholder="Москва" />
+              </label>
+
+              <label className="suggest-popover__field">
+                <span>Email для обратной связи</span>
+                <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@example.com" inputMode="email" />
+              </label>
+
+              {validationError && (
+                <p className="hint hint--error" role="status">
+                  {validationError}
+                </p>
+              )}
+
+              <button className="btn btn--primary" type="submit" disabled={submitting}>
+                {submitting ? 'Отправляем...' : 'Отправить'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       <CookieSettingsModal
         isOpen={isCookieModalOpen}
@@ -929,9 +1069,10 @@ const hiwStyles = `
   white-space: nowrap;
 }
 .hiw__compare-name-inner {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  min-width: 0;
 }
 .hiw__compare-badge {
   display: inline-flex;
@@ -947,6 +1088,11 @@ const hiwStyles = `
 }
 .hiw__compare-cost { color: var(--warm-ink-soft); white-space: nowrap; }
 .hiw__compare-row--highlight .hiw__compare-cost { color: var(--warm-ink); }
+.hiw__compare-cost--with-note .hiw__compare-note {
+  display: inline-block;
+  margin: 0 0 0 8px;
+  vertical-align: baseline;
+}
 .hiw__compare-cell-label {
   display: none;
 }
@@ -966,7 +1112,7 @@ const hiwStyles = `
 
 /* ── FAQ ── */
 .hiw__faq {
-  padding: 80px 24px;
+  padding: 48px 24px 80px;
   max-width: 720px;
   margin: 0 auto;
 }
@@ -1006,6 +1152,41 @@ const hiwStyles = `
   font-size: .92rem;
   color: var(--warm-ink-soft);
   line-height: 1.65;
+}
+.hiw__faq-link {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--warm-warm);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.hiw__faq-link:hover {
+  color: var(--warm-accent-dk);
+}
+
+/* ── Запрос ресторана ── */
+.hiw__suggest-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(42, 38, 32, .42);
+}
+.hiw__suggest-dialog {
+  position: relative;
+  width: min(420px, 100%);
+  max-height: min(720px, calc(100vh - 48px));
+  overflow-y: auto;
+  box-shadow: 0 24px 72px rgba(42, 38, 32, .24);
 }
 
 /* ── CTA ── */
@@ -1112,7 +1293,7 @@ const hiwStyles = `
     font-size: .7rem;
   }
   .hiw__compare {
-    padding: 64px 16px;
+    padding: 56px 16px 36px;
   }
   .hiw__compare-table-wrap {
     overflow: visible;
@@ -1158,18 +1339,27 @@ const hiwStyles = `
     font-size: 1rem;
     line-height: 1.35;
   }
-  .hiw__compare-name .hiw__compare-badge {
-    margin-right: 6px;
+  .hiw__compare-name-inner {
+    display: flex;
+    gap: 10px;
+    align-items: center;
   }
   .hiw__compare-cost,
   .hiw__compare-what {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin-top: 12px;
+    gap: 6px;
+    margin-top: 16px;
     white-space: normal;
     font-size: .9rem;
-    line-height: 1.45;
+    line-height: 1.55;
+  }
+  .hiw__compare-cost--with-note {
+    display: grid;
+    grid-template-columns: minmax(0, max-content) minmax(0, auto);
+    column-gap: 8px;
+    row-gap: 6px;
+    align-items: baseline;
   }
   .hiw__compare-cell-label {
     display: block;
@@ -1180,12 +1370,16 @@ const hiwStyles = `
     line-height: 1.35;
     text-transform: uppercase;
   }
+  .hiw__compare-cost--with-note .hiw__compare-cell-label {
+    grid-column: 1 / -1;
+  }
   .hiw__compare-cell-value,
   .hiw__compare-note {
     min-width: 0;
   }
   .hiw__compare-note {
-    margin-top: 0;
+    margin: 0;
+    white-space: nowrap;
   }
   .hiw__compare-verdict {
     position: absolute;
@@ -1196,6 +1390,16 @@ const hiwStyles = `
   .hiw__compare-verdict svg {
     width: 22px;
     height: 22px;
+  }
+  .hiw__faq {
+    padding-top: 36px;
+  }
+  .hiw__suggest-backdrop {
+    align-items: flex-start;
+    padding: 18px 14px;
+  }
+  .hiw__suggest-dialog {
+    max-height: calc(100vh - 36px);
   }
 }
 
