@@ -125,7 +125,7 @@ export default function HowItWorks() {
       <main className="hiw" data-page="how-it-works">
 
       {/* ── Навбар ── */}
-      <header className="landing-warm__nav" style={{ position: 'sticky', top: 0, zIndex: 100 }}>
+      <header className="landing-warm__nav">
         <div className="landing-warm__nav-left">
           <Link to="/" className="landing-warm__brand-link" aria-label="RestaurantSecret">
             <img src="/assets/logo.png" alt="" aria-hidden="true" className="landing-warm__logo" />

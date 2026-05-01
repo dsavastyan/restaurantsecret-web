@@ -21,7 +21,7 @@ const STATS_FALLBACK = {
 }
 const FEATURED_RESTAURANTS_LIMIT = 12
 
-const POPULAR_QUERIES = ['Том ям', 'боул с лососем', 'салат цезарь', 'стейк', 'паста']
+const POPULAR_QUERIES = ['бургер', 'боул с лососем', 'салат цезарь', 'стейк', 'паста']
 
 const SAMPLE_DISHES = [
   {
@@ -61,8 +61,9 @@ const SAMPLE_DISHES = [
 
 const VALUE_CARDS = [
   {
-    title: 'До 40% точнее',
+    title: 'До 40% точнее*',
     description: 'Чем усредненные калькуляторы калорий: данные от ресторанов.',
+    footnote: '*Shonkoff et al., 2023, systematic review, 52 papers',
     icon: 'arc',
   },
   {
@@ -543,6 +544,9 @@ export default function Landing() {
                 </div>
                 <h3>{item.title}</h3>
                 <p>{item.description}</p>
+                {item.footnote && (
+                  <small className="landing-warm__why-footnote">{item.footnote}</small>
+                )}
               </article>
             ))}
           </div>

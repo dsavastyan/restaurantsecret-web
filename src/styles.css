@@ -14758,6 +14758,14 @@ html[data-rs-theme="night"] .onboarding-install__image {
   line-height: 1.6;
 }
 
+.landing-warm__why-footnote {
+  display: block;
+  margin-top: 10px;
+  color: color-mix(in srgb, #c7bfae 72%, transparent);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
 .landing-warm__featured {
   background: var(--warm-bg-soft);
   padding-top: 96px;
