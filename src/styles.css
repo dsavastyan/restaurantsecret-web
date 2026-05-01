@@ -2995,11 +2995,17 @@ body {
     linear-gradient(180deg, #fbf6eb 0%, var(--tariffs-bg) 100%);
   font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .tariffs-page a {
   color: inherit;
   text-decoration: none;
+}
+
+.tariffs-main {
+  flex: 0 0 auto;
 }
 
 .tariffs-nav {
@@ -3199,6 +3205,14 @@ body {
   white-space: nowrap;
 }
 
+.tariff-card__asterisk {
+  margin-left: 2px;
+  color: var(--tariffs-muted);
+  font-size: 0.72em;
+  line-height: 0;
+  vertical-align: super;
+}
+
 .tariff-card__desc {
   margin: 7px 0 0;
   color: var(--tariffs-muted);
@@ -3344,11 +3358,12 @@ body {
 
 .tariff-card__price-option--year {
   min-height: 78px;
+  margin-top: 20px;
   padding: 16px 20px 12px;
   display: grid;
-  grid-template-columns: minmax(220px, max-content) 1fr;
+  grid-template-columns: minmax(190px, max-content) minmax(0, 1fr);
   align-items: center;
-  column-gap: 38px;
+  column-gap: 26px;
   border-color: var(--tariffs-rule-strong);
 }
 
@@ -3379,7 +3394,8 @@ body {
   color: var(--tariffs-green-dark);
   font-size: 20px;
   font-weight: 800;
-  white-space: nowrap;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .tariff-card__monthly-equivalent strong {
@@ -3390,14 +3406,86 @@ body {
 }
 
 .tariff-card__monthly-equivalent s {
-  margin-left: 10px;
+  margin-left: 4px;
   color: #9a9285;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
+  white-space: nowrap;
+}
+
+.tariff-card__billing-note {
+  margin: 10px 0 0;
+  color: #8a8174;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.tariffs-page .site-footer {
+  flex: 0 0 auto;
+  margin-top: 32px;
+  padding: 40px 56px 56px;
+  border-top: 1px solid var(--tariffs-rule);
+  background: transparent;
+}
+
+.tariffs-page .site-footer__inner {
+  max-width: none;
+  align-items: flex-start;
+  padding: 0;
+  gap: 0;
+}
+
+.tariffs-page .site-footer__nav {
+  max-width: none;
+  justify-content: flex-start;
+  gap: 12px 28px;
+}
+
+.tariffs-page .site-footer__link {
+  color: var(--tariffs-muted);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: left;
+}
+
+.tariffs-page .site-footer__link:hover {
+  color: var(--tariffs-ink);
+  text-decoration: none;
+}
+
+.tariffs-page .site-footer__meta {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--tariffs-rule);
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 10px;
+  white-space: normal;
+}
+
+.tariffs-page .site-footer__copy,
+.tariffs-page .site-footer__legal {
+  color: var(--tariffs-muted);
+  font-size: 12px;
+  line-height: 1.3;
+  text-align: left;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.tariffs-page .site-footer__dot {
+  color: var(--tariffs-muted);
 }
 
 @media (max-width: 1200px) {
   .tariffs-nav {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  .tariffs-page .site-footer {
     padding-left: 32px;
     padding-right: 32px;
   }
@@ -3482,6 +3570,11 @@ body {
   .tariff-card__best-badge {
     left: 18px;
   }
+
+  .tariffs-page .site-footer {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
 }
 
 @media (max-width: 420px) {
@@ -3510,6 +3603,11 @@ body {
   .tariffs-nav__cta {
     padding: 8px 14px;
     font-size: 12px;
+  }
+
+  .tariffs-page .site-footer {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 }
 
