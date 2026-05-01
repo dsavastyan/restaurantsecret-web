@@ -3,8 +3,8 @@
   "short_name": "RestSecret",
   "start_url": "/",
   "display": "standalone",
-  "theme_color": "#111111",
-  "background_color": "#080808",
+  "theme_color": "#f6f8fb",
+  "background_color": "#f6f8fb",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",

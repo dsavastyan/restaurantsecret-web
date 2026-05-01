@@ -73,8 +73,8 @@ function AppRoutes() {
           <Route path="search" element={<Search />} />
           <Route path="restaurants/:slug" element={<RestaurantPage />} />
           <Route path="restaurants/:slug/menu" element={<Menu />} />
-          <Route path="r/:slug" element={<RestaurantPage />} />
-          <Route path="r/:slug/menu" element={<Menu />} />
+          <Route path="r/:slug" element={<ShortRestaurantRedirect />} />
+          <Route path="r/:slug/menu" element={<ShortMenuRedirect />} />
           <Route path="pay/success" element={<PaySuccess />} />
           <Route path="pay/result" element={<PaymentResult />} />
           <Route path="payments/result" element={<PaymentResult />} />
@@ -105,6 +105,13 @@ function AppRoutes() {
 // AppRoutes component.
 export default function Router({ children }) {
   const inTelegram = isTelegramLaunch()
+  if (!inTelegram && typeof window !== 'undefined' && window.location.pathname === '/') {
+    const redirectPath = window.sessionStorage.getItem('redirectPath')
+    if (redirectPath && redirectPath.startsWith('/') && redirectPath !== '/') {
+      window.sessionStorage.removeItem('redirectPath')
+      window.history.replaceState(null, '', redirectPath)
+    }
+  }
   if (!inTelegram && typeof window !== 'undefined' && window.location.pathname === '/' && window.location.hash.startsWith('#/')) {
     const legacyPath = window.location.hash.slice(1)
     if (legacyPath.startsWith('/')) {
@@ -121,14 +128,26 @@ export default function Router({ children }) {
   )
 }
 
-// Redirect old `/restaurant/:slug` paths to the new `/r/:slug` structure.
-function LegacyRestaurantRedirect() {
+// Redirect short public links to the canonical restaurant URL.
+function ShortRestaurantRedirect() {
   const { slug = '' } = useParams()
-  return <Navigate to={`/r/${slug}`} replace />
+  return <Navigate to={`/restaurants/${slug}`} replace />
 }
 
-// Redirect old `/restaurant/:slug/menu` paths to `/r/:slug/menu`.
+// Redirect short public menu links to the canonical menu URL.
+function ShortMenuRedirect() {
+  const { slug = '' } = useParams()
+  return <Navigate to={`/restaurants/${slug}/menu`} replace />
+}
+
+// Redirect old `/restaurant/:slug` paths to the canonical structure.
+function LegacyRestaurantRedirect() {
+  const { slug = '' } = useParams()
+  return <Navigate to={`/restaurants/${slug}`} replace />
+}
+
+// Redirect old `/restaurant/:slug/menu` paths to the canonical menu URL.
 function LegacyMenuRedirect() {
   const { slug = '' } = useParams()
-  return <Navigate to={`/r/${slug}/menu`} replace />
+  return <Navigate to={`/restaurants/${slug}/menu`} replace />
 }

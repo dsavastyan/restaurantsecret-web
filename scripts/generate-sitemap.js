@@ -2,7 +2,8 @@
 // Запускать как: node scripts/generate-sitemap.js
 // Требует Node 18+ (встроенный fetch)
 
-import { writeFileSync } from 'fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'fs'
+import { dirname, join } from 'path'
 
 const BASE_URL = (process.env.SITEMAP_BASE_URL || 'https://restaurantsecret.ru').replace(/\/+$/, '')
 const API_URLS = Array.from(
@@ -26,6 +27,290 @@ function escapeXml(value) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&apos;')
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+}
+
+function stripEmpty(value) {
+  const text = String(value ?? '').trim()
+  return text || undefined
+}
+
+function publicPathToFile(pathname) {
+  const cleanPath = pathname.replace(/^\/+|\/+$/g, '')
+  return cleanPath ? join('dist', cleanPath, 'index.html') : join('dist', 'index.html')
+}
+
+function writeRouteHtml(pathname, html) {
+  const filePath = publicPathToFile(pathname)
+  mkdirSync(dirname(filePath), { recursive: true })
+  writeFileSync(filePath, html, 'utf-8')
+}
+
+function upsertHeadTag(html, pattern, tag) {
+  if (pattern.test(html)) {
+    return html.replace(pattern, tag)
+  }
+  return html.replace('</head>', `    ${tag}\n  </head>`)
+}
+
+function injectBeforeHeadClose(html, tag) {
+  return html.replace('</head>', `    ${tag}\n  </head>`)
+}
+
+function applySeoTags(baseHtml, route) {
+  const title = escapeHtml(route.title)
+  const description = escapeHtml(route.description)
+  const canonical = escapeHtml(route.canonical)
+  const robots = route.robots ? escapeHtml(route.robots) : null
+
+  let html = baseHtml
+    .replace(/<title>[\s\S]*?<\/title>/i, `<title>${title}</title>`)
+
+  html = upsertHeadTag(
+    html,
+    /<meta\s+name="description"\s+content="[^"]*"\s*\/?>/i,
+    `<meta name="description" content="${description}" />`,
+  )
+  html = upsertHeadTag(
+    html,
+    /<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/i,
+    `<link rel="canonical" href="${canonical}" />`,
+  )
+  html = upsertHeadTag(
+    html,
+    /<meta\s+property="og:title"\s+content="[^"]*"\s*\/?>/i,
+    `<meta property="og:title" content="${title}" />`,
+  )
+  html = upsertHeadTag(
+    html,
+    /<meta\s+property="og:description"\s+content="[^"]*"\s*\/?>/i,
+    `<meta property="og:description" content="${description}" />`,
+  )
+  html = upsertHeadTag(
+    html,
+    /<meta\s+property="og:url"\s+content="[^"]*"\s*\/?>/i,
+    `<meta property="og:url" content="${canonical}" />`,
+  )
+  html = upsertHeadTag(
+    html,
+    /<meta\s+name="twitter:title"\s+content="[^"]*"\s*\/?>/i,
+    `<meta name="twitter:title" content="${title}" />`,
+  )
+  html = upsertHeadTag(
+    html,
+    /<meta\s+name="twitter:description"\s+content="[^"]*"\s*\/?>/i,
+    `<meta name="twitter:description" content="${description}" />`,
+  )
+
+  if (robots) {
+    html = upsertHeadTag(
+      html,
+      /<meta\s+name="robots"\s+content="[^"]*"\s*\/?>/i,
+      `<meta name="robots" content="${robots}" />`,
+    )
+  }
+
+  if (route.schema) {
+    html = injectBeforeHeadClose(
+      html,
+      `<script type="application/ld+json">${JSON.stringify(route.schema)}</script>`,
+    )
+  }
+
+  return html
+}
+
+function createRedirectHtml({ from, to, title = 'Переадресация — RestaurantSecret' }) {
+  const escapedTo = escapeHtml(to)
+  const canonical = `${BASE_URL}${to}`
+  return `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,follow" />
+    <meta http-equiv="refresh" content="0; url=${escapedTo}" />
+    <link rel="canonical" href="${escapeHtml(canonical)}" />
+    <title>${escapeHtml(title)}</title>
+    <script>window.location.replace(${JSON.stringify(to)})</script>
+  </head>
+  <body>
+    <p><a href="${escapedTo}">Перейти на страницу</a></p>
+  </body>
+</html>
+`
+}
+
+function getRestaurantName(restaurant) {
+  return stripEmpty(restaurant.name) || stripEmpty(restaurant.title) || stripEmpty(restaurant.slug) || 'Ресторан'
+}
+
+function getRestaurantDescription(restaurant) {
+  const name = getRestaurantName(restaurant)
+  const cuisine = stripEmpty(restaurant.cuisine)
+  const metro = stripEmpty(restaurant.metro || restaurant.metroName || restaurant.metro_name)
+  const parts = [`Полное меню ресторана ${name} с калориями, белками, жирами и углеводами каждого блюда.`]
+  if (cuisine) parts.push(`Кухня: ${cuisine}.`)
+  if (metro) parts.push(`Метро: ${metro}.`)
+  parts.push('Фильтрация по целям питания.')
+  return parts.join(' ')
+}
+
+function restaurantSchema(restaurant) {
+  const slug = restaurant.slug
+  const name = getRestaurantName(restaurant)
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Restaurant',
+    name,
+    url: `${BASE_URL}/restaurants/${slug}`,
+    servesCuisine: stripEmpty(restaurant.cuisine),
+    address: stripEmpty(restaurant.address)
+      ? {
+          '@type': 'PostalAddress',
+          streetAddress: stripEmpty(restaurant.address),
+          addressLocality: 'Москва',
+          addressCountry: 'RU',
+        }
+      : undefined,
+  }
+}
+
+function websiteSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'RestaurantSecret',
+    url: BASE_URL,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${BASE_URL}/search?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  }
+}
+
+function generateStaticRoutes(restaurants) {
+  const baseHtml = readFileSync('dist/index.html', 'utf-8')
+
+  const staticRoutes = [
+    {
+      path: '/',
+      title: 'Меню ресторанов с КБЖУ — RestaurantSecret',
+      description: 'Все меню ресторанов Москвы с калориями, белками, жирами и углеводами. Фильтруйте по целям и выбирайте осознанно.',
+      canonical: `${BASE_URL}/`,
+      schema: websiteSchema(),
+    },
+    {
+      path: '/catalog',
+      title: 'Каталог ресторанов с КБЖУ — RestaurantSecret',
+      description: 'Все рестораны Москвы с полным меню и данными КБЖУ. Фильтрация по кухне, метро и целям питания.',
+      canonical: `${BASE_URL}/catalog`,
+    },
+    {
+      path: '/how-it-works',
+      title: 'Как это работает — RestaurantSecret',
+      description: 'Узнайте, как RestaurantSecret помогает следить КБЖУ в ресторанах Москвы. Реальные данные из меню каждого заведения, фильтры по целям питания.',
+      canonical: `${BASE_URL}/how-it-works`,
+    },
+    {
+      path: '/tariffs',
+      title: 'Подписка и тарифы — RestaurantSecret',
+      description: 'Бесплатный и премиум доступ к КБЖУ всех ресторанов Москвы. Пробный период 7 дней бесплатно.',
+      canonical: `${BASE_URL}/tariffs`,
+    },
+    {
+      path: '/contact',
+      title: 'Контакты — RestaurantSecret',
+      description: 'Контакты и реквизиты RestaurantSecret. Поддержка по подписке и общие вопросы.',
+      canonical: `${BASE_URL}/contact`,
+    },
+  ]
+
+  for (const route of staticRoutes) {
+    writeRouteHtml(route.path, applySeoTags(baseHtml, route))
+  }
+
+  writeRouteHtml('/restaurants', createRedirectHtml({ from: '/restaurants', to: '/catalog' }))
+
+  let generatedCount = staticRoutes.length + 1
+
+  for (const restaurant of restaurants.filter((r) => r.slug)) {
+    const slug = restaurant.slug
+    const name = getRestaurantName(restaurant)
+    const description = getRestaurantDescription(restaurant)
+
+    writeRouteHtml(
+      `/restaurants/${slug}`,
+      applySeoTags(baseHtml, {
+        title: `${name} — меню с КБЖУ | RestaurantSecret`,
+        description,
+        canonical: `${BASE_URL}/restaurants/${slug}`,
+        schema: restaurantSchema(restaurant),
+      }),
+    )
+
+    writeRouteHtml(
+      `/restaurants/${slug}/menu`,
+      applySeoTags(baseHtml, {
+        title: `${name} — меню с КБЖУ | RestaurantSecret`,
+        description,
+        canonical: `${BASE_URL}/restaurants/${slug}`,
+        robots: 'noindex,follow',
+        schema: restaurantSchema(restaurant),
+      }),
+    )
+
+    writeRouteHtml(
+      `/r/${slug}`,
+      createRedirectHtml({
+        from: `/r/${slug}`,
+        to: `/restaurants/${slug}`,
+        title: `${name} — меню с КБЖУ | RestaurantSecret`,
+      }),
+    )
+
+    writeRouteHtml(
+      `/r/${slug}/menu`,
+      createRedirectHtml({
+        from: `/r/${slug}/menu`,
+        to: `/restaurants/${slug}/menu`,
+        title: `${name} — меню с КБЖУ | RestaurantSecret`,
+      }),
+    )
+
+    writeRouteHtml(
+      `/restaurant/${slug}`,
+      createRedirectHtml({
+        from: `/restaurant/${slug}`,
+        to: `/restaurants/${slug}`,
+        title: `${name} — меню с КБЖУ | RestaurantSecret`,
+      }),
+    )
+
+    writeRouteHtml(
+      `/restaurant/${slug}/menu`,
+      createRedirectHtml({
+        from: `/restaurant/${slug}/menu`,
+        to: `/restaurants/${slug}/menu`,
+        title: `${name} — меню с КБЖУ | RestaurantSecret`,
+      }),
+    )
+
+    generatedCount += 6
+  }
+
+  console.log(`✅ Static route entrypoints generated: ${generatedCount}`)
 }
 
 async function fetchAllRestaurants() {
@@ -93,6 +378,8 @@ ${allUrls
 
   writeFileSync('dist/sitemap.xml', xml, 'utf-8')
   console.log(`✅ Sitemap generated: ${allUrls.length} URLs → dist/sitemap.xml`)
+
+  generateStaticRoutes(restaurants)
 }
 
 main().catch((error) => {
