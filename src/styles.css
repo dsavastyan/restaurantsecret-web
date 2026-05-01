@@ -14577,6 +14577,12 @@ html[data-rs-theme="night"] .onboarding-install__image {
   border-radius: 20px;
   box-shadow: 0 8px 20px rgba(110, 95, 72, 0.08);
   padding: 20px;
+  cursor: pointer;
+}
+
+.landing-warm__dish-card:focus-visible {
+  outline: 2px solid var(--warm-accent);
+  outline-offset: 4px;
 }
 
 .landing-warm__dish-head {

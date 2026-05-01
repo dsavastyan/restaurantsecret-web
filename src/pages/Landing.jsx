@@ -9,6 +9,8 @@ import { getLandingStats, getRestaurants, postSuggest } from '@/lib/api'
 import { isMoscowDaytime } from '@/lib/moscowDaytime'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
+import { useDiaryStore } from '@/store/diary'
+import { useFavoritesStore } from '@/store/favorites'
 import { analytics } from '@/services/analytics'
 
 const STATS_FALLBACK = {
@@ -23,34 +25,37 @@ const POPULAR_QUERIES = ['Том ям', 'боул с лососем', 'сала�
 
 const SAMPLE_DISHES = [
   {
-    id: 91001,
-    name: 'Сибас с томатами',
-    restaurant: 'Duo Asia',
-    kcal: 247,
-    p: 16,
-    f: 17,
-    c: 5,
-    tag: 'до 300 ккал',
+    id: 2633,
+    name: 'Салат с крабом, авокадо, яблоком и соусом гомадари',
+    restaurant: 'Ikura',
+    restaurantSlug: 'ikura',
+    kcal: 390,
+    p: 13,
+    f: 29,
+    c: 18,
+    tag: 'КБЖУ на порцию',
   },
   {
-    id: 91002,
-    name: 'Пепперони',
-    restaurant: 'Cafe Pushkin',
-    kcal: 854,
+    id: 7850,
+    name: 'Римская пицца Капричоза',
+    restaurant: 'IL Патио',
+    restaurantSlug: 'il-patio',
+    kcal: 865,
     p: 32,
-    f: 24,
-    c: 14,
-    tag: 'белковый',
+    f: 40,
+    c: 94,
+    tag: 'КБЖУ на порцию',
   },
   {
-    id: 91003,
-    name: 'Кекс шоколадный брауни',
-    restaurant: 'Probka',
-    kcal: 504,
-    p: 28,
-    f: 36,
-    c: 62,
-    tag: 'читмил',
+    id: 9378,
+    name: 'Печенье шоколадное',
+    restaurant: 'ABC coffee roasters',
+    restaurantSlug: 'abc-coffee-roasters',
+    kcal: 398,
+    p: 5,
+    f: 23,
+    c: 42,
+    tag: 'КБЖУ на порцию',
   },
 ]
 
@@ -107,12 +112,14 @@ export default function Landing() {
   const location = useLocation()
   const accessToken = useAuth((state) => state.accessToken)
   const accessTokenOrUndefined = accessToken || undefined
+  const addDiaryEntry = useDiaryStore((state) => state.addEntry)
+  const isFavoriteDish = useFavoritesStore((state) => state.isFavorite)
+  const toggleFavoriteDish = useFavoritesStore((state) => state.toggle)
 
   const [themeMode, setThemeMode] = useState(resolveThemeMode)
   const [heroStats, setHeroStats] = useState({ restaurants: 0, dishes: 0, weeklyAdded: 0 })
   const [mapStats, setMapStats] = useState({ points: 0 })
   const [query, setQuery] = useState('')
-  const [likedDishIds, setLikedDishIds] = useState(() => new Set())
   const [suggestOpen, setSuggestOpen] = useState(false)
   const [isCookieModalOpen, setIsCookieModalOpen] = useState(false)
   const [restaurant, setRestaurant] = useState('')
@@ -287,15 +294,48 @@ export default function Landing() {
     navigate(buildSearchUrl(value))
   }
 
-  function toggleDishLike(dishId) {
-    setLikedDishIds((previous) => {
-      const next = new Set(previous)
-      if (next.has(dishId)) {
-        next.delete(dishId)
-      } else {
-        next.add(dishId)
-      }
-      return next
+  async function toggleDishLike(event, dishCard) {
+    event.stopPropagation()
+    if (!accessToken) {
+      navigate('/login', { state: { from: location.pathname + location.search } })
+      return
+    }
+
+    const isFavorite = isFavoriteDish(dishCard.id)
+    analytics.track(isFavorite ? 'favorite_remove' : 'favorite_add', {
+      type: 'dish',
+      dish_id: dishCard.id,
+      name: dishCard.name,
+      restaurant: dishCard.restaurantSlug,
+      source: 'landing_sample_card',
+    })
+
+    await toggleFavoriteDish(accessToken, dishCard.id, dishCard.restaurantSlug)
+  }
+
+  async function addDishToDiary(event, dishCard) {
+    event.stopPropagation()
+    if (!accessToken) {
+      navigate('/login', { state: { from: location.pathname + location.search } })
+      return
+    }
+
+    await addDiaryEntry(accessToken, {
+      dish_id: dishCard.id,
+      restaurant_slug: dishCard.restaurantSlug,
+      restaurant_name: dishCard.restaurant,
+      name: dishCard.name,
+      calories: dishCard.kcal,
+      protein: dishCard.p,
+      fat: dishCard.f,
+      carbs: dishCard.c,
+    })
+
+    analytics.track('diary_add', {
+      dish_id: dishCard.id,
+      name: dishCard.name,
+      restaurant: dishCard.restaurantSlug,
+      source: 'landing_sample_card',
     })
   }
 
@@ -437,9 +477,21 @@ export default function Landing() {
 
           <div className="landing-warm__dish-grid">
             {SAMPLE_DISHES.map((dishCard) => {
-              const isLiked = likedDishIds.has(dishCard.id)
+              const isLiked = isFavoriteDish(dishCard.id)
               return (
-                <article key={dishCard.id} className="landing-warm__dish-card">
+                <article
+                  key={dishCard.id}
+                  className="landing-warm__dish-card"
+                  onClick={() => navigate(`/r/${dishCard.restaurantSlug}/menu`)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault()
+                      navigate(`/r/${dishCard.restaurantSlug}/menu`)
+                    }
+                  }}
+                  role="link"
+                  tabIndex={0}
+                >
                   <div className="landing-warm__dish-head">
                     <div>
                       <span>{dishCard.restaurant}</span>
@@ -457,7 +509,7 @@ export default function Landing() {
                     <button
                       type="button"
                       className={`landing-warm__dish-like ${isLiked ? 'is-liked' : ''}`}
-                      onClick={() => toggleDishLike(dishCard.id)}
+                      onClick={(event) => toggleDishLike(event, dishCard)}
                       aria-label={isLiked ? 'Убрать из избранного' : 'Добавить в избранное'}
                     >
                       <HeartIcon />
@@ -465,7 +517,7 @@ export default function Landing() {
                     <button
                       type="button"
                       className="landing-warm__dish-diary"
-                      onClick={() => navigate(buildSearchUrl(dishCard.name))}
+                      onClick={(event) => addDishToDiary(event, dishCard)}
                     >
                       В дневник →
                     </button>
