@@ -3,8 +3,12 @@
 import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { analytics } from '@/services/analytics'
+import { useSubscriptionStore } from '@/store/subscription'
 
 export default function Paywall({ onRefresh }) {
+  const hasSubscriptionHistory = useSubscriptionStore((state) => state.hasSubscriptionHistory);
+  const subscriptionCtaText = hasSubscriptionHistory ? 'Возобновить подписку' : 'Попробовать бесплатно';
+
   useEffect(() => {
     analytics.track("paywall_show");
   }, []);
@@ -27,7 +31,7 @@ export default function Paywall({ onRefresh }) {
             </div>
             <div className="rs-save" style={{ visibility: 'hidden' }}>—</div>
             <Link className="rs-btn" to="/account/subscription" state={{ from: window.location.pathname + window.location.search }}>
-              Оформить подписку
+              {subscriptionCtaText}
             </Link>
           </div>
         </article>
@@ -43,7 +47,7 @@ export default function Paywall({ onRefresh }) {
             </div>
             <div className="rs-save">Выгоднее на 38&nbsp;% · 124&nbsp;₽/мес</div>
             <Link className="rs-btn" to="/account/subscription" state={{ from: window.location.pathname + window.location.search }}>
-              Оформить подписку
+              {subscriptionCtaText}
             </Link>
           </div>
         </article>

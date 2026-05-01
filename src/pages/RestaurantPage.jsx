@@ -21,8 +21,9 @@ export default function RestaurantPage() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
   const accessToken = useAuth((state) => state.accessToken);
-  const { hasActiveSub, fetchStatus } = useSubscriptionStore((state) => ({
+  const { hasActiveSub, hasSubscriptionHistory, fetchStatus } = useSubscriptionStore((state) => ({
     hasActiveSub: state.hasActiveSub,
+    hasSubscriptionHistory: state.hasSubscriptionHistory,
     fetchStatus: state.fetchStatus,
   }));
   const [isOutdatedOpen, setIsOutdatedOpen] = useState(false);
@@ -213,6 +214,7 @@ export default function RestaurantPage() {
                   key={d.id || d.name}
                   dish={d}
                   hasActiveSub={hasActiveSub}
+                  hasSubscriptionHistory={hasSubscriptionHistory}
                   isFreeAccess={freeDishKeys.has(buildDishAccessKey(d))}
                   onSubscribe={handleSubscribeClick}
                   menuCapturedAt={menuCapturedAtLabel}
@@ -293,9 +295,10 @@ function MacroRange({ label, value, onChange }) {
   );
 }
 
-function DishCard({ dish, hasActiveSub, isFreeAccess = false, onSubscribe, menuCapturedAt }) {
+function DishCard({ dish, hasActiveSub, hasSubscriptionHistory = false, isFreeAccess = false, onSubscribe, menuCapturedAt }) {
   const description = formatDescription(dish.ingredients ?? dish.description);
   const hasDishAccess = hasActiveSub || isFreeAccess;
+  const subscriptionCtaText = hasSubscriptionHistory ? 'Возобновить подписку' : 'Попробовать бесплатно';
 
   return (
     <div className="dish">
@@ -318,7 +321,7 @@ function DishCard({ dish, hasActiveSub, isFreeAccess = false, onSubscribe, menuC
       ) : (
         <div className="dish__paywall">
           <p className="dish__paywall-text">Эта информация доступна только по подписке.</p>
-          <button type="button" className="btn" onClick={onSubscribe}>Оформить подписку</button>
+          <button type="button" className="btn" onClick={onSubscribe}>{subscriptionCtaText}</button>
         </div>
       )}
       {menuCapturedAt && <div className="dish__captured">Меню добавлено: {menuCapturedAt}</div>}

@@ -4,7 +4,9 @@ import { apiGet, isUnauthorizedError } from "@/lib/api";
 
 type SubscriptionState = {
   hasActiveSub: boolean;
+  hasSubscriptionHistory: boolean;
   setHasActiveSub: (value: boolean) => void;
+  setHasSubscriptionHistory: (value: boolean) => void;
   fetchStatus: (token?: string | null) => Promise<boolean>;
 };
 
@@ -26,7 +28,9 @@ const normalizeStatus = (value?: string | null) => {
 
 let state: SubscriptionState = {
   hasActiveSub: false,
+  hasSubscriptionHistory: false,
   setHasActiveSub: () => undefined,
+  setHasSubscriptionHistory: () => undefined,
   fetchStatus: async () => false,
 };
 
@@ -39,9 +43,13 @@ const setHasActiveSub = (value: boolean) => {
   updateState({ hasActiveSub: value });
 };
 
+const setHasSubscriptionHistory = (value: boolean) => {
+  updateState({ hasSubscriptionHistory: value });
+};
+
 const fetchStatus = async (token?: string | null) => {
   if (!token) {
-    setHasActiveSub(false);
+    updateState({ hasActiveSub: false, hasSubscriptionHistory: false });
     return false;
   }
 
@@ -62,15 +70,18 @@ const fetchStatus = async (token?: string | null) => {
       }
     }
 
-    setHasActiveSub(isActive);
+    updateState({
+      hasActiveSub: isActive,
+      hasSubscriptionHistory: Boolean(statusNorm && statusNorm !== "none"),
+    });
     return isActive;
   } catch (error) {
     if (isUnauthorizedError(error)) {
-      setHasActiveSub(false);
+      updateState({ hasActiveSub: false, hasSubscriptionHistory: false });
       return false;
     }
     console.error("Failed to fetch subscription status", error);
-    setHasActiveSub(false);
+    updateState({ hasActiveSub: false, hasSubscriptionHistory: false });
     return false;
   }
 };
@@ -78,6 +89,7 @@ const fetchStatus = async (token?: string | null) => {
 state = {
   ...state,
   setHasActiveSub,
+  setHasSubscriptionHistory,
   fetchStatus,
 };
 
@@ -92,5 +104,7 @@ export function useSubscriptionStore<T>(selector?: (state: SubscriptionState) =>
 }
 
 export const selectHasActiveSub = (subscription: SubscriptionState) => subscription.hasActiveSub;
+export const selectHasSubscriptionHistory = (subscription: SubscriptionState) => subscription.hasSubscriptionHistory;
 export const selectFetchStatus = (subscription: SubscriptionState) => subscription.fetchStatus;
 export const selectSetHasActiveSub = (subscription: SubscriptionState) => subscription.setHasActiveSub;
+export const selectSetHasSubscriptionHistory = (subscription: SubscriptionState) => subscription.setHasSubscriptionHistory;

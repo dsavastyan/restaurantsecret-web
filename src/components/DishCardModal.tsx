@@ -52,8 +52,9 @@ export default function DishCardModal() {
     close: s.close,
   }));
   const accessToken = useAuth((state) => state.accessToken);
-  const { hasActiveSub, fetchStatus } = useSubscriptionStore((state) => ({
+  const { hasActiveSub, hasSubscriptionHistory, fetchStatus } = useSubscriptionStore((state) => ({
     hasActiveSub: state.hasActiveSub,
+    hasSubscriptionHistory: state.hasSubscriptionHistory,
     fetchStatus: state.fetchStatus,
   }));
   const { isFavorite, toggleFavorite } = useFavoritesStore((state) => ({
@@ -62,6 +63,7 @@ export default function DishCardModal() {
   }));
   const addDiaryEntry = useDiaryStore((s) => s.addEntry);
   const hasDishAccess = hasActiveSub || Boolean(data?.isFreeAccess);
+  const subscriptionCtaText = hasSubscriptionHistory ? "Возобновить подписку" : "Попробовать бесплатно";
 
   const [isOutdatedOpen, setIsOutdatedOpen] = useState(false);
   const [reason, setReason] = useState<
@@ -321,7 +323,7 @@ export default function DishCardModal() {
                   Эта информация доступна только по подписке.
                 </p>
                 <button type="button" className="btn btn--primary" onClick={handleSubscribeClick}>
-                  Оформить подписку
+                  {subscriptionCtaText}
                 </button>
               </section>
             )}

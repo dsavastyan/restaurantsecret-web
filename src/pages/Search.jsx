@@ -96,10 +96,12 @@ export default function Search() {
     updateParams(inputValue, searchType)
   }, [inputValue, searchType, updateParams])
 
-  const handleTypeChange = useCallback((type) => {
-    if (type === searchType) return
-    updateParams(inputValue, normalizeType(type))
-  }, [inputValue, searchType, updateParams])
+  const handleClear = useCallback(() => {
+    setInputValue('')
+    setRestaurantsExpanded(false)
+    setDishesExpanded(false)
+    updateParams('', searchType)
+  }, [searchType, updateParams])
 
   const handleRestaurantOpen = useCallback((slug) => {
     if (!slug) return
@@ -144,31 +146,50 @@ export default function Search() {
   const dishes = results?.dishes ?? []
   const restaurants = results?.restaurants ?? []
 
-  const showRestaurants = searchType === 'restaurant' || searchType === 'dish' // Show both by default or if unified
-  const showDishes = searchType === 'dish' || searchType === 'restaurant'
-
   const visibleRestaurants = restaurantsExpanded ? restaurants : restaurants.slice(0, 5)
   const visibleDishes = dishesExpanded ? dishes : dishes.slice(0, 5)
 
   return (
     <div className="search-page">
-      <div className="search-page__header">
-        <h1 className="search-page__title">Поиск</h1>
-        <p className="search-page__hint">Результаты поиска по ресторанам и блюдам</p>
+      <div className="search-page__hero">
+        <h1 className="search-page__title">
+          Найдите рестораны
+          <span>и блюда осознанно</span>
+        </h1>
+        <p className="search-page__hint">Ищите рестораны и блюда с учетом состава, КБЖУ и ваших целей</p>
       </div>
 
       <form className="search-page__form" onSubmit={handleSubmit}>
         <label className="sr-only" htmlFor="search-query">Поисковый запрос</label>
-        <input
-          id="search-query"
-          className="search-page__input"
-          type="search"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Например, бургер или название ресторана"
-          autoComplete="off"
-        />
-        <button type="submit" className="btn btn--primary search-page__submit">Искать</button>
+        <div className="search-page__field">
+          <span className="search-page__search-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path d="m21 21-4.2-4.2m2.2-5.3a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" />
+            </svg>
+          </span>
+          <input
+            id="search-query"
+            className="search-page__input"
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Например, бургер или название ресторана"
+            autoComplete="off"
+          />
+          {inputValue && (
+            <button
+              type="button"
+              className="search-page__clear"
+              onClick={handleClear}
+              aria-label="Очистить поиск"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M6 6l12 12M18 6 6 18" />
+              </svg>
+            </button>
+          )}
+        </div>
+        <button type="submit" className="search-page__submit">Найти</button>
       </form>
 
       {loading && <div className="search-state">Ищем…</div>}
@@ -200,11 +221,15 @@ export default function Search() {
                 {visibleRestaurants.map((restaurant) => (
                   <li key={`restaurant-${restaurant.id}`} className="search-card">
                     <button type="button" className="search-card__button" onClick={() => handleRestaurantOpen(restaurant.slug)}>
-                      <div className="search-card__title">{restaurant.name}</div>
-                      {restaurant.city && (
-                        <div className="search-card__subtitle">{restaurant.city}</div>
-                      )}
-                      <div className="search-card__meta">Открыть меню</div>
+                      <span className="search-card__content">
+                        <span className="search-card__title">{restaurant.name}</span>
+                        <span className="search-card__meta">Открыть меню</span>
+                      </span>
+                      <span className="search-card__chevron" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                          <path d="m9 5 7 7-7 7" />
+                        </svg>
+                      </span>
                     </button>
                   </li>
                 ))}
@@ -230,9 +255,16 @@ export default function Search() {
                 {visibleDishes.map((dish) => (
                   <li key={`dish-${dish.id}`} className="search-card">
                     <button type="button" className="search-card__button" onClick={() => handleDishOpen(dish)}>
-                      <div className="search-card__title">{dish.dishName}</div>
-                      <div className="search-card__subtitle">{dish.restaurantName}</div>
-                      <div className="search-card__meta">Подробнее</div>
+                      <span className="search-card__content">
+                        <span className="search-card__title">{dish.dishName}</span>
+                        <span className="search-card__subtitle">{dish.restaurantName}</span>
+                        <span className="search-card__meta">Подробнее</span>
+                      </span>
+                      <span className="search-card__chevron" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                          <path d="m9 5 7 7-7 7" />
+                        </svg>
+                      </span>
                     </button>
                   </li>
                 ))}

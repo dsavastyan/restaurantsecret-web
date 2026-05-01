@@ -104,6 +104,12 @@ function AppRoutes() {
 // AppRoutes component.
 export default function Router({ children }) {
   const inTelegram = isTelegramLaunch()
+  if (!inTelegram && typeof window !== 'undefined' && window.location.pathname === '/' && window.location.hash.startsWith('#/')) {
+    const legacyPath = window.location.hash.slice(1)
+    if (legacyPath.startsWith('/')) {
+      window.history.replaceState(null, '', legacyPath)
+    }
+  }
   const RouterImpl = inTelegram ? HashRouter : BrowserRouter
 
   return (

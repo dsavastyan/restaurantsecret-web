@@ -285,7 +285,7 @@ export default function AccountLayout() {
                   </svg>
                 </span>
                 <div className="account-premium-card__copy">
-                  <strong>RestSecret Premium</strong>
+                  <strong>RestSecret Премиум</strong>
                   <span>Больше возможностей<br />для осознанного выбора</span>
                 </div>
                 <NavLink className="account-premium-card__link" to="/account/subscription">
@@ -411,7 +411,7 @@ export default function AccountLayout() {
                       </svg>
                     </span>
                     <div className="account-mobile-premium__copy">
-                      <strong>RestSecret Premium</strong>
+                      <strong>RestSecret Премиум</strong>
                       <span>Больше возможностей<br />для осознанного выбора</span>
                     </div>
                     <NavLink className="account-mobile-premium__link" to="/account/subscription">

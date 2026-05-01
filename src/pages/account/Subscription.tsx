@@ -4,6 +4,7 @@ import { ApiError, apiGet, apiPost, quotePromo, redeemPromo, isUnauthorizedError
 import { useAuth } from "@/store/auth";
 import {
   selectHasActiveSub,
+  selectSetHasSubscriptionHistory,
   selectSetHasActiveSub,
   useSubscriptionStore,
 } from "@/store/subscription";
@@ -87,6 +88,7 @@ export default function AccountSubscription() {
   }));
   const hasActiveSub = useSubscriptionStore(selectHasActiveSub);
   const setHasActiveSub = useSubscriptionStore(selectSetHasActiveSub);
+  const setHasSubscriptionHistory = useSubscriptionStore(selectSetHasSubscriptionHistory);
   const [statusData, setStatusData] = useState<SubscriptionStatusResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -108,6 +110,7 @@ export default function AccountSubscription() {
       if (hasActiveSub) {
         setHasActiveSub(false);
       }
+      setHasSubscriptionHistory(false);
       return;
     }
     setLoading(true);
@@ -159,27 +162,31 @@ export default function AccountSubscription() {
 
       setStatusData(normalized);
       setHasActiveSub(normalized.status === "active");
+      setHasSubscriptionHistory(Boolean(normalized.status && normalized.status !== "none"));
     } catch (err) {
       if (isUnauthorizedError(err)) {
         logout();
         setStatusData(null);
         setError(null);
         setHasActiveSub(false);
+        setHasSubscriptionHistory(false);
         return;
       }
       if (err instanceof ApiError && err.status === 404) {
         setStatusData({ status: "none", status_label: null, expires_at: null });
         setError(null);
         setHasActiveSub(false);
+        setHasSubscriptionHistory(false);
         return;
       }
       console.error("Failed to load subscription status", err);
       setError("Не удалось загрузить статус подписки. Попробуйте позже.");
       setHasActiveSub(false);
+      setHasSubscriptionHistory(false);
     } finally {
       setLoading(false);
     }
-  }, [accessToken, hasActiveSub, logout, setHasActiveSub]);
+  }, [accessToken, hasActiveSub, logout, setHasActiveSub, setHasSubscriptionHistory]);
 
   useEffect(() => {
     fetchStatus();
@@ -541,7 +548,7 @@ export default function AccountSubscription() {
                         onClick={() => setPlansOpen(true)}
                         disabled={Boolean(paymentPlan)}
                       >
-                        Продлить подписку
+                        Возобновить подписку
                       </button>
                     </div>
                     <div className="account-subscription-v2__mobile-illus account-subscription-v2__mobile-illus--expired">

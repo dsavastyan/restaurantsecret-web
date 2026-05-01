@@ -23,8 +23,9 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, showRes
     const navigate = useNavigate();
     const location = useLocation();
     const accessToken = useAuth((state) => state.accessToken);
-    const { hasActiveSub } = useSubscriptionStore((state) => ({
+    const { hasActiveSub, hasSubscriptionHistory } = useSubscriptionStore((state) => ({
         hasActiveSub: state.hasActiveSub,
+        hasSubscriptionHistory: state.hasSubscriptionHistory,
     }));
     const { isFavorite, toggle } = useFavoritesStore((state) => ({
         isFavorite: state.isFavorite(Number(dish.id)),
@@ -33,6 +34,7 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, showRes
 
     const favorited = isFavorite;
     const hasDishAccess = hasActiveSub || isFreeAccess;
+    const subscriptionCtaText = hasSubscriptionHistory ? 'Возобновить подписку' : 'Попробовать бесплатно';
     const macros = useMemo(() => {
         const protein = Number.isFinite(dish.protein) ? Number(dish.protein) : 0;
         const fat = Number.isFinite(dish.fat) ? Number(dish.fat) : 0;
@@ -171,7 +173,7 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, showRes
                     <div className="menu-paywall">
                         <p className="menu-paywall__text">Эта информация доступна только по подписке.</p>
                         <button type="button" className="subscribe-btn" onClick={handleSubscribe}>
-                            Оформить подписку
+                            {subscriptionCtaText}
                         </button>
                     </div>
                 )}
