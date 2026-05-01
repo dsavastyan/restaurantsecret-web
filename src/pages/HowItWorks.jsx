@@ -275,13 +275,16 @@ export default function HowItWorks() {
                     {row.option}
                   </td>
                   <td className="hiw__compare-cost">
+                    <span className="hiw__compare-cell-label">В месяц</span>
                     <span className="hiw__compare-cell-value">{row.costMonth}</span>
                     {row.note && <span className="hiw__compare-note">{row.note}</span>}
                   </td>
                   <td className="hiw__compare-cost">
+                    <span className="hiw__compare-cell-label">В год</span>
                     <span className="hiw__compare-cell-value">{row.costYear}</span>
                   </td>
                   <td className="hiw__compare-what">
+                    <span className="hiw__compare-cell-label">Что даёт</span>
                     <span className="hiw__compare-cell-value">{row.what}</span>
                   </td>
                   <td className="hiw__compare-verdict" aria-label={verdictLabel(row.verdict)}>
@@ -944,6 +947,12 @@ const hiwStyles = `
 }
 .hiw__compare-cost { color: var(--warm-ink-soft); white-space: nowrap; }
 .hiw__compare-row--highlight .hiw__compare-cost { color: var(--warm-ink); }
+.hiw__compare-cell-label {
+  display: none;
+}
+.hiw__compare-cell-value {
+  overflow-wrap: anywhere;
+}
 .hiw__compare-note {
   display: block;
   font-size: .75rem;
@@ -1154,24 +1163,16 @@ const hiwStyles = `
   }
   .hiw__compare-cost,
   .hiw__compare-what {
-    display: grid;
-    grid-template-columns: 82px minmax(0, 1fr);
-    gap: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     margin-top: 12px;
     white-space: normal;
     font-size: .9rem;
     line-height: 1.45;
   }
-  .hiw__compare-cell-value,
-  .hiw__compare-note {
-    min-width: 0;
-    grid-column: 2;
-  }
-  .hiw__compare-note {
-    margin-top: 2px;
-  }
-  .hiw__compare-cost::before,
-  .hiw__compare-what::before {
+  .hiw__compare-cell-label {
+    display: block;
     color: var(--warm-ink-soft);
     font-size: .68rem;
     font-weight: 700;
@@ -1179,14 +1180,12 @@ const hiwStyles = `
     line-height: 1.35;
     text-transform: uppercase;
   }
-  .hiw__compare-cost:nth-child(2)::before {
-    content: 'В месяц';
+  .hiw__compare-cell-value,
+  .hiw__compare-note {
+    min-width: 0;
   }
-  .hiw__compare-cost:nth-child(3)::before {
-    content: 'В год';
-  }
-  .hiw__compare-what::before {
-    content: 'Что даёт';
+  .hiw__compare-note {
+    margin-top: 0;
   }
   .hiw__compare-verdict {
     position: absolute;

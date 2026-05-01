@@ -1,0 +1,239 @@
+/* Final mobile account profile density overrides. */
+@media (max-width: 899px) {
+  .account {
+    padding-top: 12px !important;
+    padding-bottom: calc(98px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .account__inner {
+    padding-inline: 16px !important;
+  }
+
+  .account__header {
+    min-height: 58px !important;
+  }
+
+  .account-mobile-brand {
+    gap: 10px !important;
+  }
+
+  .account-mobile-brand__logo {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 11px !important;
+  }
+
+  .account-mobile-brand__name {
+    font-size: 25px !important;
+  }
+
+  .account-logout-btn.account-logout-btn--mobile {
+    min-width: 88px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding-inline: 13px !important;
+    border-radius: 13px !important;
+    gap: 8px !important;
+  }
+
+  .account-logout-btn.account-logout-btn--mobile::after {
+    font-size: 15px !important;
+  }
+
+  .account-logout-btn.account-logout-btn--mobile svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .account-mobile-dashboard {
+    gap: 12px !important;
+    margin-top: 6px !important;
+  }
+
+  .account-mobile-dashboard__title {
+    font-size: 34px !important;
+    line-height: 1.02 !important;
+  }
+
+  .account-mobile-nav {
+    display: flex !important;
+    grid-template-columns: none !important;
+    grid-auto-flow: unset !important;
+    gap: 12px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    overscroll-behavior-x: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .account-mobile-nav__link,
+  .account-mobile-nav__link:nth-child(n + 5) {
+    flex: 0 0 auto !important;
+    min-width: max-content !important;
+    min-height: 58px !important;
+    padding-inline: 10px !important;
+    overflow: visible !important;
+  }
+
+  .account-mobile-nav__label {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+  }
+
+  .account__content {
+    margin-top: 12px !important;
+  }
+
+  .account-overview-desktop {
+    gap: 14px !important;
+  }
+
+  .account-profile-card,
+  .account-about-card {
+    border-radius: 16px !important;
+  }
+
+  .account-profile-card__hero {
+    padding: 20px 18px 12px !important;
+    gap: 16px !important;
+  }
+
+  .account-profile-card__avatar {
+    width: 86px !important;
+    height: 86px !important;
+    font-size: 50px !important;
+  }
+
+  .account-profile-card__camera {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  .account-profile-card__camera svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  .account-profile-card__identity {
+    gap: 7px !important;
+  }
+
+  .account-profile-card__identity h2 {
+    font-size: 27px !important;
+  }
+
+  .account-profile-card__identity p,
+  .account-profile-card__identity span {
+    font-size: 15px !important;
+  }
+
+  .account-profile-card__body {
+    padding: 0 18px 18px !important;
+  }
+
+  .account-profile-card__body p {
+    margin-top: 4px !important;
+    font-size: 17px !important;
+  }
+
+  .account-profile-card__edit {
+    min-height: 46px !important;
+    margin-top: 22px !important;
+    border-radius: 12px !important;
+    font-size: 17px !important;
+  }
+
+  .account-about-card {
+    padding: 18px !important;
+  }
+
+  .account-about-card__header {
+    margin-bottom: 16px !important;
+  }
+
+  .account-about-card__header h3 {
+    font-size: 27px !important;
+  }
+
+  .account-about-card .stats-grid {
+    row-gap: 14px !important;
+  }
+
+  .account-about-card .form-group {
+    grid-template-columns: 86px minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .account-about-card .form-group label {
+    font-size: 15px !important;
+  }
+
+  .account-about-card .form-group input,
+  .account-about-card .form-group select {
+    height: 48px !important;
+    border-radius: 12px !important;
+    font-size: 16px !important;
+  }
+
+  .activity-segmented {
+    height: 48px !important;
+    border-radius: 20px !important;
+  }
+
+  .activity-segmented__option {
+    border-radius: 20px !important;
+    font-size: 15px !important;
+  }
+
+  .account-mobile-tabbar {
+    min-height: calc(70px + env(safe-area-inset-bottom)) !important;
+    padding-top: 8px !important;
+  }
+
+  .account-mobile-tabbar__link {
+    gap: 3px !important;
+    font-size: 11px !important;
+  }
+
+  .account-mobile-tabbar__icon {
+    width: 25px !important;
+    height: 25px !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .account__inner {
+    padding-inline: 14px !important;
+  }
+
+  .account-mobile-dashboard__title {
+    font-size: 32px !important;
+  }
+
+  .account-profile-card__hero {
+    padding: 18px 16px 12px !important;
+    gap: 14px !important;
+  }
+
+  .account-profile-card__avatar {
+    width: 82px !important;
+    height: 82px !important;
+    font-size: 48px !important;
+  }
+
+  .account-profile-card__identity h2 {
+    font-size: 26px !important;
+  }
+
+  .account-profile-card__body {
+    padding-inline: 16px !important;
+  }
+
+  .account-profile-card__body p {
+    font-size: 16px !important;
+  }
+
+  .account-about-card .form-group {
+    grid-template-columns: 82px minmax(0, 1fr) !important;
+  }
+}
