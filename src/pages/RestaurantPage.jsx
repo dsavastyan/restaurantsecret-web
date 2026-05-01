@@ -269,6 +269,9 @@ function normalizeMenu(raw) {
 
 function RestaurantSchema({ menu, slug }) {
   if (!menu || !menu.name) return null
+  if (typeof document !== 'undefined' && document.getElementById('restaurant-schema')) {
+    return null
+  }
 
   const schema = {
     '@context': 'https://schema.org',
@@ -282,33 +285,13 @@ function RestaurantSchema({ menu, slug }) {
           streetAddress: menu.address,
           addressLocality: 'Москва',
           addressCountry: 'RU',
-        }
+      }
       : undefined,
-    hasMenu: {
-      '@type': 'Menu',
-      hasMenuSection: (menu.categories ?? []).map((cat) => ({
-        '@type': 'MenuSection',
-        name: cat.name,
-        hasMenuItem: (cat.dishes ?? []).slice(0, 10).map((dish) => ({
-          '@type': 'MenuItem',
-          name: dish.name,
-          offers: dish.price
-            ? { '@type': 'Offer', price: dish.price, priceCurrency: 'RUB' }
-            : undefined,
-          nutrition: {
-            '@type': 'NutritionInformation',
-            calories: `${dish.kcal} ккал`,
-            proteinContent: `${dish.protein} г`,
-            fatContent: `${dish.fat} г`,
-            carbohydrateContent: `${dish.carbs} г`,
-          },
-        })),
-      })),
-    },
   }
 
   return (
     <script
+      id="restaurant-schema"
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
     />

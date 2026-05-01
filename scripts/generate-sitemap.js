@@ -120,7 +120,7 @@ function applySeoTags(baseHtml, route) {
   if (route.schema) {
     html = injectBeforeHeadClose(
       html,
-      `<script type="application/ld+json">${JSON.stringify(route.schema)}</script>`,
+      `<script id="restaurant-schema" type="application/ld+json">${JSON.stringify(route.schema)}</script>`,
     )
   }
 
