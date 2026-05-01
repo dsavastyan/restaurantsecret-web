@@ -5,13 +5,19 @@
 import { writeFileSync } from 'fs'
 
 const BASE_URL = (process.env.SITEMAP_BASE_URL || 'https://restaurantsecret.ru').replace(/\/+$/, '')
-const API_URL = (
-  process.env.SITEMAP_API_URL ||
-  process.env.VITE_API_BASE_URL ||
-  process.env.VITE_API_BASE ||
-  process.env.VITE_API_URL ||
-  'https://api.restaurantsecret.ru/cf'
-).replace(/\/+$/, '')
+const API_URLS = Array.from(
+  new Set(
+    [
+      process.env.SITEMAP_API_URL,
+      process.env.VITE_API_BASE_URL,
+      process.env.VITE_API_BASE,
+      process.env.VITE_API_URL,
+      'https://api.restaurantsecret.ru/cf',
+    ]
+      .filter(Boolean)
+      .map((url) => url.replace(/\/+$/, '')),
+  ),
+)
 
 function escapeXml(value) {
   return String(value)
@@ -23,10 +29,26 @@ function escapeXml(value) {
 }
 
 async function fetchAllRestaurants() {
-  const res = await fetch(`${API_URL}/restaurants?limit=2000`)
-  if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`)
-  const data = await res.json()
-  return data.items ?? data ?? []
+  const errors = []
+
+  for (const apiUrl of API_URLS) {
+    const url = `${apiUrl}/restaurants?limit=2000`
+
+    try {
+      const res = await fetch(url)
+      if (!res.ok) {
+        errors.push(`${url}: ${res.status} ${res.statusText}`)
+        continue
+      }
+
+      const data = await res.json()
+      return data.items ?? data ?? []
+    } catch (error) {
+      errors.push(`${url}: ${error?.message ?? String(error)}`)
+    }
+  }
+
+  throw new Error(`All restaurant API endpoints failed: ${errors.join('; ')}`)
 }
 
 async function main() {
