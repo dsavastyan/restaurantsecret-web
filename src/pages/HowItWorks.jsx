@@ -140,7 +140,8 @@ export default function HowItWorks() {
         </nav>
         <div className="landing-warm__nav-right">
           <Link to="/onboarding/welcome" className="landing-warm__nav-cta">
-            Попробовать 7 дней бесплатно →
+            <span className="hiw__nav-cta-label hiw__nav-cta-label--desktop">Попробовать 7 дней бесплатно →</span>
+            <span className="hiw__nav-cta-label hiw__nav-cta-label--mobile">Попробовать бесплатно</span>
           </Link>
         </div>
       </header>
@@ -265,11 +266,15 @@ export default function HowItWorks() {
                     {row.option}
                   </td>
                   <td className="hiw__compare-cost">
-                    {row.costMonth}
+                    <span className="hiw__compare-cell-value">{row.costMonth}</span>
                     {row.note && <span className="hiw__compare-note">{row.note}</span>}
                   </td>
-                  <td className="hiw__compare-cost">{row.costYear}</td>
-                  <td className="hiw__compare-what">{row.what}</td>
+                  <td className="hiw__compare-cost">
+                    <span className="hiw__compare-cell-value">{row.costYear}</span>
+                  </td>
+                  <td className="hiw__compare-what">
+                    <span className="hiw__compare-cell-value">{row.what}</span>
+                  </td>
                   <td className="hiw__compare-verdict" aria-label={verdictLabel(row.verdict)}>
                     <VerdictIcon verdict={row.verdict} />
                   </td>
@@ -566,6 +571,10 @@ const hiwStyles = `
 .hiw a {
   color: inherit;
   text-decoration: none;
+}
+
+.hiw__nav-cta-label--mobile {
+  display: none;
 }
 
 /* ── Герой ── */
@@ -1018,15 +1027,180 @@ const hiwStyles = `
 
 /* ── Адаптив ── */
 @media (max-width: 720px) {
+  .hiw .landing-warm__nav {
+    column-gap: 10px;
+  }
+  .hiw .landing-warm__nav-left {
+    flex: 1 1 auto;
+  }
+  .hiw .landing-warm__nav-right {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+  }
+  .hiw__nav-cta-label--desktop {
+    display: none;
+  }
+  .hiw__nav-cta-label--mobile {
+    display: inline;
+  }
+  .hiw__problem {
+    padding-top: 48px;
+    padding-bottom: 64px;
+  }
+  .hiw__section-head {
+    margin-bottom: 36px;
+  }
+  .hiw__section-head h2 {
+    font-size: clamp(2rem, 9vw, 2.6rem);
+  }
+  .hiw__section-head p {
+    font-size: .96rem;
+    line-height: 1.55;
+  }
   .hiw__step, .hiw__step--reverse {
     grid-template-columns: 1fr;
     direction: ltr;
   }
   .hiw__step-num { font-size: 2.5rem; }
-  .hiw__hero-stat-bar { flex-direction: column; gap: 8px; }
-  .hiw__hero-stat-divider { width: 40px; height: 1px; }
-  .hiw__hero-stat-footnote { width: 100%; margin: 10px auto 0; }
-  .hiw__compare-table th:nth-child(3),
-  .hiw__compare-table td:nth-child(3) { display: none; }
+  .hiw__hero-stat-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 24px 18px;
+  }
+  .hiw__hero-stat {
+    flex: 0 0 auto;
+    padding: 0;
+    gap: 6px;
+  }
+  .hiw__hero-stat strong {
+    font-size: 1.65rem;
+    line-height: 1.05;
+  }
+  .hiw__hero-stat span {
+    max-width: 280px;
+    margin: 0 auto;
+    font-size: .82rem;
+    line-height: 1.45;
+  }
+  .hiw__hero-stat-divider {
+    width: 44px;
+    height: 1px;
+    margin: 0 auto;
+  }
+  .hiw__hero-stat-footnote {
+    width: 100%;
+    margin: 10px auto 0;
+    font-size: .7rem;
+  }
+  .hiw__compare {
+    padding: 64px 16px;
+  }
+  .hiw__compare-table-wrap {
+    overflow: visible;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .hiw__compare-table,
+  .hiw__compare-table tbody,
+  .hiw__compare-table tr,
+  .hiw__compare-table td {
+    display: block;
+  }
+  .hiw__compare-table {
+    background: transparent;
+    border-radius: 0;
+  }
+  .hiw__compare-table thead {
+    display: none;
+  }
+  .hiw__compare-table tbody {
+    display: grid;
+    gap: 12px;
+  }
+  .hiw__compare-table tr {
+    position: relative;
+    padding: 18px 16px;
+    border: 1px solid var(--warm-rule);
+    border-radius: 16px;
+    background: var(--warm-card);
+    box-shadow: 0 8px 24px rgba(42,38,32,.07);
+  }
+  .hiw__compare-row--highlight {
+    border-color: rgba(212,122,58,.34);
+    background: rgba(212,122,58,.08) !important;
+  }
+  .hiw__compare-table td {
+    border-top: 0;
+    padding: 0;
+  }
+  .hiw__compare-name {
+    padding-right: 36px;
+    white-space: normal;
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+  .hiw__compare-name .hiw__compare-badge {
+    margin-right: 6px;
+  }
+  .hiw__compare-cost,
+  .hiw__compare-what {
+    display: grid;
+    grid-template-columns: 82px minmax(0, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+    white-space: normal;
+    font-size: .9rem;
+    line-height: 1.45;
+  }
+  .hiw__compare-cell-value,
+  .hiw__compare-note {
+    min-width: 0;
+    grid-column: 2;
+  }
+  .hiw__compare-note {
+    margin-top: 2px;
+  }
+  .hiw__compare-cost::before,
+  .hiw__compare-what::before {
+    color: var(--warm-ink-soft);
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    line-height: 1.35;
+    text-transform: uppercase;
+  }
+  .hiw__compare-cost:nth-child(2)::before {
+    content: 'В месяц';
+  }
+  .hiw__compare-cost:nth-child(3)::before {
+    content: 'В год';
+  }
+  .hiw__compare-what::before {
+    content: 'Что даёт';
+  }
+  .hiw__compare-verdict {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: auto;
+  }
+  .hiw__compare-verdict svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+@media (max-width: 420px) {
+  .hiw .landing-warm__nav-cta {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  .hiw .landing-warm__brand {
+    font-size: 17px;
+  }
+  .hiw__problem {
+    padding-top: 40px;
+  }
 }
 `
