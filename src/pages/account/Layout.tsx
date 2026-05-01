@@ -175,6 +175,7 @@ export default function AccountLayout() {
   const hasPremium = Boolean(sub && sub.status !== "none" && !sub.expired);
   const showPremiumUpsell = !loading && Boolean(me?.user) && !hasPremium;
   const isAccountRoot = location.pathname === "/account";
+  const isStatisticsPage = location.pathname.startsWith("/account/statistics");
 
   const navItems = [
     { to: "/account", label: "Профиль", end: true },
@@ -244,7 +245,7 @@ export default function AccountLayout() {
   }
 
   return (
-    <div className="account">
+    <div className={`account${isStatisticsPage ? " account--statistics" : ""}`}>
       <div className="account__inner">
         <div className="account__layout">
           <aside className="account__sidebar">

@@ -1,5 +1,5 @@
-import { useEffect, useState, useMemo } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useFavoriteRestaurantsStore } from '@/store/favoriteRestaurants';
 import { useAuth } from '@/store/auth';
 import { useFavoritesStore } from '@/store/favorites';
@@ -18,6 +18,27 @@ type HydratedDish = {
     addedAt: string;
 };
 
+const getRestaurantInitials = (name?: string) => {
+    if (!name) return 'RS';
+
+    const trimmedName = name.trim();
+    if (!trimmedName) return 'RS';
+
+    const words = trimmedName
+        .split(/\s+/)
+        .filter(Boolean);
+
+    if (words.length >= 2) {
+        return words
+            .slice(0, 2)
+            .map((word) => word[0])
+            .join('')
+            .toUpperCase();
+    }
+
+    return trimmedName.slice(0, 2).toUpperCase();
+};
+
 export default function Favorites() {
     const token = useAuth((s) => s.accessToken);
     const { items, isLoading: isIdsLoading, load } = useFavoritesStore((s) => ({
@@ -34,18 +55,15 @@ export default function Favorites() {
         items: favRestaurantItems,
         isLoading: isRestaurantIdsLoading,
         load: loadRestaurantFavs,
-        toggle: toggleRestaurantFav,
-        isFavorite: isRestaurantFavorite
+        toggle: toggleRestaurantFav
     } = useFavoriteRestaurantsStore((s) => ({
         items: s.items,
         isLoading: s.isLoading,
         load: s.load,
-        toggle: s.toggle,
-        isFavorite: s.isFavorite
+        toggle: s.toggle
     }));
 
     const navigate = useNavigate();
-    const location = useLocation();
 
     const [dishes, setDishes] = useState<HydratedDish[]>([]);
     const [restaurants, setRestaurants] = useState<any[]>([]);
@@ -251,23 +269,25 @@ export default function Favorites() {
                     )}
 
                     {restaurants.length > 0 && (
-                        <ul className="catalog-grid">
+                        <ul className="favorite-restaurants-list">
                             {restaurants.map((r, i) => (
-                                <li key={`${r.slug || r.name}-${i}`} className="catalog-card">
-                                    <div className="catalog-card__header">
-                                        <div className="catalog-card__badge">{r?.name?.slice(0, 2).toUpperCase() || 'RS'}</div>
-                                        <div className="catalog-card__title-block">
-                                            <h3 className="catalog-card__title">{r.name}</h3>
-                                            {r.cuisine && <div className="catalog-card__cuisine">{r.cuisine}</div>}
+                                <li key={`${r.slug || r.name}-${i}`} className="favorite-restaurant-card">
+                                    <div className="favorite-restaurant-card__main">
+                                        <div className="favorite-restaurant-card__badge">{getRestaurantInitials(r?.name)}</div>
+                                        <div className="favorite-restaurant-card__title-block">
+                                            <h3 className="favorite-restaurant-card__title">{r.name}</h3>
+                                            {r.cuisine && <div className="favorite-restaurant-card__cuisine">{r.cuisine}</div>}
                                         </div>
                                         <button
                                             type="button"
-                                            className="catalog-card__fav-btn is-active"
+                                            className="favorite-restaurant-card__fav-btn is-active"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 analytics.track("favorite_remove", { type: "restaurant", slug: r.slug, name: r.name });
                                                 toggleRestaurantFav(token, r.slug);
                                             }}
+                                            aria-label="Удалить ресторан из избранного"
+                                            title="Удалить из избранного"
                                         >
                                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z"
@@ -276,15 +296,14 @@ export default function Favorites() {
                                             </svg>
                                         </button>
                                     </div>
-                                    <div className="catalog-card__actions">
-                                        <button
-                                            type="button"
-                                            className="btn btn--primary"
-                                            onClick={() => navigate(`/r/${r.slug}/menu`)}
-                                        >
-                                            Открыть меню
-                                        </button>
-                                    </div>
+                                    <button
+                                        type="button"
+                                        className="favorite-restaurant-card__menu-link"
+                                        onClick={() => navigate(`/r/${r.slug}/menu`)}
+                                    >
+                                        <span>Открыть меню</span>
+                                        <span aria-hidden="true" className="favorite-restaurant-card__arrow">→</span>
+                                    </button>
                                 </li>
                             ))}
                         </ul>

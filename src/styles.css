@@ -12621,6 +12621,225 @@ html[data-rs-theme="night"] .rs-banner__text {
   color: #64748b;
 }
 
+.favorite-restaurants-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+.favorite-restaurant-card {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 18px;
+  min-height: 174px;
+  padding: 28px 34px 24px;
+  border: 1px solid rgba(218, 205, 186, 0.9);
+  border-radius: 18px;
+  background: rgba(255, 253, 249, 0.86);
+  box-shadow: none;
+  color: #241a12;
+}
+
+.favorite-restaurant-card__main {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) 48px;
+  align-items: start;
+  gap: 24px;
+  min-width: 0;
+}
+
+.favorite-restaurant-card__badge {
+  width: 72px;
+  height: 72px;
+  border: 1.5px solid rgba(132, 124, 109, 0.68);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #4f6d35;
+  background: rgba(255, 255, 255, 0.48);
+  font-family: "Playfair Display", "DM Serif Display", Georgia, serif;
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.favorite-restaurant-card__title-block {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding-top: 3px;
+}
+
+.favorite-restaurant-card__title {
+  margin: 0;
+  color: #201712;
+  font-family: "Playfair Display", "DM Serif Display", Georgia, serif;
+  font-size: clamp(27px, 3.4vw, 38px);
+  font-weight: 400;
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+}
+
+.favorite-restaurant-card__cuisine {
+  color: rgba(69, 58, 49, 0.76);
+  font-family: "Playfair Display", "DM Serif Display", Georgia, serif;
+  font-size: clamp(19px, 2vw, 25px);
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.favorite-restaurant-card__fav-btn {
+  width: 48px;
+  height: 48px;
+  margin: -2px -6px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #e11d48;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.18s ease, background-color 0.18s ease;
+}
+
+.favorite-restaurant-card__fav-btn:hover {
+  background: rgba(225, 29, 72, 0.08);
+  transform: scale(1.04);
+}
+
+.favorite-restaurant-card__fav-btn svg {
+  width: 30px;
+  height: 30px;
+}
+
+.favorite-restaurant-card__menu-link {
+  justify-self: start;
+  min-height: 34px;
+  padding: 0;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  color: #4f6d35;
+  background: transparent;
+  font-family: "Playfair Display", "DM Serif Display", Georgia, serif;
+  font-size: clamp(21px, 2.1vw, 28px);
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.18s ease, transform 0.18s ease;
+}
+
+.favorite-restaurant-card__menu-link:hover {
+  color: #3f5c27;
+  transform: translateX(2px);
+}
+
+.favorite-restaurant-card__arrow {
+  font-family: Georgia, serif;
+  font-size: 1.18em;
+  line-height: 0.8;
+}
+
+@media (min-width: 960px) {
+  .favorite-restaurants-list {
+    gap: 18px;
+  }
+
+  .favorite-restaurant-card {
+    min-height: 188px;
+    padding: 32px 40px 28px;
+  }
+}
+
+@media (max-width: 640px) {
+  .favorite-restaurants-list {
+    gap: 14px;
+  }
+
+  .favorite-restaurant-card {
+    min-height: 130px;
+    gap: 14px;
+    padding: 20px 22px 19px;
+    border-radius: 16px;
+  }
+
+  .favorite-restaurant-card__main {
+    grid-template-columns: 58px minmax(0, 1fr) 38px;
+    gap: 16px;
+  }
+
+  .favorite-restaurant-card__badge {
+    width: 58px;
+    height: 58px;
+    font-size: 25px;
+  }
+
+  .favorite-restaurant-card__title-block {
+    gap: 7px;
+    padding-top: 2px;
+  }
+
+  .favorite-restaurant-card__title {
+    font-size: clamp(26px, 7vw, 32px);
+  }
+
+  .favorite-restaurant-card__cuisine {
+    font-size: clamp(19px, 5.3vw, 23px);
+  }
+
+  .favorite-restaurant-card__fav-btn {
+    width: 38px;
+    height: 38px;
+    margin: 0 -4px 0 0;
+  }
+
+  .favorite-restaurant-card__fav-btn svg {
+    width: 27px;
+    height: 27px;
+  }
+
+  .favorite-restaurant-card__menu-link {
+    min-height: 30px;
+    gap: 13px;
+    font-size: clamp(20px, 5.6vw, 24px);
+  }
+}
+
+@media (max-width: 380px) {
+  .favorite-restaurant-card {
+    padding: 18px 18px 17px;
+  }
+
+  .favorite-restaurant-card__main {
+    grid-template-columns: 52px minmax(0, 1fr) 34px;
+    gap: 14px;
+  }
+
+  .favorite-restaurant-card__badge {
+    width: 52px;
+    height: 52px;
+    font-size: 23px;
+  }
+
+  .favorite-restaurant-card__title {
+    font-size: 24px;
+  }
+
+  .favorite-restaurant-card__cuisine {
+    font-size: 18px;
+  }
+}
+
 /* --- Account Button (iOS style) --- */
 .nav-account-button {
   display: inline-flex;
@@ -14134,6 +14353,40 @@ html[data-rs-theme="night"] .favorites-page .catalog-card__actions .btn--primary
 html[data-rs-theme="night"] .favorites-page .catalog-card__actions .btn--primary:hover {
   background: linear-gradient(135deg, #13aa79, #14aa99);
   border-color: rgba(94, 234, 212, 0.52);
+}
+
+html[data-rs-theme="night"] .favorite-restaurant-card {
+  border-color: rgba(148, 163, 184, 0.28);
+  background:
+    radial-gradient(120% 120% at 100% 0%, rgba(52, 211, 153, 0.08) 0%, rgba(52, 211, 153, 0) 52%),
+    rgba(15, 26, 44, 0.92);
+  color: #eaf2ff;
+}
+
+html[data-rs-theme="night"] .favorite-restaurant-card__badge {
+  border-color: rgba(191, 219, 254, 0.36);
+  background: rgba(11, 22, 38, 0.62);
+  color: #9fce80;
+}
+
+html[data-rs-theme="night"] .favorite-restaurant-card__title {
+  color: #f3f7ff;
+}
+
+html[data-rs-theme="night"] .favorite-restaurant-card__cuisine {
+  color: #b7c7dc;
+}
+
+html[data-rs-theme="night"] .favorite-restaurant-card__menu-link {
+  color: #9fce80;
+}
+
+html[data-rs-theme="night"] .favorite-restaurant-card__menu-link:hover {
+  color: #b9e39a;
+}
+
+html[data-rs-theme="night"] .favorite-restaurant-card__fav-btn:hover {
+  background: rgba(251, 113, 133, 0.12);
 }
 
 html[data-rs-theme="night"] .catalog-hero {
@@ -17218,6 +17471,450 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
 
   .account-about-card .form-group label {
     font-size: 16px !important;
+  }
+}
+
+/* Final compact mobile sizing for search and the account diary. */
+@media (max-width: 760px) {
+  .app-theme--search .search-page {
+    padding: 30px 14px 42px;
+  }
+
+  .app-theme--search .search-page__hero {
+    margin-bottom: 22px;
+  }
+
+  .app-theme--search .search-page__title {
+    font-size: clamp(34px, 10vw, 42px);
+    line-height: 1.02;
+  }
+
+  .app-theme--search .search-page__title span {
+    margin-top: 4px;
+  }
+
+  .app-theme--search .search-page__hint {
+    margin-top: 16px;
+    font-size: 16px;
+    line-height: 1.28;
+  }
+
+  .app-theme--search .search-page__form {
+    gap: 12px;
+    margin-bottom: 24px;
+    padding: 14px 14px 16px;
+    border-width: 1px;
+    border-radius: 18px;
+  }
+
+  .app-theme--search .search-page__field {
+    min-height: 44px;
+    grid-template-columns: 28px minmax(0, 1fr) 30px;
+    gap: 8px;
+    padding-bottom: 10px;
+  }
+
+  .app-theme--search .search-page__search-icon svg {
+    width: 23px;
+    height: 23px;
+  }
+
+  .app-theme--search .search-page__input {
+    font-size: 22px;
+  }
+
+  .app-theme--search .search-page__clear {
+    width: 30px;
+    height: 30px;
+  }
+
+  .app-theme--search .search-page__clear svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .app-theme--search .search-page__submit {
+    min-height: 52px;
+    font-size: 18px;
+  }
+
+  .app-theme--search .search-results-section {
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .app-theme--search .search-results-section + .search-results-section {
+    padding-top: 22px;
+  }
+
+  .app-theme--search .search-results-header__title,
+  .app-theme--search .search-results-header__count {
+    font-size: 20px;
+  }
+
+  .app-theme--search .search-results {
+    gap: 10px;
+  }
+
+  .app-theme--search .search-card {
+    border-width: 1px;
+    border-radius: 16px;
+  }
+
+  .app-theme--search .search-card__button {
+    min-height: 88px;
+    grid-template-columns: minmax(0, 1fr) 30px;
+    gap: 10px;
+    padding: 17px 14px 16px 20px;
+  }
+
+  .app-theme--search .search-card__content {
+    gap: 5px;
+  }
+
+  .app-theme--search .search-card__title {
+    font-size: 20px;
+  }
+
+  .app-theme--search .search-card__subtitle,
+  .app-theme--search .search-card__meta {
+    font-size: 16px;
+  }
+
+  .app-theme--search .search-card__chevron svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .account--statistics {
+    padding-top: 10px !important;
+    padding-bottom: calc(84px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .account--statistics .account__inner {
+    padding: 0 14px !important;
+  }
+
+  .account--statistics .account__header {
+    min-height: 52px !important;
+  }
+
+  .account--statistics .account__header-mobile {
+    gap: 8px !important;
+  }
+
+  .account--statistics .account__mobile-back {
+    min-height: 42px !important;
+    padding: 0 12px !important;
+    border-radius: 13px !important;
+    font-size: 15px !important;
+    gap: 6px !important;
+  }
+
+  .account--statistics .account__mobile-back svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .account--statistics .account-logout-btn.account-logout-btn--mobile {
+    min-width: 78px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 12px !important;
+    border-radius: 13px !important;
+    gap: 6px !important;
+  }
+
+  .account--statistics .account-logout-btn.account-logout-btn--mobile::after {
+    font-size: 14px !important;
+  }
+
+  .account--statistics .account-logout-btn.account-logout-btn--mobile svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .account--statistics .account__content {
+    margin-top: 12px !important;
+  }
+
+  .account--statistics .nds {
+    gap: 12px !important;
+  }
+
+  .account--statistics .ndsDateWrap {
+    gap: 8px !important;
+  }
+
+  .account--statistics .ndsDateBtn {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 14px !important;
+  }
+
+  .account--statistics .ndsDateBtn svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .account--statistics .ndsDatePill {
+    height: 44px !important;
+    padding: 0 12px !important;
+    border-radius: 14px !important;
+    gap: 8px !important;
+  }
+
+  .account--statistics .ndsCalIcon svg {
+    width: 17px !important;
+    height: 17px !important;
+  }
+
+  .account--statistics .ndsDateText {
+    font-size: 17px !important;
+  }
+
+  .account--statistics .ndsCard {
+    border-radius: 18px !important;
+  }
+
+  .account--statistics .ndsCardMain {
+    padding: 18px !important;
+  }
+
+  .account--statistics .ndsMetricLayout {
+    grid-template-columns: 54px minmax(0, 1fr) !important;
+    gap: 14px !important;
+    align-items: center !important;
+  }
+
+  .account--statistics .ndsMetricTopline {
+    flex-direction: row !important;
+    align-items: center !important;
+    margin-bottom: 12px !important;
+    gap: 10px !important;
+  }
+
+  .account--statistics .ndsMetricIcon,
+  .account--statistics .ndsMetricIcon--calories {
+    width: 50px !important;
+    height: 50px !important;
+  }
+
+  .account--statistics .ndsMetricIcon svg {
+    width: 25px !important;
+    height: 25px !important;
+  }
+
+  .account--statistics .ndsStrong,
+  .account--statistics .ndsTileHead {
+    font-size: 18px !important;
+  }
+
+  .account--statistics .ndsCardValue {
+    margin-top: 3px !important;
+    font-size: 25px !important;
+  }
+
+  .account--statistics .ndsRemaining {
+    align-self: center !important;
+    padding: 7px 10px !important;
+    font-size: 12px !important;
+    white-space: normal !important;
+    text-align: center !important;
+  }
+
+  .account--statistics .ndsProgressRow {
+    gap: 8px !important;
+  }
+
+  .account--statistics .ndsBar {
+    height: 8px !important;
+  }
+
+  .account--statistics .ndsPercent {
+    min-width: 28px !important;
+    font-size: 13px !important;
+  }
+
+  .account--statistics .ndsTiles {
+    gap: 10px !important;
+  }
+
+  .account--statistics .ndsTile {
+    padding: 14px !important;
+    border-radius: 16px !important;
+    gap: 12px !important;
+  }
+
+  .account--statistics .ndsTileMain {
+    grid-template-columns: 46px minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .account--statistics .ndsTileMain .ndsMetricIcon {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  .account--statistics .ndsTileMain .ndsMetricIcon svg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  .account--statistics .ndsTileNums {
+    font-size: 18px !important;
+  }
+
+  .account--statistics .btn-add-product {
+    min-height: 46px !important;
+    border-radius: 14px !important;
+    font-size: 15px !important;
+  }
+
+  .account--statistics .diary-list {
+    margin-top: 14px !important;
+  }
+
+  .account--statistics .diary-item {
+    padding: 14px !important;
+    border-radius: 14px !important;
+  }
+
+  .account--statistics .diary-item-name {
+    font-size: 16px !important;
+  }
+
+  .account--statistics .diary-item-meta {
+    font-size: 13px !important;
+  }
+
+  .account--statistics .account-mobile-tabbar {
+    min-height: calc(64px + env(safe-area-inset-bottom)) !important;
+    padding: 7px 6px calc(6px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .account--statistics .account-mobile-tabbar__link {
+    gap: 2px !important;
+    font-size: 11px !important;
+  }
+
+  .account--statistics .account-mobile-tabbar__icon {
+    width: 23px !important;
+    height: 23px !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .app-theme--search .search-page {
+    padding-top: 26px;
+  }
+
+  .app-theme--search .search-page__title {
+    font-size: 34px;
+  }
+
+  .app-theme--search .search-page__hint {
+    font-size: 15px;
+  }
+
+  .app-theme--search .search-page__input {
+    font-size: 21px;
+  }
+
+  .app-theme--search .search-results-header__title,
+  .app-theme--search .search-results-header__count {
+    font-size: 19px;
+  }
+
+  .app-theme--search .search-card__button {
+    min-height: 82px;
+    padding: 15px 12px 14px 18px;
+  }
+
+  .app-theme--search .search-card__title {
+    font-size: 19px;
+  }
+
+  .app-theme--search .search-card__subtitle,
+  .app-theme--search .search-card__meta {
+    font-size: 15px;
+  }
+
+  .account--statistics .account__inner {
+    padding: 0 12px !important;
+  }
+
+  .account--statistics .account__mobile-back span {
+    max-width: 185px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .account--statistics .account__mobile-back,
+  .account--statistics .account-logout-btn.account-logout-btn--mobile {
+    height: 38px !important;
+    min-height: 38px !important;
+    border-radius: 12px !important;
+  }
+
+  .account--statistics .account__mobile-back {
+    font-size: 14px !important;
+  }
+
+  .account--statistics .account-logout-btn.account-logout-btn--mobile {
+    min-width: 72px !important;
+  }
+
+  .account--statistics .ndsDateBtn,
+  .account--statistics .ndsDatePill {
+    height: 40px !important;
+  }
+
+  .account--statistics .ndsDateBtn {
+    width: 40px !important;
+  }
+
+  .account--statistics .ndsDateText {
+    font-size: 16px !important;
+  }
+
+  .account--statistics .ndsCardMain {
+    padding: 16px !important;
+  }
+
+  .account--statistics .ndsMetricLayout {
+    grid-template-columns: 46px minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .account--statistics .ndsMetricIcon,
+  .account--statistics .ndsMetricIcon--calories {
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  .account--statistics .ndsMetricIcon svg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  .account--statistics .ndsStrong,
+  .account--statistics .ndsTileHead {
+    font-size: 17px !important;
+  }
+
+  .account--statistics .ndsCardValue {
+    font-size: 23px !important;
+  }
+
+  .account--statistics .ndsRemaining {
+    padding: 6px 8px !important;
+    font-size: 11px !important;
+  }
+
+  .account--statistics .ndsTile {
+    padding: 12px !important;
   }
 }
 
