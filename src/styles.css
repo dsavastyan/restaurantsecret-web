@@ -2442,27 +2442,25 @@ body {
   margin-right: clamp(16px, 4vw, 64px);
 }
 
-.catalog-heading__stat {
+.catalog-heading__stat,
+.catalog-heading__weekly {
   min-width: 178px;
   display: inline-flex;
   align-items: center;
   gap: 16px;
   padding: 16px 20px;
-  border: 1px solid rgba(138, 110, 72, 0.28);
   border-radius: 12px;
-  background: rgba(255, 252, 246, 0.72);
   box-shadow: 0 12px 28px rgba(97, 78, 54, 0.1);
 }
 
+.catalog-heading__stat {
+  border: 1px solid rgba(138, 110, 72, 0.28);
+  background: rgba(255, 252, 246, 0.72);
+}
+
 .catalog-heading__weekly {
-  min-width: 156px;
-  display: inline-flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 5px;
-  padding: 16px 18px;
+  min-width: 222px;
   border: 1px solid rgba(104, 134, 63, 0.24);
-  border-radius: 12px;
   background: rgba(244, 248, 234, 0.78);
   box-shadow: 0 12px 28px rgba(97, 78, 54, 0.08);
 }
@@ -2479,6 +2477,11 @@ body {
   flex-shrink: 0;
 }
 
+.catalog-heading__stat-icon--weekly {
+  color: #607b3d;
+  background: linear-gradient(135deg, #f1f6df, #e5ecd4);
+}
+
 .catalog-heading__stat-icon svg,
 .catalog-search__icon,
 .catalog-card__meta svg {
@@ -2491,7 +2494,8 @@ body {
   stroke-linejoin: round;
 }
 
-.catalog-heading__stat strong {
+.catalog-heading__stat strong,
+.catalog-heading__weekly strong {
   display: block;
   color: #607b3d;
   font-family: "Playfair Display", "DM Serif Display", Georgia, serif;
@@ -2501,15 +2505,11 @@ body {
 }
 
 .catalog-heading__weekly strong {
-  display: block;
-  color: #607b3d;
-  font-family: "Playfair Display", "DM Serif Display", Georgia, serif;
   font-size: 30px;
-  line-height: 1;
-  letter-spacing: 0;
 }
 
-.catalog-heading__stat span {
+.catalog-heading__stat span,
+.catalog-heading__weekly span {
   display: block;
   margin-top: 4px;
   color: #5f574d;
@@ -2518,8 +2518,6 @@ body {
 }
 
 .catalog-heading__weekly span {
-  display: block;
-  color: #5f574d;
   font-size: 13px;
   line-height: 1.25;
 }
@@ -2910,7 +2908,8 @@ body {
     margin-bottom: 4px;
   }
 
-  .catalog-heading__stat {
+  .catalog-heading__stat,
+  .catalog-heading__weekly {
     width: 100%;
     min-width: 0;
   }
@@ -2920,8 +2919,14 @@ body {
     flex-direction: column;
   }
 
-  .catalog-heading__weekly {
-    min-width: 0;
+  .catalog-heading__stat-icon {
+    width: 52px;
+    height: 52px;
+  }
+
+  .catalog-heading__stat strong,
+  .catalog-heading__weekly strong {
+    font-size: 30px;
   }
 
   .catalog-page .catalog-search {

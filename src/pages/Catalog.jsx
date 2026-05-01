@@ -34,6 +34,17 @@ const MetroIcon = () => (
   </svg>
 )
 
+const WeeklyAddedIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M7 3v3" />
+    <path d="M17 3v3" />
+    <path d="M5 9h14" />
+    <path d="M6.6 5h10.8c1.1 0 2 .9 2 2v10.8c0 1.1-.9 2-2 2H6.6c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2Z" />
+    <path d="M12 12v5" />
+    <path d="M9.5 14.5h5" />
+  </svg>
+)
+
 const normalizeInstagramUrl = (rawUrl) => {
   if (!rawUrl) return null
   const text = String(rawUrl).trim()
@@ -319,8 +330,13 @@ export default function Catalog() {
           </div>
           {weeklyAdded > 0 && (
             <div className="catalog-heading__weekly" aria-label={`Добавлено на этой неделе: ${weeklyAdded}`}>
-              <strong>+{weeklyAdded.toLocaleString('ru-RU')}</strong>
-              <span>добавлено на этой неделе</span>
+              <div className="catalog-heading__stat-icon catalog-heading__stat-icon--weekly" aria-hidden="true">
+                <WeeklyAddedIcon />
+              </div>
+              <div>
+                <strong>+{weeklyAdded.toLocaleString('ru-RU')}</strong>
+                <span>добавлено на этой неделе</span>
+              </div>
             </div>
           )}
         </div>
