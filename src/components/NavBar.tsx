@@ -1,4 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
+
+import { analytics } from "@/services/analytics";
 import { useAuth } from "@/store/auth";
 
 import AccountButton from "./AccountButton";
@@ -8,6 +10,48 @@ export default function NavBar() {
   const location = useLocation();
   const isLoginPage = location.pathname === "/login";
   const isOnboardingPage = location.pathname.startsWith("/onboarding");
+  const currentPath = location.pathname + location.search;
+
+  if (!token) {
+    return (
+      <header className="navbar navbar--guest">
+        <div className="navbar__inner navbar__inner--guest">
+          <Link to="/" className="navbar__brand navbar__brand--guest" aria-label="RestaurantSecret">
+            <img src="/assets/logo-64.png" alt="" className="navbar__logo" aria-hidden="true" />
+            <span>RestaurantSecret</span>
+          </Link>
+
+          <nav className="navbar__center" aria-label="Разделы">
+            <Link to="/restaurants">Рестораны</Link>
+            <Link to="/how-it-works">Как работает</Link>
+            <Link to="/tariffs">Тарифы</Link>
+            <a href="https://t.me/RestSecretSupport_bot" target="_blank" rel="noopener noreferrer">Поддержка</a>
+          </nav>
+
+          <div className="navbar__right">
+            {!isLoginPage && (
+              <div className="navbar__guest-actions">
+                <Link
+                  to="/login"
+                  state={{ from: currentPath }}
+                  className="navbar__login-link"
+                >
+                  Войти
+                </Link>
+                <Link
+                  to="/onboarding/welcome"
+                  className="navbar__trial-link"
+                  onClick={() => analytics.track("cta_clicked", { location: "nav", text: "Попробовать бесплатно" })}
+                >
+                  Попробовать бесплатно
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="navbar">
@@ -31,15 +75,6 @@ export default function NavBar() {
         <div className="navbar__right">
           {token && !location.pathname.startsWith("/account") && !isOnboardingPage && (
             <AccountButton />
-          )}
-          {!token && !isLoginPage && (
-            <Link
-              to="/login"
-              state={{ from: location.pathname + location.search }}
-              className="btn btn--primary"
-            >
-              Войти
-            </Link>
           )}
         </div>
       </div>

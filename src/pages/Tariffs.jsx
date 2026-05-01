@@ -30,7 +30,7 @@ export default function Tariffs() {
   const proState = accessToken ? undefined : { from: '/account/subscription' }
 
   const handleProClick = () => {
-    analytics.track('cta_clicked', { location: 'tariffs', text: 'Попробовать Pro' })
+    analytics.track('cta_clicked', { location: 'tariffs', text: accessToken ? 'Попробовать Pro' : 'Попробовать бесплатно' })
   }
 
   return (
@@ -51,15 +51,9 @@ export default function Tariffs() {
         </nav>
 
         <div className="tariffs-nav__right">
-          <Link
-            to={accessToken ? '/account' : '/login'}
-            state={accessToken ? undefined : { from: location.pathname + location.search }}
-            className="tariffs-nav__login-link tariffs-nav__desktop-action"
-          >
-            Личный кабинет
-          </Link>
           {accessToken ? (
             <>
+              <Link to="/account" className="tariffs-nav__login-link tariffs-nav__desktop-action">Личный кабинет</Link>
               <Link to="/account" className="tariffs-nav__cta tariffs-nav__mobile-action">Личный кабинет</Link>
               <Link
                 to={proTo}
@@ -71,14 +65,22 @@ export default function Tariffs() {
               </Link>
             </>
           ) : (
-            <Link
-              to={proTo}
-              state={proState}
-              className="tariffs-nav__cta"
-              onClick={handleProClick}
-            >
-              Попробовать бесплатно
-            </Link>
+            <>
+              <Link
+                to="/login"
+                state={{ from: location.pathname + location.search }}
+                className="tariffs-nav__login-link"
+              >
+                Войти
+              </Link>
+              <Link
+                to="/onboarding/welcome"
+                className="tariffs-nav__cta"
+                onClick={handleProClick}
+              >
+                Попробовать бесплатно
+              </Link>
+            </>
           )}
         </div>
       </header>

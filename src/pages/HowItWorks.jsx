@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 
 import { CookieSettingsModal } from '@/components/CookieSettingsModal'
 import { postSuggest } from '@/lib/api'
+import { analytics } from '@/services/analytics'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
 
@@ -121,6 +122,7 @@ const FAQ = [
 // ─────────────────────────────────────────────
 
 export default function HowItWorks() {
+  const location = useLocation()
   const accessToken = useAuth((state) => state.accessToken)
   const accessTokenOrUndefined = accessToken || undefined
   const [openFaq, setOpenFaq] = useState(null)
@@ -208,13 +210,22 @@ export default function HowItWorks() {
               <Link to="/account" className="landing-warm__nav-cta landing-warm__mobile-action">Личный кабинет</Link>
             </>
           ) : (
-            <Link
-              to="/onboarding/welcome"
-              className="landing-warm__nav-cta"
-            >
-              <span className="hiw__nav-cta-label hiw__nav-cta-label--desktop">Попробовать 7 дней бесплатно →</span>
-              <span className="hiw__nav-cta-label hiw__nav-cta-label--mobile">Попробовать бесплатно</span>
-            </Link>
+            <>
+              <Link
+                to="/login"
+                state={{ from: location.pathname + location.search }}
+                className="landing-warm__login-link"
+              >
+                Войти
+              </Link>
+              <Link
+                to="/onboarding/welcome"
+                className="landing-warm__nav-cta"
+                onClick={() => analytics.track('cta_clicked', { location: 'nav', text: 'Попробовать бесплатно' })}
+              >
+                Попробовать бесплатно
+              </Link>
+            </>
           )}
         </div>
       </header>

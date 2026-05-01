@@ -423,7 +423,7 @@ export default function Landing() {
               <Link
                 to="/login"
                 state={{ from: location.pathname + location.search }}
-                className="landing-warm__login-link landing-warm__desktop-action"
+                className="landing-warm__login-link"
               >
                 Войти
               </Link>
