@@ -15955,6 +15955,10 @@ html[data-rs-theme="night"] .onboarding-install__image {
   z-index: 1;
 }
 
+.landing-warm__hero > .landing-warm__search {
+  z-index: 20;
+}
+
 .landing-warm__hero .botanic-decor {
   position: absolute;
   inset: 0;
@@ -16106,6 +16110,7 @@ html[data-rs-theme="night"] .onboarding-install__image {
 .landing-warm__search .search-input__dropdown {
   top: calc(100% + 18px);
   text-align: left;
+  z-index: 30;
 }
 
 .landing-warm__search-submit {
