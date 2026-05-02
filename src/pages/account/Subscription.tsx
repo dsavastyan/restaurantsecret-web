@@ -222,30 +222,29 @@ export default function AccountSubscription() {
   const isExpired = status === "expired";
   const isCancellationScheduled = Boolean(statusData?.canceled_at);
   const expiresLabel = useMemo(() => formatDate(statusData?.expires_at), [statusData?.expires_at, formatDate]);
-  const illustrationSrc = subscriptionActivePng;
   const currentPlanKey = typeof statusData?.plan === "string" ? statusData.plan.trim().toLowerCase() : "";
   const currentUiPlan: UiPlan | null = currentPlanKey === "monthly" ? "month" : currentPlanKey === "annual" ? "year" : null;
   const planTitle = PLAN_LABELS[currentPlanKey] || "Тариф";
   const planPriceBadge = PLAN_PRICE_BADGES[currentPlanKey] || "ТЕКУЩИЙ ТАРИФ";
-  const paymentPeriodLabel = statusData?.is_trial && !statusData?.next_charge_at
-    ? "Пробный период"
-    : currentPlanKey === "annual"
-      ? "Оплата каждый год"
-      : currentPlanKey === "monthly"
-        ? "Оплата каждый месяц"
-        : "Периодичность оплаты";
-  const nextBillingLabel = statusData?.next_charge_at
-    ? `Следующее списание: ${formatDate(statusData?.next_charge_at) ?? "—"}`
-    : statusData?.is_trial
-      ? `Окончание пробного периода: ${expiresLabel ?? "—"}`
-      : `Следующее списание: ${expiresLabel ?? "—"}`;
   const expiredTitle = "Подписка истекла";
   const expiredDescription = `Ваша подписка на ${planTitle} закончилась ${expiresLabel ?? ""}`.trim();
+  const isAnnualPlan = currentPlanKey === "annual";
+  const activePlanTitle = currentPlanKey === "annual" ? "Год" : currentPlanKey === "monthly" ? "Месяц" : planTitle;
+  const activePlanPrice = currentPlanKey === "annual" ? "1 490 ₽" : currentPlanKey === "monthly" ? "199 ₽" : planPriceBadge;
+  const activePlanPeriod = currentPlanKey === "annual" ? "/год" : currentPlanKey === "monthly" ? "/мес" : "";
+  const activeRenewalLabel = isCancellationScheduled ? "Автопродление отключено" : "Автопродление включено";
+  const activeBillingLabel = isCancellationScheduled
+    ? `Подписка действует до: ${expiresLabel ?? "—"}`
+    : statusData?.next_charge_at
+      ? `Следующее списание: ${formatDate(statusData.next_charge_at) ?? "—"}`
+      : statusData?.is_trial
+        ? `Окончание пробного периода: ${expiresLabel ?? "—"}`
+        : `Следующее списание: ${expiresLabel ?? "—"}`;
 
   const showHistory = (isActive || isCanceled || isExpired) && !loading;
   const isNeverSubscribed = status === "none" && !showHistory;
 
-  const pageTitle = isNeverSubscribed ? "Оформить подписку" : "Управление подпиской";
+  const pageTitle = isNeverSubscribed ? "Оформить подписку" : isActive ? "Моя подписка" : "Управление подпиской";
 
   const promoErrorLabel = useMemo(() => {
     if (!promoError) return null;
@@ -455,13 +454,16 @@ export default function AccountSubscription() {
   }, [accessToken, canceling, fetchStatus, statusData?.plan]);
 
   return (
-    <section className="account-panel-v2 account-subscription-panel" aria-labelledby="account-subscription-heading">
+    <section className={`account-panel-v2 account-subscription-panel${isActive ? " is-active-subscription" : ""}`} aria-labelledby="account-subscription-heading">
       <header className="account-panel-v2__header">
         <h2 id="account-subscription-heading" className="account-panel-v2__title">
           {pageTitle}
         </h2>
         {isNeverSubscribed && (
           <p className="account-panel-v2__subtitle">Выберите подходящий тариф</p>
+        )}
+        {isActive && (
+          <p className="account-panel-v2__subtitle">Управляйте тарифом и следите за продлением</p>
         )}
       </header>
 
@@ -474,74 +476,135 @@ export default function AccountSubscription() {
               <div className="account-subscription-v2__mobile-surface">
                 {isActive ? (
                   <>
-                    <div className="account-subscription-v2__floating-frame">
-                      <div className="account-subscription-v2__floating-head">
-                        <h3 className="account-subscription-v2__floating-title">Текущая подписка</h3>
-                        {statusData?.can_cancel && (
-                          <button
-                            className="account-subscription-v2__btn-cancel-inline"
-                            type="button"
-                            onClick={handleCancel}
-                            disabled={canceling}
-                          >
-                            {canceling ? "Отмена..." : "Отменить подписку"}
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="account-subscription-v2__inner-frame">
-                        <div className="account-subscription-v2__inner-top">
-                          <div className="account-subscription-v2__dish-icon" aria-hidden="true">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                              <path d="M4 16C4 12.2 7.1 9 11 9h2c3.9 0 7 3.2 7 7H4Z" fill="currentColor" opacity=".2" />
-                              <path d="M12 4v2M7.5 7.5l1.4 1.4M16.5 7.5l-1.4 1.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                              <path d="M3.5 16h17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                    <div className="account-subscription-v2__active-card">
+                      <div className="account-subscription-v2__active-content">
+                        <div className="account-subscription-v2__active-badges">
+                          <span className="account-subscription-v2__status-pill">
+                            <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.7-9.7a1 1 0 0 0-1.4-1.4L9 10.2 7.7 8.9a1 1 0 0 0-1.4 1.4l2 2a1 1 0 0 0 1.4 0l4-4Z" clipRule="evenodd" />
                             </svg>
-                          </div>
-                          <div className="account-subscription-v2__inner-plan">{planTitle}</div>
-                          <div className="account-subscription-v2__inner-badge">{planPriceBadge}</div>
+                            Активна
+                          </span>
+                          <span className="account-subscription-v2__current-pill">Текущий план</span>
                         </div>
 
-                        <p className="account-subscription-v2__inner-meta">{paymentPeriodLabel}</p>
-                        <p className="account-subscription-v2__inner-next">{nextBillingLabel}</p>
+                        <h3 className="account-subscription-v2__active-title">{activePlanTitle}</h3>
+                        <p className="account-subscription-v2__active-price">
+                          <span>{activePlanPrice}</span>
+                          {activePlanPeriod && <small>{activePlanPeriod}</small>}
+                        </p>
+
+                        <div className="account-subscription-v2__active-meta">
+                          <p>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
+                              <path d="M17 2l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M3 11V9a3 3 0 0 1 3-3h15" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M7 22l-4-4 4-4" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M21 13v2a3 3 0 0 1-3 3H3" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            {activeRenewalLabel}
+                          </p>
+                          <p>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
+                              <path d="M7 3v4M17 3v4M4 9h16" strokeLinecap="round" strokeLinejoin="round" />
+                              <rect x="4" y="5" width="16" height="16" rx="3" />
+                            </svg>
+                            {activeBillingLabel}
+                          </p>
+                        </div>
+
+                        <p className="account-subscription-v2__active-note">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M12 10v6M12 7.5h.01" strokeLinecap="round" />
+                          </svg>
+                          Тариф можно изменить или отменить в любой момент.
+                        </p>
+
+                        <div className="account-subscription-v2__active-actions">
+                          <button
+                            className="account-subscription-v2__btn-renew"
+                            onClick={() => setPlansOpen(true)}
+                            disabled={Boolean(paymentPlan)}
+                          >
+                            Изменить тариф
+                          </button>
+
+                          {statusData?.can_cancel && (
+                            <button
+                              className="account-subscription-v2__btn-cancel-inline"
+                              type="button"
+                              onClick={handleCancel}
+                              disabled={canceling}
+                            >
+                              {canceling ? "Отмена..." : "Отменить подписку"}
+                            </button>
+                          )}
+                        </div>
                       </div>
 
+                      <div className="account-subscription-v2__active-visual" aria-hidden="true">
+                        <img src={subscriptionActivePng} alt="" />
+                      </div>
+                    </div>
+
+                    <div className="account-subscription-v2__subscriber-notes" aria-label="Информация для подписчика">
+                      <div className="account-subscription-v2__subscriber-note account-subscription-v2__subscriber-note--olive">
+                        <span className="account-subscription-v2__subscriber-icon" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+                            <path d="M20.8 4.6c-1.6-1.5-4.1-1.4-5.6.2L12 8.1 8.8 4.8C7.3 3.2 4.8 3.1 3.2 4.6 1.5 6.2 1.4 8.9 3 10.6L12 20l9-9.4c1.6-1.7 1.5-4.4-.2-6Z" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </span>
+                        <p>
+                          Рады, что ты теперь с нами! Подписывайся на наш{" "}
+                          <a href="https://t.me/restaurantsecret" target="_blank" rel="noreferrer">
+                            телеграм канал
+                          </a>{" "}
+                          для всех новостей, акций и предложений
+                        </p>
+                      </div>
+
+                      <div className="account-subscription-v2__subscriber-note account-subscription-v2__subscriber-note--gold">
+                        <span className="account-subscription-v2__subscriber-icon" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+                            <path d="M12 3.5a6 6 0 0 0-3.4 11c.6.4.9 1 .9 1.7V17h5v-.8c0-.7.4-1.3.9-1.7A6 6 0 0 0 12 3.5Z" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M9.5 20h5M10 17h4" strokeLinecap="round" />
+                          </svg>
+                        </span>
+                        <p>
+                          Будем благодарны за{" "}
+                          <a href="https://restaurantsecret.ru/feedback" target="_blank" rel="noreferrer">
+                            отзыв, идеи и рекомендации
+                          </a>.
+                        </p>
+                      </div>
+                    </div>
+
+                    {!isAnnualPlan && (
                       <button
-                        className="account-subscription-v2__btn-renew"
+                        className="account-subscription-v2__saving-card"
+                        type="button"
                         onClick={() => setPlansOpen(true)}
                         disabled={Boolean(paymentPlan)}
                       >
-                        Изменить план
+                        <span className="account-subscription-v2__saving-icon" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+                            <path d="M20 12v8H4v-8M22 7H2v5h20V7ZM12 22V7" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M12 7H7.5A2.5 2.5 0 1 1 12 4.5V7Zm0 0h4.5A2.5 2.5 0 1 0 12 4.5V7Z" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </span>
+                        <span className="account-subscription-v2__saving-copy">
+                          <strong>Хочешь сэкономить?</strong>
+                          <span>Перейди на годовой тариф — <b>1 490 ₽/год</b></span>
+                        </span>
+                        <span className="account-subscription-v2__saving-link">
+                          Посмотреть варианты
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+                            <path d="m9 18 6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </span>
                       </button>
-
-                      <img
-                        className="account-subscription-v2__desktop-sticker"
-                        src={subscriptionActivePng}
-                        alt=""
-                      />
-
-                      <p className="account-subscription-v2__notice account-subscription-v2__notice--desktop">
-                        {isCancellationScheduled ? (
-                          <>Автосписание отключено. Мы пришлем уведомление за <strong>2 дня до окончания подписки</strong>!</>
-                        ) : (
-                          <>Мы пришлем уведомление за <strong>2 дня до следующего списания</strong>!</>
-                        )}
-                      </p>
-                    </div>
-
-                    <div className="account-subscription-v2__mobile-illus">
-                      <img
-                        src={illustrationSrc}
-                        alt=""
-                      />
-                    </div>
-                    <p className="account-subscription-v2__notice account-subscription-v2__notice--mobile">
-                      {isCancellationScheduled ? (
-                        <>Автосписание отключено. Мы пришлем уведомление за <strong>2 дня до окончания подписки</strong>!</>
-                      ) : (
-                        <>Мы пришлем уведомление за <strong>2 дня до следующего списания</strong>!</>
-                      )}
-                    </p>
+                    )}
                   </>
                 ) : (
                   <>
@@ -568,7 +631,7 @@ export default function AccountSubscription() {
                   </>
                 )}
 
-                {showHistory && (
+                {showHistory && !isActive && (
                   <div className="account-subscription-v2__card-history">
                     <Link to="/account/subscription/history" className="account-subscription-v2__btn-history">
                       История подписок
