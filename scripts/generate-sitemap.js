@@ -7,6 +7,8 @@ import { dirname, join } from 'path'
 
 const BASE_URL = (process.env.SITEMAP_BASE_URL || 'https://restaurantsecret.ru').replace(/\/+$/, '')
 const MENU_FETCH_CONCURRENCY = Math.max(1, Number(process.env.SITEMAP_MENU_FETCH_CONCURRENCY || 8))
+const FETCH_TIMEOUT_MS = Math.max(1000, Number(process.env.SITEMAP_FETCH_TIMEOUT_MS || 10000))
+const STRICT_API_FETCH = process.env.SITEMAP_STRICT_API_FETCH === 'true'
 const API_URLS = Array.from(
   new Set(
     [
@@ -20,6 +22,26 @@ const API_URLS = Array.from(
       .map((url) => url.replace(/\/+$/, '')),
   ),
 )
+
+async function fetchJson(url) {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+
+  try {
+    const res = await fetch(url, { signal: controller.signal })
+    if (!res.ok) {
+      throw new Error(`${res.status} ${res.statusText}`)
+    }
+    return await res.json()
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      throw new Error(`timed out after ${FETCH_TIMEOUT_MS}ms`)
+    }
+    throw error
+  } finally {
+    clearTimeout(timeout)
+  }
+}
 
 function escapeXml(value) {
   return String(value)
@@ -448,13 +470,7 @@ async function fetchAllRestaurants() {
     const url = `${apiUrl}/restaurants?limit=2000`
 
     try {
-      const res = await fetch(url)
-      if (!res.ok) {
-        errors.push(`${url}: ${res.status} ${res.statusText}`)
-        continue
-      }
-
-      const data = await res.json()
+      const data = await fetchJson(url)
       return data.items ?? data ?? []
     } catch (error) {
       errors.push(`${url}: ${error?.message ?? String(error)}`)
@@ -471,13 +487,7 @@ async function fetchRestaurantMenu(slug) {
     const url = `${apiUrl}/restaurants/${encodeURIComponent(slug)}/menu`
 
     try {
-      const res = await fetch(url)
-      if (!res.ok) {
-        errors.push(`${url}: ${res.status} ${res.statusText}`)
-        continue
-      }
-
-      return await res.json()
+      return await fetchJson(url)
     } catch (error) {
       errors.push(`${url}: ${error?.message ?? String(error)}`)
     }
@@ -515,7 +525,18 @@ async function fetchRestaurantMenus(restaurants) {
 
 async function main() {
   console.log('🔍 Fetching restaurants from API...')
-  const restaurants = await fetchAllRestaurants()
+  let restaurants = []
+
+  try {
+    restaurants = await fetchAllRestaurants()
+  } catch (error) {
+    if (STRICT_API_FETCH) {
+      throw error
+    }
+
+    console.warn(`⚠️  Restaurant API unavailable; generating static-only sitemap: ${error?.message ?? String(error)}`)
+  }
+
   console.log(`   Found ${restaurants.length} restaurants`)
   console.log('🔍 Fetching restaurant menus for prerender...')
   const menuBySlug = await fetchRestaurantMenus(restaurants)
