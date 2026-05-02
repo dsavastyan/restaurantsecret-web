@@ -6,6 +6,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { dirname, join } from 'path'
 
 const BASE_URL = (process.env.SITEMAP_BASE_URL || 'https://restaurantsecret.ru').replace(/\/+$/, '')
+const MENU_FETCH_CONCURRENCY = Math.max(1, Number(process.env.SITEMAP_MENU_FETCH_CONCURRENCY || 8))
 const API_URLS = Array.from(
   new Set(
     [
@@ -40,6 +41,45 @@ function escapeHtml(value) {
 function stripEmpty(value) {
   const text = String(value ?? '').trim()
   return text || undefined
+}
+
+function toNumber(value) {
+  if (value === null || value === undefined || value === '') return NaN
+  const numeric = typeof value === 'number' ? value : Number(String(value).replace(',', '.').replace(/\s+/g, ''))
+  return Number.isFinite(numeric) ? numeric : NaN
+}
+
+function formatNumeric(value) {
+  const numeric = toNumber(value)
+  return Number.isFinite(numeric) ? String(Math.round(numeric)) : '-'
+}
+
+function normalizeDishForSeo(dish = {}, categoryName = '') {
+  return {
+    name: stripEmpty(dish.name || dish.title || dish.canonical_name) || 'Блюдо',
+    category: stripEmpty(dish.category || categoryName),
+    kcal: toNumber(dish.kcal ?? dish.calories ?? dish.energy_kcal),
+    protein: toNumber(dish.protein ?? dish.proteins ?? dish.proteins_g ?? dish.protein_g),
+    fat: toNumber(dish.fat ?? dish.fats ?? dish.fats_g ?? dish.fat_g),
+    carbs: toNumber(dish.carbs ?? dish.carb ?? dish.carbohydrates ?? dish.carbs_g ?? dish.carbohydrates_g),
+  }
+}
+
+function flattenMenuForSeo(menu) {
+  if (!menu) return []
+
+  if (Array.isArray(menu.categories)) {
+    return menu.categories.flatMap((category) => {
+      const dishes = Array.isArray(category?.dishes) ? category.dishes : []
+      return dishes.map((dish) => normalizeDishForSeo(dish, category?.name))
+    })
+  }
+
+  if (Array.isArray(menu.items)) {
+    return menu.items.map((dish) => normalizeDishForSeo(dish, dish?.category))
+  }
+
+  return []
 }
 
 function publicPathToFile(pathname) {
@@ -160,10 +200,10 @@ function getRestaurantDescription(restaurant) {
   const name = getRestaurantName(restaurant)
   const cuisine = stripEmpty(restaurant.cuisine)
   const metro = stripEmpty(restaurant.metro || restaurant.metroName || restaurant.metro_name)
-  const parts = [`Полное меню ресторана ${name} с калориями, белками, жирами и углеводами каждого блюда.`]
-  if (cuisine) parts.push(`Кухня: ${cuisine}.`)
-  if (metro) parts.push(`Метро: ${metro}.`)
-  parts.push('Фильтрация по целям питания.')
+  const parts = [`Меню ${name} с КБЖУ: калории, белки, жиры и углеводы блюд ресторана в одной таблице.`]
+  if (cuisine) parts.push(`Кухня ресторана: ${cuisine}.`)
+  if (metro) parts.push(`Рядом с метро ${metro}.`)
+  parts.push(`Сравнивайте блюда ${name} по калорийности и макронутриентам перед посещением ресторана.`)
   return parts.join(' ')
 }
 
@@ -199,22 +239,48 @@ function fallbackPage({ title, description, links = [] }) {
 </main>`
 }
 
-function restaurantFallback(restaurant) {
+function restaurantFallback(restaurant, menu) {
   const slug = restaurant.slug
   const name = getRestaurantName(restaurant)
   const description = getRestaurantDescription(restaurant)
   const cuisine = stripEmpty(restaurant.cuisine)
   const metro = stripEmpty(restaurant.metro || restaurant.metroName || restaurant.metro_name)
+  const dishes = flattenMenuForSeo(menu)
   const details = [
     cuisine ? `Кухня: ${cuisine}` : '',
     metro ? `Метро: ${metro}` : '',
-    Number.isFinite(Number(restaurant.dishesCount)) ? `Блюд в меню: ${Number(restaurant.dishesCount)}` : '',
+    dishes.length ? `Блюд в меню: ${dishes.length}` : Number.isFinite(Number(restaurant.dishesCount)) ? `Блюд в меню: ${Number(restaurant.dishesCount)}` : '',
   ].filter(Boolean)
+  const rows = dishes.length
+    ? dishes
+        .map((dish) => `<tr>
+      <td>${escapeHtml(dish.name)}</td>
+      <td>${escapeHtml(formatNumeric(dish.kcal))}</td>
+      <td>${escapeHtml(formatNumeric(dish.protein))}</td>
+      <td>${escapeHtml(formatNumeric(dish.fat))}</td>
+      <td>${escapeHtml(formatNumeric(dish.carbs))}</td>
+    </tr>`)
+        .join('\n')
+    : `<tr><td colspan="5">Данные КБЖУ для меню ресторана обновляются.</td></tr>`
 
   return `<main style="font-family:Inter,system-ui,sans-serif;max-width:760px;margin:0 auto;padding:48px 20px;line-height:1.5">
-  <h1>${escapeHtml(name)} — меню с КБЖУ</h1>
+  <h1>Меню ${escapeHtml(name)} с КБЖУ</h1>
   <p>${escapeHtml(description)}</p>
   ${details.length ? `<ul>${details.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : ''}
+  <table>
+    <thead>
+      <tr>
+        <th>Блюдо</th>
+        <th>Калории</th>
+        <th>Белки</th>
+        <th>Жиры</th>
+        <th>Углеводы</th>
+      </tr>
+    </thead>
+    <tbody>
+    ${rows}
+    </tbody>
+  </table>
   <p><a href="/restaurants/${escapeHtml(slug)}/menu">Открыть меню ресторана</a></p>
   <p><a href="/catalog">Вернуться в каталог ресторанов</a></p>
 </main>`
@@ -237,7 +303,7 @@ function websiteSchema() {
   }
 }
 
-function generateStaticRoutes(restaurants) {
+function generateStaticRoutes(restaurants, menuBySlug) {
   const baseHtml = readFileSync('dist/index.html', 'utf-8')
 
   const staticRoutes = [
@@ -308,27 +374,28 @@ function generateStaticRoutes(restaurants) {
     const slug = restaurant.slug
     const name = getRestaurantName(restaurant)
     const description = getRestaurantDescription(restaurant)
+    const menu = menuBySlug.get(slug)
+    const title = `Меню ${name} с КБЖУ — калории, белки, жиры, углеводы`
 
     writeRouteHtml(
       `/restaurants/${slug}`,
       applySeoTags(baseHtml, {
-        title: `${name} — меню с КБЖУ | RestaurantSecret`,
+        title,
         description,
         canonical: `${BASE_URL}/restaurants/${slug}`,
         schema: restaurantSchema(restaurant),
-        fallbackHtml: restaurantFallback(restaurant),
+        fallbackHtml: restaurantFallback(restaurant, menu),
       }),
     )
 
     writeRouteHtml(
       `/restaurants/${slug}/menu`,
       applySeoTags(baseHtml, {
-        title: `${name} — меню с КБЖУ | RestaurantSecret`,
+        title,
         description,
         canonical: `${BASE_URL}/restaurants/${slug}`,
-        robots: 'noindex,follow',
         schema: restaurantSchema(restaurant),
-        fallbackHtml: restaurantFallback(restaurant),
+        fallbackHtml: restaurantFallback(restaurant, menu),
       }),
     )
 
@@ -397,10 +464,61 @@ async function fetchAllRestaurants() {
   throw new Error(`All restaurant API endpoints failed: ${errors.join('; ')}`)
 }
 
+async function fetchRestaurantMenu(slug) {
+  const errors = []
+
+  for (const apiUrl of API_URLS) {
+    const url = `${apiUrl}/restaurants/${encodeURIComponent(slug)}/menu`
+
+    try {
+      const res = await fetch(url)
+      if (!res.ok) {
+        errors.push(`${url}: ${res.status} ${res.statusText}`)
+        continue
+      }
+
+      return await res.json()
+    } catch (error) {
+      errors.push(`${url}: ${error?.message ?? String(error)}`)
+    }
+  }
+
+  throw new Error(errors.join('; '))
+}
+
+async function fetchRestaurantMenus(restaurants) {
+  const targets = restaurants.filter((restaurant) => restaurant.slug)
+  const menuBySlug = new Map()
+  let nextIndex = 0
+  let failedCount = 0
+
+  async function worker() {
+    while (nextIndex < targets.length) {
+      const restaurant = targets[nextIndex]
+      nextIndex += 1
+
+      try {
+        const menu = await fetchRestaurantMenu(restaurant.slug)
+        menuBySlug.set(restaurant.slug, menu)
+      } catch (error) {
+        failedCount += 1
+        console.warn(`⚠️  Failed to fetch menu for ${restaurant.slug}: ${error?.message ?? String(error)}`)
+      }
+    }
+  }
+
+  const workerCount = Math.min(MENU_FETCH_CONCURRENCY, targets.length)
+  await Promise.all(Array.from({ length: workerCount }, worker))
+  console.log(`   Menus fetched: ${menuBySlug.size}/${targets.length}${failedCount ? `, failed: ${failedCount}` : ''}`)
+  return menuBySlug
+}
+
 async function main() {
   console.log('🔍 Fetching restaurants from API...')
   const restaurants = await fetchAllRestaurants()
   console.log(`   Found ${restaurants.length} restaurants`)
+  console.log('🔍 Fetching restaurant menus for prerender...')
+  const menuBySlug = await fetchRestaurantMenus(restaurants)
 
   const today = new Date().toISOString().split('T')[0]
 
@@ -440,7 +558,7 @@ ${allUrls
   writeFileSync('dist/sitemap.xml', xml, 'utf-8')
   console.log(`✅ Sitemap generated: ${allUrls.length} URLs → dist/sitemap.xml`)
 
-  generateStaticRoutes(restaurants)
+  generateStaticRoutes(restaurants, menuBySlug)
 }
 
 main().catch((error) => {

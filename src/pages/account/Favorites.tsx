@@ -142,7 +142,10 @@ export default function Favorites() {
                 await Promise.all(slugs.map(async (slug) => {
                     try {
                         // Ideally we should have a caching layer or simple cache here
-                        const menu = await apiGet(`/restaurants/${slug}/menu`);
+                        const menu = await apiGet(
+                            `/restaurants/${slug}/menu`,
+                            accessToken ? { headers: { Authorization: `Bearer ${accessToken}` } } : {},
+                        );
                         menuCache.set(slug, menu);
                     } catch (e) {
                         console.error(`Failed to load menu for ${slug}`, e);

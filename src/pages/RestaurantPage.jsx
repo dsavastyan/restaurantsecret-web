@@ -75,7 +75,10 @@ export default function RestaurantPage() {
       try {
         setLoading(true);
         setErr(null);
-        const data = await apiGet(`/restaurants/${slug}/menu`);
+        const data = await apiGet(
+          `/restaurants/${slug}/menu`,
+          accessToken ? { headers: { Authorization: `Bearer ${accessToken}` } } : {},
+        );
         if (!aborted) {
           const m = normalizeMenu(data);
           setMenu(m);
@@ -89,16 +92,6 @@ export default function RestaurantPage() {
     })();
     return () => { aborted = true; };
   }, [accessToken, fetchStatus, slug]);
-
-  useMeta({
-    title: menu
-      ? `${menu.name} — меню с КБЖУ | RestaurantSecret`
-      : 'Меню ресторана | RestaurantSecret',
-    description: menu
-      ? `Полное меню ресторана ${menu.name} с калориями, белками, жирами и углеводами каждого блюда. Фильтрация по целям питания.`
-      : undefined,
-    canonical: `https://restaurantsecret.ru/restaurants/${slug}`,
-  });
 
   const handleSubscribeClick = () => {
     if (accessToken) {
@@ -139,6 +132,17 @@ export default function RestaurantPage() {
     () => formatMenuCapturedAt(menu?.menuCapturedAt),
     [menu?.menuCapturedAt]
   );
+  const seoRestaurantName = menu?.name || slug || 'ресторана';
+  const seoDescription = useMemo(
+    () => `Меню ${seoRestaurantName} с КБЖУ: калории, белки, жиры и углеводы блюд ресторана в одной таблице. Сравнивайте блюда ${seoRestaurantName} по калорийности и макронутриентам перед посещением ресторана.`,
+    [seoRestaurantName]
+  );
+
+  useMeta({
+    title: `Меню ${seoRestaurantName} с КБЖУ — калории, белки, жиры, углеводы`,
+    description: seoDescription,
+    canonical: `https://restaurantsecret.ru/restaurants/${slug}`,
+  });
 
   function togglePreset(key) {
     setPresets(p => ({ ...p, [key]: !p[key] }));
@@ -156,7 +160,7 @@ export default function RestaurantPage() {
     <main className="restaurant-page">
       <header className="rp__header">
         <div className="rp__title-row">
-          <h1 className="rp__title">{menu?.name || slug}</h1>
+          <h1 className="rp__title">Меню {seoRestaurantName} с КБЖУ</h1>
           <button
             type="button"
             className={`rp__fav-btn ${isFavorite ? 'is-active' : ''}`}
@@ -187,6 +191,7 @@ export default function RestaurantPage() {
           </button>
         </div>
       </header>
+      <p className="rp__seo-description">{seoDescription}</p>
 
       <section className="rp__filters" aria-label="Фильтры блюд">
         <div className="rp__row">
@@ -237,6 +242,7 @@ export default function RestaurantPage() {
           )
         )}
       </section>
+      <NutritionSeoTable dishes={allDishes} />
 
       {/* minimal styles for MVP */}
       <style>{styles}</style>
@@ -339,6 +345,44 @@ function MacroRange({ label, value, onChange }) {
   );
 }
 
+function NutritionSeoTable({ dishes }) {
+  return (
+    <section className="rp__seo-table" aria-label="Таблица КБЖУ блюд">
+      <h2 className="rp__seo-table-title">Таблица блюд с КБЖУ</h2>
+      <div className="rp__seo-table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Блюдо</th>
+              <th>Калории</th>
+              <th>Белки</th>
+              <th>Жиры</th>
+              <th>Углеводы</th>
+            </tr>
+          </thead>
+          <tbody>
+            {dishes.length ? (
+              dishes.map((dish, index) => (
+                <tr key={`${dish.id || dish.name}-${index}`}>
+                  <td>{dish.name}</td>
+                  <td>{formatNumeric(dish.kcal)}</td>
+                  <td>{formatNumeric(dish.protein)}</td>
+                  <td>{formatNumeric(dish.fat)}</td>
+                  <td>{formatNumeric(dish.carbs)}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5">Данные КБЖУ для меню ресторана обновляются.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
 function DishCard({ dish, hasActiveSub, hasSubscriptionHistory = false, isFreeAccess = false, onSubscribe, menuCapturedAt }) {
   const description = formatDescription(dish.ingredients ?? dish.description);
   const hasDishAccess = hasActiveSub || isFreeAccess;
@@ -378,6 +422,7 @@ const styles = `
 .rp__header { margin-bottom: 12px; }
 .rp__title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
 .rp__title { font-size: 22px; margin: 0; }
+.rp__seo-description { color:#334155; margin: 0 0 14px; max-width: 840px; line-height: 1.5; }
 .rp__fav-btn {
   background: none;
   border: none;
@@ -461,6 +506,15 @@ const styles = `
 .dish__paywall { display:flex; align-items:center; gap:10px; margin-top:8px; flex-wrap:wrap; }
 .dish__paywall-text { margin:0; color:#475569; }
 .dish__captured { margin-top:8px; font-size:12px; color:#475569; }
+.rp__seo-table { margin-top: 22px; }
+.rp__seo-table-title { font-size: 20px; margin: 0 0 10px; }
+.rp__seo-table-scroll { overflow-x: auto; border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; }
+.rp__seo-table table { width: 100%; border-collapse: collapse; min-width: 620px; }
+.rp__seo-table th,
+.rp__seo-table td { padding: 10px 12px; border-bottom: 1px solid #e5e7eb; text-align: left; }
+.rp__seo-table th { background: #f8fafc; color: #0f172a; font-weight: 700; }
+.rp__seo-table td:not(:first-child),
+.rp__seo-table th:not(:first-child) { text-align: right; white-space: nowrap; }
 `;
 
 function buildDishAccessKey(dish) {

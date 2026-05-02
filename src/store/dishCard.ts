@@ -4,6 +4,7 @@ import { apiGet } from "@/lib/requests";
 import { flattenMenuDishes } from "@/lib/nutrition";
 import { formatDescription } from "@/lib/text";
 import { formatMenuCapturedAt } from "@/lib/dates";
+import { getAuthState } from "@/store/auth";
 
 type DishCardDraft = {
   id?: number;
@@ -252,7 +253,11 @@ const deriveCardData = (
 async function openDishCard(draft: DishCardDraft) {
   updateState({ ...initialSlice, isOpen: true, isLoading: true });
   try {
-    const menu = await apiGet(`/restaurants/${draft.restaurantSlug}/menu`);
+    const accessToken = getAuthState().accessToken;
+    const menu = await apiGet(
+      `/restaurants/${draft.restaurantSlug}/menu`,
+      accessToken ? { headers: { Authorization: `Bearer ${accessToken}` } } : {},
+    );
     const dishes = flattenMenuDishes(menu);
     const match = findDishInMenu(dishes, draft);
 

@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { AttributionControl, CircleMarker, MapContainer, TileLayer } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { apiGet } from '@/lib/requests'
-import { flattenMenuDishes } from '@/lib/nutrition'
+import { flattenMenuDishes, formatNumeric } from '@/lib/nutrition'
 import { formatDescription, getRussianPluralWord, matchesSearchQuery } from '@/lib/text'
 import { formatMenuCapturedAt } from '@/lib/dates'
 import { useAuth } from '@/store/auth'
@@ -15,6 +15,7 @@ import { useDishCardStore } from '@/store/dishCard'
 import { useFavoriteRestaurantsStore } from '@/store/favoriteRestaurants'
 import { analytics } from '@/services/analytics'
 import { toast } from '@/lib/toast'
+import { useMeta } from '@/lib/useMeta'
 
 const createDefaultPresets = () => ({ highProtein: false, lowFat: false, lowKcal: false })
 const createDefaultRange = () => ({
@@ -106,7 +107,10 @@ export default function Menu() {
           await fetchStatus(accessToken)
           setLoading(true)
           setError('')
-          const raw = await apiGet(`/restaurants/${slug}/menu`)
+          const raw = await apiGet(
+            `/restaurants/${slug}/menu`,
+            accessToken ? { headers: { Authorization: `Bearer ${accessToken}` } } : {},
+          )
           const data = raw?.categories ? raw : { ...(raw || {}), name: raw?.name || slug, categories: [] }
           if (!aborted) {
             const normalizedMenu = normalizeMenu(data)
@@ -229,6 +233,11 @@ export default function Menu() {
     return ordered.filter((section) => section.dishes.length)
   }, [filtered, menu?.categories])
   const instagramUrl = useMemo(() => normalizeInstagramUrl(menu?.instagramUrl), [menu?.instagramUrl])
+  const seoRestaurantName = menu?.name || slug || 'ресторана'
+  const seoDescription = useMemo(
+    () => `Меню ${seoRestaurantName} с КБЖУ: калории, белки, жиры и углеводы блюд ресторана в одной таблице. Сравнивайте блюда ${seoRestaurantName} по калорийности и макронутриентам перед посещением ресторана.`,
+    [seoRestaurantName]
+  )
   const mapCenter = useMemo(
     () => (restaurantPoint ? [restaurantPoint.lat, restaurantPoint.lon] : DEFAULT_MAP_CENTER),
     [restaurantPoint]
@@ -240,6 +249,12 @@ export default function Menu() {
     }
     return `https://www.openstreetmap.org/search?query=${encodeURIComponent(`${menu?.name || slug} ресторан`)}`
   }, [menu?.name, restaurantPoint, slug])
+
+  useMeta({
+    title: `Меню ${seoRestaurantName} с КБЖУ — калории, белки, жиры, углеводы`,
+    description: seoDescription,
+    canonical: `https://restaurantsecret.ru/restaurants/${slug}`,
+  })
 
   // Toggle a preset chip and re-run memoized filtering.
   const togglePreset = (key) => {
@@ -358,7 +373,7 @@ export default function Menu() {
         <div className="menu-hero__header">
           <div className="menu-hero__lead">
             <div className="menu-hero__title-row">
-              <h1 className="menu-hero__title">{menu?.name || 'Меню'}</h1>
+              <h1 className="menu-hero__title">Меню {seoRestaurantName} с КБЖУ</h1>
               <div className="menu-hero__socials">
                 {instagramUrl ? <InstagramLink href={instagramUrl} /> : null}
                 <button
@@ -380,6 +395,7 @@ export default function Menu() {
                 </button>
               </div>
             </div>
+            <p className="menu-hero__seo-description">{seoDescription}</p>
             {!!capturedAt && <div className="menu__captured-at">Меню добавлено: {capturedAt}</div>}
             <div className="menu-hero__meta-row">
               <button
@@ -567,12 +583,51 @@ export default function Menu() {
           )
         )}
       </section>
+      <NutritionSeoTable dishes={dishes} restaurantName={seoRestaurantName} />
       <MenuOutdatedModal
         restaurantName={menu?.name || slug}
         isOpen={isOutdatedOpen}
         onClose={() => setIsOutdatedOpen(false)}
       />
     </div>
+  )
+}
+
+function NutritionSeoTable({ dishes, restaurantName }) {
+  return (
+    <section className="menu-seo-table" aria-label={`Таблица КБЖУ блюд ${restaurantName}`}>
+      <h2 className="menu-seo-table__title">Таблица блюд с КБЖУ</h2>
+      <div className="menu-seo-table__scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Блюдо</th>
+              <th>Калории</th>
+              <th>Белки</th>
+              <th>Жиры</th>
+              <th>Углеводы</th>
+            </tr>
+          </thead>
+          <tbody>
+            {dishes.length ? (
+              dishes.map((dish, index) => (
+                <tr key={`${dish.id || dish.name}-${index}`}>
+                  <td>{dish.name}</td>
+                  <td>{formatNumeric(dish.kcal)}</td>
+                  <td>{formatNumeric(dish.protein)}</td>
+                  <td>{formatNumeric(dish.fat)}</td>
+                  <td>{formatNumeric(dish.carbs)}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5">Данные КБЖУ для меню ресторана обновляются.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
   )
 }
 

@@ -1789,6 +1789,14 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
   word-break: break-word;
 }
 
+.menu-hero__seo-description {
+  max-width: 820px;
+  margin: 12px 0 0;
+  color: #4a3927;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
 .menu-hero__meta-row {
   display: flex;
   justify-content: flex-start;
@@ -2195,6 +2203,50 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(288px, 1fr));
   gap: 22px;
+}
+
+.menu-seo-table {
+  margin-top: 26px;
+}
+
+.menu-seo-table__title {
+  margin: 0 0 12px;
+  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+  font-size: clamp(24px, 2.4vw, 30px);
+  line-height: 1.1;
+  color: #07182a;
+}
+
+.menu-seo-table__scroll {
+  overflow-x: auto;
+  border: 1px solid rgba(218, 202, 181, 0.82);
+  border-radius: 12px;
+  background: #fffdfb;
+}
+
+.menu-seo-table table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+}
+
+.menu-seo-table th,
+.menu-seo-table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid rgba(218, 202, 181, 0.72);
+  text-align: left;
+}
+
+.menu-seo-table th {
+  background: #f7efe5;
+  color: #1c2836;
+  font-weight: 800;
+}
+
+.menu-seo-table td:not(:first-child),
+.menu-seo-table th:not(:first-child) {
+  text-align: right;
+  white-space: nowrap;
 }
 
 .menu-card {
@@ -13816,6 +13868,33 @@ html[data-rs-theme="night"] .menu-section__title {
 
 html[data-rs-theme="night"] .menu-section__count {
   background: rgba(51, 65, 85, 0.6);
+  color: #dbe7f8;
+}
+
+html[data-rs-theme="night"] .menu-hero__seo-description {
+  color: #c9d4e3;
+}
+
+html[data-rs-theme="night"] .menu-seo-table__title {
+  color: #ecf3ff;
+}
+
+html[data-rs-theme="night"] .menu-seo-table__scroll {
+  background: rgba(15, 26, 44, 0.9);
+  border-color: rgba(148, 163, 184, 0.28);
+}
+
+html[data-rs-theme="night"] .menu-seo-table th,
+html[data-rs-theme="night"] .menu-seo-table td {
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+html[data-rs-theme="night"] .menu-seo-table th {
+  background: rgba(30, 41, 59, 0.86);
+  color: #e5edf8;
+}
+
+html[data-rs-theme="night"] .menu-seo-table td {
   color: #dbe7f8;
 }
 
