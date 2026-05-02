@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom'
 import Footer from '@/components/Footer'
 import { analytics } from '@/services/analytics'
 import { useAuth } from '@/store/auth'
+import { useSubscriptionStore } from '@/store/subscription'
 import { useMeta } from '@/lib/useMeta'
 
 const freeFeatures = [
@@ -33,11 +34,20 @@ export default function Tariffs() {
 
   const location = useLocation()
   const accessToken = useAuth((state) => state.accessToken)
+  const { showAccountAction, isSubscriptionStatusLoaded } = useSubscriptionStore((state) => ({
+    showAccountAction: state.hasActiveSub || state.hasSubscriptionHistory,
+    isSubscriptionStatusLoaded: state.isStatusLoaded,
+  }))
+  const showTrialAction = !accessToken || (isSubscriptionStatusLoaded && !showAccountAction)
   const proTo = accessToken ? '/account/subscription' : '/login'
   const proState = accessToken ? undefined : { from: '/account/subscription' }
 
   const handleProClick = () => {
     analytics.track('cta_clicked', { location: 'tariffs', text: accessToken ? 'Попробовать Pro' : 'Попробовать бесплатно' })
+  }
+
+  const handleTrialClick = () => {
+    analytics.track('cta_clicked', { location: 'nav', text: 'Попробовать бесплатно' })
   }
 
   return (
@@ -58,35 +68,31 @@ export default function Tariffs() {
         </nav>
 
         <div className="tariffs-nav__right">
-          {accessToken ? (
+          {accessToken && showAccountAction ? (
             <>
               <Link to="/account" className="tariffs-nav__login-link tariffs-nav__desktop-action">Личный кабинет</Link>
               <Link to="/account" className="tariffs-nav__cta tariffs-nav__mobile-action">Личный кабинет</Link>
-              <Link
-                to={proTo}
-                state={proState}
-                className="tariffs-nav__cta tariffs-nav__desktop-action"
-                onClick={handleProClick}
-              >
-                Попробовать Pro
-              </Link>
             </>
           ) : (
             <>
-              <Link
-                to="/login"
-                state={{ from: location.pathname + location.search }}
-                className="tariffs-nav__login-link"
-              >
-                Войти
-              </Link>
-              <Link
-                to="/onboarding/welcome"
-                className="tariffs-nav__cta"
-                onClick={handleProClick}
-              >
-                Попробовать бесплатно
-              </Link>
+              {!accessToken && (
+                <Link
+                  to="/login"
+                  state={{ from: location.pathname + location.search }}
+                  className="tariffs-nav__login-link"
+                >
+                  Войти
+                </Link>
+              )}
+              {showTrialAction && (
+                <Link
+                  to="/onboarding/welcome"
+                  className="tariffs-nav__cta"
+                  onClick={handleTrialClick}
+                >
+                  Попробовать бесплатно
+                </Link>
+              )}
             </>
           )}
         </div>

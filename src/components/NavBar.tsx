@@ -2,11 +2,16 @@ import { Link, useLocation } from "react-router-dom";
 
 import { analytics } from "@/services/analytics";
 import { useAuth } from "@/store/auth";
+import { useSubscriptionStore } from "@/store/subscription";
 
 import AccountButton from "./AccountButton";
 
 export default function NavBar() {
   const token = useAuth((state) => state.accessToken);
+  const { showAccountAction, isSubscriptionStatusLoaded } = useSubscriptionStore((state) => ({
+    showAccountAction: state.hasActiveSub || state.hasSubscriptionHistory,
+    isSubscriptionStatusLoaded: state.isStatusLoaded,
+  }));
   const location = useLocation();
   const isLoginPage = location.pathname === "/login";
   const isOnboardingPage = location.pathname.startsWith("/onboarding");
@@ -73,8 +78,17 @@ export default function NavBar() {
         </Link>
 
         <div className="navbar__right">
-          {token && !location.pathname.startsWith("/account") && !isOnboardingPage && (
+          {token && showAccountAction && !location.pathname.startsWith("/account") && !isOnboardingPage && (
             <AccountButton />
+          )}
+          {token && isSubscriptionStatusLoaded && !showAccountAction && !isOnboardingPage && (
+            <Link
+              to="/onboarding/welcome"
+              className="navbar__trial-link"
+              onClick={() => analytics.track("cta_clicked", { location: "nav", text: "Попробовать бесплатно" })}
+            >
+              Попробовать бесплатно
+            </Link>
           )}
         </div>
       </div>

@@ -7,6 +7,7 @@ import { fetchCurrentUser } from '@/lib/api'
 import { loadTelegramWebApp } from '@/lib/telegram'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
+import { useSubscriptionStore } from '@/store/subscription'
 
 const NavBar = lazy(() => import('@/components/NavBar'))
 const SearchInput = lazy(() => import('@/components/SearchInput'))
@@ -40,6 +41,7 @@ export default function AppShell() {
   const navigate = useNavigate()
   const location = useLocation()
   const accessToken = useAuth((state) => state.accessToken)
+  const fetchSubscriptionStatus = useSubscriptionStore((state) => state.fetchStatus)
   const [access, setAccess] = useState(() => {
     if (typeof window === 'undefined') return defaultAccess
     try {
@@ -171,6 +173,10 @@ export default function AppShell() {
   }, [])
 
   const showPaywall = false
+
+  useEffect(() => {
+    fetchSubscriptionStatus(accessToken)
+  }, [accessToken, fetchSubscriptionStatus])
 
   // Keep a lightweight previous-route pointer for analytics attribution in SPA navigation.
   useEffect(() => {

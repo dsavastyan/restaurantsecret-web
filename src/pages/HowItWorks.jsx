@@ -7,6 +7,7 @@ import { postSuggest } from '@/lib/api'
 import { analytics } from '@/services/analytics'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
+import { useSubscriptionStore } from '@/store/subscription'
 
 // ─────────────────────────────────────────────
 // Данные
@@ -131,6 +132,11 @@ export default function HowItWorks() {
 
   const location = useLocation()
   const accessToken = useAuth((state) => state.accessToken)
+  const { showAccountAction, isSubscriptionStatusLoaded } = useSubscriptionStore((state) => ({
+    showAccountAction: state.hasActiveSub || state.hasSubscriptionHistory,
+    isSubscriptionStatusLoaded: state.isStatusLoaded,
+  }))
+  const showTrialAction = !accessToken || (isSubscriptionStatusLoaded && !showAccountAction)
   const accessTokenOrUndefined = accessToken || undefined
   const [openFaq, setOpenFaq] = useState(null)
   const [isCookieModalOpen, setIsCookieModalOpen] = useState(false)
@@ -211,27 +217,31 @@ export default function HowItWorks() {
           <a href="https://t.me/RestSecretSupport_bot" target="_blank" rel="noopener noreferrer">Поддержка</a>
         </nav>
         <div className="landing-warm__nav-right">
-          {accessToken ? (
+          {accessToken && showAccountAction ? (
             <>
               <Link to="/account" className="landing-warm__login-link landing-warm__desktop-action">Личный кабинет</Link>
               <Link to="/account" className="landing-warm__nav-cta landing-warm__mobile-action">Личный кабинет</Link>
             </>
           ) : (
             <>
-              <Link
-                to="/login"
-                state={{ from: location.pathname + location.search }}
-                className="landing-warm__login-link"
-              >
-                Войти
-              </Link>
-              <Link
-                to="/onboarding/welcome"
-                className="landing-warm__nav-cta"
-                onClick={() => analytics.track('cta_clicked', { location: 'nav', text: 'Попробовать бесплатно' })}
-              >
-                Попробовать бесплатно
-              </Link>
+              {!accessToken && (
+                <Link
+                  to="/login"
+                  state={{ from: location.pathname + location.search }}
+                  className="landing-warm__login-link"
+                >
+                  Войти
+                </Link>
+              )}
+              {showTrialAction && (
+                <Link
+                  to="/onboarding/welcome"
+                  className="landing-warm__nav-cta"
+                  onClick={() => analytics.track('cta_clicked', { location: 'nav', text: 'Попробовать бесплатно' })}
+                >
+                  Попробовать бесплатно
+                </Link>
+              )}
             </>
           )}
         </div>
