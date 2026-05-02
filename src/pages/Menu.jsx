@@ -344,14 +344,15 @@ export default function Menu() {
               {seoRestaurantName}
             </h1>
             <div className="menu-mobile-hero__meta">
-              <span>{dishes.length} {getRussianPluralWord(dishes.length, 'блюдо', 'блюда', 'блюд')}</span>
-              {!!capturedAt && (
-                <>
-                  <span aria-hidden="true">•</span>
-                  <span>Обновлено {capturedAt}</span>
-                </>
-              )}
-              <span aria-hidden="true">•</span>
+              <div className="menu-mobile-hero__meta-line">
+                <span>{dishes.length} {getRussianPluralWord(dishes.length, 'блюдо', 'блюда', 'блюд')}</span>
+                {!!capturedAt && (
+                  <>
+                    <span aria-hidden="true">•</span>
+                    <span>Обновлено {capturedAt}</span>
+                  </>
+                )}
+              </div>
               <button
                 type="button"
                 className="menu-mobile-hero__report"
