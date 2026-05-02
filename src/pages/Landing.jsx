@@ -450,18 +450,30 @@ export default function Landing() {
           </div>
 
           <div className="landing-warm__stats">
-            <div className="landing-warm__stat">
+            <Link
+              to="/restaurants"
+              className="landing-warm__stat"
+              aria-label="Открыть список ресторанов"
+            >
               <p>{restaurantsLabel}</p>
               <span>ресторанов</span>
-            </div>
-            <div className="landing-warm__stat">
+            </Link>
+            <Link
+              to="/restaurants"
+              className="landing-warm__stat"
+              aria-label="Открыть список ресторанов с блюдами КБЖУ"
+            >
               <p>{dishesLabel}</p>
               <span>блюд с КБЖУ</span>
-            </div>
-            <div className="landing-warm__stat">
+            </Link>
+            <Link
+              to="/restaurants"
+              className="landing-warm__stat"
+              aria-label="Открыть список ресторанов с новыми блюдами"
+            >
               <p>{weeklyAddedLabel}</p>
               <span>за эту неделю</span>
-            </div>
+            </Link>
           </div>
 
           <div className="landing-warm__hero-scroll" aria-hidden="true">
