@@ -37,7 +37,7 @@ const PaymentMethods = lazy(() => import('../pages/account/PaymentMethods.tsx'))
 
 // Defines the route tree shared between BrowserRouter and HashRouter. Keeping
 // this as a separate component makes it easier to unit test in isolation.
-function AppRoutes() {
+function AppRoutes({ onReady }) {
   return (
     <Suspense fallback={null}>
       <Routes>
@@ -97,13 +97,14 @@ function AppRoutes() {
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
+      <AppReadySignal onReady={onReady} />
     </Suspense>
   )
 }
 
 // Chooses the router implementation based on the environment and mounts the
 // AppRoutes component.
-export default function Router({ children }) {
+export default function Router({ children, onReady }) {
   const inTelegram = isTelegramLaunch()
   if (!inTelegram && typeof window !== 'undefined' && window.location.pathname === '/') {
     const redirectPath = window.sessionStorage.getItem('redirectPath')
@@ -122,10 +123,18 @@ export default function Router({ children }) {
 
   return (
     <RouterImpl>
-      <AppRoutes />
+      <AppRoutes onReady={onReady} />
       {children}
     </RouterImpl>
   )
+}
+
+function AppReadySignal({ onReady }) {
+  React.useEffect(() => {
+    onReady?.()
+  }, [onReady])
+
+  return null
 }
 
 // Redirect short public links to the canonical restaurant URL.

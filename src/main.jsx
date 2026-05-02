@@ -13,6 +13,31 @@ import './account-mobile-profile.css'
 
 loadTelegramWebApp().catch(() => { })
 
+function hideInitialSplash() {
+  const hide = () => {
+    const splash = document.getElementById('rs-splash')
+    if (!splash || splash.dataset.state === 'hiding') return
+
+    splash.dataset.state = 'hiding'
+    splash.setAttribute('aria-hidden', 'true')
+    splash.classList.add('rs-splash--hide')
+    window.setTimeout(() => splash.remove(), 550)
+  }
+
+  const hideAfterPaint = () => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(hide)
+    })
+  }
+
+  if (document.readyState === 'complete') {
+    hideAfterPaint()
+    return
+  }
+
+  window.addEventListener('load', hideAfterPaint, { once: true })
+}
+
 // Register the service worker (if supported) once the page has fully loaded so
 // network caching can work in production. Errors are intentionally swallowed to
 // avoid surfacing noisy warnings to end users.
@@ -74,14 +99,20 @@ function Root() {
     }
   }, [])
 
-  if (!ready) return null // Initial loading state (splash screen could go here)
+  useEffect(() => {
+    if (ready && maintenance?.enabled) {
+      hideInitialSplash()
+    }
+  }, [ready, maintenance?.enabled])
+
+  if (!ready) return null
 
   if (maintenance?.enabled) {
     return <MaintenanceScreen cfg={maintenance} />
   }
 
   return (
-    <Router>
+    <Router onReady={hideInitialSplash}>
       <ToastViewport />
       <ConsentBanner />
     </Router>

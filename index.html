@@ -40,6 +40,287 @@
     <meta name="twitter:description" content="Фильтруй блюда и рестораны по целям за секунды. Смотри на карте, сохраняй избранное и находи общие места с друзьями. Ешь вкусно — выбирай осознанно." />
     <meta name="twitter:image" content="https://restaurantsecret.ru/assets/logo.png" />
 
+    <style>
+      #rs-splash {
+        --rs-splash-bg: #f7f1e4;
+        --rs-splash-ink: #2a2620;
+        --rs-splash-green: #8a9a6b;
+        --rs-splash-orange: #d47a3a;
+        --rs-splash-sand: #e8a15e;
+        --rs-splash-logo: 120px;
+        --rs-splash-outer-ring: 152px;
+        --rs-splash-inner-ring: 170px;
+        --rs-splash-wordmark: 32px;
+        --rs-splash-subtitle: 12px;
+        --rs-splash-loader: 160px;
+        --rs-splash-gap: 32px;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background:
+          radial-gradient(ellipse 90% 60% at 8% 0%, rgba(212, 122, 58, 0.10) 0%, transparent 55%),
+          radial-gradient(ellipse 70% 55% at 92% 5%, rgba(138, 154, 107, 0.12) 0%, transparent 50%),
+          radial-gradient(ellipse 60% 40% at 50% 100%, rgba(232, 161, 94, 0.09) 0%, transparent 50%),
+          var(--rs-splash-bg);
+        color: var(--rs-splash-ink);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        transition: opacity 0.5s ease, transform 0.5s ease;
+      }
+
+      #rs-splash.rs-splash--hide {
+        opacity: 0;
+        transform: scale(1.04);
+        pointer-events: none;
+      }
+
+      .rs-splash__decor {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      .rs-splash__content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--rs-splash-gap);
+      }
+
+      .rs-splash__logo-wrap {
+        position: relative;
+        display: grid;
+        width: calc(var(--rs-splash-inner-ring) + 20px);
+        height: calc(var(--rs-splash-inner-ring) + 20px);
+        place-items: center;
+      }
+
+      .rs-splash__logo {
+        position: relative;
+        z-index: 2;
+        display: block;
+        width: var(--rs-splash-logo);
+        height: var(--rs-splash-logo);
+        border-radius: 24%;
+        filter:
+          drop-shadow(0 12px 32px rgba(138, 154, 107, 0.3))
+          drop-shadow(0 4px 12px rgba(42, 38, 32, 0.15));
+      }
+
+      .rs-splash__ring {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        border-radius: 999px;
+        pointer-events: none;
+      }
+
+      .rs-splash__ring--outer {
+        width: var(--rs-splash-outer-ring);
+        height: var(--rs-splash-outer-ring);
+        border: 1.5px solid transparent;
+        border-top-color: var(--rs-splash-orange);
+        border-right-color: rgba(212, 122, 58, 0.25);
+        animation: rsSplashSpinCw 3s linear infinite;
+      }
+
+      .rs-splash__ring--outer::before {
+        content: "";
+        position: absolute;
+        top: -3px;
+        left: 50%;
+        width: 6px;
+        height: 6px;
+        border-radius: 999px;
+        background: var(--rs-splash-orange);
+        box-shadow: 0 0 6px rgba(212, 122, 58, 0.6);
+        transform: translateX(-50%);
+      }
+
+      .rs-splash__ring--inner {
+        width: var(--rs-splash-inner-ring);
+        height: var(--rs-splash-inner-ring);
+        border: 1px solid transparent;
+        border-bottom-color: rgba(138, 154, 107, 0.5);
+        border-left-color: rgba(138, 154, 107, 0.2);
+        animation: rsSplashSpinCcw 4.5s linear infinite;
+      }
+
+      .rs-splash__wordmark {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        text-align: center;
+      }
+
+      .rs-splash__title {
+        margin: 0;
+        color: var(--rs-splash-ink);
+        font-family: "DM Serif Display", Georgia, serif;
+        font-size: var(--rs-splash-wordmark);
+        font-weight: 400;
+        letter-spacing: 0;
+        line-height: 1;
+        white-space: nowrap;
+      }
+
+      .rs-splash__title em {
+        color: var(--rs-splash-green);
+        font-style: italic;
+      }
+
+      .rs-splash__subtitle {
+        margin: 0;
+        color: rgba(42, 38, 32, 0.42);
+        font-size: var(--rs-splash-subtitle);
+        font-weight: 500;
+        letter-spacing: 2px;
+        line-height: 1.2;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .rs-splash__loader {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .rs-splash__track {
+        position: relative;
+        width: var(--rs-splash-loader);
+        height: 3px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: rgba(212, 122, 58, 0.15);
+      }
+
+      .rs-splash__fill {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 60%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--rs-splash-green), var(--rs-splash-orange));
+        animation: rsSplashLoadSlide 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      }
+
+      .rs-splash__dots {
+        display: flex;
+        gap: 5px;
+      }
+
+      .rs-splash__dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 999px;
+        background: var(--rs-splash-ink);
+        opacity: 0.3;
+        animation: rsSplashDotPop 1.4s ease-in-out infinite;
+      }
+
+      .rs-splash__dot:nth-child(2) {
+        animation-delay: 0.18s;
+      }
+
+      .rs-splash__dot:nth-child(3) {
+        animation-delay: 0.36s;
+      }
+
+      .rs-splash__float-a {
+        animation: rsSplashFloatA 7s ease-in-out infinite;
+      }
+
+      .rs-splash__float-b {
+        animation: rsSplashFloatB 9s ease-in-out infinite;
+      }
+
+      .rs-splash__float-c {
+        animation: rsSplashFloatC 8s ease-in-out infinite;
+      }
+
+      @keyframes rsSplashSpinCw {
+        from { transform: translate(-50%, -50%) rotate(0deg); }
+        to { transform: translate(-50%, -50%) rotate(360deg); }
+      }
+
+      @keyframes rsSplashSpinCcw {
+        from { transform: translate(-50%, -50%) rotate(0deg); }
+        to { transform: translate(-50%, -50%) rotate(-360deg); }
+      }
+
+      @keyframes rsSplashLoadSlide {
+        0% { left: -60%; width: 60%; }
+        50% { left: 60%; width: 60%; }
+        100% { left: 120%; width: 60%; }
+      }
+
+      @keyframes rsSplashDotPop {
+        0%, 80%, 100% { opacity: 0.2; transform: scale(0.85); }
+        40% { opacity: 0.65; transform: scale(1.2); }
+      }
+
+      @keyframes rsSplashFloatA {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-10px) rotate(2deg); }
+      }
+
+      @keyframes rsSplashFloatB {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(8px) rotate(-2deg); }
+      }
+
+      @keyframes rsSplashFloatC {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-6px) rotate(1.5deg); }
+      }
+
+      @media (max-width: 640px) {
+        #rs-splash {
+          --rs-splash-logo: 96px;
+          --rs-splash-outer-ring: 128px;
+          --rs-splash-inner-ring: 146px;
+          --rs-splash-wordmark: 26px;
+          --rs-splash-subtitle: 10px;
+          --rs-splash-loader: 130px;
+          --rs-splash-gap: 22px;
+        }
+
+        .rs-splash__track {
+          height: 2.5px;
+        }
+
+        .rs-splash__dot {
+          width: 4px;
+          height: 4px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .rs-splash__ring,
+        .rs-splash__fill,
+        .rs-splash__dot,
+        .rs-splash__float-a,
+        .rs-splash__float-b,
+        .rs-splash__float-c {
+          animation: none;
+        }
+
+        .rs-splash__fill {
+          left: 20%;
+          width: 60%;
+        }
+      }
+    </style>
+
     <script type="text/javascript">
       window.ym = window.ym || function(){(window.ym.a=window.ym.a||[]).push(arguments)};
       window.ym.l = 1 * new Date();
@@ -64,6 +345,77 @@
   </head>
   <body>
     <noscript><div><img src="https://mc.yandex.ru/watch/108992733" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <div id="rs-splash" role="status" aria-live="polite" aria-label="RestaurantSecret загружается">
+      <svg class="rs-splash__decor" viewBox="0 0 1200 800" preserveAspectRatio="none" aria-hidden="true">
+        <ellipse cx="600" cy="-80" rx="620" ry="500" fill="none" stroke="rgba(212,122,58,0.07)" stroke-width="2" />
+        <ellipse cx="600" cy="-80" rx="480" ry="380" fill="none" stroke="rgba(138,154,107,0.06)" stroke-width="1.5" />
+
+        <g class="rs-splash__float-b" opacity="0.82">
+          <line x1="78" y1="48" x2="82" y2="292" stroke="rgba(138,154,107,0.26)" stroke-width="2.5" stroke-linecap="round" />
+          <ellipse cx="104" cy="90" rx="22" ry="9" fill="rgba(138,154,107,0.12)" transform="rotate(25 104 90)" />
+          <ellipse cx="52" cy="122" rx="22" ry="9" fill="rgba(138,154,107,0.13)" transform="rotate(-25 52 122)" />
+          <ellipse cx="106" cy="154" rx="22" ry="9" fill="rgba(138,154,107,0.14)" transform="rotate(25 106 154)" />
+          <ellipse cx="50" cy="186" rx="22" ry="9" fill="rgba(138,154,107,0.15)" transform="rotate(-25 50 186)" />
+          <ellipse cx="106" cy="218" rx="22" ry="9" fill="rgba(138,154,107,0.16)" transform="rotate(25 106 218)" />
+        </g>
+
+        <g class="rs-splash__float-c" opacity="0.76">
+          <circle cx="1070" cy="150" r="92" fill="rgba(212,122,58,0.05)" />
+          <circle cx="1070" cy="150" r="70" fill="rgba(232,161,94,0.09)" />
+          <circle cx="1070" cy="150" r="36" fill="rgba(212,122,58,0.06)" />
+          <line x1="1070" y1="110" x2="1070" y2="190" stroke="rgba(212,122,58,0.16)" stroke-width="1.2" />
+          <line x1="1030" y1="150" x2="1110" y2="150" stroke="rgba(212,122,58,0.16)" stroke-width="1.2" />
+          <line x1="1042" y1="122" x2="1098" y2="178" stroke="rgba(212,122,58,0.14)" stroke-width="1.2" />
+          <line x1="1098" y1="122" x2="1042" y2="178" stroke="rgba(212,122,58,0.14)" stroke-width="1.2" />
+        </g>
+
+        <g class="rs-splash__float-a" opacity="0.65">
+          <line x1="55" y1="790" x2="60" y2="650" stroke="rgba(138,154,107,0.20)" stroke-width="2" stroke-linecap="round" />
+          <ellipse cx="74" cy="760" rx="16" ry="7" fill="rgba(138,154,107,0.12)" transform="rotate(22 74 760)" />
+          <ellipse cx="38" cy="730" rx="16" ry="7" fill="rgba(138,154,107,0.12)" transform="rotate(-22 38 730)" />
+          <ellipse cx="74" cy="700" rx="16" ry="7" fill="rgba(138,154,107,0.12)" transform="rotate(22 74 700)" />
+          <ellipse cx="38" cy="670" rx="16" ry="7" fill="rgba(138,154,107,0.12)" transform="rotate(-22 38 670)" />
+        </g>
+
+        <g class="rs-splash__float-b" opacity="0.62">
+          <line x1="1138" y1="790" x2="1144" y2="610" stroke="rgba(232,161,94,0.22)" stroke-width="2" stroke-linecap="round" />
+          <ellipse cx="1156" cy="754" rx="14" ry="6" fill="rgba(232,161,94,0.14)" transform="rotate(-35 1156 754)" />
+          <ellipse cx="1124" cy="724" rx="14" ry="6" fill="rgba(232,161,94,0.15)" transform="rotate(35 1124 724)" />
+          <ellipse cx="1156" cy="694" rx="14" ry="6" fill="rgba(232,161,94,0.16)" transform="rotate(-35 1156 694)" />
+          <ellipse cx="1124" cy="664" rx="14" ry="6" fill="rgba(232,161,94,0.17)" transform="rotate(35 1124 664)" />
+          <ellipse cx="1156" cy="634" rx="14" ry="6" fill="rgba(232,161,94,0.18)" transform="rotate(-35 1156 634)" />
+        </g>
+
+        <circle cx="14%" cy="52%" r="5" fill="rgba(212,122,58,0.20)" />
+        <circle cx="86%" cy="44%" r="4" fill="rgba(138,154,107,0.18)" />
+        <circle cx="30%" cy="88%" r="5" fill="rgba(232,161,94,0.20)" />
+        <circle cx="70%" cy="82%" r="4" fill="rgba(212,122,58,0.16)" />
+        <circle cx="50%" cy="10%" r="3.5" fill="rgba(138,154,107,0.16)" />
+        <circle cx="20%" cy="34%" r="3" fill="rgba(212,122,58,0.14)" />
+        <circle cx="80%" cy="32%" r="3.5" fill="rgba(232,161,94,0.16)" />
+      </svg>
+      <div class="rs-splash__content">
+        <div class="rs-splash__logo-wrap">
+          <div class="rs-splash__ring rs-splash__ring--outer"></div>
+          <div class="rs-splash__ring rs-splash__ring--inner"></div>
+          <img class="rs-splash__logo" src="/assets/logo.png" width="120" height="120" alt="" />
+        </div>
+        <div class="rs-splash__wordmark">
+          <p class="rs-splash__title">Restaurant<em>Secret</em></p>
+          <p class="rs-splash__subtitle">Меню ресторанов с КБЖУ</p>
+        </div>
+        <div class="rs-splash__loader" aria-hidden="true">
+          <div class="rs-splash__track">
+            <div class="rs-splash__fill"></div>
+          </div>
+          <div class="rs-splash__dots">
+            <span class="rs-splash__dot"></span>
+            <span class="rs-splash__dot"></span>
+            <span class="rs-splash__dot"></span>
+          </div>
+        </div>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
