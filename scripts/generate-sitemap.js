@@ -71,11 +71,6 @@ function toNumber(value) {
   return Number.isFinite(numeric) ? numeric : NaN
 }
 
-function formatNumeric(value) {
-  const numeric = toNumber(value)
-  return Number.isFinite(numeric) ? String(Math.round(numeric)) : '-'
-}
-
 function normalizeDishForSeo(dish = {}, categoryName = '') {
   return {
     name: stripEmpty(dish.name || dish.title || dish.canonical_name) || 'Блюдо',
@@ -222,7 +217,7 @@ function getRestaurantDescription(restaurant) {
   const name = getRestaurantName(restaurant)
   const cuisine = stripEmpty(restaurant.cuisine)
   const metro = stripEmpty(restaurant.metro || restaurant.metroName || restaurant.metro_name)
-  const parts = [`Меню ${name} с КБЖУ: калории, белки, жиры и углеводы блюд ресторана в одной таблице.`]
+  const parts = [`Меню ${name} с КБЖУ: калории, белки, жиры и углеводы блюд ресторана.`]
   if (cuisine) parts.push(`Кухня ресторана: ${cuisine}.`)
   if (metro) parts.push(`Рядом с метро ${metro}.`)
   parts.push(`Сравнивайте блюда ${name} по калорийности и макронутриентам перед посещением ресторана.`)
@@ -273,36 +268,11 @@ function restaurantFallback(restaurant, menu) {
     metro ? `Метро: ${metro}` : '',
     dishes.length ? `Блюд в меню: ${dishes.length}` : Number.isFinite(Number(restaurant.dishesCount)) ? `Блюд в меню: ${Number(restaurant.dishesCount)}` : '',
   ].filter(Boolean)
-  const rows = dishes.length
-    ? dishes
-        .map((dish) => `<tr>
-      <td>${escapeHtml(dish.name)}</td>
-      <td>${escapeHtml(formatNumeric(dish.kcal))}</td>
-      <td>${escapeHtml(formatNumeric(dish.protein))}</td>
-      <td>${escapeHtml(formatNumeric(dish.fat))}</td>
-      <td>${escapeHtml(formatNumeric(dish.carbs))}</td>
-    </tr>`)
-        .join('\n')
-    : `<tr><td colspan="5">Данные КБЖУ для меню ресторана обновляются.</td></tr>`
 
   return `<main style="font-family:Inter,system-ui,sans-serif;max-width:760px;margin:0 auto;padding:48px 20px;line-height:1.5">
-  <h1>Меню ${escapeHtml(name)} с КБЖУ</h1>
+  <h1 aria-label="${escapeHtml(`Меню ${name} с КБЖУ`)}">${escapeHtml(name)}</h1>
   <p>${escapeHtml(description)}</p>
   ${details.length ? `<ul>${details.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : ''}
-  <table>
-    <thead>
-      <tr>
-        <th>Блюдо</th>
-        <th>Калории</th>
-        <th>Белки</th>
-        <th>Жиры</th>
-        <th>Углеводы</th>
-      </tr>
-    </thead>
-    <tbody>
-    ${rows}
-    </tbody>
-  </table>
   <p><a href="/restaurants/${escapeHtml(slug)}/menu">Открыть меню ресторана</a></p>
   <p><a href="/catalog">Вернуться в каталог ресторанов</a></p>
 </main>`

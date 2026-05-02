@@ -134,7 +134,7 @@ export default function RestaurantPage() {
   );
   const seoRestaurantName = menu?.name || slug || 'ресторана';
   const seoDescription = useMemo(
-    () => `Меню ${seoRestaurantName} с КБЖУ: калории, белки, жиры и углеводы блюд ресторана в одной таблице. Сравнивайте блюда ${seoRestaurantName} по калорийности и макронутриентам перед посещением ресторана.`,
+    () => `Меню ${seoRestaurantName} с КБЖУ: калории, белки, жиры и углеводы блюд ресторана. Сравнивайте блюда ${seoRestaurantName} по калорийности и макронутриентам перед посещением ресторана.`,
     [seoRestaurantName]
   );
 
@@ -160,7 +160,9 @@ export default function RestaurantPage() {
     <main className="restaurant-page">
       <header className="rp__header">
         <div className="rp__title-row">
-          <h1 className="rp__title">Меню {seoRestaurantName} с КБЖУ</h1>
+          <h1 className="rp__title" aria-label={`Меню ${seoRestaurantName} с КБЖУ`}>
+            {seoRestaurantName}
+          </h1>
           <button
             type="button"
             className={`rp__fav-btn ${isFavorite ? 'is-active' : ''}`}
@@ -240,8 +242,6 @@ export default function RestaurantPage() {
           )
         )}
       </section>
-      <NutritionSeoTable dishes={allDishes} />
-
       {/* minimal styles for MVP */}
       <style>{styles}</style>
       <MenuOutdatedModal
@@ -340,44 +340,6 @@ function MacroRange({ label, value, onChange }) {
         />
       </div>
     </div>
-  );
-}
-
-function NutritionSeoTable({ dishes }) {
-  return (
-    <section className="rp__seo-table" aria-label="Таблица КБЖУ блюд">
-      <h2 className="rp__seo-table-title">Таблица блюд с КБЖУ</h2>
-      <div className="rp__seo-table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Блюдо</th>
-              <th>Калории</th>
-              <th>Белки</th>
-              <th>Жиры</th>
-              <th>Углеводы</th>
-            </tr>
-          </thead>
-          <tbody>
-            {dishes.length ? (
-              dishes.map((dish, index) => (
-                <tr key={`${dish.id || dish.name}-${index}`}>
-                  <td>{dish.name}</td>
-                  <td>{formatNumeric(dish.kcal)}</td>
-                  <td>{formatNumeric(dish.protein)}</td>
-                  <td>{formatNumeric(dish.fat)}</td>
-                  <td>{formatNumeric(dish.carbs)}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5">Данные КБЖУ для меню ресторана обновляются.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </section>
   );
 }
 
@@ -504,15 +466,6 @@ const styles = `
 .dish__paywall { display:flex; align-items:center; gap:10px; margin-top:8px; flex-wrap:wrap; }
 .dish__paywall-text { margin:0; color:#475569; }
 .dish__captured { margin-top:8px; font-size:12px; color:#475569; }
-.rp__seo-table { margin-top: 22px; }
-.rp__seo-table-title { font-size: 20px; margin: 0 0 10px; }
-.rp__seo-table-scroll { overflow-x: auto; border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; }
-.rp__seo-table table { width: 100%; border-collapse: collapse; min-width: 620px; }
-.rp__seo-table th,
-.rp__seo-table td { padding: 10px 12px; border-bottom: 1px solid #e5e7eb; text-align: left; }
-.rp__seo-table th { background: #f8fafc; color: #0f172a; font-weight: 700; }
-.rp__seo-table td:not(:first-child),
-.rp__seo-table th:not(:first-child) { text-align: right; white-space: nowrap; }
 `;
 
 function buildDishAccessKey(dish) {

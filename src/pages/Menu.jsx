@@ -235,7 +235,7 @@ export default function Menu() {
   const instagramUrl = useMemo(() => normalizeInstagramUrl(menu?.instagramUrl), [menu?.instagramUrl])
   const seoRestaurantName = menu?.name || slug || 'ресторана'
   const seoDescription = useMemo(
-    () => `Меню ${seoRestaurantName} с КБЖУ: калории, белки, жиры и углеводы блюд ресторана в одной таблице. Сравнивайте блюда ${seoRestaurantName} по калорийности и макронутриентам перед посещением ресторана.`,
+    () => `Меню ${seoRestaurantName} с КБЖУ: калории, белки, жиры и углеводы блюд ресторана. Сравнивайте блюда ${seoRestaurantName} по калорийности и макронутриентам перед посещением ресторана.`,
     [seoRestaurantName]
   )
   const mapCenter = useMemo(
@@ -373,7 +373,9 @@ export default function Menu() {
         <div className="menu-hero__header">
           <div className="menu-hero__lead">
             <div className="menu-hero__title-row">
-              <h1 className="menu-hero__title">Меню {seoRestaurantName} с КБЖУ</h1>
+              <h1 className="menu-hero__title" aria-label={`Меню ${seoRestaurantName} с КБЖУ`}>
+                {seoRestaurantName}
+              </h1>
               <div className="menu-hero__socials">
                 {instagramUrl ? <InstagramLink href={instagramUrl} /> : null}
                 <button
@@ -582,51 +584,12 @@ export default function Menu() {
           )
         )}
       </section>
-      <NutritionSeoTable dishes={dishes} restaurantName={seoRestaurantName} />
       <MenuOutdatedModal
         restaurantName={menu?.name || slug}
         isOpen={isOutdatedOpen}
         onClose={() => setIsOutdatedOpen(false)}
       />
     </div>
-  )
-}
-
-function NutritionSeoTable({ dishes, restaurantName }) {
-  return (
-    <section className="menu-seo-table" aria-label={`Таблица КБЖУ блюд ${restaurantName}`}>
-      <h2 className="menu-seo-table__title">Таблица блюд с КБЖУ</h2>
-      <div className="menu-seo-table__scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Блюдо</th>
-              <th>Калории</th>
-              <th>Белки</th>
-              <th>Жиры</th>
-              <th>Углеводы</th>
-            </tr>
-          </thead>
-          <tbody>
-            {dishes.length ? (
-              dishes.map((dish, index) => (
-                <tr key={`${dish.id || dish.name}-${index}`}>
-                  <td>{dish.name}</td>
-                  <td>{formatNumeric(dish.kcal)}</td>
-                  <td>{formatNumeric(dish.protein)}</td>
-                  <td>{formatNumeric(dish.fat)}</td>
-                  <td>{formatNumeric(dish.carbs)}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5">Данные КБЖУ для меню ресторана обновляются.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </section>
   )
 }
 
