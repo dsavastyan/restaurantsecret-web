@@ -207,7 +207,6 @@ export default function SubscriptionPlans({
                                 </div>
                                 {renderPrice(monthPrice, "/мес*")}
                                 <div className="rsPlanDesc rsPlanDesc--coffee">
-                                    <span aria-hidden="true">☕</span>
                                     <span>дешевле стаканчика кофе</span>
                                 </div>
                             </div>
