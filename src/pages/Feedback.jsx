@@ -160,7 +160,7 @@ export default function Feedback() {
           </header>
 
           <ul className="contact-list" aria-label="Каналы обратной связи">
-            <li className="contact-list__item">
+            <li className="contact-list__item contact-list__item--telegram">
               <span className="contact-list__icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" focusable="false">
                   <path d="M4 6h16v12H4z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
@@ -183,7 +183,7 @@ export default function Feedback() {
               </span>
               <div className="contact-list__body">
                 <p className="contact-list__label">Поддержка в Telegram</p>
-                <a className="contact-list__value" href="http://t.me/RestSecretSupport_bot" target="_blank" rel="noreferrer">
+                <a className="contact-list__value contact-list__value--telegram" href="http://t.me/RestSecretSupport_bot" target="_blank" rel="noreferrer">
                   @RestSecretSupport_bot
                 </a>
               </div>

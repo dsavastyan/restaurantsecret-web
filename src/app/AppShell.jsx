@@ -189,6 +189,23 @@ export default function AppShell() {
     window.sessionStorage.setItem('rs_current_path', currentPath)
   }, [location.pathname, location.search])
 
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const scrollToPageTop = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+      document.documentElement.scrollTop = 0
+      document.body.scrollTop = 0
+    }
+
+    scrollToPageTop()
+    const frame = window.requestAnimationFrame(scrollToPageTop)
+
+    return () => {
+      window.cancelAnimationFrame(frame)
+    }
+  }, [location.pathname, location.search])
+
   // Manual refresh triggered by the user after completing payment.
   const refreshAccess = useCallback(async () => {
     try {

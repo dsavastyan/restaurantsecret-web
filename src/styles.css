@@ -5313,6 +5313,13 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
   overflow-wrap: anywhere;
 }
 
+.contact-page--feedback .contact-list__value--telegram {
+  white-space: nowrap;
+  word-break: normal;
+  overflow-wrap: normal;
+  font-size: clamp(14px, 1.18vw, 16px);
+}
+
 .contact-page--feedback .contact-list__cta,
 .contact-page--feedback .contact-card:not(.contact-card--accent) .contact-list__cta {
   min-height: 34px;
@@ -5407,6 +5414,19 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
   .contact-page--feedback .contact-layout {
     grid-template-columns: 1fr;
     width: min(640px, 100%);
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1120px) {
+  .contact-page--feedback .contact-list__item--telegram {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .contact-page--feedback .contact-list__item--telegram .contact-list__cta {
+    grid-column: 2;
+    justify-self: start;
+    align-self: auto;
+    margin-top: 2px;
   }
 }
 
