@@ -11,9 +11,181 @@ import { loadTelegramWebApp } from './lib/telegram'
 import './styles.css'
 import './account-mobile-profile.css'
 
+const SPLASH_MAX_WAIT_MS = 15000
+const SPLASH_IDLE_MS = 700
+
+const initialFetchTracker = (() => {
+  if (typeof window === 'undefined' || typeof window.fetch !== 'function') {
+    return { pending: 0, restore: () => { } }
+  }
+
+  const originalFetch = window.fetch.bind(window)
+  const ignoredPatterns = [
+    '/api/analytics/event',
+    '/api/consent/analytics',
+    'mc.yandex.ru',
+  ]
+
+  const tracker = {
+    pending: 0,
+    restore: () => {
+      if (window.fetch === trackedFetch) {
+        window.fetch = originalFetch
+      }
+    },
+  }
+
+  function getFetchUrl(input) {
+    if (typeof input === 'string') return input
+    if (input instanceof URL) return input.href
+    return input?.url || ''
+  }
+
+  function shouldTrack(input) {
+    const splash = document.getElementById('rs-splash')
+    if (!splash || splash.dataset.state === 'hiding') return false
+
+    const url = getFetchUrl(input)
+    return !ignoredPatterns.some((pattern) => url.includes(pattern))
+  }
+
+  function emitChange() {
+    window.dispatchEvent(new Event('rs-initial-fetch-change'))
+  }
+
+  function trackedFetch(...args) {
+    const track = shouldTrack(args[0])
+    if (!track) return originalFetch(...args)
+
+    tracker.pending += 1
+    emitChange()
+
+    return originalFetch(...args).finally(() => {
+      tracker.pending = Math.max(0, tracker.pending - 1)
+      emitChange()
+    })
+  }
+
+  window.fetch = trackedFetch
+  return tracker
+})()
+
 loadTelegramWebApp().catch(() => { })
 
-function hideInitialSplash() {
+function waitForWindowLoad() {
+  if (document.readyState === 'complete') return Promise.resolve()
+
+  return new Promise((resolve) => {
+    window.addEventListener('load', resolve, { once: true })
+  })
+}
+
+function waitForFontsReady() {
+  if (!document.fonts?.ready) return Promise.resolve()
+  return document.fonts.ready.catch(() => { })
+}
+
+function isVisible(element) {
+  if (!(element instanceof Element)) return false
+  const style = window.getComputedStyle(element)
+  return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) !== 0 && element.getClientRects().length > 0
+}
+
+function hasVisibleLoadingState(root) {
+  const loadingSelectors = [
+    '[aria-busy="true"]',
+    '[data-rs-loading="true"]',
+    '.catalog-state:not(.catalog-state--empty)',
+    '.map-overlay',
+    '.favorites-loading',
+    '.goals-loading',
+    '.dish-card__loading',
+    '.account-skeleton',
+    '.account-history__item--skeleton',
+    '.restaurant-card.skeleton',
+    '.search-state',
+  ]
+
+  if (loadingSelectors.some((selector) => {
+    try {
+      return Array.from(root.querySelectorAll(selector)).some(isVisible)
+    } catch {
+      return false
+    }
+  })) {
+    return true
+  }
+
+  return Array.from(root.querySelectorAll('p, div, span'))
+    .some((element) => isVisible(element) && /(?:Загружаем|Загрузка|Ищем)/i.test(element.textContent || ''))
+}
+
+function getPendingImages(root) {
+  return Array.from(root.querySelectorAll('img'))
+    .filter((img) => isVisible(img) && !img.complete)
+}
+
+function waitForInitialPageSettle() {
+  const root = document.getElementById('root')
+  if (!root) return Promise.resolve()
+
+  return new Promise((resolve) => {
+    const startedAt = performance.now()
+    let lastChangedAt = performance.now()
+    let done = false
+    let timer = 0
+
+    const finish = () => {
+      if (done) return
+      done = true
+      window.clearTimeout(timer)
+      observer.disconnect()
+      window.removeEventListener('rs-initial-fetch-change', markChanged)
+      resolve()
+    }
+
+    const markChanged = () => {
+      lastChangedAt = performance.now()
+      scheduleCheck()
+    }
+
+    const observer = new MutationObserver(markChanged)
+    observer.observe(root, {
+      attributes: true,
+      childList: true,
+      characterData: true,
+      subtree: true,
+    })
+
+    const scheduleCheck = () => {
+      if (done || timer) return
+      timer = window.setTimeout(check, 100)
+    }
+
+    const check = () => {
+      timer = 0
+      const now = performance.now()
+      const timedOut = now - startedAt >= SPLASH_MAX_WAIT_MS
+      const isSettled =
+        initialFetchTracker.pending === 0 &&
+        getPendingImages(root).length === 0 &&
+        !hasVisibleLoadingState(root) &&
+        now - lastChangedAt >= SPLASH_IDLE_MS
+
+      if (timedOut || isSettled) {
+        finish()
+        return
+      }
+
+      scheduleCheck()
+    }
+
+    window.addEventListener('rs-initial-fetch-change', markChanged)
+    scheduleCheck()
+  })
+}
+
+async function hideInitialSplash() {
   const hide = () => {
     const splash = document.getElementById('rs-splash')
     if (!splash || splash.dataset.state === 'hiding') return
@@ -30,12 +202,17 @@ function hideInitialSplash() {
     })
   }
 
-  if (document.readyState === 'complete') {
-    hideAfterPaint()
-    return
-  }
+  await Promise.race([
+    Promise.all([
+      waitForWindowLoad(),
+      waitForFontsReady(),
+      waitForInitialPageSettle(),
+    ]),
+    new Promise((resolve) => window.setTimeout(resolve, SPLASH_MAX_WAIT_MS)),
+  ])
 
-  window.addEventListener('load', hideAfterPaint, { once: true })
+  initialFetchTracker.restore()
+  hideAfterPaint()
 }
 
 // Register the service worker (if supported) once the page has fully loaded so
