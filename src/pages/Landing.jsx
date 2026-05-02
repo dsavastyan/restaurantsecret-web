@@ -403,14 +403,7 @@ export default function Landing() {
                 Войти
               </Link>
             ) : showAccountAction ? (
-              <Link to="/account" className="landing-warm__nav-cta landing-warm__desktop-action">Личный кабинет</Link>
-            ) : (
-              null
-            )}
-            {accessToken && showAccountAction ? (
-              <>
-                <Link to="/account" className="landing-warm__nav-cta landing-warm__mobile-action">Личный кабинет</Link>
-              </>
+              <Link to="/account" className="landing-warm__nav-cta">Личный кабинет</Link>
             ) : showTrialAction ? (
               <Link to="/onboarding/welcome" className="landing-warm__nav-cta" onClick={() => analytics.track('cta_clicked', { location: 'nav', text: 'Попробовать бесплатно' })}>
                 Попробовать бесплатно
