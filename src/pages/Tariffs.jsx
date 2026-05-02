@@ -51,8 +51,8 @@ export default function Tariffs() {
         </div>
 
         <nav className="tariffs-nav__center" aria-label="Разделы">
-          <Link to="/#restaurants-list">Рестораны</Link>
-          <Link to="/#why">Как работает</Link>
+          <Link to="/restaurants">Рестораны</Link>
+          <Link to="/how-it-works">Как работает</Link>
           <Link to="/tariffs" className="is-active">Тарифы</Link>
           <a href="https://t.me/RestSecretSupport_bot" target="_blank" rel="noopener noreferrer">Поддержка</a>
         </nav>

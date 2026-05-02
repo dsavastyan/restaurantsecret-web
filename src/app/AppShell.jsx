@@ -230,19 +230,20 @@ export default function AppShell() {
     requireAccess
   }), [access, handleAccessUpdate, refreshAccess, requestPaywall, closePaywall, requireAccess])
 
-  const isContact = location.pathname.startsWith('/contact')
-  const isFeedbackPage = location.pathname === '/feedback'
-  const isLanding = location.pathname === '/'
-  const isTariffsPage = location.pathname === '/tariffs'
-  const isHowItWorksPage = location.pathname === '/how-it-works'
-  const isLoginPage = location.pathname === '/login'
-  const isOnboardingPage = location.pathname.startsWith('/onboarding')
-  const isAccountPage = location.pathname.startsWith('/account')
+  const normalizedPath = location.pathname.replace(/\/+$/, '') || '/'
+  const isContact = normalizedPath.startsWith('/contact')
+  const isFeedbackPage = normalizedPath === '/feedback'
+  const isLanding = normalizedPath === '/'
+  const isTariffsPage = normalizedPath === '/tariffs'
+  const isHowItWorksPage = normalizedPath === '/how-it-works'
+  const isLoginPage = normalizedPath === '/login'
+  const isOnboardingPage = normalizedPath.startsWith('/onboarding')
+  const isAccountPage = normalizedPath.startsWith('/account')
   const isImmersivePage = isLoginPage || isOnboardingPage || isAccountPage
   const isMarketingPage = isLanding || isTariffsPage || isHowItWorksPage
   const isRestaurantMenuPage = /^\/(?:restaurants|r)\/[^/]+\/menu\/?$/.test(location.pathname)
-  const isRestaurantsCatalogPage = location.pathname === '/restaurants'
-  const isSearchPage = location.pathname === '/search' || location.pathname === '/app/search'
+  const isRestaurantsCatalogPage = normalizedPath === '/restaurants'
+  const isSearchPage = normalizedPath === '/search' || normalizedPath === '/app/search'
 
   useEffect(() => {
     if (!accessToken || isOnboardingPage || isLoginPage) return
