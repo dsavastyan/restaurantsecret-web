@@ -5079,9 +5079,9 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
 }
 
 .contact-page--feedback .contact-layout {
-  width: min(1080px, 100%);
+  width: min(1240px, 100%);
   max-width: none;
-  grid-template-columns: minmax(0, 1.05fr) minmax(330px, 0.85fr);
+  grid-template-columns: minmax(0, 1fr) minmax(430px, 0.9fr);
   align-items: stretch;
   gap: clamp(22px, 3vw, 36px);
   padding: 0;
@@ -5229,6 +5229,10 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
   border: 1px solid rgba(139, 115, 83, 0.18);
   border-radius: 16px;
   background: rgba(255, 252, 247, 0.54);
+}
+
+.contact-page--feedback .contact-list__item--telegram {
+  grid-template-columns: 56px minmax(210px, 1fr) auto;
 }
 
 .contact-page--feedback .contact-list__icon {
