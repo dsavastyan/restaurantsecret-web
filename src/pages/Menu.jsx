@@ -510,6 +510,12 @@ export default function Menu() {
 
           <div className="menu-filters__chips" role="group" aria-label="Быстрые фильтры">
             <FilterChip
+              active={presets.lowKcal}
+              label="🔥 Мало калорий"
+              description="до 400 ккал"
+              onClick={() => togglePreset('lowKcal')}
+            />
+            <FilterChip
               active={presets.highProtein}
               label="💪 Много белка"
               description=">= 25 г"
@@ -521,12 +527,7 @@ export default function Menu() {
               description="<= 10 г"
               onClick={() => togglePreset('lowFat')}
             />
-            <FilterChip
-              active={presets.lowKcal}
-              label="🔥 Мало калорий"
               description="<= 400 ккал"
-              onClick={() => togglePreset('lowKcal')}
-            />
           </div>
         </div>
 

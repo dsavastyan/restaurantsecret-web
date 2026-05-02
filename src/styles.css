@@ -12964,18 +12964,22 @@ body:has(.account--sheet-open) {
   }
 
   .menu-filters__primary-row {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 58px;
+    gap: 12px;
   }
 
-  .menu-filters__search,
-  .menu-category-filter {
-    flex: 1 1 auto;
+  .menu-filters__search {
+    flex: none;
     width: 100%;
     min-width: 0;
   }
 
+  .menu-category-filter {
+    display: none;
+  }
+
   .menu-filters__input,
-  .menu-category-filter__select,
   .menu-filters__toggle-btn,
   .menu-chip {
     min-height: 58px;
@@ -12984,16 +12988,26 @@ body:has(.account--sheet-open) {
   .menu-filters__toggle-btn {
     width: 58px;
     height: 58px;
-    align-self: flex-start;
+    align-self: stretch;
     border-radius: 999px;
   }
 
   .menu-filters__chips {
+    grid-column: 1 / -1;
     width: 100%;
+    gap: 10px;
   }
 
   .menu-chip {
-    min-width: 158px;
+    min-width: max-content;
+    min-height: 46px;
+    flex-direction: row;
+    padding: 0 16px;
+    border-radius: 14px;
+  }
+
+  .menu-chip__description {
+    display: none;
   }
 }
 
