@@ -160,7 +160,7 @@ export default function Feedback() {
           </header>
 
           <ul className="contact-list" aria-label="Каналы обратной связи">
-            <li className="contact-list__item contact-list__item--telegram">
+            <li className="contact-list__item">
               <span className="contact-list__icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" focusable="false">
                   <path d="M4 6h16v12H4z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
@@ -174,7 +174,7 @@ export default function Feedback() {
                 </a>
               </div>
             </li>
-            <li className="contact-list__item">
+            <li className="contact-list__item contact-list__item--telegram">
               <span className="contact-list__icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" focusable="false">
                   <path d="M20.6 4.5 3.8 11.2c-.9.4-.9 1.6.1 1.9l4.3 1.3 1.6 4.9c.3.9 1.5 1 1.9.2l2.2-3.5 4.1 3c.7.5 1.6.1 1.8-.7l2.2-12.2c.2-1-.6-1.9-1.4-1.6Z" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
