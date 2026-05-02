@@ -168,6 +168,7 @@ export default function AccountLayout() {
   const hasPremium = Boolean(sub && sub.status !== "none" && !sub.expired);
   const showPremiumUpsell = !loading && Boolean(me?.user) && !hasPremium;
   const isAccountRoot = location.pathname === "/account";
+  const isProfileSection = isAccountRoot || location.pathname === "/account/profile";
   const isStatisticsPage = location.pathname.startsWith("/account/statistics");
 
   const navItems = [
@@ -274,18 +275,20 @@ export default function AccountLayout() {
           <div className="account__main">
             <header className="account__header">
               <div className="account__header-desktop">
-                <div className="account__title-row">
-                  <h1 className="account__title">Личный кабинет</h1>
-                  {hasPremium && (
-                    <span className="account-premium-crown" tabIndex={0} aria-label="Премиум пользователь">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
-                        <path d="m3.5 9 3.8 2.7L12 4l4.7 7.7L20.5 9l-2 9.5h-13L3.5 9Z" strokeLinecap="round" strokeLinejoin="round" />
-                        <path d="M6.5 21h11" strokeLinecap="round" />
-                      </svg>
-                      <span className="account-premium-crown__tooltip" role="tooltip">Премиум пользователь</span>
-                    </span>
-                  )}
-                </div>
+                {isProfileSection && (
+                  <div className="account__title-row">
+                    <h1 className="account__title">Личный кабинет</h1>
+                    {hasPremium && (
+                      <span className="account-premium-crown" tabIndex={0} aria-label="Премиум пользователь">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
+                          <path d="m3.5 9 3.8 2.7L12 4l4.7 7.7L20.5 9l-2 9.5h-13L3.5 9Z" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M6.5 21h11" strokeLinecap="round" />
+                        </svg>
+                        <span className="account-premium-crown__tooltip" role="tooltip">Премиум пользователь</span>
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="account__header-mobile">
                 {isAccountRoot ? (
