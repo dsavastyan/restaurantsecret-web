@@ -18,7 +18,6 @@
   --app-header-bg: rgba(255, 255, 255, 0.9);
   --app-header-border: #e5e7eb;
   --app-card-shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
-  --rs-visual-viewport-height: 100vh;
 }
 
 html[data-rs-theme="night"] {
@@ -10656,9 +10655,9 @@ body:has(.account--sheet-open) {
 /* Intro Onboarding Styles */
 .intro {
   position: relative;
+  min-height: 100vh;
   min-height: 100svh;
-  min-height: var(--rs-visual-viewport-height, 100dvh);
-  height: var(--rs-visual-viewport-height, 100dvh);
+  min-height: 100lvh;
   font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   background:
     linear-gradient(90deg, rgba(248, 239, 226, 0.2), rgba(255, 251, 246, 0.82) 34%, rgba(255, 250, 244, 0.92)),
@@ -11019,7 +11018,8 @@ body:has(.account--sheet-open) {
 
 @media (min-width: 900px) {
   .intro {
-    height: var(--rs-visual-viewport-height, 100dvh);
+    height: 100vh;
+    height: 100svh;
     overflow: hidden;
     background:
       linear-gradient(90deg, rgba(248, 239, 226, 0.06), rgba(255, 251, 246, 0.76) 34%, rgba(255, 250, 244, 0.9)),
@@ -11094,9 +11094,9 @@ body:has(.account--sheet-open) {
 /* Onboarding Profile Steps */
 .onboarding-flow {
   position: relative;
+  min-height: 100vh;
   min-height: 100svh;
-  min-height: var(--rs-visual-viewport-height, 100dvh);
-  height: var(--rs-visual-viewport-height, 100dvh);
+  min-height: 100lvh;
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -11335,8 +11335,9 @@ body:has(.account--sheet-open) {
 
 @media (max-width: 899px) {
   .onboarding-flow {
-    height: var(--rs-visual-viewport-height, 100dvh);
-    min-height: var(--rs-visual-viewport-height, 100dvh);
+    min-height: 100vh;
+    min-height: 100svh;
+    min-height: 100lvh;
     align-items: flex-start;
     padding: 42px 18px 36px;
     overflow-y: auto;
@@ -11394,9 +11395,9 @@ body:has(.account--sheet-open) {
 
 /* Login Page Styles */
 .login {
+  min-height: 100vh;
   min-height: 100svh;
-  min-height: var(--rs-visual-viewport-height, 100dvh);
-  height: var(--rs-visual-viewport-height, 100dvh);
+  min-height: 100lvh;
   color: #eef0f8;
   font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   background:
