@@ -24051,3 +24051,177 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
     font-size: 13.5px !important;
   }
 }
+
+@media (min-width: 900px) {
+  .account-subscription-panel.is-annual-upgrade,
+  .account-subscription-panel.is-active-subscription.is-annual-upgrade {
+    width: min(100%, 720px) !important;
+    gap: 6px !important;
+  }
+
+  .account-subscription-panel.is-annual-upgrade .account-panel-v2__header,
+  .account-subscription-panel.is-active-subscription.is-annual-upgrade .account-panel-v2__header {
+    gap: 2px !important;
+    margin-bottom: 0 !important;
+  }
+
+  .account-subscription-panel.is-annual-upgrade .account-panel-v2__title,
+  .account-subscription-panel.is-active-subscription.is-annual-upgrade .account-panel-v2__title {
+    font-size: clamp(26px, 2.35vw, 34px) !important;
+    line-height: 1 !important;
+  }
+
+  .account-subscription-panel.is-annual-upgrade .account-panel-v2__subtitle,
+  .account-subscription-panel.is-active-subscription.is-annual-upgrade .account-panel-v2__subtitle {
+    font-size: clamp(12px, 1vw, 14px) !important;
+    line-height: 1.18 !important;
+  }
+
+  .account-subscription-v2__annual-upgrade {
+    gap: 7px !important;
+  }
+
+  .account-subscription-v2__annual-back,
+  .account-subscription-v2__annual-current {
+    min-height: 32px !important;
+    border-radius: 9px !important;
+    font-size: 12px !important;
+  }
+
+  .account-subscription-v2__annual-back {
+    padding: 0 11px !important;
+  }
+
+  .account-subscription-v2__annual-current {
+    padding: 0 11px !important;
+  }
+
+  .account-subscription-v2__annual-back svg,
+  .account-subscription-v2__annual-current svg {
+    width: 15px !important;
+    height: 15px !important;
+  }
+
+  .account-subscription-v2__annual-card {
+    min-height: 196px !important;
+    grid-template-columns: minmax(0, 1fr) 154px !important;
+    gap: 14px !important;
+    padding: 16px 20px !important;
+    border-width: 1.5px !important;
+    border-radius: 15px !important;
+  }
+
+  .account-subscription-v2__annual-badge {
+    min-height: 25px !important;
+    padding: 0 10px !important;
+    border-radius: 8px !important;
+    font-size: 10px !important;
+  }
+
+  .account-subscription-v2__annual-badge svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  .account-subscription-v2__annual-card h3 {
+    margin: 10px 0 4px !important;
+    font-size: clamp(28px, 2.6vw, 36px) !important;
+  }
+
+  .account-subscription-v2__annual-price {
+    gap: 6px !important;
+  }
+
+  .account-subscription-v2__annual-price strong {
+    font-size: clamp(38px, 3.5vw, 48px) !important;
+  }
+
+  .account-subscription-v2__annual-price span {
+    font-size: 15px !important;
+  }
+
+  .account-subscription-v2__annual-month {
+    gap: 12px !important;
+    margin-top: 5px !important;
+    font-size: 15px !important;
+  }
+
+  .account-subscription-v2__annual-month b {
+    font-size: 18px !important;
+  }
+
+  .account-subscription-v2__annual-month s {
+    font-size: 14px !important;
+  }
+
+  .account-subscription-v2__annual-saving {
+    min-height: 31px !important;
+    gap: 7px !important;
+    margin-top: 12px !important;
+    padding: 0 12px !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+  }
+
+  .account-subscription-v2__annual-saving svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  .account-subscription-v2__annual-visual {
+    width: 154px !important;
+  }
+
+  .account-subscription-v2__annual-summary {
+    min-height: 54px !important;
+    grid-template-columns: 38px minmax(0, 1fr) !important;
+    gap: 10px !important;
+    padding: 9px 12px !important;
+    border-radius: 12px !important;
+  }
+
+  .account-subscription-v2__annual-summary-icon {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  .account-subscription-v2__annual-summary-icon svg {
+    width: 21px !important;
+    height: 21px !important;
+  }
+
+  .account-subscription-v2__annual-summary p {
+    font-size: 13px !important;
+    line-height: 1.28 !important;
+  }
+
+  .account-subscription-v2__annual-summary s {
+    font-size: 15px !important;
+  }
+
+  .account-subscription-v2__annual-summary b {
+    font-size: 17px !important;
+  }
+
+  .account-subscription-v2__annual-note {
+    gap: 7px !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+  }
+
+  .account-subscription-v2__annual-note svg {
+    width: 15px !important;
+    height: 15px !important;
+  }
+
+  .account-subscription-v2__annual-primary {
+    min-height: 42px !important;
+    border-radius: 9px !important;
+    font-size: 15px !important;
+  }
+
+  .account-subscription-v2__annual-secondary {
+    min-height: 30px !important;
+    font-size: 13px !important;
+  }
+}
