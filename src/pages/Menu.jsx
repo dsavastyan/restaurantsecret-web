@@ -527,7 +527,6 @@ export default function Menu() {
               description="<= 10 г"
               onClick={() => togglePreset('lowFat')}
             />
-              description="<= 400 ккал"
           </div>
         </div>
 
