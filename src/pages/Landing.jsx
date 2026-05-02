@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
+import BotanicDecor from '@/components/BotanicDecor'
 import CityMapBackground from '@/components/CityMapBackground'
 import SearchInput from '@/components/SearchInput'
 import { CookieSettingsModal } from '@/components/CookieSettingsModal'
@@ -413,8 +414,9 @@ export default function Landing() {
           </div>
         </header>
 
-        <section className="landing-warm__hero" id="top" style={{ position: 'relative' }}>
-          <CityMapBackground themeMode={themeMode} />
+        <section className="landing-warm__hero landing-warm__hero--botanic" id="top" style={{ position: 'relative' }}>
+          <CityMapBackground themeMode={themeMode} variant="botanic" />
+          <BotanicDecor />
           <h1 className="landing-warm__hero-title">
             Ешь вкусно,
             <br />
