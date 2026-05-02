@@ -395,7 +395,6 @@ export default function Menu() {
                 </button>
               </div>
             </div>
-            <p className="menu-hero__seo-description">{seoDescription}</p>
             {!!capturedAt && <div className="menu__captured-at">Меню добавлено: {capturedAt}</div>}
             <div className="menu-hero__meta-row">
               <button

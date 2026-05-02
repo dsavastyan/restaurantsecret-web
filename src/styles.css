@@ -824,7 +824,7 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
 }
 
 .menu__captured-at {
-  margin-top: 0;
+  margin-top: 12px;
   font-size: 15px;
   color: #6b7280;
 }
@@ -16120,6 +16120,8 @@ html[data-rs-theme="night"] .onboarding-install__image {
 }
 
 .landing-warm__search {
+  position: relative;
+  z-index: 4;
   margin-top: 48px;
   max-width: 640px;
   width: 100%;
@@ -23986,5 +23988,66 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
 
   .account-subscription-panel.is-active-subscription.is-annual-upgrade .account-panel-v2__subtitle {
     font-size: 13px !important;
+  }
+}
+
+@media (min-width: 900px) {
+  .account-subscription-v2__active-content {
+    display: grid !important;
+    grid-template-columns: max-content minmax(0, 1fr) !important;
+    column-gap: 34px !important;
+    align-items: baseline !important;
+  }
+
+  .account-subscription-v2__active-badges,
+  .account-subscription-v2__active-meta,
+  .account-subscription-v2__active-note,
+  .account-subscription-v2__active-actions {
+    grid-column: 1 / -1 !important;
+  }
+
+  .account-subscription-v2__active-title {
+    grid-column: 1 !important;
+    margin: 0 !important;
+  }
+
+  .account-subscription-v2__active-price {
+    grid-column: 2 !important;
+    margin: 0 0 9px !important;
+  }
+
+  .account-subscription-v2__subscriber-note,
+  .account-subscription-v2__saving-card {
+    min-height: 54px !important;
+    padding: 10px 14px !important;
+    grid-template-columns: 38px minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .account-subscription-v2__saving-card {
+    grid-template-columns: 38px minmax(0, 1fr) auto !important;
+  }
+
+  .account-subscription-v2__subscriber-icon,
+  .account-subscription-v2__saving-icon {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  .account-subscription-v2__subscriber-icon svg,
+  .account-subscription-v2__saving-icon svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .account-subscription-v2__subscriber-note p,
+  .account-subscription-v2__saving-copy strong,
+  .account-subscription-v2__saving-copy span {
+    font-size: 13.5px !important;
+    line-height: 1.2 !important;
+  }
+
+  .account-subscription-v2__saving-link {
+    font-size: 13.5px !important;
   }
 }

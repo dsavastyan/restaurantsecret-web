@@ -191,8 +191,6 @@ export default function RestaurantPage() {
           </button>
         </div>
       </header>
-      <p className="rp__seo-description">{seoDescription}</p>
-
       <section className="rp__filters" aria-label="Фильтры блюд">
         <div className="rp__row">
           <input
