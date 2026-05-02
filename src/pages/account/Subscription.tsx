@@ -44,10 +44,12 @@ const PLAN_LABELS: Record<string, string> = {
 };
 
 const PLAN_PRICE_BADGES: Record<string, string> = {
-  monthly: "99 РУБ / МЕСЯЦ",
-  annual: "999 РУБ / ГОД",
+  monthly: "199 РУБ / МЕСЯЦ",
+  annual: "1 490 РУБ / ГОД",
   mock: "ПРОБНЫЙ ПЕРИОД",
 };
+
+const INTRO_TRIAL_PROMO_CODE = "RS7FREE";
 
 const ERROR_LABELS: Record<string, string> = {
   invalid_code: "Промокод не найден",
@@ -409,10 +411,10 @@ export default function AccountSubscription() {
         // Use either the code from quote (preferred) or what we might have elsewhere
         handleRedeemPromo(promoQuote.code || '');
       } else if (selectedPlan) {
-        createPayment(selectedPlan, promoQuote?.code);
+        createPayment(selectedPlan, promoQuote?.code || (isNeverSubscribed ? INTRO_TRIAL_PROMO_CODE : undefined));
       }
     }
-  }, [selectedPlan, createPayment, promoQuote, handleRedeemPromo]);
+  }, [selectedPlan, createPayment, promoQuote, handleRedeemPromo, isNeverSubscribed]);
 
   const handleResetPromo = useCallback(() => {
     setPromoQuote(null);
@@ -458,6 +460,9 @@ export default function AccountSubscription() {
         <h2 id="account-subscription-heading" className="account-panel-v2__title">
           {pageTitle}
         </h2>
+        {isNeverSubscribed && (
+          <p className="account-panel-v2__subtitle">Выберите подходящий тариф</p>
+        )}
       </header>
 
       {loading && <SubscriptionSkeleton />}
@@ -586,6 +591,8 @@ export default function AccountSubscription() {
                 loading={promoLoading || Boolean(paymentPlan)}
                 promoError={promoErrorLabel}
                 promoQuote={promoQuote}
+                showTrialPricing
+                trialDays={7}
               />
             </div>
           )}

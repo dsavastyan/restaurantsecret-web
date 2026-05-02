@@ -1,224 +1,347 @@
 .rsPlansContainer {
     display: flex;
     flex-direction: column;
+    gap: 18px;
+}
+
+.rsBenefitsStrip {
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid rgba(217, 207, 190, 0.78);
+    border-radius: 18px;
+    background: rgba(255, 252, 246, 0.72);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.rsBenefitsTrack {
+    display: flex;
+    width: max-content;
+}
+
+.rsBenefitsGroup {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    padding: 18px 44px;
+}
+
+.rsBenefitsGroup[aria-hidden="true"] {
+    display: none;
+}
+
+.rsBenefitItem {
+    display: inline-flex;
+    align-items: center;
+    gap: 13px;
+    color: #3c4147;
+    font-size: 20px;
+    line-height: 1.2;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.rsBenefitCheck {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    background: #edf3e5;
+    color: #4f7136;
+    font-size: 17px;
+    font-weight: 900;
+}
+
+.rsBenefitDot {
+    margin-left: 20px;
+    color: #46573a;
+    font-size: 20px;
+    line-height: 1;
 }
 
 .rsPlanGrid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-    margin-top: 8px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 28px;
 }
 
 .rsPlanCard {
     position: relative;
-    border-radius: 22px;
-    padding: 22px 22px 20px;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.08);
-    background: rgba(255, 255, 255, 0.78);
+    min-height: 238px;
+    border-radius: 18px;
+    padding: 34px 44px;
+    border: 1px solid rgba(217, 207, 190, 0.9);
+    box-shadow: 0 18px 44px rgba(63, 53, 36, 0.08);
+    background: rgba(255, 252, 246, 0.78);
     display: flex;
     flex-direction: column;
     cursor: pointer;
-    transition: all 0.2s ease;
+    overflow: visible;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
 .rsPlanCard:hover {
     transform: translateY(-2px);
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 22px 48px rgba(63, 53, 36, 0.11);
 }
 
 .rsPlanCard.is-selected {
-    border-color: #4FAE57;
-    background: #fff;
-    box-shadow: 0 14px 35px rgba(79, 174, 87, 0.15);
+    border-color: #4f8f3f;
+    background: rgba(255, 255, 255, 0.86);
+    box-shadow: 0 18px 44px rgba(75, 93, 52, 0.13);
 }
 
 .rsPlanMonth {
-    background: rgba(255, 255, 255, 0.82);
+    background: rgba(255, 252, 246, 0.74);
 }
 
 .rsPlanYear {
-    background: linear-gradient(135deg,
-            rgba(209, 250, 229, 0.9) 0%,
-            rgba(255, 255, 255, 0.85) 65%);
+    border-color: #6ea35c;
+    background:
+        radial-gradient(420px 180px at 72% 0%, rgba(236, 248, 228, 0.72), transparent 66%),
+        rgba(255, 252, 246, 0.78);
+}
+
+.rsPlanCardBody {
+    min-height: 100%;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .rsPlanTopRow {
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 14px;
 }
 
 .rsPlanName {
-    font-size: 18px;
+    color: #0f172a;
+    font-size: 24px;
+    line-height: 1;
     font-weight: 800;
-    color: #0F172A;
 }
 
 .rsPlanRadio {
-    width: 20px;
-    height: 20px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
-    border: 2px solid rgba(0, 0, 0, 0.1);
+    border: 3px solid rgba(15, 23, 42, 0.16);
     position: relative;
+    flex: 0 0 auto;
 }
 
 .is-selected .rsPlanRadio {
-    border-color: #4FAE57;
+    border-color: #3f8b3f;
 }
 
 .is-selected .rsPlanRadio::after {
-    content: '';
+    content: "";
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 10px;
-    height: 10px;
+    inset: 5px;
     border-radius: 50%;
-    background: #4FAE57;
+    background: #3f8b3f;
 }
 
 .rsBadge {
-    font-size: 12px;
+    position: absolute;
+    left: 44px;
+    top: -8px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 15px;
+    border-radius: 0 0 10px 10px;
+    background: linear-gradient(180deg, #ff8b2a 0%, #f05e0f 100%);
+    color: #fff;
+    font-size: 14px;
+    line-height: 1;
     font-weight: 900;
-    letter-spacing: 0.05em;
-    padding: 6px 10px;
-    border-radius: 999px;
-    background: rgba(34, 197, 94, 0.14);
-    color: #117A37;
-    border: 1px solid rgba(34, 197, 94, 0.22);
+    text-transform: uppercase;
+    box-shadow: 0 8px 16px rgba(210, 92, 14, 0.22);
+}
+
+.rsBadge::before {
+    content: "★";
+    font-size: 13px;
 }
 
 .rsPlanPrice {
-    margin-top: 12px;
+    margin-top: 28px;
     display: flex;
     align-items: baseline;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .rsPlanPriceBig {
-    font-size: 38px;
-    font-weight: 900;
-    letter-spacing: -0.03em;
-    color: #0B1220;
+    color: #0b1220;
+    font-family: "DM Serif Display", "Fraunces", Georgia, serif;
+    font-size: clamp(52px, 5.4vw, 72px);
+    font-weight: 400;
+    line-height: 0.95;
+    letter-spacing: 0;
+    white-space: nowrap;
 }
 
 .rsPlanPriceOld {
-    font-size: 18px;
+    color: rgba(11, 18, 32, 0.42);
+    font-size: 24px;
+    font-weight: 700;
     text-decoration: line-through;
-    color: rgba(11, 18, 32, 0.3);
-    margin-right: 4px;
+    white-space: nowrap;
 }
 
 .rsPlanPriceNew {
-    color: #D32F2F;
+    color: #0b1220;
 }
 
 .rsPlanPriceSmall {
-    font-size: 18px;
-    font-weight: 700;
-    color: rgba(11, 18, 32, 0.75);
+    color: #273241;
+    font-size: 28px;
+    font-weight: 800;
+    white-space: nowrap;
 }
 
 .rsPlanPriceTrial {
-    margin-top: 12px;
+    margin-top: 24px;
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
 }
 
 .rsTrialBig {
-    font-size: 24px;
+    color: #2f7a2f;
+    font-size: clamp(32px, 3.8vw, 48px);
     font-weight: 900;
-    color: #2E7D32;
+    line-height: 1;
+    letter-spacing: 0;
 }
 
 .rsTrialSmall {
-    font-size: 14px;
-    color: rgba(0, 0, 0, 0.6);
-    margin-top: 4px;
+    color: rgba(15, 23, 42, 0.62);
+    font-size: 16px;
+    font-weight: 700;
 }
 
 .rsPlanDesc {
-    margin-top: 12px;
-    font-size: 14px;
-    line-height: 1.35;
-    color: rgba(11, 18, 32, 0.62);
-    min-height: 56px;
+    margin-top: auto;
+    color: rgba(15, 23, 42, 0.72);
+    font-size: 18px;
+    line-height: 1.25;
+    font-weight: 600;
+}
+
+.rsPlanDesc--coffee {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 22px;
+    border-radius: 18px;
+    background: rgba(235, 229, 216, 0.58);
+}
+
+.rsPlanEquivalent {
+    margin-top: 28px;
+    display: flex;
+    align-items: baseline;
+    gap: 9px;
+    color: #2f7a2f;
+    font-size: 26px;
+    line-height: 1;
+    font-weight: 800;
+    flex-wrap: wrap;
+}
+
+.rsPlanEquivalent strong {
+    font-size: 40px;
+    line-height: 1;
+    font-weight: 900;
+}
+
+.rsPlanEquivalent s {
+    margin-left: 14px;
+    color: rgba(15, 23, 42, 0.45);
+    font-size: 25px;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 .rsFootnote {
-    margin: 10px 6px 16px;
-    font-size: 12px;
-    color: rgba(11, 18, 32, 0.55);
+    margin: -2px 0 0;
+    color: #6b7280;
+    font-size: 20px;
+    line-height: 1.25;
     text-align: left;
 }
 
-/* Main CTA Button */
 .rsMainCta {
     width: 100%;
-    height: 54px;
-    border-radius: 16px;
+    height: 72px;
+    border-radius: 18px;
     border: none;
     cursor: pointer;
-    font-size: 16px;
-    font-weight: 900;
     color: white;
-    background: linear-gradient(180deg, #7BCB74 0%, #4FAE57 100%);
-    box-shadow: 0 10px 25px rgba(79, 174, 87, 0.25);
-    transition: all 0.2s;
-    margin-top: 10px;
+    background: linear-gradient(180deg, #4ba24d 0%, #247a2b 100%);
+    box-shadow: 0 14px 26px rgba(74, 91, 45, 0.2);
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: 0;
+    transition: transform 0.14s ease, filter 0.18s ease, box-shadow 0.18s ease;
 }
 
 .rsMainCta:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 30px rgba(79, 174, 87, 0.35);
+    transform: translateY(-1px);
+    filter: brightness(1.04);
+    box-shadow: 0 18px 32px rgba(74, 91, 45, 0.26);
 }
 
 .rsMainCta:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    background: #ccc;
+    background: #c9c9c9;
     box-shadow: none;
 }
 
 .rsMainCta--free {
-    background: linear-gradient(180deg, #FF7AA8 0%, #E85086 100%);
-    box-shadow: 0 10px 25px rgba(232, 80, 134, 0.25);
+    background: linear-gradient(180deg, #4ba24d 0%, #247a2b 100%);
 }
 
-/* Promo Section */
 .rsPromoBox {
-    margin-top: 10px;
-    margin-bottom: 20px;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(217, 207, 190, 0.8);
+    border-radius: 18px;
+    background: rgba(255, 252, 246, 0.72);
+    overflow: hidden;
 }
 
 .rsPromoHeader {
+    min-height: 58px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    padding: 12px 0;
-    color: #222;
-    transition: color 0.2s;
-}
-
-.rsPromoHeader:hover {
-    color: #000;
+    padding: 0 24px;
+    color: #111827;
 }
 
 .rsPromoTitle {
-    font-weight: 600;
-    font-size: 15px;
+    font-weight: 700;
+    font-size: 20px;
 }
 
 .rsPromoChevron {
-    font-size: 10px;
-    opacity: 0.5;
-    transition: transform 0.2s;
+    color: #3c4650;
+    font-size: 16px;
+    line-height: 1;
+    transition: transform 0.2s ease;
 }
 
 .rsPromoChevron--open {
@@ -226,7 +349,7 @@
 }
 
 .rsPromoBody {
-    padding-bottom: 15px;
+    padding: 0 24px 20px;
 }
 
 .rsPromoRow {
@@ -236,49 +359,67 @@
 
 .rsPromoInput {
     flex: 1;
-    height: 44px;
-    border: 1px solid #ddd;
+    min-width: 0;
+    height: 48px;
+    border: 1px solid rgba(148, 163, 184, 0.45);
     border-radius: 12px;
     padding: 0 15px;
-    font-size: 14px;
+    color: #0f172a;
+    font-size: 16px;
     outline: none;
-    background: #fdfdfd;
+    background: rgba(255, 255, 255, 0.92);
+}
+
+.rsPromoInput:focus-visible {
+    border-color: rgba(79, 174, 87, 0.72);
+    box-shadow: 0 0 0 3px rgba(79, 174, 87, 0.16);
 }
 
 .rsPromoBtn {
-    height: 44px;
+    height: 48px;
     padding: 0 20px;
-    background: #000;
+    background: #111827;
     color: #fff;
     border: none;
     border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 15px;
+    font-weight: 800;
     cursor: pointer;
 }
 
+.rsPromoBtn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
 .rsPromoResult {
-    background: #F1F8E9;
+    background: #f1f8e9;
+    border: 1px solid rgba(74, 222, 128, 0.35);
     border-radius: 12px;
     padding: 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 12px;
 }
 
 .rsPromoBadge {
-    background: #4FAE57;
+    background: #4fae57;
     color: #fff;
-    padding: 4px 10px;
+    padding: 5px 11px;
     border-radius: 8px;
     font-size: 13px;
-    font-weight: 800;
+    font-weight: 900;
 }
 
 .rsPromoDesc {
+    color: #2e7d32;
     font-size: 14px;
-    color: #2E7D32;
-    font-weight: 500;
+    font-weight: 700;
+}
+
+.rsPromoActions {
+    margin-left: auto;
 }
 
 .rsPromoCancel {
@@ -292,48 +433,208 @@
 }
 
 .rsPromoError {
-    color: #D32F2F;
+    color: #d32f2f;
     font-size: 13px;
     margin-top: 8px;
-    font-weight: 500;
+    font-weight: 700;
 }
 
-/* Plan Card states */
 .rsPlanCard.is-disabled {
-    opacity: 0.4;
+    opacity: 0.48;
     cursor: not-allowed;
-    filter: grayscale(1);
+    filter: grayscale(0.7);
     background: #f5f5f5;
 }
 
 .rsPlanUnavailableBadge {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 12px;
+    right: 12px;
     background: rgba(211, 47, 47, 0.1);
-    color: #D32F2F;
-    padding: 4px 10px;
+    color: #d32f2f;
+    padding: 5px 10px;
     border-radius: 8px;
     font-size: 11px;
-    font-weight: 700;
-    z-index: 2;
+    font-weight: 800;
+    z-index: 3;
 }
 
 @media (max-width: 720px) {
+    .rsPlansContainer {
+        gap: 10px;
+    }
+
+    .rsBenefitsStrip {
+        margin-left: calc(50% - 50vw);
+        width: 100vw;
+        border-left: 0;
+        border-right: 0;
+        border-radius: 22px;
+    }
+
+    .rsBenefitsTrack {
+        animation: rsBenefitsMarquee 22s linear infinite;
+    }
+
+    .rsBenefitsGroup,
+    .rsBenefitsGroup[aria-hidden="true"] {
+        display: flex;
+        gap: 18px;
+        padding: 11px 16px;
+    }
+
+    .rsBenefitItem {
+        gap: 9px;
+        font-size: 14px;
+    }
+
+    .rsBenefitCheck {
+        width: 21px;
+        height: 21px;
+        font-size: 14px;
+    }
+
+    .rsBenefitDot {
+        margin-left: 10px;
+        font-size: 16px;
+    }
+
     .rsPlanGrid {
         grid-template-columns: 1fr;
-        gap: 12px;
+        gap: 10px;
     }
 
     .rsPlanCard {
-        padding: 18px;
+        min-height: 126px;
+        border-radius: 18px;
+        padding: 18px 18px 16px;
+    }
+
+    .rsPlanName {
+        font-size: 21px;
+    }
+
+    .rsPlanRadio {
+        width: 24px;
+        height: 24px;
+        border-width: 2px;
+    }
+
+    .is-selected .rsPlanRadio::after {
+        inset: 5px;
+    }
+
+    .rsBadge {
+        left: 18px;
+        top: -6px;
+        padding: 8px 13px;
+        border-radius: 0 0 10px 10px;
+        font-size: 12px;
+    }
+
+    .rsPlanPrice {
+        margin-top: 13px;
+        gap: 6px;
     }
 
     .rsPlanPriceBig {
-        font-size: 32px;
+        font-size: 42px;
+    }
+
+    .rsPlanPriceSmall {
+        font-size: 22px;
+    }
+
+    .rsPlanPriceOld {
+        font-size: 18px;
+    }
+
+    .rsPlanPriceTrial {
+        margin-top: 12px;
+        gap: 5px;
+    }
+
+    .rsTrialBig {
+        font-size: clamp(28px, 8vw, 34px);
+    }
+
+    .rsTrialSmall {
+        font-size: 13px;
     }
 
     .rsPlanDesc {
-        min-height: auto;
+        margin-top: 12px;
+        font-size: 14px;
+    }
+
+    .rsPlanDesc--coffee {
+        min-height: 34px;
+        padding: 0 14px;
+        border-radius: 12px;
+        gap: 8px;
+    }
+
+    .rsPlanEquivalent {
+        margin-top: 11px;
+        gap: 7px;
+        font-size: 20px;
+    }
+
+    .rsPlanEquivalent strong {
+        font-size: 26px;
+    }
+
+    .rsPlanEquivalent s {
+        margin-left: 7px;
+        font-size: 16px;
+    }
+
+    .rsFootnote {
+        font-size: 14px;
+    }
+
+    .rsPromoHeader {
+        min-height: 48px;
+        padding: 0 16px;
+    }
+
+    .rsPromoTitle {
+        font-size: 18px;
+    }
+
+    .rsPromoBody {
+        padding: 0 16px 14px;
+    }
+
+    .rsPromoRow {
+        flex-direction: column;
+    }
+
+    .rsPromoInput,
+    .rsPromoBtn {
+        width: 100%;
+        height: 42px;
+    }
+
+    .rsMainCta {
+        height: 56px;
+        border-radius: 16px;
+        font-size: 19px;
+    }
+}
+
+@keyframes rsBenefitsMarquee {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rsBenefitsTrack {
+        animation: none;
     }
 }

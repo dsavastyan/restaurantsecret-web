@@ -14,7 +14,15 @@ type SubscriptionPlansProps = {
     promoQuote?: PromoQuote | null;
     disabledPlan?: "month" | "year" | null;
     disabledPlanHint?: string | null;
+    showTrialPricing?: boolean;
+    trialDays?: number;
 };
+
+const benefits = [
+    "Все рестораны и блюда",
+    "Дневник питания + цели по КБЖУ",
+    "Избранные рестораны и блюда",
+];
 
 export default function SubscriptionPlans({
     selectedPlan,
@@ -28,6 +36,8 @@ export default function SubscriptionPlans({
     promoQuote,
     disabledPlan = null,
     disabledPlanHint,
+    showTrialPricing = false,
+    trialDays = 7,
 }: SubscriptionPlansProps) {
     const [promo, setPromo] = useState("");
     const [isPromoOpen, setIsPromoOpen] = useState(false);
@@ -45,8 +55,8 @@ export default function SubscriptionPlans({
     const isFreeDaysTrial = promoQuote?.type === 'free_days' && promoQuote.requires_subscribing;
 
     // Prices
-    const baseMonthPrice = 99;
-    const baseYearPrice = 999;
+    const baseMonthPrice = 199;
+    const baseYearPrice = 1490;
 
     // Plan availability/auto-selection logic
     useEffect(() => {
@@ -101,6 +111,7 @@ export default function SubscriptionPlans({
         if (isFreeAccessNoCard) return "Активировать доступ";
         if (loading) return "Загрузка...";
         if (!selectedPlan) return "Выберите тариф";
+        if (showTrialPricing && !promoQuote) return `${trialDays} дней бесплатно`;
 
         if (isFreeDaysTrial && selectedPlan) {
             const priceObj = selectedPlan === 'month' ? monthPrice : yearPrice;
@@ -115,6 +126,15 @@ export default function SubscriptionPlans({
     };
 
     const renderPrice = (priceObj: any, period: string) => {
+        if (showTrialPricing && !promoQuote) {
+            return (
+                <div className="rsPlanPriceTrial rsPlanPriceTrial--intro">
+                    <span className="rsTrialBig">{trialDays} дней бесплатно</span>
+                    <div className="rsTrialSmall">потом {priceObj.new} ₽ {period.replace("*", "")}</div>
+                </div>
+            );
+        }
+
         if (isFreeDaysTrial && promoQuote?.amount) {
             return (
                 <div className="rsPlanPriceTrial">
@@ -139,6 +159,28 @@ export default function SubscriptionPlans({
 
     return (
         <div className="rsPlansContainer">
+            <div className="rsBenefitsStrip" aria-label="Преимущества подписки">
+                <div className="rsBenefitsTrack">
+                    {[0, 1].map((group) => (
+                        <div
+                            className="rsBenefitsGroup"
+                            key={group}
+                            aria-hidden={group === 1}
+                        >
+                            {benefits.map((benefit, index) => (
+                                <div className="rsBenefitItem" key={benefit}>
+                                    <span className="rsBenefitCheck" aria-hidden="true">✓</span>
+                                    <span>{benefit}</span>
+                                    {index < benefits.length - 1 && (
+                                        <span className="rsBenefitDot" aria-hidden="true">•</span>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            </div>
+
             {/* Plans Grid */}
             {!isFreeAccessNoCard && (
                 <>
@@ -158,14 +200,15 @@ export default function SubscriptionPlans({
                                     {disabledPlan === "month" ? "Текущий тариф" : "Недоступно с выбранным промокодом"}
                                 </div>
                             )}
-                            <div style={{ flex: 1 }}>
+                            <div className="rsPlanCardBody">
                                 <div className="rsPlanTopRow">
                                     <div className="rsPlanName">Месяц</div>
                                     <div className="rsPlanRadio" />
                                 </div>
                                 {renderPrice(monthPrice, "/мес*")}
-                                <div className="rsPlanDesc">
-                                    Подходит чтобы оценить удобство сервиса
+                                <div className="rsPlanDesc rsPlanDesc--coffee">
+                                    <span aria-hidden="true">☕</span>
+                                    <span>дешевле стаканчика кофе</span>
                                 </div>
                             </div>
                         </div>
@@ -180,25 +223,27 @@ export default function SubscriptionPlans({
                                     {disabledPlan === "year" ? "Текущий тариф" : "Недоступно с выбранным промокодом"}
                                 </div>
                             )}
-                            <div style={{ flex: 1 }}>
+                            <div className="rsPlanCardBody">
+                                <div className="rsBadge">Самый выгодный</div>
                                 <div className="rsPlanTopRow">
                                     <div className="rsPlanName">Год</div>
-                                    <div className="rsBadge">ВЫГОДНО</div>
                                     <div className="rsPlanRadio" />
                                 </div>
                                 {renderPrice(yearPrice, "/год*")}
-                                <div className="rsPlanDesc">
-                                    12 месяцев по цене 10. Лучший выбор
+                                <div className="rsPlanEquivalent">
+                                    <strong>{Math.round(yearPrice.new / 12)} ₽</strong>
+                                    <span>/мес</span>
+                                    <s>{baseMonthPrice} ₽/мес</s>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div className="rsFootnote">* Подписка продлевается автоматически</div>
+                    <div className="rsFootnote">* Автоматическое списание, отменить можно в любой момент</div>
                 </>
             )}
 
             {/* Promo Section at Bottom (Collapsible) */}
-            <div className={`rsPromoBox ${isPromoOpen ? "rsPromoBox--open" : ""}`} style={{ marginBottom: 20, marginTop: 10 }}>
+            <div className={`rsPromoBox ${isPromoOpen ? "rsPromoBox--open" : ""}`}>
                 <div
                     className="rsPromoHeader"
                     onClick={() => setIsPromoOpen(!isPromoOpen)}
