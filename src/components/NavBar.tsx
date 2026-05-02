@@ -6,7 +6,7 @@ import { useSubscriptionStore } from "@/store/subscription";
 
 import AccountButton from "./AccountButton";
 
-export default function NavBar() {
+export default function NavBar({ forceGuest = false }: { forceGuest?: boolean }) {
   const token = useAuth((state) => state.accessToken);
   const { showAccountAction, isSubscriptionStatusLoaded } = useSubscriptionStore((state) => ({
     showAccountAction: state.hasActiveSub || state.hasSubscriptionHistory,
@@ -17,7 +17,7 @@ export default function NavBar() {
   const isOnboardingPage = location.pathname.startsWith("/onboarding");
   const currentPath = location.pathname + location.search;
 
-  if (!token) {
+  if (forceGuest || !token) {
     return (
       <header className="navbar navbar--guest">
         <div className="navbar__inner navbar__inner--guest">

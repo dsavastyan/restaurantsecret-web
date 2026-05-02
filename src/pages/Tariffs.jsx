@@ -70,7 +70,7 @@ export default function Tariffs() {
         <div className="tariffs-nav__right">
           {accessToken && showAccountAction ? (
             <>
-              <Link to="/account" className="tariffs-nav__login-link tariffs-nav__desktop-action">Личный кабинет</Link>
+              <Link to="/account" className="tariffs-nav__cta tariffs-nav__desktop-action">Личный кабинет</Link>
               <Link to="/account" className="tariffs-nav__cta tariffs-nav__mobile-action">Личный кабинет</Link>
             </>
           ) : (

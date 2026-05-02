@@ -219,7 +219,7 @@ export default function HowItWorks() {
         <div className="landing-warm__nav-right">
           {accessToken && showAccountAction ? (
             <>
-              <Link to="/account" className="landing-warm__login-link landing-warm__desktop-action">Личный кабинет</Link>
+              <Link to="/account" className="landing-warm__nav-cta landing-warm__desktop-action">Личный кабинет</Link>
               <Link to="/account" className="landing-warm__nav-cta landing-warm__mobile-action">Личный кабинет</Link>
             </>
           ) : (

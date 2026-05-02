@@ -312,7 +312,7 @@ export default function AppShell() {
   return (
     <div className={`min-h-screen flex flex-col app-theme app-theme--day${isSearchPage ? ' app-theme--search' : ''}`}>
       <Suspense fallback={null}>
-        {!isMarketingPage && !isImmersivePage && <NavBar />}
+        {!isMarketingPage && !isImmersivePage && <NavBar forceGuest={isFeedbackPage} />}
         {!isMarketingPage && <DishCardModal />}
         {!isMarketingPage && !isImmersivePage && <DiaryFloatingButton />}
       </Suspense>

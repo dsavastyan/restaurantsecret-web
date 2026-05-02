@@ -12,8 +12,6 @@ import SubscriptionPlansModal from "@/components/subscription/SubscriptionPlansM
 import SubscriptionPlans from "@/components/subscription/SubscriptionPlans";
 import { analytics } from "@/services/analytics";
 
-// Import assets from src/assets to ensure they are bundled correctly
-import subscriptionActivePng from "@/assets/subscription/subscription-active.png";
 import subscriptionExpiredPng from "@/assets/subscription/subscription-expired.png";
 
 type SubscriptionStatusResponse = {
@@ -544,7 +542,15 @@ export default function AccountSubscription() {
                       </div>
 
                       <div className="account-subscription-v2__active-visual" aria-hidden="true">
-                        <img src={subscriptionActivePng} alt="" />
+                        <svg className="account-subscription-v2__active-ornament" viewBox="0 0 180 180" fill="none">
+                          <circle cx="91" cy="91" r="70" fill="#F3F0E5" />
+                          <circle cx="91" cy="91" r="48" fill="#E7EEDB" />
+                          <path d="M54 93c13-24 50-38 79-19-4 34-34 56-70 46-11-3-15-15-9-27Z" fill="#7A9349" />
+                          <path d="M68 96c15 6 35 6 58-13" stroke="#F9F7EF" strokeWidth="7" strokeLinecap="round" />
+                          <circle cx="96" cy="93" r="28" fill="#FBFCF5" stroke="#C9D4B4" strokeWidth="5" />
+                          <path d="m84 93 9 9 18-21" stroke="#6F873D" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M65 45v16M57 53h16M135 116v14M128 123h14" stroke="#D7A23B" strokeWidth="5" strokeLinecap="round" />
+                        </svg>
                       </div>
                     </div>
 
