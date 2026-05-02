@@ -100,6 +100,7 @@ export default function AccountSubscription() {
 
   const [promoLoading, setPromoLoading] = useState(false);
   const [plansOpen, setPlansOpen] = useState(false);
+  const [annualOfferOpen, setAnnualOfferOpen] = useState(false);
   const [promoQuote, setPromoQuote] = useState<PromoQuote | null>(null);
   const [canceling, setCanceling] = useState(false);
 
@@ -227,6 +228,7 @@ export default function AccountSubscription() {
   const expiredTitle = "Подписка истекла";
   const expiredDescription = `Ваша подписка на ${planTitle} закончилась ${expiresLabel ?? ""}`.trim();
   const isAnnualPlan = currentPlanKey === "annual";
+  const canShowAnnualOffer = isActive && currentPlanKey === "monthly";
   const activePlanTitle = currentPlanKey === "annual" ? "Год" : currentPlanKey === "monthly" ? "Месяц" : planTitle;
   const activePlanPrice = currentPlanKey === "annual" ? "1 490 ₽" : currentPlanKey === "monthly" ? "199 ₽" : planPriceBadge;
   const activePlanPeriod = currentPlanKey === "annual" ? "/год" : currentPlanKey === "monthly" ? "/мес" : "";
@@ -241,8 +243,15 @@ export default function AccountSubscription() {
 
   const showHistory = (isActive || isCanceled || isExpired) && !loading;
   const isNeverSubscribed = status === "none" && !showHistory;
+  const showAnnualOffer = annualOfferOpen && canShowAnnualOffer;
 
-  const pageTitle = isNeverSubscribed ? "Оформить подписку" : isActive ? "Моя подписка" : "Управление подпиской";
+  const pageTitle = showAnnualOffer
+    ? "Сэкономь с годовым тарифом"
+    : isNeverSubscribed
+      ? "Оформить подписку"
+      : isActive
+        ? "Моя подписка"
+        : "Управление подпиской";
 
   const promoErrorLabel = useMemo(() => {
     if (!promoError) return null;
@@ -428,6 +437,21 @@ export default function AccountSubscription() {
     }
   }, [createPayment, promoQuote, handleRedeemPromo, isActive, currentUiPlan]);
 
+  const handleOpenAnnualOffer = useCallback(() => {
+    setAnnualOfferOpen(true);
+    analytics.track("annual_upgrade_offer_opened", { source_page: "subscription_management" });
+  }, []);
+
+  const handleAnnualUpgrade = useCallback(() => {
+    createPayment("year", undefined, Boolean(isActive && currentUiPlan === "month"));
+  }, [createPayment, currentUiPlan, isActive]);
+
+  useEffect(() => {
+    if (!canShowAnnualOffer && annualOfferOpen) {
+      setAnnualOfferOpen(false);
+    }
+  }, [annualOfferOpen, canShowAnnualOffer]);
+
   const handleCancel = useCallback(async () => {
     if (!accessToken || canceling) return;
     if (!window.confirm("Вы уверены что хотите отменить подписку?")) {
@@ -452,7 +476,7 @@ export default function AccountSubscription() {
   }, [accessToken, canceling, fetchStatus, statusData?.plan]);
 
   return (
-    <section className={`account-panel-v2 account-subscription-panel${isActive ? " is-active-subscription" : ""}`} aria-labelledby="account-subscription-heading">
+    <section className={`account-panel-v2 account-subscription-panel${isActive ? " is-active-subscription" : ""}${showAnnualOffer ? " is-annual-upgrade" : ""}`} aria-labelledby="account-subscription-heading">
       <header className="account-panel-v2__header">
         <h2 id="account-subscription-heading" className="account-panel-v2__title">
           {pageTitle}
@@ -460,8 +484,11 @@ export default function AccountSubscription() {
         {isNeverSubscribed && (
           <p className="account-panel-v2__subtitle">Выберите подходящий тариф</p>
         )}
-        {isActive && (
+        {isActive && !showAnnualOffer && (
           <p className="account-panel-v2__subtitle">Управляйте тарифом и следите за продлением</p>
+        )}
+        {showAnnualOffer && (
+          <p className="account-panel-v2__subtitle">Сейчас у тебя месячный план — 199 ₽/мес</p>
         )}
       </header>
 
@@ -469,6 +496,116 @@ export default function AccountSubscription() {
 
       {!loading && (
         <div className="account-subscription-v2">
+          {showAnnualOffer && (
+            <div className="account-subscription-v2__annual-upgrade" aria-label="Переход на годовой тариф">
+              <div className="account-subscription-v2__annual-toolbar">
+                <button
+                  className="account-subscription-v2__annual-back"
+                  type="button"
+                  onClick={() => setAnnualOfferOpen(false)}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" aria-hidden="true">
+                    <path d="m15 18-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Назад
+                </button>
+                <span className="account-subscription-v2__annual-current">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
+                    <path d="M7 3v4M17 3v4M4 9h16" strokeLinecap="round" strokeLinejoin="round" />
+                    <rect x="4" y="5" width="16" height="16" rx="3" />
+                  </svg>
+                  Текущий план: месяц
+                </span>
+              </div>
+
+              <div className="account-subscription-v2__annual-card">
+                <div className="account-subscription-v2__annual-content">
+                  <span className="account-subscription-v2__annual-badge">
+                    <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path d="m10 1.8 2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8L10 1.8Z" />
+                    </svg>
+                    Самый выгодный
+                  </span>
+                  <h3>Годовой тариф</h3>
+                  <div className="account-subscription-v2__annual-price">
+                    <strong>1 490 ₽</strong>
+                    <span>/год</span>
+                  </div>
+                  <div className="account-subscription-v2__annual-month">
+                    <b>124 ₽/мес</b>
+                    <s>199 ₽/мес</s>
+                  </div>
+                  <div className="account-subscription-v2__annual-saving">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                      <path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M22 7H2v5h20V7ZM12 22V7" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M12 7H7.5A2.5 2.5 0 1 1 12 4.5V7Zm0 0h4.5A2.5 2.5 0 1 0 12 4.5V7Z" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Экономия 898 ₽ в год
+                  </div>
+                </div>
+
+                <div className="account-subscription-v2__annual-visual" aria-hidden="true">
+                  <svg viewBox="0 0 180 150" fill="none">
+                    <path d="M114 35c22 3 39 21 39 45 0 29-25 51-58 51-34 0-61-21-61-49 0-26 22-47 51-48 7-11 21-18 29 1Z" fill="#eef1df" />
+                    <path d="M68 42h58a8 8 0 0 1 8 8v55a8 8 0 0 1-8 8H68a8 8 0 0 1-8-8V50a8 8 0 0 1 8-8Z" fill="#fbf8ee" stroke="#d5c8ae" strokeWidth="3" />
+                    <path d="M60 58h74" stroke="#7b8d58" strokeWidth="13" />
+                    <path d="M78 34v18M100 34v18M122 34v18" stroke="#64784a" strokeWidth="8" strokeLinecap="round" />
+                    <circle cx="97" cy="86" r="22" fill="#97a86f" />
+                    <path d="m86 86 8 8 17-19" stroke="#fffdf6" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="136" cy="105" r="17" fill="#e0bd79" stroke="#fff8e8" strokeWidth="5" />
+                    <path d="M131 106h10M131 99h7a6 6 0 0 1 0 12h-7V96" stroke="#fff8e8" strokeWidth="4" strokeLinecap="round" />
+                    <circle cx="153" cy="91" r="14" fill="#d8ae65" stroke="#fff8e8" strokeWidth="4" />
+                    <path d="M149 92h8M149 86h5a5 5 0 0 1 0 10h-5V84" stroke="#fff8e8" strokeWidth="3" strokeLinecap="round" />
+                    <path d="M43 38c-10-12-16-23-16-23M39 48c-14-4-25-9-31-15M145 31c9-11 17-18 26-22M151 42c12-5 22-8 30-8" stroke="#c9d4b4" strokeWidth="4" strokeLinecap="round" />
+                  </svg>
+                </div>
+              </div>
+
+              <div className="account-subscription-v2__annual-summary">
+                <span className="account-subscription-v2__annual-summary-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+                    <path d="M4 19V5M4 19h16M8 16v-4M12 16V8M16 16v-7M8 12l4-4 4 1 4-5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+                <p>
+                  При помесячной оплате за год: <s>2 388 ₽</s>
+                  <br />
+                  С годовым тарифом: <b>1 490 ₽</b>
+                </p>
+              </div>
+
+              <p className="account-subscription-v2__annual-note">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 10v6M12 7.5h.01" strokeLinecap="round" />
+                </svg>
+                Можно перейти на годовой тариф в любой момент. Автопродление можно отключить позже.
+              </p>
+
+              <div className="account-subscription-v2__annual-actions">
+                <button
+                  className="account-subscription-v2__annual-primary"
+                  type="button"
+                  onClick={handleAnnualUpgrade}
+                  disabled={Boolean(paymentPlan)}
+                >
+                  {paymentPlan === "year" ? "Переходим..." : "Перейти на годовой за 1 490 ₽"}
+                </button>
+                <button
+                  className="account-subscription-v2__annual-secondary"
+                  type="button"
+                  onClick={() => setAnnualOfferOpen(false)}
+                  disabled={Boolean(paymentPlan)}
+                >
+                  Оставить месячный тариф
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!showAnnualOffer && (
+            <>
           {(isActive || isExpired || isCanceled) && (
             <div className={`account-subscription-v2__card ${isActive ? 'is-active' : 'is-expired'}`}>
               <div className="account-subscription-v2__mobile-surface">
@@ -590,7 +727,7 @@ export default function AccountSubscription() {
                       <button
                         className="account-subscription-v2__saving-card"
                         type="button"
-                        onClick={() => setPlansOpen(true)}
+                        onClick={handleOpenAnnualOffer}
                         disabled={Boolean(paymentPlan)}
                       >
                         <span className="account-subscription-v2__saving-icon" aria-hidden="true">
@@ -679,6 +816,8 @@ export default function AccountSubscription() {
             disabledPlan={isActive ? currentUiPlan : null}
             disabledPlanHint={isActive ? "Текущий тариф недоступен в выборе. Новый тариф начнет действовать после окончания текущего периода." : null}
           />
+          </>
+          )}
 
           {error && (
             <div className="account-subscription-v2__error-box" role="alert">
