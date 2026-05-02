@@ -3,6 +3,7 @@ import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom"
 import logoIcon from "@/assets/intro screens/RestSecret logo.png";
 import dayThemeBackground from "@/assets/intro screens/day_theme.png";
 import { completeOnboarding, fetchCurrentUser } from "@/lib/api";
+import { resetImmersiveViewport, useImmersiveViewport } from "@/hooks/useImmersiveViewport";
 import { analytics } from "@/services/analytics";
 import { useAuth } from "@/store/auth";
 import { useGoalsStore } from "@/store/goals";
@@ -70,6 +71,8 @@ export default function OnboardingProfilePage() {
     weight: "",
     activity: "",
   });
+
+  useImmersiveViewport(`${location.key}:${step}`);
 
   const nextPath = useMemo(() => {
     const state = (location.state || {}) as IntroLocationState;
@@ -205,6 +208,7 @@ export default function OnboardingProfilePage() {
 
     if (isDevPreview) {
       if (step === "step-1") {
+        resetImmersiveViewport({ blurActiveElement: true });
         navigate("/onboarding/profile/step-2?preview=1", {
           replace: true,
           state: { next: nextPath, profileName },
@@ -212,6 +216,7 @@ export default function OnboardingProfilePage() {
         return;
       }
 
+      resetImmersiveViewport({ blurActiveElement: true });
       navigate(nextPath, { replace: true });
       return;
     }
@@ -223,6 +228,7 @@ export default function OnboardingProfilePage() {
 
       if (step === "step-1") {
         analytics.track("onboarding_profile_step_completed", { step: 1 });
+        resetImmersiveViewport({ blurActiveElement: true });
         navigate("/onboarding/profile/step-2", {
           replace: true,
           state: { next: nextPath, profileName },
@@ -233,6 +239,7 @@ export default function OnboardingProfilePage() {
       await completeOnboarding(accessToken);
       analytics.track("onboarding_profile_step_completed", { step: 2 });
       analytics.track("onboarding_completed", { source: "signup" });
+      resetImmersiveViewport({ blurActiveElement: true });
       navigate(nextPath, { replace: true });
     } catch (saveError) {
       console.error("Failed to save onboarding profile step", saveError);
@@ -246,6 +253,7 @@ export default function OnboardingProfilePage() {
     if (isSkipping) return;
 
     if (isDevPreview) {
+      resetImmersiveViewport({ blurActiveElement: true });
       navigate(nextPath, { replace: true });
       return;
     }
@@ -258,6 +266,7 @@ export default function OnboardingProfilePage() {
           await completeOnboarding(accessToken);
         }
         analytics.track("onboarding_skipped", { step: step === "step-1" ? 1 : 2 });
+        resetImmersiveViewport({ blurActiveElement: true });
         navigate(nextPath, { replace: true });
       } catch (skipError) {
         console.error("Failed to skip onboarding", skipError);
@@ -269,6 +278,7 @@ export default function OnboardingProfilePage() {
 
   const handleBack = () => {
     if (step === "step-1") {
+      resetImmersiveViewport({ blurActiveElement: true });
       navigate(`/onboarding/welcome${isDevPreview ? "?preview=1" : ""}`, {
         replace: true,
         state: { next: nextPath, profileName },
@@ -276,6 +286,7 @@ export default function OnboardingProfilePage() {
       return;
     }
 
+    resetImmersiveViewport({ blurActiveElement: true });
     navigate(`/onboarding/profile/step-1${isDevPreview ? "?preview=1" : ""}`, {
       replace: true,
       state: { next: nextPath, profileName },

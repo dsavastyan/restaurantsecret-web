@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { apiPost } from "@/lib/api";
+import { resetImmersiveViewport, useImmersiveViewport } from "@/hooks/useImmersiveViewport";
 import { useAuth, selectSetToken } from "@/store/auth"; // <— меняем импорт
 import { analytics } from "@/services/analytics";
 import mobileDayBackground from "@/assets/login/Login bacground mobile day.png";
@@ -19,6 +20,12 @@ export default function LoginPage() {
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [timer, setTimer] = useState(0);
+  const shouldAutoFocus = useMemo(
+    () => typeof window !== "undefined" && window.matchMedia?.("(hover: hover) and (pointer: fine)").matches,
+    []
+  );
+
+  useImmersiveViewport(`${location.key}:${step}`);
 
   const redirectTo = useMemo(() => {
     let from = location.state?.from;
@@ -50,6 +57,7 @@ export default function LoginPage() {
     try {
       const res = await apiPost("/auth/request-otp", { email });
       if (res?.ok) {
+        resetImmersiveViewport({ blurActiveElement: true });
         setStep("code");
         setTimer(60);
         analytics.track("otp_request");
@@ -85,8 +93,10 @@ export default function LoginPage() {
         analytics.recordPolicyAcceptance(); // Record that user accepted policy upon login
 
         if (needsOnboarding) {
+          resetImmersiveViewport({ blurActiveElement: true });
           navigate("/onboarding/welcome", { replace: true, state: { next: redirectTo } });
         } else {
+          resetImmersiveViewport({ blurActiveElement: true });
           navigate(redirectTo, { replace: true });
         }
       } else {
@@ -106,6 +116,7 @@ export default function LoginPage() {
 
   const backToEmail = () => {
     if (loading) return;
+    resetImmersiveViewport({ blurActiveElement: true });
     setStep("enter");
     setCode("");
     setErr(null);
@@ -158,7 +169,7 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     autoComplete="email"
-                    autoFocus
+                    autoFocus={shouldAutoFocus}
                     disabled={loading}
                     aria-invalid={!!err}
                   />
@@ -182,7 +193,7 @@ export default function LoginPage() {
                     maxLength={6}
                     value={code}
                     onChange={(e) => setCode(e.target.value.replace(/\D/g, "").trim())}
-                    autoFocus
+                    autoFocus={shouldAutoFocus}
                     disabled={loading}
                     aria-invalid={!!err}
                   />

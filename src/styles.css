@@ -18,6 +18,7 @@
   --app-header-bg: rgba(255, 255, 255, 0.9);
   --app-header-border: #e5e7eb;
   --app-card-shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
+  --rs-visual-viewport-height: 100vh;
 }
 
 html[data-rs-theme="night"] {
@@ -10656,12 +10657,16 @@ body:has(.account--sheet-open) {
 .intro {
   position: relative;
   min-height: 100svh;
+  min-height: var(--rs-visual-viewport-height, 100dvh);
+  height: var(--rs-visual-viewport-height, 100dvh);
   font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   background:
     linear-gradient(90deg, rgba(248, 239, 226, 0.2), rgba(255, 251, 246, 0.82) 34%, rgba(255, 250, 244, 0.92)),
     var(--intro-bg-mobile) center center / cover no-repeat;
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .intro::before {
@@ -10692,7 +10697,7 @@ body:has(.account--sheet-open) {
 .intro__stage {
   position: relative;
   z-index: 1;
-  min-height: 100svh;
+  min-height: 100%;
   display: flex;
   justify-content: center;
   padding: clamp(34px, 7vh, 96px) 24px clamp(24px, 5vh, 62px);
@@ -11014,7 +11019,7 @@ body:has(.account--sheet-open) {
 
 @media (min-width: 900px) {
   .intro {
-    height: 100svh;
+    height: var(--rs-visual-viewport-height, 100dvh);
     overflow: hidden;
     background:
       linear-gradient(90deg, rgba(248, 239, 226, 0.06), rgba(255, 251, 246, 0.76) 34%, rgba(255, 250, 244, 0.9)),
@@ -11022,7 +11027,7 @@ body:has(.account--sheet-open) {
   }
 
   .intro__stage {
-    height: 100svh;
+    height: 100%;
     min-height: 0;
   }
 }
@@ -11090,7 +11095,8 @@ body:has(.account--sheet-open) {
 .onboarding-flow {
   position: relative;
   min-height: 100svh;
-  height: 100svh;
+  min-height: var(--rs-visual-viewport-height, 100dvh);
+  height: var(--rs-visual-viewport-height, 100dvh);
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -11101,6 +11107,7 @@ body:has(.account--sheet-open) {
     linear-gradient(90deg, rgba(248, 239, 226, 0.06), rgba(255, 251, 246, 0.76) 34%, rgba(255, 250, 244, 0.9)),
     var(--intro-bg-desktop) center center / cover no-repeat;
   overflow: hidden;
+  overscroll-behavior: contain;
 }
 
 .onboarding-flow::before {
@@ -11328,11 +11335,12 @@ body:has(.account--sheet-open) {
 
 @media (max-width: 899px) {
   .onboarding-flow {
-    height: auto;
-    min-height: 100svh;
+    height: var(--rs-visual-viewport-height, 100dvh);
+    min-height: var(--rs-visual-viewport-height, 100dvh);
     align-items: flex-start;
     padding: 42px 18px 36px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     background:
       linear-gradient(90deg, rgba(248, 239, 226, 0.2), rgba(255, 251, 246, 0.82) 34%, rgba(255, 250, 244, 0.92)),
       var(--intro-bg-mobile) center center / cover no-repeat;
@@ -11386,12 +11394,18 @@ body:has(.account--sheet-open) {
 
 /* Login Page Styles */
 .login {
-  min-height: 100vh;
+  min-height: 100svh;
+  min-height: var(--rs-visual-viewport-height, 100dvh);
+  height: var(--rs-visual-viewport-height, 100dvh);
   color: #eef0f8;
   font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   background:
     linear-gradient(rgba(8, 10, 22, 0.52), rgba(8, 10, 22, 0.72)),
     var(--login-bg-mobile) center center / cover no-repeat;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .login__wrap {
@@ -11510,7 +11524,7 @@ body:has(.account--sheet-open) {
 
 .login__stage {
   position: relative;
-  min-height: 100vh;
+  min-height: 100%;
   display: grid;
   place-items: center;
   padding: 16px 16px 24px;

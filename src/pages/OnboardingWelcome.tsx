@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { completeOnboarding, fetchCurrentUser, saveOnboardingProfileName } from "@/lib/api";
+import { resetImmersiveViewport, useImmersiveViewport } from "@/hooks/useImmersiveViewport";
 import { useAuth } from "@/store/auth";
 import { analytics } from "@/services/analytics";
 import dayThemeBackground from "@/assets/intro screens/day_theme.png";
@@ -23,6 +24,10 @@ export default function OnboardingWelcomePage() {
   const previewParam = new URLSearchParams(location.search).get("preview");
   const isDevPreview =
     import.meta.env.DEV && typeof previewParam === "string" && previewParam.startsWith("1");
+  const shouldAutoFocus = useMemo(
+    () => typeof window !== "undefined" && window.matchMedia?.("(hover: hover) and (pointer: fine)").matches,
+    []
+  );
 
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +36,8 @@ export default function OnboardingWelcomePage() {
   const [isOnboardingAllowed, setIsOnboardingAllowed] = useState<boolean | null>(
     isDevPreview ? true : null
   );
+
+  useImmersiveViewport(location.key);
 
   const nextPath = useMemo(() => {
     const state = (location.state || {}) as IntroLocationState;
@@ -83,6 +90,7 @@ export default function OnboardingWelcomePage() {
         return;
       }
       window.sessionStorage.setItem("rs_onboarding_preview_name", normalizedName);
+      resetImmersiveViewport({ blurActiveElement: true });
       navigate("/onboarding/profile/step-1?preview=1", {
         replace: true,
         state: { next: nextPath, profileName: normalizedName },
@@ -109,6 +117,7 @@ export default function OnboardingWelcomePage() {
         name_length: normalizedName.length,
       });
 
+      resetImmersiveViewport({ blurActiveElement: true });
       navigate("/onboarding/profile/step-1", {
         replace: true,
         state: { next: nextPath, profileName: normalizedName },
@@ -122,6 +131,7 @@ export default function OnboardingWelcomePage() {
 
   const handleSkip = async () => {
     if (isDevPreview) {
+      resetImmersiveViewport({ blurActiveElement: true });
       navigate(nextPath, { replace: true });
       return;
     }
@@ -134,6 +144,7 @@ export default function OnboardingWelcomePage() {
     try {
       await completeOnboarding(accessToken);
       analytics.track("onboarding_skipped", { step: "welcome" });
+      resetImmersiveViewport({ blurActiveElement: true });
       navigate(nextPath, { replace: true });
     } catch (skipError) {
       console.error("Failed to skip onboarding welcome", skipError);
@@ -225,7 +236,7 @@ export default function OnboardingWelcomePage() {
                   }}
                   placeholder="Как к тебе обращаться?"
                   autoComplete="given-name"
-                  autoFocus
+                  autoFocus={shouldAutoFocus}
                   disabled={isSubmitting || isSkipping}
                   aria-invalid={Boolean(error)}
                 />
