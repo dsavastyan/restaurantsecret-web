@@ -327,6 +327,75 @@ export default function Menu() {
   return (
     <div className="menu-page">
       <header className="menu-hero">
+        <div className="menu-mobile-hero">
+          <button
+            type="button"
+            className="menu-mobile-hero__back"
+            onClick={() => navigate('/catalog')}
+            aria-label="Назад к меню ресторанов"
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none">
+              <path d="M15 6 9 12l6 6" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+
+          <div className="menu-mobile-hero__main">
+            <h1 className="menu-mobile-hero__title" aria-label={`Меню ${seoRestaurantName} с КБЖУ`}>
+              {seoRestaurantName}
+            </h1>
+            <div className="menu-mobile-hero__meta">
+              <span>{dishes.length} {getRussianPluralWord(dishes.length, 'блюдо', 'блюда', 'блюд')}</span>
+              {!!capturedAt && (
+                <>
+                  <span aria-hidden="true">•</span>
+                  <span>Обновлено {capturedAt}</span>
+                </>
+              )}
+              <span aria-hidden="true">•</span>
+              <button
+                type="button"
+                className="menu-mobile-hero__report"
+                onClick={() => setIsOutdatedOpen(true)}
+              >
+                Сообщить об ошибке
+              </button>
+            </div>
+          </div>
+
+          <div className="menu-mobile-hero__actions">
+            <button
+              type="button"
+              className="menu-mobile-hero__map"
+              onClick={openMapInBrowser}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none">
+                <path d="M12 21s7-5.1 7-11a7 7 0 0 0-14 0c0 5.9 7 11 7 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <circle cx="12" cy="10" r="2.5" stroke="currentColor" strokeWidth="2" />
+              </svg>
+              <span>На карте</span>
+            </button>
+
+            <button
+              type="button"
+              className={`menu-mobile-hero__favorite ${isFavoriteRestaurant ? 'is-active' : ''}`}
+              onClick={handleToggleRestaurantFavorite}
+              aria-label={isFavoriteRestaurant ? 'Удалить ресторан из избранного' : 'Добавить ресторан в избранное'}
+              title={isFavoriteRestaurant ? 'В избранном' : 'Добавить в избранное'}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path
+                  d="M12 21.35 10.55 20.03C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3 9.24 3 10.91 3.81 12 5.09 13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35Z"
+                  fill={isFavoriteRestaurant ? '#E11D48' : 'none'}
+                  stroke={isFavoriteRestaurant ? '#E11D48' : 'currentColor'}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
         <div className="menu-hero__top-row">
           <div className="menu-hero__top-main">
             <button
@@ -512,7 +581,7 @@ export default function Menu() {
             <FilterChip
               active={presets.lowKcal}
               label="🔥 Мало калорий"
-              description="до 400 ккал"
+              description="<= 400 ккал"
               onClick={() => togglePreset('lowKcal')}
             />
             <FilterChip
