@@ -4,9 +4,9 @@
     --rs-plan-ink: #2c2923;
     --rs-plan-muted: #766d5e;
     --rs-plan-rule: #dfd3be;
-    --rs-plan-rule-strong: #9aaa86;
-    --rs-plan-green: #6f8746;
-    --rs-plan-green-dark: #587136;
+    --rs-plan-rule-strong: #a6ac8d;
+    --rs-plan-green: #75845a;
+    --rs-plan-green-dark: #5f7048;
     --rs-plan-orange: #cf7b39;
     display: flex;
     flex-direction: column;
@@ -98,7 +98,7 @@
 .rsPlanCard.is-selected,
 .rsPlanYear {
     border-color: var(--rs-plan-rule-strong);
-    box-shadow: 0 20px 50px rgba(75, 93, 52, 0.11);
+    box-shadow: 0 18px 44px rgba(63, 53, 36, 0.09);
 }
 
 .rsPlanCardBody {
@@ -134,7 +134,7 @@
 }
 
 .is-selected .rsPlanRadio {
-    border-color: #3f8b3f;
+    border-color: var(--rs-plan-green);
 }
 
 .is-selected .rsPlanRadio::after {
@@ -142,7 +142,7 @@
     position: absolute;
     inset: 5px;
     border-radius: 50%;
-    background: #3f8b3f;
+    background: var(--rs-plan-green);
 }
 
 .rsBadge {
@@ -289,8 +289,8 @@
     border: none;
     cursor: pointer;
     color: white;
-    background: linear-gradient(180deg, #7d964f 0%, #5d7838 100%);
-    box-shadow: 0 14px 26px rgba(74, 91, 45, 0.18);
+    background: linear-gradient(180deg, #78934f 0%, #617f3a 100%);
+    box-shadow: 0 10px 20px rgba(94, 122, 56, 0.16);
     font-size: 16px;
     font-weight: 900;
     letter-spacing: 0;
