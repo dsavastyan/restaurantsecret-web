@@ -37,7 +37,7 @@ export default function CuisineFilter({ cuisines = [], selectedCuisines = [], on
     }, []);
 
     const selectedCount = selectedCuisines.length;
-    let triggerText = "Любая кухня";
+    let triggerText = "Любая";
     if (selectedCount === 1) {
         triggerText = selectedCuisines[0];
     } else if (selectedCount > 1) {

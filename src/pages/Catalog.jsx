@@ -378,37 +378,62 @@ export default function Catalog() {
                 </button>
               )}
             </div>
-            <div className="catalog-filter">
-              <div className="catalog-filter__label">Кухня</div>
-              <div className="catalog-filter__control">
-                <CuisineFilter
-                  cuisines={cuisineOptions}
-                  selectedCuisines={selectedCuisines}
-                  onChange={setSelectedCuisines}
+            <button
+              type="button"
+              className="catalog-search__filter-btn"
+              aria-label="Фильтры ресторанов"
+              onClick={() => document.querySelector('.catalog-filter')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path
+                  d="M3 6h10M17 6h4M9 6a2 2 0 1 0 0 0ZM3 12h4M11 12h10M15 12a2 2 0 1 0 0 0ZM3 18h10M17 18h4M9 18a2 2 0 1 0 0 0Z"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
                 />
+              </svg>
+            </button>
+            <div className="catalog-filter-row">
+              <div className="catalog-filter">
+                <div className="catalog-filter__label">Кухня</div>
+                <div className="catalog-filter__control">
+                  <CuisineFilter
+                    cuisines={cuisineOptions}
+                    selectedCuisines={selectedCuisines}
+                    onChange={setSelectedCuisines}
+                  />
+                </div>
               </div>
-            </div>
-            <div className="catalog-filter">
-              <div className="catalog-filter__label">Метро</div>
-              <div className="catalog-filter__select-wrap">
-                <select
-                  className="catalog-metro-select"
-                  value={selectedMetro}
-                  onChange={(e) => setSelectedMetro(e.target.value)}
-                  disabled={!metroOptions.length}
-                >
-                  <option value="">Любое метро</option>
-                  {metroOptions.map((metroName) => (
-                    <option key={metroName} value={metroName.toLowerCase()}>
-                      {metroName}
-                    </option>
-                  ))}
-                </select>
+              <div className="catalog-filter">
+                <div className="catalog-filter__label">Метро</div>
+                <div className="catalog-filter__select-wrap">
+                  <select
+                    className="catalog-metro-select"
+                    value={selectedMetro}
+                    onChange={(e) => setSelectedMetro(e.target.value)}
+                    disabled={!metroOptions.length}
+                  >
+                    <option value="">Любое</option>
+                    {metroOptions.map((metroName) => (
+                      <option key={metroName} value={metroName.toLowerCase()}>
+                        {metroName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
           </form>
         </div>
       </section>
+
+      {weeklyAdded > 0 && (
+        <div className="catalog-mobile-weekly" aria-label={`Добавлено на этой неделе: ${weeklyAdded}`}>
+          <strong>+{weeklyAdded.toLocaleString('ru-RU')}</strong>
+          <span>добавлено на этой неделе</span>
+        </div>
+      )}
 
       <section className="catalog-results">
         {isInitialLoading && <div className="catalog-state">Загружаем рестораны…</div>}
