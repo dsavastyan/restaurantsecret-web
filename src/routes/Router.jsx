@@ -2,7 +2,7 @@
 // BrowserRouter (regular web) and HashRouter (Telegram WebApp) and renders the
 // full route tree.
 import React, { Suspense, lazy } from 'react'
-import { BrowserRouter, HashRouter, Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom'
+import { BrowserRouter, HashRouter, Navigate, Outlet, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import AppShell from '../app/AppShell.jsx'
 import { isTelegramLaunch } from '../lib/telegram'
 import NotFound from '../pages/NotFound.jsx'
@@ -104,7 +104,7 @@ function AppRoutes({ onReady }) {
 
 // Chooses the router implementation based on the environment and mounts the
 // AppRoutes component.
-export default function Router({ children, onReady }) {
+export default function Router({ children, onReady, onRouteStart }) {
   const inTelegram = isTelegramLaunch()
   if (!inTelegram && typeof window !== 'undefined' && window.location.pathname === '/') {
     const redirectPath = window.sessionStorage.getItem('redirectPath')
@@ -123,16 +123,32 @@ export default function Router({ children, onReady }) {
 
   return (
     <RouterImpl>
+      <RouteSplashController onRouteStart={onRouteStart} />
       <AppRoutes onReady={onReady} />
       {children}
     </RouterImpl>
   )
 }
 
+function RouteSplashController({ onRouteStart }) {
+  const location = useLocation()
+  const previousKeyRef = React.useRef(location.key)
+
+  React.useEffect(() => {
+    if (previousKeyRef.current === location.key) return
+    previousKeyRef.current = location.key
+    onRouteStart?.()
+  }, [location.key, onRouteStart])
+
+  return null
+}
+
 function AppReadySignal({ onReady }) {
+  const location = useLocation()
+
   React.useEffect(() => {
     onReady?.()
-  }, [onReady])
+  }, [location.key, onReady])
 
   return null
 }

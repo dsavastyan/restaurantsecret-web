@@ -3410,6 +3410,7 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 24px;
   min-height: 142px;
 }
@@ -3427,17 +3428,20 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
 .catalog-heading__metrics {
   display: inline-flex;
   align-items: stretch;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 16px;
   margin-right: clamp(16px, 4vw, 64px);
 }
 
 .catalog-heading__stat,
 .catalog-heading__weekly {
-  min-width: 178px;
-  display: inline-flex;
+  min-width: 288px;
+  min-height: 128px;
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
   align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
+  gap: 24px;
+  padding: 24px 32px;
   border-radius: 12px;
   box-shadow: 0 12px 28px rgba(97, 78, 54, 0.1);
 }
@@ -3448,15 +3452,15 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
 }
 
 .catalog-heading__weekly {
-  min-width: 222px;
+  min-width: 360px;
   border: 1px solid rgba(104, 134, 63, 0.24);
   background: rgba(244, 248, 234, 0.78);
   box-shadow: 0 12px 28px rgba(97, 78, 54, 0.08);
 }
 
 .catalog-heading__stat-icon {
-  width: 56px;
-  height: 56px;
+  width: 72px;
+  height: 72px;
   border-radius: 10px;
   display: inline-flex;
   align-items: center;
@@ -3464,6 +3468,11 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
   color: #6d7f43;
   background: linear-gradient(135deg, #eff2dc, #e7e5cf);
   flex-shrink: 0;
+}
+
+.catalog-heading__stat > div:last-child,
+.catalog-heading__weekly > div:last-child {
+  min-width: 0;
 }
 
 .catalog-heading__stat-icon--weekly {
@@ -3488,27 +3497,29 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
   display: block;
   color: #607b3d;
   font-family: "Playfair Display", "DM Serif Display", Georgia, serif;
-  font-size: 32px;
+  font-size: 38px;
   line-height: 1;
   letter-spacing: 0;
+  white-space: nowrap;
 }
 
 .catalog-heading__weekly strong {
-  font-size: 30px;
+  font-size: 38px;
 }
 
 .catalog-heading__stat span,
 .catalog-heading__weekly span {
   display: block;
-  margin-top: 4px;
+  margin-top: 8px;
   color: #5f574d;
-  font-size: 14px;
-  line-height: 1.2;
+  font-size: 16px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .catalog-heading__weekly span {
-  font-size: 13px;
-  line-height: 1.25;
+  max-width: 180px;
+  font-size: 16px;
 }
 
 .catalog-page .catalog-hero {

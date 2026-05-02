@@ -13,10 +13,11 @@ import './account-mobile-profile.css'
 
 const SPLASH_MAX_WAIT_MS = 15000
 const SPLASH_IDLE_MS = 700
+let splashGeneration = 0
 
 const initialFetchTracker = (() => {
   if (typeof window === 'undefined' || typeof window.fetch !== 'function') {
-    return { pending: 0, restore: () => { } }
+    return { pending: 0 }
   }
 
   const originalFetch = window.fetch.bind(window)
@@ -28,11 +29,6 @@ const initialFetchTracker = (() => {
 
   const tracker = {
     pending: 0,
-    restore: () => {
-      if (window.fetch === trackedFetch) {
-        window.fetch = originalFetch
-      }
-    },
   }
 
   function getFetchUrl(input) {
@@ -71,6 +67,16 @@ const initialFetchTracker = (() => {
 })()
 
 loadTelegramWebApp().catch(() => { })
+
+function showInitialSplash() {
+  const splash = document.getElementById('rs-splash')
+  if (!splash) return
+
+  splashGeneration += 1
+  splash.dataset.state = 'shown'
+  splash.removeAttribute('aria-hidden')
+  splash.classList.remove('rs-splash--hide')
+}
 
 function waitForWindowLoad() {
   if (document.readyState === 'complete') return Promise.resolve()
@@ -186,14 +192,22 @@ function waitForInitialPageSettle() {
 }
 
 async function hideInitialSplash() {
+  const generation = splashGeneration
+
   const hide = () => {
+    if (generation !== splashGeneration) return
+
     const splash = document.getElementById('rs-splash')
     if (!splash || splash.dataset.state === 'hiding') return
 
     splash.dataset.state = 'hiding'
     splash.setAttribute('aria-hidden', 'true')
     splash.classList.add('rs-splash--hide')
-    window.setTimeout(() => splash.remove(), 550)
+    window.setTimeout(() => {
+      if (splash.dataset.state === 'hiding') {
+        splash.dataset.state = 'hidden'
+      }
+    }, 550)
   }
 
   const hideAfterPaint = () => {
@@ -211,7 +225,6 @@ async function hideInitialSplash() {
     new Promise((resolve) => window.setTimeout(resolve, SPLASH_MAX_WAIT_MS)),
   ])
 
-  initialFetchTracker.restore()
   hideAfterPaint()
 }
 
@@ -289,7 +302,7 @@ function Root() {
   }
 
   return (
-    <Router onReady={hideInitialSplash}>
+    <Router onRouteStart={showInitialSplash} onReady={hideInitialSplash}>
       <ToastViewport />
       <ConsentBanner />
     </Router>
