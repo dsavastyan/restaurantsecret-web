@@ -265,7 +265,10 @@ export default function AppShell() {
   const isImmersivePage = isLoginPage || isOnboardingPage || isAccountPage
   const isMarketingPage = isLanding || isTariffsPage || isHowItWorksPage
   const isRestaurantMenuPage = /^\/(?:restaurants|r)\/[^/]+\/menu\/?$/.test(location.pathname)
-  const isRestaurantsCatalogPage = normalizedPath === '/restaurants'
+  const isRestaurantsCatalogPage =
+    normalizedPath === '/restaurants' ||
+    normalizedPath === '/catalog' ||
+    normalizedPath === '/app/catalog'
   const isSearchPage = normalizedPath === '/search' || normalizedPath === '/app/search'
 
   useEffect(() => {
