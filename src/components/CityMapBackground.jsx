@@ -1,14 +1,32 @@
 import { useEffect, useRef } from 'react'
 
+const DEFAULT_ORBS = [
+  { x: 0.18, y: 0.38, r: 0.42, hue: 36, sat: 52, speed: 0.28, phase: 0.00, dx: 0.012, dy: 0.009 },
+  { x: 0.75, y: 0.30, r: 0.36, hue: 22, sat: 48, speed: 0.22, phase: 1.30, dx: -0.009, dy: 0.013 },
+  { x: 0.50, y: 0.78, r: 0.32, hue: 48, sat: 44, speed: 0.35, phase: 2.60, dx: 0.010, dy: -0.008 },
+  { x: 0.10, y: 0.70, r: 0.26, hue: 30, sat: 50, speed: 0.20, phase: 0.80, dx: 0.007, dy: 0.011 },
+  { x: 0.88, y: 0.72, r: 0.28, hue: 42, sat: 46, speed: 0.30, phase: 1.90, dx: -0.011, dy: -0.007 },
+]
+
+const BOTANIC_ORBS = [
+  { x: 0.10, y: 0.22, r: 0.36, hue: 90, sat: 38, speed: 0.26, phase: 0.00, dx: 0.010, dy: 0.007 },
+  { x: 0.82, y: 0.18, r: 0.32, hue: 32, sat: 55, speed: 0.20, phase: 1.30, dx: -0.008, dy: 0.010 },
+  { x: 0.50, y: 0.90, r: 0.26, hue: 38, sat: 50, speed: 0.32, phase: 2.60, dx: 0.009, dy: -0.006 },
+  { x: 0.06, y: 0.68, r: 0.20, hue: 100, sat: 36, speed: 0.18, phase: 0.80, dx: 0.006, dy: 0.009 },
+  { x: 0.88, y: 0.72, r: 0.22, hue: 28, sat: 52, speed: 0.28, phase: 1.90, dx: -0.009, dy: -0.005 },
+]
+
 /**
  * Warm gradient orbs background.
  * Soft colour blobs that slowly drift and breathe — pure atmosphere, no distraction.
  * Pure Canvas, GPU-composited, pointer-events: none.
  */
-export default function CityMapBackground({ themeMode = 'day' }) {
+export default function CityMapBackground({ themeMode = 'day', variant = 'default' }) {
   const canvasRef = useRef(null)
   const themeRef  = useRef(themeMode)
+  const variantRef = useRef(variant)
   themeRef.current = themeMode
+  variantRef.current = variant
 
   useEffect(() => {
     const cv = canvasRef.current
@@ -16,15 +34,6 @@ export default function CityMapBackground({ themeMode = 'day' }) {
     const ctx = cv.getContext('2d')
     let rafId = 0, W = 0, H = 0, t = 0
     let stopped = false
-
-    /* ---- orb definitions (normalised 0-1) ---- */
-    const orbs = [
-      { x: 0.18, y: 0.38, r: 0.42, hue: 36,  sat: 52, speed: 0.28, phase: 0.00, dx: 0.012, dy: 0.009 },
-      { x: 0.75, y: 0.30, r: 0.36, hue: 22,  sat: 48, speed: 0.22, phase: 1.30, dx: -0.009, dy: 0.013 },
-      { x: 0.50, y: 0.78, r: 0.32, hue: 48,  sat: 44, speed: 0.35, phase: 2.60, dx: 0.010, dy: -0.008 },
-      { x: 0.10, y: 0.70, r: 0.26, hue: 30,  sat: 50, speed: 0.20, phase: 0.80, dx: 0.007, dy: 0.011 },
-      { x: 0.88, y: 0.72, r: 0.28, hue: 42,  sat: 46, speed: 0.30, phase: 1.90, dx: -0.011, dy: -0.007 },
-    ]
 
     function resize(entry) {
       W = Math.round(entry?.contentRect?.width || cv.clientWidth)
@@ -41,6 +50,7 @@ export default function CityMapBackground({ themeMode = 'day' }) {
 
       const dark = themeRef.current === 'night'
       const maxAlpha = dark ? 0.22 : 0.18
+      const orbs = !dark && variantRef.current === 'botanic' ? BOTANIC_ORBS : DEFAULT_ORBS
 
       for (const o of orbs) {
         // gentle drift within bounds

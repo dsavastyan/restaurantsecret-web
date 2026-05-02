@@ -15324,9 +15324,80 @@ html[data-rs-theme="night"] .onboarding-install__image {
   overflow: hidden;
 }
 
+.landing-warm__hero--botanic {
+  background:
+    radial-gradient(ellipse 90% 60% at 8% 0%, rgba(212, 122, 58, 0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 55% at 92% 5%, rgba(138, 154, 107, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(232, 161, 94, 0.09) 0%, transparent 50%),
+    #f7f1e4;
+}
+
 .landing-warm__hero > *:not(canvas) {
   position: relative;
   z-index: 1;
+}
+
+.landing-warm__hero .botanic-decor {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.botanic-decor__svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.botanic-decor__small-sprig {
+  transform-box: view-box;
+}
+
+@keyframes botanicFloatA {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+}
+
+@keyframes botanicFloatB {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(8px) rotate(-2deg);
+  }
+}
+
+@keyframes botanicFloatC {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-6px) rotate(1.5deg);
+  }
+}
+
+.botanic-fa {
+  animation: botanicFloatA 7s ease-in-out infinite;
+}
+
+.botanic-fb {
+  animation: botanicFloatB 9s ease-in-out infinite;
+}
+
+.botanic-fc {
+  animation: botanicFloatC 8s ease-in-out infinite;
 }
 
 .landing-warm__hero-title {
@@ -16178,6 +16249,26 @@ html[data-rs-theme="night"] .onboarding-install__image {
     padding-bottom: 56px;
   }
 
+  .botanic-decor__large-sprig {
+    transform: scale(0.62);
+    transform-origin: 42px 140px;
+  }
+
+  .botanic-decor__large-sprig line:not(:first-child),
+  .botanic-decor__large-sprig ellipse:nth-of-type(n+8) {
+    display: none;
+  }
+
+  .botanic-decor__citrus {
+    transform: scale(0.62);
+    transform-origin: calc(100% - 64px) 88px;
+  }
+
+  .botanic-decor__small-sprig {
+    opacity: 0.35;
+    transform: scale(0.7);
+  }
+
   .landing-warm__hero-title {
     font-size: clamp(40px, 12vw, 52px);
     letter-spacing: -1.2px;
@@ -16385,6 +16476,14 @@ html[data-rs-theme="night"] .onboarding-install__image {
 
   .landing-warm__map-overlay h3 {
     font-size: 19px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .botanic-fa,
+  .botanic-fb,
+  .botanic-fc {
+    animation: none;
   }
 }
 
