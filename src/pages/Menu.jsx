@@ -362,13 +362,27 @@ export default function Menu() {
               </svg>
             </button>
           </div>
-          <button
-            type="button"
-            className="menu-outdated"
-            onClick={() => setIsOutdatedOpen(true)}
-          >
-            Меню устарело?
-          </button>
+          <div className="menu-hero__status-row">
+            <button
+              type="button"
+              className="menu-outdated"
+              onClick={() => setIsOutdatedOpen(true)}
+            >
+              Меню устарело?
+            </button>
+            <div className="menu-hero__badge">
+              <span className="menu-hero__badge-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M7 2v8m4-8v8M7 2H5v8a4 4 0 0 0 8 0V2h-2M9 14v8M17 2v20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              <span>
+                {filtered.length
+                  ? `${filtered.length} ${getRussianPluralWord(filtered.length, 'блюдо', 'блюда', 'блюд')}`
+                  : 'Ничего не найдено'}
+              </span>
+            </div>
+          </div>
         </div>
         <div className="menu-hero__header">
           <div className="menu-hero__lead">
@@ -406,18 +420,6 @@ export default function Menu() {
               >
                 Показать на карте
               </button>
-              <div className="menu-hero__badge">
-                <span className="menu-hero__badge-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" focusable="false">
-                    <path d="M7 2v8m4-8v8M7 2H5v8a4 4 0 0 0 8 0V2h-2M9 14v8M17 2v20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-                <span>
-                  {filtered.length
-                    ? `${filtered.length} ${getRussianPluralWord(filtered.length, 'блюдо', 'блюда', 'блюд')}`
-                    : 'Ничего не найдено'}
-                </span>
-              </div>
             </div>
           </div>
 

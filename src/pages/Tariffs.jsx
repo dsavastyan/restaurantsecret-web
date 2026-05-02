@@ -2,6 +2,7 @@ import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
 import Footer from '@/components/Footer'
+import HomeIcon from '@/components/HomeIcon'
 import { analytics } from '@/services/analytics'
 import { useAuth } from '@/store/auth'
 import { useSubscriptionStore } from '@/store/subscription'
@@ -55,7 +56,7 @@ export default function Tariffs() {
       <header className="tariffs-nav">
         <div className="tariffs-nav__left">
           <Link to="/" className="tariffs-nav__brand-link" aria-label="RestaurantSecret">
-            <img src="/assets/logo.png" alt="" aria-hidden="true" className="tariffs-nav__logo" />
+            <HomeIcon />
             <span className="tariffs-nav__brand">RestaurantSecret</span>
           </Link>
         </div>

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, NavLink, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
+import HomeIcon from "@/components/HomeIcon";
 import { apiGet, apiPostAuth, isUnauthorizedError } from "@/lib/api";
 import { useAuth } from "@/store/auth";
-import logo from "@/assets/login/Icon.png";
 
 export type Sub = {
   plan: string;
@@ -223,7 +223,7 @@ export default function AccountLayout() {
         <div className="account__layout">
           <aside className="account__sidebar">
             <Link className="account-brand" to="/" aria-label="На главную страницу RestSecret">
-              <img className="account-brand__logo" src={logo} alt="" />
+              <HomeIcon className="account-brand__home" />
               <div className="account-brand__copy">
                 <span className="account-brand__name">RestSecret</span>
                 <span className="account-brand__tagline">
@@ -293,7 +293,7 @@ export default function AccountLayout() {
               <div className="account__header-mobile">
                 {isAccountRoot ? (
                   <Link className="account-mobile-brand" to="/" aria-label="На главную страницу RestSecret">
-                    <img className="account-mobile-brand__logo" src={logo} alt="" />
+                    <HomeIcon className="account-mobile-brand__home" />
                     <span className="account-mobile-brand__name">RestSecret</span>
                   </Link>
                 ) : (

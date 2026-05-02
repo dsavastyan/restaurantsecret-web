@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { useMeta } from '@/lib/useMeta'
 
 import { CookieSettingsModal } from '@/components/CookieSettingsModal'
+import HomeIcon from '@/components/HomeIcon'
 import { postSuggest } from '@/lib/api'
 import { analytics } from '@/services/analytics'
 import { toast } from '@/lib/toast'
@@ -206,7 +207,7 @@ export default function HowItWorks() {
       <header className="landing-warm__nav">
         <div className="landing-warm__nav-left">
           <Link to="/" className="landing-warm__brand-link" aria-label="RestaurantSecret">
-            <img src="/assets/logo-64.png" width="32" height="32" alt="" aria-hidden="true" className="landing-warm__logo" />
+            <HomeIcon />
             <span className="landing-warm__brand">RestaurantSecret</span>
           </Link>
         </div>
