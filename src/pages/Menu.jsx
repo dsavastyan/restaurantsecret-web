@@ -544,20 +544,13 @@ export default function Menu() {
             />
           </div>
 
-          <div className="menu-category-filter" aria-label="Фильтр по категории">
-            <label className="sr-only" htmlFor="menu-category-select">Категория меню</label>
-            <select
-              id="menu-category-select"
-              className="menu-category-filter__select"
-              value={selectedCategory}
-              onChange={(event) => setSelectedCategory(event.target.value)}
-            >
-              <option value="all">Категории</option>
-              {categoryOptions.map((name) => (
-                <option key={name} value={name}>{name}</option>
-              ))}
-            </select>
-          </div>
+          <CategorySelect
+            id="menu-category-select"
+            className="menu-category-filter"
+            value={selectedCategory}
+            options={categoryOptions}
+            onChange={setSelectedCategory}
+          />
 
           <button
             type="button"
@@ -616,11 +609,20 @@ export default function Menu() {
         {!!error && !loading && <p className="err">{error}</p>}
         {!loading && !error && (
           groupedDishes.length ? (
-            groupedDishes.map((section) => (
+            groupedDishes.map((section, sectionIndex) => (
               <article key={section.name} className="menu-section">
                 <header className="menu-section__header">
-                  <div>
+                  <div className="menu-section__title-wrap">
                     <h2 className="menu-section__title">{section.name}</h2>
+                    {sectionIndex === 0 ? (
+                      <CategorySelect
+                        id="menu-section-category-select"
+                        className="menu-section__category-filter"
+                        value={selectedCategory}
+                        options={categoryOptions}
+                        onChange={setSelectedCategory}
+                      />
+                    ) : null}
                   </div>
                   <div className="menu-section__count">{formatPositionCount(section.dishes.length)}</div>
                 </header>
@@ -661,6 +663,25 @@ export default function Menu() {
         isOpen={isOutdatedOpen}
         onClose={() => setIsOutdatedOpen(false)}
       />
+    </div>
+  )
+}
+
+function CategorySelect({ id, className, value, options, onChange }) {
+  return (
+    <div className={className} aria-label="Фильтр по категории">
+      <label className="sr-only" htmlFor={id}>Категория меню</label>
+      <select
+        id={id}
+        className="menu-category-filter__select"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        <option value="all">Категории</option>
+        {options.map((name) => (
+          <option key={name} value={name}>{name}</option>
+        ))}
+      </select>
     </div>
   )
 }

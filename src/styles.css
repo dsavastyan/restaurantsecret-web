@@ -2491,6 +2491,21 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
   margin-bottom: 10px;
 }
 
+.menu-section__title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.menu-section__title-wrap .menu-section__title {
+  min-width: 0;
+}
+
+.menu-section__category-filter {
+  display: none;
+}
+
 .menu-section__eyebrow {
   margin: 0;
   font-size: 12px;
@@ -13354,6 +13369,33 @@ body:has(.account--sheet-open) {
 
   .menu-category-filter {
     display: none;
+  }
+
+  .menu-section__title-wrap {
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .menu-section__title-wrap .menu-section__title {
+    flex: 1 1 auto;
+  }
+
+  .menu-section__category-filter {
+    display: flex;
+    flex: 0 0 min(45vw, 190px);
+    min-width: 142px;
+  }
+
+  .menu-section__category-filter .menu-category-filter__select {
+    min-height: 44px;
+    border-radius: 999px;
+    padding: 0 34px 0 14px;
+    font-size: 14px;
+    color: #4f812d;
+    background-color: rgba(255, 251, 245, 0.9);
+    box-shadow: 0 8px 18px rgba(62, 47, 30, 0.05);
   }
 
   .menu-filters__input,
