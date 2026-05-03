@@ -57,7 +57,7 @@ const WeeklyAddedIcon = () => (
   </svg>
 )
 
-const normalizeInstagramUrl = (rawUrl) => {
+const normalizeRestaurantLinkUrl = (rawUrl) => {
   if (!rawUrl) return null
   const text = String(rawUrl).trim()
   if (!text || text === '-' || text === '—') return null
@@ -65,8 +65,7 @@ const normalizeInstagramUrl = (rawUrl) => {
 
   try {
     const parsed = new URL(withProtocol)
-    const host = parsed.hostname.replace(/^www\./i, '').toLowerCase()
-    if (!host.endsWith('instagram.com')) return null
+    if (!/^https?:$/i.test(parsed.protocol) || !parsed.hostname.includes('.')) return null
     return parsed.toString()
   } catch (_) {
     return null
@@ -459,7 +458,7 @@ export default function Catalog() {
         <ul className="catalog-grid">
           {visibleItems.map((r, i) => {
             const allDishes = extractDishes(r)
-            const instagramUrl = normalizeInstagramUrl(r.instagramUrl)
+            const restaurantLinkUrl = normalizeRestaurantLinkUrl(r.instagramUrl)
             const dishesCount = typeof r?.dishesCount === 'number'
               ? r.dishesCount
               : allDishes.length
@@ -488,9 +487,9 @@ export default function Catalog() {
                     </div>
                   </div>
                   <div className="catalog-card__top-actions">
-                    {instagramUrl && (
+                    {restaurantLinkUrl && (
                       <a
-                        href={instagramUrl}
+                        href={restaurantLinkUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}

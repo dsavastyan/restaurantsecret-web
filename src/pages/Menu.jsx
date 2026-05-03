@@ -42,7 +42,7 @@ const formatPositionCount = (count) => {
   return `${count} ${suffix}`
 }
 
-const normalizeInstagramUrl = (rawUrl) => {
+const normalizeRestaurantLinkUrl = (rawUrl) => {
   if (!rawUrl) return null
   const text = String(rawUrl).trim()
   if (!text || text === '-' || text === '—') return null
@@ -50,8 +50,7 @@ const normalizeInstagramUrl = (rawUrl) => {
 
   try {
     const parsed = new URL(withProtocol)
-    const host = parsed.hostname.replace(/^www\./i, '').toLowerCase()
-    if (!host.endsWith('instagram.com')) return null
+    if (!/^https?:$/i.test(parsed.protocol) || !parsed.hostname.includes('.')) return null
     return parsed.toString()
   } catch (_) {
     return null
@@ -232,7 +231,7 @@ export default function Menu() {
 
     return ordered.filter((section) => section.dishes.length)
   }, [filtered, menu?.categories])
-  const instagramUrl = useMemo(() => normalizeInstagramUrl(menu?.instagramUrl), [menu?.instagramUrl])
+  const restaurantLinkUrl = useMemo(() => normalizeRestaurantLinkUrl(menu?.instagramUrl), [menu?.instagramUrl])
   const seoRestaurantName = menu?.name || slug || 'ресторана'
   const seoDescription = useMemo(
     () => `Меню ${seoRestaurantName} с КБЖУ: калории, белки, жиры и углеводы блюд ресторана. Сравнивайте блюда ${seoRestaurantName} по калорийности и макронутриентам перед посещением ресторана.`,
@@ -376,7 +375,7 @@ export default function Menu() {
               <span>На карте</span>
             </button>
 
-            <span className="menu-mobile-hero__divider" aria-hidden="true" />
+            {restaurantLinkUrl ? <RestaurantWebLink href={restaurantLinkUrl} className="menu-mobile-hero__web" /> : null}
 
             <button
               type="button"
@@ -457,7 +456,7 @@ export default function Menu() {
                 {seoRestaurantName}
               </h1>
               <div className="menu-hero__socials">
-                {instagramUrl ? <RestaurantWebLink href={instagramUrl} /> : null}
+                {restaurantLinkUrl ? <RestaurantWebLink href={restaurantLinkUrl} /> : null}
                 <button
                   type="button"
                   className="menu-hero__share"
@@ -695,7 +694,7 @@ function FilterChip({ active, label, description, onClick }) {
   )
 }
 
-function RestaurantWebLink({ href }) {
+function RestaurantWebLink({ href, className = 'menu-hero__web' }) {
   return (
     <a
       href={href}
@@ -703,7 +702,7 @@ function RestaurantWebLink({ href }) {
       rel="noopener noreferrer"
       aria-label="Ссылка ресторана"
       title="Ссылка ресторана"
-      className="menu-hero__web"
+      className={className}
     >
       <svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="9.25" />

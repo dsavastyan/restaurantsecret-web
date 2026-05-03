@@ -38,7 +38,7 @@ const favoriteMarkerIcon = L.divIcon({
   `,
 })
 
-function normalizeInstagramUrl(rawUrl) {
+function normalizeRestaurantLinkUrl(rawUrl) {
   if (!rawUrl) return null
   const text = String(rawUrl).trim()
   if (!text || text === '-' || text === '—') return null
@@ -46,8 +46,7 @@ function normalizeInstagramUrl(rawUrl) {
   const withProtocol = /^https?:\/\//i.test(text) ? text : `https://${text.replace(/^\/+/, '')}`
   try {
     const url = new URL(withProtocol)
-    const host = url.hostname.replace(/^www\./i, '').toLowerCase()
-    if (!host.endsWith('instagram.com')) return null
+    if (!/^https?:$/i.test(url.protocol) || !url.hostname.includes('.')) return null
     return url.toString()
   } catch (_) {
     return null
@@ -139,11 +138,14 @@ function ClusterLayer({ restaurants, favoriteSlugs }) {
           [Number(r.lat), Number(r.lon)],
           isFavoriteRestaurant ? { icon: favoriteMarkerIcon } : undefined,
         )
-        const instagramUrl = normalizeInstagramUrl(r.instagramUrl)
-        const instagramLink = instagramUrl
-          ? `<a href="${instagramUrl}" target="_blank" rel="noopener noreferrer" class="popup-instagram" title="Instagram">
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm11.5 1.8a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+        const restaurantLinkUrl = normalizeRestaurantLinkUrl(r.instagramUrl)
+        const restaurantLink = restaurantLinkUrl
+          ? `<a href="${restaurantLinkUrl}" target="_blank" rel="noopener noreferrer" class="popup-web" title="Ссылка ресторана">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="9.25" />
+                <path d="M3 12h18" />
+                <path d="M12 2.75c2.35 2.55 3.55 5.63 3.55 9.25s-1.2 6.7-3.55 9.25" />
+                <path d="M12 2.75C9.65 5.3 8.45 8.38 8.45 12s1.2 6.7 3.55 9.25" />
               </svg>
             </a>`
           : ''
@@ -155,7 +157,7 @@ function ClusterLayer({ restaurants, favoriteSlugs }) {
           ${r.cuisine || ''}<br/>
           <div class="popup-links">
             <a href="/r/${r.slug}/menu" class="popup-link">Перейти к меню</a>
-            ${instagramLink}
+            ${restaurantLink}
           </div>
         `
 
@@ -839,17 +841,16 @@ export default function RestaurantMap({
           gap: 8px;
         }
 
-        .popup-instagram {
+        .popup-web {
           display: inline-flex;
           width: 18px;
           height: 18px;
-          color: #e1306c;
+          color: #4d463e;
         }
 
-        .popup-instagram svg {
+        .popup-web svg {
           width: 18px;
           height: 18px;
-          fill: currentColor;
         }
 
         .map-fav-marker-wrapper {
