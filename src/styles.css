@@ -9972,6 +9972,30 @@ body:has(.account--sheet-open) {
   text-decoration: underline;
 }
 
+.site-footer__social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: #6b7280;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.site-footer__social-link:hover {
+  color: #229ed9;
+  background: rgba(34, 158, 217, 0.1);
+  transform: translateY(-1px);
+}
+
+.site-footer__social-icon {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
 .site-footer__meta {
   display: inline-flex;
   align-items: center;
@@ -14558,6 +14582,7 @@ html[data-rs-theme="night"] .restaurants__count {
 }
 
 .site-footer__link,
+.site-footer__social-link,
 .site-footer__copy,
 .site-footer__legal {
   color: var(--app-muted);
@@ -14569,6 +14594,10 @@ html[data-rs-theme="night"] .restaurants__count {
 
 .site-footer__link:hover {
   color: var(--app-text);
+}
+
+.site-footer__social-link:hover {
+  color: #229ed9;
 }
 
 .search-input__control,
