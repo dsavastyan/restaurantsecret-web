@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { analytics } from "@/services/analytics";
 import { getSubscriptionCheckoutLink } from "@/lib/subscriptionCta";
@@ -15,17 +15,24 @@ export default function NavBar({ forceGuest = false }: { forceGuest?: boolean })
     isSubscriptionStatusLoaded: state.isStatusLoaded,
   }));
   const location = useLocation();
+  const navigate = useNavigate();
   const isLoginPage = location.pathname === "/login";
   const isOnboardingPage = location.pathname.startsWith("/onboarding");
+  const isRestaurantMenuPage = /^\/(?:restaurants|r)\/[^/]+\/menu\/?$/.test(location.pathname);
   const currentPath = location.pathname + location.search;
   const subscriptionCheckoutLink = getSubscriptionCheckoutLink(token, currentPath);
+  const goBackToCatalog = () => navigate("/catalog");
 
   if (forceGuest || !token) {
     return (
       <header className="navbar navbar--guest">
         <div className="navbar__inner navbar__inner--guest">
-          <Link to="/" className="navbar__brand navbar__brand--guest" aria-label="RestaurantSecret">
-            <HomeIcon />
+          <Link
+            to={isRestaurantMenuPage ? "/catalog" : "/"}
+            className="navbar__brand navbar__brand--guest"
+            aria-label={isRestaurantMenuPage ? "Назад к меню ресторанов" : "RestaurantSecret"}
+          >
+            {isRestaurantMenuPage ? <BackIcon className="navbar__back-icon" /> : <HomeIcon />}
             <span>RestaurantSecret</span>
           </Link>
 
@@ -66,9 +73,20 @@ export default function NavBar({ forceGuest = false }: { forceGuest?: boolean })
     <header className="navbar">
       <div className="navbar__inner">
         <div className="navbar__left">
-          <Link to="/" className="navbar__home" aria-label="На главную">
-            <HomeIcon />
-          </Link>
+          {isRestaurantMenuPage ? (
+            <button
+              type="button"
+              className="navbar__home navbar__menu-back"
+              onClick={goBackToCatalog}
+              aria-label="Назад к меню ресторанов"
+            >
+              <BackIcon />
+            </button>
+          ) : (
+            <Link to="/" className="navbar__home" aria-label="На главную">
+              <HomeIcon />
+            </Link>
+          )}
         </div>
 
         <Link to="/" className="navbar__brand navbar__brand--center">
@@ -92,5 +110,15 @@ export default function NavBar({ forceGuest = false }: { forceGuest?: boolean })
         </div>
       </div>
     </header>
+  );
+}
+
+function BackIcon({ className = "" }: { className?: string }) {
+  return (
+    <span className={`rs-home-icon rs-back-icon ${className}`} aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" focusable="false" fill="none">
+        <path d="M15 6 9 12l6 6" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </span>
   );
 }

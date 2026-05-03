@@ -328,53 +328,10 @@ export default function Menu() {
     <div className="menu-page">
       <header className="menu-hero">
         <div className="menu-mobile-hero">
-          <button
-            type="button"
-            className="menu-mobile-hero__back"
-            onClick={() => navigate('/catalog')}
-            aria-label="Назад к меню ресторанов"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none">
-              <path d="M15 6 9 12l6 6" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-
-          <div className="menu-mobile-hero__main">
+          <div className="menu-mobile-hero__title-row">
             <h1 className="menu-mobile-hero__title" aria-label={`Меню ${seoRestaurantName} с КБЖУ`}>
               {seoRestaurantName}
             </h1>
-            <div className="menu-mobile-hero__meta">
-              <div className="menu-mobile-hero__meta-line">
-                <span>{dishes.length} {getRussianPluralWord(dishes.length, 'блюдо', 'блюда', 'блюд')}</span>
-                {!!capturedAt && (
-                  <>
-                    <span aria-hidden="true">•</span>
-                    <span>Обновлено {capturedAt}</span>
-                  </>
-                )}
-              </div>
-              <button
-                type="button"
-                className="menu-mobile-hero__report"
-                onClick={() => setIsOutdatedOpen(true)}
-              >
-                Сообщить об ошибке
-              </button>
-            </div>
-          </div>
-
-          <div className="menu-mobile-hero__actions">
-            <button
-              type="button"
-              className="menu-mobile-hero__map"
-              onClick={openMapInBrowser}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none">
-                <path d="M12 21s7-5.1 7-11a7 7 0 0 0-14 0c0 5.9 7 11 7 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="12" cy="10" r="2.5" stroke="currentColor" strokeWidth="2" />
-              </svg>
-              <span>На карте</span>
-            </button>
 
             <button
               type="button"
@@ -393,6 +350,45 @@ export default function Menu() {
                   strokeLinejoin="round"
                 />
               </svg>
+            </button>
+          </div>
+
+          <div className="menu-mobile-hero__meta-line">
+            <span>{dishes.length} {getRussianPluralWord(dishes.length, 'блюдо', 'блюда', 'блюд')}</span>
+            {!!capturedAt && (
+              <>
+                <span aria-hidden="true">•</span>
+                <span>Обновлено {capturedAt}</span>
+              </>
+            )}
+          </div>
+
+          <div className="menu-mobile-hero__actions">
+            <button
+              type="button"
+              className="menu-mobile-hero__map"
+              onClick={openMapInBrowser}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none">
+                <path d="M12 21s7-5.1 7-11a7 7 0 0 0-14 0c0 5.9 7 11 7 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <circle cx="12" cy="10" r="2.5" stroke="currentColor" strokeWidth="2" />
+              </svg>
+              <span>На карте</span>
+            </button>
+
+            <span className="menu-mobile-hero__divider" aria-hidden="true" />
+
+            <button
+              type="button"
+              className="menu-mobile-hero__report"
+              onClick={() => setIsOutdatedOpen(true)}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+                <path d="M12 11.5v5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <circle cx="12" cy="7.6" r="1" fill="currentColor" />
+              </svg>
+              <span>Сообщить об ошибке</span>
             </button>
           </div>
         </div>
