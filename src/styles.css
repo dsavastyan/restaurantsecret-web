@@ -17303,6 +17303,24 @@ html[data-rs-theme="night"] .onboarding-install__image {
   color: var(--warm-ink);
 }
 
+.landing-warm__footer-links .landing-warm__footer-social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--warm-ink-soft);
+  border-radius: 999px;
+  line-height: 1;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.landing-warm__footer-links .landing-warm__footer-social:hover {
+  color: #229ed9;
+  background: rgba(34, 158, 217, 0.1);
+  transform: translateY(-1px);
+}
+
 .landing-warm__footer-meta {
   margin-top: 20px;
   padding-top: 20px;

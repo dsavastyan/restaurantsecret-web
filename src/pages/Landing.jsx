@@ -5,6 +5,7 @@ import BotanicDecor from '@/components/BotanicDecor'
 import CityMapBackground from '@/components/CityMapBackground'
 import SearchInput from '@/components/SearchInput'
 import { CookieSettingsModal } from '@/components/CookieSettingsModal'
+import TelegramFooterLink from '@/components/TelegramFooterLink'
 import { getLandingStats, getRestaurants, postSuggest } from '@/lib/api'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
@@ -737,6 +738,7 @@ export default function Landing() {
             <Link to="/contact">Контакты</Link>
             <a href="https://t.me/RestSecretSupport_bot" target="_blank" rel="noopener noreferrer">Поддержка</a>
             <Link to="/feedback">Оставить отзыв</Link>
+            <TelegramFooterLink className="landing-warm__footer-social" />
           </div>
 
           <div className="landing-warm__footer-meta">

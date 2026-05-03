@@ -4,6 +4,7 @@ import { useMeta } from '@/lib/useMeta'
 
 import { CookieSettingsModal } from '@/components/CookieSettingsModal'
 import HomeIcon from '@/components/HomeIcon'
+import TelegramFooterLink from '@/components/TelegramFooterLink'
 import { postSuggest } from '@/lib/api'
 import { analytics } from '@/services/analytics'
 import { toast } from '@/lib/toast'
@@ -466,6 +467,7 @@ export default function HowItWorks() {
             <Link to="/contact">Контакты</Link>
             <a href="https://t.me/RestSecretSupport_bot" target="_blank" rel="noopener noreferrer">Поддержка</a>
             <Link to="/feedback">Оставить отзыв</Link>
+            <TelegramFooterLink className="landing-warm__footer-social" />
           </div>
 
           <div className="landing-warm__footer-meta">
