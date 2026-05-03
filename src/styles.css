@@ -13203,7 +13203,7 @@ body:has(.account--sheet-open) {
 
   .menu-mobile-hero__map,
   .menu-mobile-hero__favorite {
-    min-height: 74px;
+    min-height: 56px;
     border: 1px solid rgba(224, 213, 199, 0.95);
     background: rgba(255, 255, 255, 0.82);
     color: #101828;
@@ -13215,26 +13215,26 @@ body:has(.account--sheet-open) {
   }
 
   .menu-mobile-hero__map {
-    gap: 14px;
-    min-width: clamp(150px, 31vw, 202px);
+    gap: 8px;
+    min-width: clamp(120px, 28vw, 170px);
     border-radius: 999px;
-    padding: 0 clamp(18px, 4vw, 28px);
+    padding: 0 clamp(14px, 3vw, 20px);
     color: #4f812d;
     font: inherit;
-    font-size: clamp(17px, 3vw, 20px);
+    font-size: clamp(14px, 2.6vw, 16px);
     font-weight: 600;
     white-space: nowrap;
   }
 
   .menu-mobile-hero__map svg {
-    width: 28px;
-    height: 28px;
+    width: 20px;
+    height: 20px;
   }
 
   .menu-mobile-hero__favorite {
-    width: 74px;
-    height: 74px;
-    min-height: 74px;
+    width: 56px;
+    height: 56px;
+    min-height: 56px;
     border-radius: 999px;
     padding: 0;
     justify-self: end;
@@ -13242,8 +13242,8 @@ body:has(.account--sheet-open) {
   }
 
   .menu-mobile-hero__favorite svg {
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
   }
 
   .menu-mobile-hero__favorite.is-active {
@@ -13388,8 +13388,8 @@ body:has(.account--sheet-open) {
 
   .menu-filters__primary-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 78px;
-    gap: 16px;
+    grid-template-columns: minmax(0, 1fr) 60px;
+    gap: 12px;
   }
 
   .menu-filters__search {
@@ -13432,56 +13432,56 @@ body:has(.account--sheet-open) {
   .menu-filters__input,
   .menu-filters__toggle-btn,
   .menu-chip {
-    min-height: 72px;
+    min-height: 56px;
   }
 
   .menu-filters__toggle-btn {
-    width: 78px;
-    height: 72px;
+    width: 60px;
+    height: 56px;
     align-self: stretch;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.84);
   }
 
   .menu-filters__toggle-btn svg {
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
   }
 
   .menu-filters__search::before {
-    left: 30px;
-    width: 30px;
-    height: 30px;
+    left: 22px;
+    width: 22px;
+    height: 22px;
     border-color: #9a9d9d;
   }
 
   .menu-filters__search::after {
-    left: 55px;
-    top: calc(50% + 12px);
-    width: 14px;
-    height: 3px;
+    left: 41px;
+    top: calc(50% + 9px);
+    width: 10px;
+    height: 2px;
     background: #9a9d9d;
   }
 
   .menu-filters__input {
-    padding-left: 82px;
+    padding-left: 58px;
     border-radius: 30px;
     background: rgba(255, 255, 255, 0.78);
-    font-size: 20px;
+    font-size: 16px;
   }
 
   .menu-filters__chips {
     grid-column: 1 / -1;
     width: 100%;
-    gap: 12px;
+    gap: 10px;
   }
 
   .menu-chip {
     min-width: max-content;
-    min-height: 70px;
+    min-height: 54px;
     flex-direction: row;
-    padding: 0 22px;
-    border-radius: 22px;
+    padding: 0 16px;
+    border-radius: 18px;
     background: rgba(255, 255, 255, 0.78);
   }
 
@@ -13521,21 +13521,21 @@ body:has(.account--sheet-open) {
   }
 
   .menu-mobile-hero__map {
-    min-width: 146px;
-    min-height: 62px;
-    padding: 0 18px;
-    font-size: 17px;
+    min-width: 120px;
+    min-height: 50px;
+    padding: 0 14px;
+    font-size: 15px;
   }
 
   .menu-mobile-hero__favorite {
-    width: 62px;
-    height: 62px;
-    min-height: 62px;
+    width: 50px;
+    height: 50px;
+    min-height: 50px;
   }
 
   .menu-mobile-hero__favorite svg {
-    width: 28px;
-    height: 28px;
+    width: 22px;
+    height: 22px;
   }
 
   .menu-mobile-hero__divider {
