@@ -8,7 +8,6 @@ import {
   selectSetHasActiveSub,
   useSubscriptionStore,
 } from "@/store/subscription";
-import SubscriptionPlansModal from "@/components/subscription/SubscriptionPlansModal";
 import SubscriptionPlans from "@/components/subscription/SubscriptionPlans";
 import { analytics } from "@/services/analytics";
 
@@ -117,7 +116,7 @@ export default function AccountSubscription() {
 
 
   const [promoLoading, setPromoLoading] = useState(false);
-  const [plansOpen, setPlansOpen] = useState(false);
+  const [renewPlansOpen, setRenewPlansOpen] = useState(false);
   const [annualOfferOpen, setAnnualOfferOpen] = useState(false);
   const [promoQuote, setPromoQuote] = useState<PromoQuote | null>(null);
   const [canceling, setCanceling] = useState(false);
@@ -505,7 +504,7 @@ export default function AccountSubscription() {
           createPayment(planToUse, trimmedCode);
         } else {
           setPromoQuote(null);
-          setPlansOpen(false); // Close modal on success
+          setRenewPlansOpen(false);
           await fetchStatus();
         }
       } else {
@@ -545,16 +544,6 @@ export default function AccountSubscription() {
     setPromoQuote(null);
     setPromoError(null);
   }, []);
-
-  const handleChoosePlan = useCallback((plan: UiPlan) => {
-    setSelectedPlan(plan);
-    const deferUntilPeriodEnd = Boolean(isActive && currentUiPlan && currentUiPlan !== plan);
-    if (promoQuote?.type === 'free_days') {
-      handleRedeemPromo(promoQuote.code || '');
-    } else {
-      createPayment(plan, promoQuote?.code, deferUntilPeriodEnd);
-    }
-  }, [createPayment, promoQuote, handleRedeemPromo, isActive, currentUiPlan]);
 
   const handleOpenAnnualOffer = useCallback(() => {
     setAnnualOfferOpen(true);
@@ -776,13 +765,15 @@ export default function AccountSubscription() {
                         </p>
 
                         <div className="account-subscription-v2__active-actions">
-                          <button
-                            className="account-subscription-v2__btn-renew"
-                            onClick={() => setPlansOpen(true)}
-                            disabled={Boolean(paymentPlan)}
-                          >
-                            Изменить тариф
-                          </button>
+                          {canShowAnnualOffer && (
+                            <button
+                              className="account-subscription-v2__btn-renew"
+                              onClick={handleOpenAnnualOffer}
+                              disabled={Boolean(paymentPlan)}
+                            >
+                              Перейти на годовой
+                            </button>
+                          )}
 
                           {statusData?.can_cancel && (
                             <button
@@ -875,7 +866,7 @@ export default function AccountSubscription() {
                       <p className="account-subscription-v2__expired-description">{expiredDescription}</p>
                       <button
                         className="account-subscription-v2__btn-renew"
-                        onClick={() => setPlansOpen(true)}
+                        onClick={() => setRenewPlansOpen(true)}
                         disabled={Boolean(paymentPlan)}
                       >
                         Возобновить подписку
@@ -922,19 +913,21 @@ export default function AccountSubscription() {
             </div>
           )}
 
-          <SubscriptionPlansModal
-            open={plansOpen}
-            onClose={() => setPlansOpen(false)}
-            onChoosePlan={handleChoosePlan}
-            onQuotePromo={handleQuotePromo}
-            onRedeemPromo={handleRedeemPromo}
-            onResetPromo={handleResetPromo}
-            loading={promoLoading || Boolean(paymentPlan)}
-            promoError={promoErrorLabel}
-            promoQuote={promoQuote}
-            disabledPlan={isActive ? currentUiPlan : null}
-            disabledPlanHint={isActive ? "Текущий тариф недоступен в выборе. Новый тариф начнет действовать после окончания текущего периода." : null}
-          />
+          {(isExpired || isCanceled) && renewPlansOpen && (
+            <div className="account-subscription-v2__intro account-subscription-v2__intro--renew">
+              <SubscriptionPlans
+                selectedPlan={selectedPlan}
+                onSelectPlan={handleSelectPlan}
+                onProceed={handleProceed}
+                onQuotePromo={handleQuotePromo}
+                onRedeemPromo={handleRedeemPromo}
+                onResetPromo={handleResetPromo}
+                loading={promoLoading || Boolean(paymentPlan)}
+                promoError={promoErrorLabel}
+                promoQuote={promoQuote}
+              />
+            </div>
+          )}
           </>
           )}
 
