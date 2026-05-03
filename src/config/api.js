@@ -2,8 +2,8 @@
 // reused by fetch helpers and hooks. Prefer the Vite-powered environment
 // variables so CI workflows can point the frontend at staging or review
 // backends without touching the source.
-const FALLBACK_PUBLIC_API_BASE = 'https://api.restaurantsecret.ru/cf'
 const FALLBACK_PD_API_BASE = 'https://pd.restaurantsecret.ru'
+const FALLBACK_PUBLIC_API_BASE = `${FALLBACK_PD_API_BASE}/cf`
 
 const env = typeof import.meta !== 'undefined' ? (import.meta.env ?? {}) : {}
 const configuredPublic =

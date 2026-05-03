@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ApiError, apiGet, apiPost, quotePromo, redeemPromo, isUnauthorizedError, PromoQuote, attachPaymentMethod } from "@/lib/api";
+import { ApiError, apiGet, apiPost, quotePromo, redeemPromo, isUnauthorizedError, PromoQuote, attachPaymentMethod, syncTrialPayment } from "@/lib/api";
 import { useAuth } from "@/store/auth";
 import {
   selectHasActiveSub,
@@ -48,6 +48,7 @@ const PLAN_PRICE_BADGES: Record<string, string> = {
 };
 
 const INTRO_TRIAL_PROMO_CODE = "RS7FREE";
+const PENDING_TRIAL_PAYMENT_KEY = "rs_pending_intro_trial_payment_id";
 
 const ERROR_LABELS: Record<string, string> = {
   invalid_code: "Промокод не найден",
@@ -67,6 +68,20 @@ const ERROR_LABELS: Record<string, string> = {
 function mapUiPlanToApi(plan: UiPlan): ApiPlan {
   if (plan === "month") return "monthly";
   return "annual";
+}
+
+function rememberPendingTrialPayment(paymentId?: string) {
+  if (typeof window === "undefined" || !paymentId) return;
+  try {
+    window.sessionStorage.setItem(PENDING_TRIAL_PAYMENT_KEY, paymentId);
+  } catch { /* ignore */ }
+}
+
+function forgetPendingTrialPayment() {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.removeItem(PENDING_TRIAL_PAYMENT_KEY);
+  } catch { /* ignore */ }
 }
 
 function SubscriptionSkeleton() {
@@ -203,6 +218,44 @@ export default function AccountSubscription() {
       current_status: statusData?.status || "none"
     });
   }, []); // Only once on mount
+
+  useEffect(() => {
+    if (!accessToken || typeof window === "undefined") return;
+
+    let canceled = false;
+    const pendingPaymentId = window.sessionStorage.getItem(PENDING_TRIAL_PAYMENT_KEY) || "";
+    if (!pendingPaymentId) return;
+
+    const pollTrialActivation = async () => {
+      for (let attempt = 0; attempt < 12 && !canceled; attempt += 1) {
+        try {
+          const syncRes = await syncTrialPayment(accessToken, {
+            payment_id: pendingPaymentId || undefined,
+          });
+          await fetchStatus();
+
+          if (syncRes?.active) {
+            forgetPendingTrialPayment();
+            return;
+          }
+        } catch (err) {
+          if (isUnauthorizedError(err)) {
+            logout();
+            return;
+          }
+          console.error("Failed to sync trial payment", err);
+        }
+
+        await new Promise((resolve) => window.setTimeout(resolve, 1500));
+      }
+    };
+
+    pollTrialActivation();
+
+    return () => {
+      canceled = true;
+    };
+  }, [accessToken, fetchStatus, logout]);
 
   const formatDate = useCallback((value?: string | null) => {
     if (!value) return null;
@@ -345,6 +398,7 @@ export default function AccountSubscription() {
 
         if (confirmationUrl) {
           try { sessionStorage.setItem("rs_checkout_plan", plan); } catch { /* ignore */ }
+          rememberPendingTrialPayment(attachRes.payment_id);
           window.location.href = confirmationUrl;
           return;
         }
@@ -433,6 +487,7 @@ export default function AccountSubscription() {
           analytics.track("checkout_started", { plan: planToUse, source_page: "subscription_management", method: "promo_attach" });
 
           if (attachRes?.confirmation_url) {
+            rememberPendingTrialPayment(attachRes.payment_id);
             window.location.href = attachRes.confirmation_url;
             return;
           }

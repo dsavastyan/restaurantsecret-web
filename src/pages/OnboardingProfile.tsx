@@ -149,10 +149,10 @@ export default function OnboardingProfilePage() {
     }
     setForm({
       gender: goals.gender || "",
-      age: goals.age?.toString() || "",
+      age: "",
       goal: goals.goal_type || "",
-      height: goals.height?.toString() || "",
-      weight: goals.weight?.toString() || "",
+      height: "",
+      weight: "",
       activity: goals.activity_level || "",
     });
   }, [goals]);
@@ -371,7 +371,6 @@ export default function OnboardingProfilePage() {
                   inputMode="numeric"
                   min="1"
                   max="120"
-                  placeholder="25"
                   value={form.age}
                   onChange={(event) => setField("age", event.target.value)}
                 />
@@ -401,7 +400,6 @@ export default function OnboardingProfilePage() {
                   inputMode="decimal"
                   min="50"
                   max="250"
-                  placeholder="164"
                   value={form.height}
                   onChange={(event) => setField("height", event.target.value)}
                 />
@@ -415,7 +413,6 @@ export default function OnboardingProfilePage() {
                   inputMode="decimal"
                   min="20"
                   max="300"
-                  placeholder="52"
                   value={form.weight}
                   onChange={(event) => setField("weight", event.target.value)}
                 />

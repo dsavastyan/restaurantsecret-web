@@ -17553,7 +17553,7 @@ html[data-rs-theme="night"] .onboarding-install__image {
 
   .botanic-decor__citrus {
     transform: scale(0.62);
-    transform-origin: calc(100% - 64px) 88px;
+    transform-origin: 1136px 88px;
   }
 
   .botanic-decor__small-sprig {

@@ -16,6 +16,7 @@ const API_URLS = Array.from(
       process.env.VITE_API_BASE_URL,
       process.env.VITE_API_BASE,
       process.env.VITE_API_URL,
+      'https://pd.restaurantsecret.ru/cf',
       'https://api.restaurantsecret.ru/cf',
     ]
       .filter(Boolean)

@@ -28,10 +28,18 @@ const scatterDots = [
   [92, 68, GREEN, 0.14, 2.5],
 ]
 
+const citrusCenter = { x: 1070, y: 155 }
+const smallSprigLeaves = [
+  [74, 760, 22],
+  [38, 730, -22],
+  [74, 700, 22],
+  [38, 670, -22],
+]
+
 export default function BotanicDecor() {
   return (
     <div className="botanic-decor" aria-hidden="true">
-      <svg className="botanic-decor__svg" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <svg className="botanic-decor__svg" width="100%" height="100%" viewBox="0 0 1200 820" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <ellipse cx="50%" cy="-8%" rx="52%" ry="62%" fill="none" stroke={`${ORANGE}0.07)`} strokeWidth="2" />
         <ellipse cx="50%" cy="-8%" rx="40%" ry="48%" fill="none" stroke={`${GREEN}0.06)`} strokeWidth="1.5" />
 
@@ -64,22 +72,22 @@ export default function BotanicDecor() {
           <ellipse cx="26" cy="188" rx="12" ry="5" fill={`${GREEN}0.11)`} transform="rotate(30 26 188)" />
         </g>
 
-        <g className="botanic-fc botanic-decor__citrus" style={{ transformOrigin: 'calc(100% - 130px) 155px' }}>
-          <circle cx="calc(100% - 130px)" cy="155" r="95" fill={`${ORANGE}0.06)`} />
-          <circle cx="calc(100% - 130px)" cy="155" r="82" fill={`${ORANGE}0.09)`} />
-          <circle cx="calc(100% - 130px)" cy="155" r="68" fill={`${SAND}0.10)`} />
-          <circle cx="calc(100% - 130px)" cy="155" r="40" fill={`${ORANGE}0.06)`} />
-          <circle cx="calc(100% - 130px)" cy="155" r="12" fill={`${ORANGE}0.12)`} />
+        <g className="botanic-fc botanic-decor__citrus" style={{ transformOrigin: `${citrusCenter.x}px ${citrusCenter.y}px` }}>
+          <circle cx={citrusCenter.x} cy={citrusCenter.y} r="95" fill={`${ORANGE}0.06)`} />
+          <circle cx={citrusCenter.x} cy={citrusCenter.y} r="82" fill={`${ORANGE}0.09)`} />
+          <circle cx={citrusCenter.x} cy={citrusCenter.y} r="68" fill={`${SAND}0.10)`} />
+          <circle cx={citrusCenter.x} cy={citrusCenter.y} r="40" fill={`${ORANGE}0.06)`} />
+          <circle cx={citrusCenter.x} cy={citrusCenter.y} r="12" fill={`${ORANGE}0.12)`} />
           {citrusSegments.map((deg) => {
             const rad = deg * Math.PI / 180
-            const x2 = 130 - Math.cos(rad) * 42
-            const y2 = 155 + Math.sin(rad) * 42
+            const x2 = citrusCenter.x + Math.cos(rad) * 42
+            const y2 = citrusCenter.y + Math.sin(rad) * 42
             return (
               <line
                 key={deg}
-                x1="calc(100% - 130px)"
-                y1="155"
-                x2={`calc(100% - ${x2}px)`}
+                x1={citrusCenter.x}
+                y1={citrusCenter.y}
+                x2={x2}
                 y2={y2}
                 stroke={`${ORANGE}0.20)`}
                 strokeWidth="1.2"
@@ -89,22 +97,17 @@ export default function BotanicDecor() {
           {citrusDots.map(([dx, dy]) => (
             <circle
               key={`${dx}-${dy}`}
-              cx={`calc(100% - ${130 - dx * 0.7}px)`}
-              cy={155 + dy * 0.7}
+              cx={citrusCenter.x + dx * 0.7}
+              cy={citrusCenter.y + dy * 0.7}
               r="2.5"
               fill={`${ORANGE}0.14)`}
             />
           ))}
         </g>
 
-        <g className="botanic-fa botanic-decor__small-sprig" style={{ transformOrigin: '55px calc(100% - 80px)' }} opacity="0.7">
-          <line x1="55" y1="calc(100% - 20px)" x2="60" y2="calc(100% - 160px)" stroke={`${GREEN}0.22)`} strokeWidth="2" strokeLinecap="round" />
-          {[
-            [73, 'calc(100% - 130px)', 22],
-            [37, 'calc(100% - 104px)', -22],
-            [73, 'calc(100% - 78px)', 22],
-            [37, 'calc(100% - 52px)', -22],
-          ].map(([cx, cy, rotation]) => (
+        <g className="botanic-fa botanic-decor__small-sprig" style={{ transformOrigin: '55px 740px' }} opacity="0.7">
+          <line x1="55" y1="800" x2="60" y2="660" stroke={`${GREEN}0.22)`} strokeWidth="2" strokeLinecap="round" />
+          {smallSprigLeaves.map(([cx, cy, rotation]) => (
             <ellipse
               key={`${cx}-${cy}`}
               cx={cx}

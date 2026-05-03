@@ -3,7 +3,7 @@
 import React, { Suspense, lazy, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { PD_API_BASE } from '@/config/api'
-import { fetchCurrentUser } from '@/lib/api'
+import { fetchCurrentUser, isUnauthorizedError } from '@/lib/api'
 import { loadTelegramWebApp } from '@/lib/telegram'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
@@ -41,6 +41,7 @@ export default function AppShell() {
   const navigate = useNavigate()
   const location = useLocation()
   const accessToken = useAuth((state) => state.accessToken)
+  const logout = useAuth((state) => state.logout)
   const fetchSubscriptionStatus = useSubscriptionStore((state) => state.fetchStatus)
   const [access, setAccess] = useState(() => {
     if (typeof window === 'undefined') return defaultAccess
@@ -288,6 +289,10 @@ export default function AppShell() {
           state: { from: currentPath }
         })
       } catch (err) {
+        if (isUnauthorizedError(err)) {
+          logout()
+          return
+        }
         console.error('Failed to check onboarding status', err)
       }
     })()
@@ -295,7 +300,7 @@ export default function AppShell() {
     return () => {
       isCancelled = true
     }
-  }, [accessToken, isLoginPage, isOnboardingPage, location.pathname, location.search, navigate])
+  }, [accessToken, isLoginPage, isOnboardingPage, location.pathname, location.search, logout, navigate])
 
   // Keep the app in the light theme and expose it via html/body dataset.
   useEffect(() => {

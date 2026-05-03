@@ -329,7 +329,18 @@ export async function redeemPromo(code: string, token: string, plan?: string) {
 }
 
 export async function attachPaymentMethod(token: string, data: { promo_code?: string; plan?: string; return_url?: string }) {
-  return apiPost<{ confirmation_url: string }>("/api/payment-methods/attach", data, token);
+  return apiPost<{ confirmation_url: string; payment_id?: string }>("/api/payment-methods/attach", data, token);
+}
+
+export async function syncTrialPayment(token: string, data: { payment_id?: string }) {
+  return apiPost<{
+    ok: boolean;
+    synced?: boolean;
+    active?: boolean;
+    payment_status?: string;
+    provider_status?: string;
+    error?: string;
+  }>("/api/payments/sync-trial", data, token);
 }
 
 export function postSuggest(body: SuggestRequest, token?: string) {
