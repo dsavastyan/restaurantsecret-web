@@ -2068,8 +2068,8 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
   gap: 8px;
 }
 
-.menu-hero__insta {
-  color: #e1306c;
+.menu-hero__web {
+  color: #2f6f68;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3288,8 +3288,8 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
   border-color: #cbd5e1;
 }
 
-.catalog-card__icon-btn--ig {
-  color: #E1306C;
+.catalog-card__icon-btn--web {
+  color: #2f6f68;
 }
 
 .catalog-card__top-actions .catalog-card__fav-btn {
@@ -3820,7 +3820,7 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
   color: #4d463e;
 }
 
-.catalog-page .catalog-card__icon-btn--ig {
+.catalog-page .catalog-card__icon-btn--web {
   color: #4d463e;
 }
 
@@ -14873,8 +14873,8 @@ html[data-rs-theme="night"] .menu-hero__back-catalog:hover {
   border-color: rgba(148, 163, 184, 0.46);
 }
 
-html[data-rs-theme="night"] .menu-hero__insta {
-  color: #ff78ad;
+html[data-rs-theme="night"] .menu-hero__web {
+  color: #7dd3c7;
 }
 
 html[data-rs-theme="night"] .menu-hero__share {

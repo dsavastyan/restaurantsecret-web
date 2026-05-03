@@ -35,6 +35,17 @@ const MetroIcon = () => (
   </svg>
 )
 
+const RestaurantWebIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="9.25" />
+    <path d="M3 12h18" />
+    <path d="M12 2.75c2.35 2.55 3.55 5.63 3.55 9.25s-1.2 6.7-3.55 9.25" />
+    <path d="M12 2.75C9.65 5.3 8.45 8.38 8.45 12s1.2 6.7 3.55 9.25" />
+    <path d="M5.35 6.05c1.72.83 3.93 1.25 6.65 1.25s4.93-.42 6.65-1.25" />
+    <path d="M5.35 17.95c1.72-.83 3.93-1.25 6.65-1.25s4.93.42 6.65 1.25" />
+  </svg>
+)
+
 const WeeklyAddedIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
     <path d="M7 3v3" />
@@ -483,13 +494,11 @@ export default function Catalog() {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        aria-label="Instagram ресторана"
-                        title="Instagram"
-                        className="catalog-card__icon-btn catalog-card__icon-btn--ig"
+                        aria-label="Ссылка ресторана"
+                        title="Ссылка ресторана"
+                        className="catalog-card__icon-btn catalog-card__icon-btn--web"
                       >
-                        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor">
-                          <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm11.5 1.8a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
-                        </svg>
+                        <RestaurantWebIcon />
                       </a>
                     )}
                     <button
