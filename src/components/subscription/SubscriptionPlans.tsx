@@ -65,9 +65,6 @@ export default function SubscriptionPlans({
                 onSelectPlan('year');
             } else if (promoQuote.plan === 'monthly') {
                 onSelectPlan('month');
-            } else if (promoQuote.type === 'free_days' && promoQuote.requires_subscribing) {
-                // RS7FREE -> Auto year
-                onSelectPlan('year');
             }
         }
     }, [promoQuote]);

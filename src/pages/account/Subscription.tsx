@@ -58,6 +58,9 @@ const ERROR_LABELS: Record<string, string> = {
   not_started: "Акция еще не началась",
   global_limit_reached: "Лимит использований исчерпан",
   user_limit_reached: "Вы уже использовали этот промокод",
+  intro_trial_unavailable: "Пробный период доступен только пользователям без прошлых подписок",
+  trial_requires_card_binding: "Для пробного периода нужно привязать карту",
+  invalid_plan_for_promo: "Этот промокод недоступен для выбранного тарифа",
   network_error: "Ошибка сети. Попробуйте позже.",
 };
 
@@ -313,6 +316,63 @@ export default function AccountSubscription() {
     [accessToken, logout, paymentPlan],
   );
 
+  const startIntroTrial = useCallback(
+    async (plan: UiPlan) => {
+      if (!accessToken || paymentPlan) return;
+
+      setPaymentError(null);
+      setPaymentPlan(plan);
+      const apiPlan = mapUiPlanToApi(plan);
+
+      analytics.track("checkout_started", {
+        plan,
+        source_page: "subscription_management",
+        method: "intro_trial_attach",
+      });
+      try { ym(108992733, 'reachGoal', 'checkout_started'); } catch { /* ym not loaded */ }
+
+      try {
+        const attachRes = await attachPaymentMethod(accessToken, {
+          promo_code: INTRO_TRIAL_PROMO_CODE,
+          plan: apiPlan,
+          return_url: window.location.origin + "/account/subscription",
+        });
+
+        const confirmationUrl =
+          typeof attachRes?.confirmation_url === "string" && attachRes.confirmation_url.trim()
+            ? attachRes.confirmation_url.trim()
+            : null;
+
+        if (confirmationUrl) {
+          try { sessionStorage.setItem("rs_checkout_plan", plan); } catch { /* ignore */ }
+          window.location.href = confirmationUrl;
+          return;
+        }
+
+        setPaymentError("Не удалось начать пробный период. Попробуйте позже.");
+      } catch (err) {
+        if (isUnauthorizedError(err)) {
+          logout();
+          setPaymentError(null);
+          setPaymentPlan(null);
+          return;
+        }
+
+        if (err instanceof ApiError && err.payload && typeof err.payload === "object") {
+          const payload = err.payload as { error?: string };
+          const code = typeof payload.error === "string" ? payload.error : null;
+          setPaymentError(code ? ERROR_LABELS[code] ?? code : "Не удалось начать пробный период. Попробуйте позже.");
+        } else {
+          console.error("Failed to attach payment method for trial", err);
+          setPaymentError("Не удалось начать пробный период. Попробуйте позже.");
+        }
+      } finally {
+        setPaymentPlan(null);
+      }
+    },
+    [accessToken, logout, paymentPlan],
+  );
+
   const handleSelectPlan = useCallback((plan: UiPlan) => {
     setSelectedPlan(plan);
     analytics.track("plan_selected", { plan });
@@ -417,10 +477,14 @@ export default function AccountSubscription() {
         // Use either the code from quote (preferred) or what we might have elsewhere
         handleRedeemPromo(promoQuote.code || '');
       } else if (selectedPlan) {
-        createPayment(selectedPlan, promoQuote?.code || (isNeverSubscribed ? INTRO_TRIAL_PROMO_CODE : undefined));
+        if (isNeverSubscribed && !promoQuote) {
+          startIntroTrial(selectedPlan);
+        } else {
+          createPayment(selectedPlan, promoQuote?.code);
+        }
       }
     }
-  }, [selectedPlan, createPayment, promoQuote, handleRedeemPromo, isNeverSubscribed]);
+  }, [selectedPlan, createPayment, promoQuote, handleRedeemPromo, isNeverSubscribed, startIntroTrial]);
 
   const handleResetPromo = useCallback(() => {
     setPromoQuote(null);
