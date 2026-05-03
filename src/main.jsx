@@ -1,6 +1,6 @@
 // Entry point for the Vite-powered React application. We keep the file tiny so
 // it stays easy to reason about during hydration.
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import Router from './routes/Router.jsx'
 import ToastViewport from './components/ui/ToastViewport.tsx'
@@ -11,9 +11,11 @@ import { loadTelegramWebApp } from './lib/telegram'
 import './styles.css'
 import './account-mobile-profile.css'
 
-const SPLASH_MAX_WAIT_MS = 15000
-const SPLASH_IDLE_MS = 700
+const SPLASH_MAX_WAIT_MS = 5000
+const SPLASH_IDLE_MS = 350
+const MAINTENANCE_MAX_WAIT_MS = 3500
 let splashGeneration = 0
+let splashFailsafeTimer = 0
 
 const initialFetchTracker = (() => {
   if (typeof window === 'undefined' || typeof window.fetch !== 'function') {
@@ -76,19 +78,7 @@ function showInitialSplash() {
   splash.dataset.state = 'shown'
   splash.removeAttribute('aria-hidden')
   splash.classList.remove('rs-splash--hide')
-}
-
-function waitForWindowLoad() {
-  if (document.readyState === 'complete') return Promise.resolve()
-
-  return new Promise((resolve) => {
-    window.addEventListener('load', resolve, { once: true })
-  })
-}
-
-function waitForFontsReady() {
-  if (!document.fonts?.ready) return Promise.resolve()
-  return document.fonts.ready.catch(() => { })
+  scheduleSplashFailsafe()
 }
 
 function isVisible(element) {
@@ -124,11 +114,6 @@ function hasVisibleLoadingState(root) {
 
   return Array.from(root.querySelectorAll('p, div, span'))
     .some((element) => isVisible(element) && /(?:Загружаем|Загрузка|Ищем)/i.test(element.textContent || ''))
-}
-
-function getPendingImages(root) {
-  return Array.from(root.querySelectorAll('img'))
-    .filter((img) => isVisible(img) && !img.complete)
 }
 
 function waitForInitialPageSettle() {
@@ -173,8 +158,6 @@ function waitForInitialPageSettle() {
       const now = performance.now()
       const timedOut = now - startedAt >= SPLASH_MAX_WAIT_MS
       const isSettled =
-        initialFetchTracker.pending === 0 &&
-        getPendingImages(root).length === 0 &&
         !hasVisibleLoadingState(root) &&
         now - lastChangedAt >= SPLASH_IDLE_MS
 
@@ -191,14 +174,12 @@ function waitForInitialPageSettle() {
   })
 }
 
-async function hideInitialSplash() {
-  const generation = splashGeneration
-
+function hideInitialSplashNow(generation = splashGeneration) {
   const hide = () => {
     if (generation !== splashGeneration) return
 
     const splash = document.getElementById('rs-splash')
-    if (!splash || splash.dataset.state === 'hiding') return
+    if (!splash || splash.dataset.state === 'hiding' || splash.dataset.state === 'hidden') return
 
     splash.dataset.state = 'hiding'
     splash.setAttribute('aria-hidden', 'true')
@@ -210,22 +191,49 @@ async function hideInitialSplash() {
     }, 550)
   }
 
-  const hideAfterPaint = () => {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(hide)
-    })
-  }
+  requestAnimationFrame(() => {
+    requestAnimationFrame(hide)
+  })
+}
+
+function clearSplashFailsafe() {
+  if (!splashFailsafeTimer) return
+  window.clearTimeout(splashFailsafeTimer)
+  splashFailsafeTimer = 0
+}
+
+function scheduleSplashFailsafe() {
+  clearSplashFailsafe()
+
+  const generation = splashGeneration
+  splashFailsafeTimer = window.setTimeout(() => {
+    splashFailsafeTimer = 0
+    hideInitialSplashNow(generation)
+  }, SPLASH_MAX_WAIT_MS)
+}
+
+async function hideInitialSplash() {
+  const generation = splashGeneration
+  clearSplashFailsafe()
 
   await Promise.race([
-    Promise.all([
-      waitForWindowLoad(),
-      waitForFontsReady(),
-      waitForInitialPageSettle(),
-    ]),
+    waitForInitialPageSettle(),
     new Promise((resolve) => window.setTimeout(resolve, SPLASH_MAX_WAIT_MS)),
   ])
 
-  hideAfterPaint()
+  hideInitialSplashNow(generation)
+}
+
+function fetchMaintenanceConfig() {
+  const controller = new AbortController()
+  const timeout = window.setTimeout(() => controller.abort(), MAINTENANCE_MAX_WAIT_MS)
+
+  return fetch(`/maintenance.json?ts=${Date.now()}`, {
+    cache: 'no-store',
+    signal: controller.signal,
+  }).finally(() => {
+    window.clearTimeout(timeout)
+  })
 }
 
 // Register the service worker (if supported) once the page has fully loaded so
@@ -244,7 +252,13 @@ function Root() {
   const [maintenance, setMaintenance] = useState(null)
   const [ready, setReady] = useState(false)
 
+  const handleReady = useCallback(() => {
+    hideInitialSplash()
+  }, [])
+
   useEffect(() => {
+    scheduleSplashFailsafe()
+
     // Analytics: Session Start
     analytics.trackSessionStart().catch(() => { })
     analytics.trackLandingAttribution().catch(() => { })
@@ -258,7 +272,7 @@ function Root() {
 
     // Fetch the maintenance kill-switch from public folder. Use a cache-busting
     // timestamp to ensure we get the latest version from GitHub Pages.
-    fetch(`/maintenance.json?ts=${Date.now()}`, { cache: 'no-store' })
+    fetchMaintenanceConfig()
       .then(r => (r.ok ? r.json() : null))
       .then(data => {
         if (!data) return setMaintenance(null)
@@ -285,15 +299,16 @@ function Root() {
       .finally(() => setReady(true))
 
     return () => {
+      clearSplashFailsafe()
       window.removeEventListener('pagehide', handleUnload)
     }
   }, [])
 
   useEffect(() => {
     if (ready && maintenance?.enabled) {
-      hideInitialSplash()
+      handleReady()
     }
-  }, [ready, maintenance?.enabled])
+  }, [handleReady, ready, maintenance?.enabled])
 
   if (!ready) return null
 
@@ -302,7 +317,7 @@ function Root() {
   }
 
   return (
-    <Router onRouteStart={showInitialSplash} onReady={hideInitialSplash}>
+    <Router onRouteStart={showInitialSplash} onReady={handleReady}>
       <ToastViewport />
       <ConsentBanner />
     </Router>
