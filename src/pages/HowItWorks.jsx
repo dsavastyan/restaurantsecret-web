@@ -9,6 +9,7 @@ import { analytics } from '@/services/analytics'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
 import { useSubscriptionStore } from '@/store/subscription'
+import { getSubscriptionCheckoutLink } from '@/lib/subscriptionCta'
 
 // ─────────────────────────────────────────────
 // Данные
@@ -138,6 +139,7 @@ export default function HowItWorks() {
     isSubscriptionStatusLoaded: state.isStatusLoaded,
   }))
   const showTrialAction = !accessToken || (isSubscriptionStatusLoaded && !showAccountAction)
+  const subscriptionCheckoutLink = getSubscriptionCheckoutLink(accessToken, location.pathname + location.search)
   const accessTokenOrUndefined = accessToken || undefined
   const [openFaq, setOpenFaq] = useState(null)
   const [isCookieModalOpen, setIsCookieModalOpen] = useState(false)
@@ -236,7 +238,8 @@ export default function HowItWorks() {
               )}
               {showTrialAction && (
                 <Link
-                  to="/onboarding/welcome"
+                  to={subscriptionCheckoutLink.to}
+                  state={subscriptionCheckoutLink.state}
                   className="landing-warm__nav-cta"
                   onClick={() => analytics.track('cta_clicked', { location: 'nav', text: 'Попробовать бесплатно' })}
                 >
@@ -431,21 +434,27 @@ export default function HowItWorks() {
       </section>
 
       {/* ── 5. CTA ── */}
-        <section className="hiw__cta">
-          <h2>
-            Рестораны больше<br />
-            не срывают <em>твои цели</em>
-          </h2>
-          <p>КБЖУ каждого блюда в сотнях московских ресторанов — прямо в телефоне. Ешь вкусно и знай, что ешь</p>
-          <div className="hiw__cta-actions">
-            <Link to="/onboarding/welcome" className="hiw__hero-btn-primary">
-              Попробовать 7 дней бесплатно
-            </Link>
-          </div>
-          <p className="hiw__cta-fine">
-            <LockIcon /> Потом 199 ₽/мес · Отмена в любой момент
-          </p>
-        </section>
+        {showTrialAction && (
+          <section className="hiw__cta">
+            <h2>
+              Рестораны больше<br />
+              не срывают <em>твои цели</em>
+            </h2>
+            <p>КБЖУ каждого блюда в сотнях московских ресторанов — прямо в телефоне. Ешь вкусно и знай, что ешь</p>
+            <div className="hiw__cta-actions">
+              <Link
+                to={subscriptionCheckoutLink.to}
+                state={subscriptionCheckoutLink.state}
+                className="hiw__hero-btn-primary"
+              >
+                Попробовать 7 дней бесплатно
+              </Link>
+            </div>
+            <p className="hiw__cta-fine">
+              <LockIcon /> Потом 199 ₽/мес · Отмена в любой момент
+            </p>
+          </section>
+        )}
 
         <footer className="landing-warm__footer">
           <div className="landing-warm__footer-links">

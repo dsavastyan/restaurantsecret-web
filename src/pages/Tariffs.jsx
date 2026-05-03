@@ -7,6 +7,7 @@ import { analytics } from '@/services/analytics'
 import { useAuth } from '@/store/auth'
 import { useSubscriptionStore } from '@/store/subscription'
 import { useMeta } from '@/lib/useMeta'
+import { getSubscriptionCheckoutLink } from '@/lib/subscriptionCta'
 
 const freeFeatures = [
   {
@@ -42,6 +43,7 @@ export default function Tariffs() {
   const showTrialAction = !accessToken || (isSubscriptionStatusLoaded && !showAccountAction)
   const proTo = accessToken ? '/account/subscription' : '/login'
   const proState = accessToken ? undefined : { from: '/account/subscription' }
+  const subscriptionCheckoutLink = getSubscriptionCheckoutLink(accessToken, location.pathname + location.search)
 
   const handleProClick = () => {
     analytics.track('cta_clicked', { location: 'tariffs', text: accessToken ? 'Попробовать Pro' : 'Попробовать бесплатно' })
@@ -87,7 +89,8 @@ export default function Tariffs() {
               )}
               {showTrialAction && (
                 <Link
-                  to="/onboarding/welcome"
+                  to={subscriptionCheckoutLink.to}
+                  state={subscriptionCheckoutLink.state}
                   className="tariffs-nav__cta"
                   onClick={handleTrialClick}
                 >

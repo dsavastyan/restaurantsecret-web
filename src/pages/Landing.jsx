@@ -13,6 +13,7 @@ import { useDiaryStore } from '@/store/diary'
 import { useFavoritesStore } from '@/store/favorites'
 import { analytics } from '@/services/analytics'
 import { useMeta } from '@/lib/useMeta'
+import { getSubscriptionCheckoutLink } from '@/lib/subscriptionCta'
 
 const STATS_FALLBACK = {
   restaurants: 0,
@@ -119,6 +120,7 @@ export default function Landing() {
     isSubscriptionStatusLoaded: state.isStatusLoaded,
   }))
   const showTrialAction = !accessToken || (isSubscriptionStatusLoaded && !showAccountAction)
+  const subscriptionCheckoutLink = getSubscriptionCheckoutLink(accessToken, location.pathname + location.search)
   const accessTokenOrUndefined = accessToken || undefined
   const addDiaryEntry = useDiaryStore((state) => state.addEntry)
   const isFavoriteDish = useFavoritesStore((state) => state.isFavorite)
@@ -412,7 +414,8 @@ export default function Landing() {
                 )}
                 {showTrialAction && (
                   <Link
-                    to="/onboarding/welcome"
+                    to={subscriptionCheckoutLink.to}
+                    state={subscriptionCheckoutLink.state}
                     className="landing-warm__nav-cta"
                     onClick={() => analytics.track('cta_clicked', { location: 'nav', text: 'Попробовать бесплатно' })}
                   >
@@ -704,16 +707,25 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="landing-warm__cta">
-          <h2>
-            Попробуйте <em>бесплатно</em>.
-          </h2>
-          <p>Первые 7 дней - доступ ко всей базе ресторанов</p>
-          <div className="landing-warm__cta-actions">
-            <Link to="/onboarding/welcome" className="landing-warm__cta-primary" onClick={() => analytics.track('cta_clicked', { location: 'hero_bottom', text: 'Начать бесплатно' })}>Начать бесплатно</Link>
-            <Link to="/restaurants" className="landing-warm__cta-secondary" onClick={() => analytics.track('cta_clicked', { location: 'hero_bottom', text: 'Посмотреть меню' })}>Посмотреть меню</Link>
-          </div>
-        </section>
+        {showTrialAction && (
+          <section className="landing-warm__cta">
+            <h2>
+              Попробуйте <em>бесплатно</em>.
+            </h2>
+            <p>Первые 7 дней - доступ ко всей базе ресторанов</p>
+            <div className="landing-warm__cta-actions">
+              <Link
+                to={subscriptionCheckoutLink.to}
+                state={subscriptionCheckoutLink.state}
+                className="landing-warm__cta-primary"
+                onClick={() => analytics.track('cta_clicked', { location: 'hero_bottom', text: 'Начать бесплатно' })}
+              >
+                Начать бесплатно
+              </Link>
+              <Link to="/restaurants" className="landing-warm__cta-secondary" onClick={() => analytics.track('cta_clicked', { location: 'hero_bottom', text: 'Посмотреть меню' })}>Посмотреть меню</Link>
+            </div>
+          </section>
+        )}
 
         <footer className="landing-warm__footer">
           <div className="landing-warm__footer-links">

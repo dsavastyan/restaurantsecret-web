@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 
 import { analytics } from "@/services/analytics";
+import { getSubscriptionCheckoutLink } from "@/lib/subscriptionCta";
 import { useAuth } from "@/store/auth";
 import { useSubscriptionStore } from "@/store/subscription";
 
@@ -17,6 +18,7 @@ export default function NavBar({ forceGuest = false }: { forceGuest?: boolean })
   const isLoginPage = location.pathname === "/login";
   const isOnboardingPage = location.pathname.startsWith("/onboarding");
   const currentPath = location.pathname + location.search;
+  const subscriptionCheckoutLink = getSubscriptionCheckoutLink(token, currentPath);
 
   if (forceGuest || !token) {
     return (
@@ -45,7 +47,8 @@ export default function NavBar({ forceGuest = false }: { forceGuest?: boolean })
                   Войти
                 </Link>
                 <Link
-                  to="/onboarding/welcome"
+                  to={subscriptionCheckoutLink.to}
+                  state={subscriptionCheckoutLink.state}
                   className="navbar__trial-link"
                   onClick={() => analytics.track("cta_clicked", { location: "nav", text: "Попробовать бесплатно" })}
                 >
@@ -78,7 +81,8 @@ export default function NavBar({ forceGuest = false }: { forceGuest?: boolean })
           )}
           {token && isSubscriptionStatusLoaded && !showAccountAction && !isOnboardingPage && (
             <Link
-              to="/onboarding/welcome"
+              to={subscriptionCheckoutLink.to}
+              state={subscriptionCheckoutLink.state}
               className="navbar__trial-link"
               onClick={() => analytics.track("cta_clicked", { location: "nav", text: "Попробовать бесплатно" })}
             >
