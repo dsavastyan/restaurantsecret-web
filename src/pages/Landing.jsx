@@ -5,6 +5,7 @@ import BotanicDecor from '@/components/BotanicDecor'
 import CityMapBackground from '@/components/CityMapBackground'
 import SearchInput from '@/components/SearchInput'
 import { CookieSettingsModal } from '@/components/CookieSettingsModal'
+import PublicAccountLink from '@/components/PublicAccountLink'
 import TelegramFooterLink from '@/components/TelegramFooterLink'
 import { getLandingStats, getRestaurants, postSuggest } from '@/lib/api'
 import { toast } from '@/lib/toast'
@@ -398,10 +399,7 @@ export default function Landing() {
 
           <div className="landing-warm__nav-right">
             {accessToken && showAccountAction ? (
-              <>
-                <Link to="/account" className="landing-warm__nav-cta landing-warm__desktop-action">Личный кабинет</Link>
-                <Link to="/account" className="landing-warm__nav-cta landing-warm__mobile-action">Личный кабинет</Link>
-              </>
+              <PublicAccountLink className="landing-warm__nav-cta" />
             ) : (
               <>
                 {!accessToken && (

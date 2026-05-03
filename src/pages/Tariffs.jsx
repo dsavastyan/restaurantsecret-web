@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 
 import Footer from '@/components/Footer'
 import HomeIcon from '@/components/HomeIcon'
+import PublicAccountLink from '@/components/PublicAccountLink'
 import { analytics } from '@/services/analytics'
 import { useAuth } from '@/store/auth'
 import { useSubscriptionStore } from '@/store/subscription'
@@ -72,10 +73,7 @@ export default function Tariffs() {
 
         <div className="tariffs-nav__right">
           {accessToken && showAccountAction ? (
-            <>
-              <Link to="/account" className="tariffs-nav__cta tariffs-nav__desktop-action">Личный кабинет</Link>
-              <Link to="/account" className="tariffs-nav__cta tariffs-nav__mobile-action">Личный кабинет</Link>
-            </>
+            <PublicAccountLink className="tariffs-nav__cta" />
           ) : (
             <>
               {!accessToken && (

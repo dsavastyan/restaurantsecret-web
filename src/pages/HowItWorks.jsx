@@ -4,6 +4,7 @@ import { useMeta } from '@/lib/useMeta'
 
 import { CookieSettingsModal } from '@/components/CookieSettingsModal'
 import HomeIcon from '@/components/HomeIcon'
+import PublicAccountLink from '@/components/PublicAccountLink'
 import TelegramFooterLink from '@/components/TelegramFooterLink'
 import { postSuggest } from '@/lib/api'
 import { analytics } from '@/services/analytics'
@@ -222,10 +223,7 @@ export default function HowItWorks() {
         </nav>
         <div className="landing-warm__nav-right">
           {accessToken && showAccountAction ? (
-            <>
-              <Link to="/account" className="landing-warm__nav-cta landing-warm__desktop-action">Личный кабинет</Link>
-              <Link to="/account" className="landing-warm__nav-cta landing-warm__mobile-action">Личный кабинет</Link>
-            </>
+            <PublicAccountLink className="landing-warm__nav-cta" />
           ) : (
             <>
               {!accessToken && (

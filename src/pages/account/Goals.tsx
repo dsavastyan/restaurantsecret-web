@@ -5,6 +5,11 @@ import { useGoalsStore } from '@/store/goals';
 
 import goalMenuImg from '@/assets/icons/goal-menu.png';
 
+const parseManualGoalValue = (value: string) => {
+    const parsed = value === '' ? 0 : Number(value);
+    return Number.isFinite(parsed) ? parsed : NaN;
+};
+
 export default function Goals() {
     const navigate = useNavigate();
     const token = useAuth(s => s.accessToken);
@@ -80,12 +85,22 @@ export default function Goals() {
     const handleSaveManualGoals = async () => {
         if (!token) return;
 
+        const calories = parseManualGoalValue(manualForm.calories);
+        const protein = parseManualGoalValue(manualForm.protein);
+        const fat = parseManualGoalValue(manualForm.fat);
+        const carbs = parseManualGoalValue(manualForm.carbs);
+
+        if ([calories, protein, fat, carbs].some(value => !Number.isFinite(value) || value < 0)) {
+            alert('Значения КБЖУ не могут быть отрицательными');
+            return;
+        }
+
         try {
             await updateTargets(token, {
-                target_calories: parseFloat(manualForm.calories) || 0,
-                target_protein: parseFloat(manualForm.protein) || 0,
-                target_fat: parseFloat(manualForm.fat) || 0,
-                target_carbs: parseFloat(manualForm.carbs) || 0,
+                target_calories: calories,
+                target_protein: protein,
+                target_fat: fat,
+                target_carbs: carbs,
                 is_auto_calculated: false
             });
             setShowManualForm(false);
@@ -187,6 +202,7 @@ export default function Goals() {
                                 <label>Калории (ккал)</label>
                                 <input
                                     type="number"
+                                    min="0"
                                     value={manualForm.calories}
                                     onChange={(e) => handleManualFormChange('calories', e.target.value)}
                                     placeholder="2000"
@@ -196,6 +212,7 @@ export default function Goals() {
                                 <label>Белки (г)</label>
                                 <input
                                     type="number"
+                                    min="0"
                                     value={manualForm.protein}
                                     onChange={(e) => handleManualFormChange('protein', e.target.value)}
                                     placeholder="150"
@@ -205,6 +222,7 @@ export default function Goals() {
                                 <label>Жиры (г)</label>
                                 <input
                                     type="number"
+                                    min="0"
                                     value={manualForm.fat}
                                     onChange={(e) => handleManualFormChange('fat', e.target.value)}
                                     placeholder="70"
@@ -214,6 +232,7 @@ export default function Goals() {
                                 <label>Углеводы (г)</label>
                                 <input
                                     type="number"
+                                    min="0"
                                     value={manualForm.carbs}
                                     onChange={(e) => handleManualFormChange('carbs', e.target.value)}
                                     placeholder="200"

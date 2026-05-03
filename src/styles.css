@@ -16561,11 +16561,6 @@ html[data-rs-theme="night"] .onboarding-install__image {
   transform: translateY(1px);
 }
 
-.landing-warm__mobile-action,
-.tariffs-nav__mobile-action {
-  display: none;
-}
-
 .landing-warm__hero {
   padding-top: 100px;
   padding-bottom: 80px;
@@ -21708,24 +21703,14 @@ html[data-rs-theme="night"] .account-subscription-v2__saving-copy span {
     gap: 8px;
   }
 
-  .landing-warm__desktop-action,
-  .tariffs-nav__desktop-action {
-    display: none;
-  }
-
-  .landing-warm__nav-right > .landing-warm__login-link:not(.landing-warm__desktop-action),
-  .tariffs-nav__right > .tariffs-nav__login-link:not(.tariffs-nav__desktop-action) {
+  .landing-warm__nav-right > .landing-warm__login-link,
+  .tariffs-nav__right > .tariffs-nav__login-link {
     display: none;
     min-height: 44px;
     align-items: center;
     font-size: 15px;
     font-weight: 500;
     white-space: nowrap;
-  }
-
-  .landing-warm__mobile-action,
-  .tariffs-nav__mobile-action {
-    display: inline-flex;
   }
 
   .landing-warm__nav-cta,
@@ -21856,8 +21841,8 @@ html[data-rs-theme="night"] .account-subscription-v2__saving-copy span {
     font-size: 11px;
   }
 
-  .landing-warm__nav-right > .landing-warm__login-link:not(.landing-warm__desktop-action),
-  .tariffs-nav__right > .tariffs-nav__login-link:not(.tariffs-nav__desktop-action) {
+  .landing-warm__nav-right > .landing-warm__login-link,
+  .tariffs-nav__right > .tariffs-nav__login-link {
     min-height: 40px;
     font-size: 13px;
   }
