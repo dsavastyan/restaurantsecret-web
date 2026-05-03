@@ -144,6 +144,11 @@ export default function DishCardModal() {
       navigate("/login", { state: { from: location.pathname + location.search } });
       return;
     }
+    if (!isFavorite && !hasDishAccess) {
+      close();
+      navigate("/account/subscription", { state: { from: location.pathname + location.search } });
+      return;
+    }
     if (!isFavorite) {
       analytics.track("favorite_add", { type: "dish", dish_id: data.id, name: data.name });
     } else {
@@ -175,6 +180,7 @@ export default function DishCardModal() {
     const dishId = Number(data.id);
 
     await addDiaryEntry(accessToken, {
+      date: new Date().toISOString().split('T')[0],
       dish_id: Number.isFinite(dishId) ? dishId : undefined,
       restaurant_slug: data.restaurantSlug,
       restaurant_name: data.restaurantName || undefined,

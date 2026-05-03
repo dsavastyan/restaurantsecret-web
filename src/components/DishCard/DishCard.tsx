@@ -60,6 +60,12 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, showRes
             navigate('/login', { state: { from: location.pathname + location.search } });
             return;
         }
+
+        if (!favorited && !hasDishAccess) {
+            navigate('/account/subscription', { state: { from: location.pathname + location.search } });
+            return;
+        }
+
         if (!favorited) {
             analytics.track("favorite_add", { type: "dish", dish_id: dish.id, name: dish.name });
         } else {
@@ -90,6 +96,7 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, showRes
         const dishId = Number(dish.id);
 
         await addDiaryEntry(accessToken, {
+            date: new Date().toISOString().split('T')[0],
             dish_id: Number.isFinite(dishId) ? dishId : undefined,
             restaurant_slug: restaurantSlug,
             restaurant_name: restaurantName || undefined,

@@ -16,6 +16,12 @@ type HydratedDish = {
     restaurantSlug: string;
     restaurantName: string;
     addedAt: string;
+    isFreeAccess: boolean;
+};
+
+const buildDishAccessKey = (dish: any) => {
+    if (dish?.id != null && dish?.id !== '') return `id:${dish.id}`;
+    return `name:${String(dish?.name || '').trim().toLowerCase()}`;
 };
 
 const getRestaurantInitials = (name?: string) => {
@@ -144,7 +150,7 @@ export default function Favorites() {
                         // Ideally we should have a caching layer or simple cache here
                         const menu = await apiGet(
                             `/restaurants/${slug}/menu`,
-                            accessToken ? { headers: { Authorization: `Bearer ${accessToken}` } } : {},
+                            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
                         );
                         menuCache.set(slug, menu);
                     } catch (e) {
@@ -163,6 +169,7 @@ export default function Favorites() {
                     // Flatten dishes to find by ID
                     // Note: flattenMenuDishes is a helper that returns array of dishes
                     const allDishes = flattenMenuDishes(menu);
+                    const freeDishKeys = new Set(allDishes.slice(0, 3).map(buildDishAccessKey));
                     const found = allDishes.find((d: any) => Number(d.id) === item.dishId);
 
                     if (found) {
@@ -170,7 +177,8 @@ export default function Favorites() {
                             dish: found,
                             restaurantSlug: item.restaurantSlug,
                             restaurantName: menu.name || item.restaurantSlug,
-                            addedAt: item.addedAt
+                            addedAt: item.addedAt,
+                            isFreeAccess: freeDishKeys.has(buildDishAccessKey(found)),
                         });
                     }
                 }
@@ -186,7 +194,7 @@ export default function Favorites() {
 
         fetchDetails();
         return () => { aborted = true; };
-    }, [items]); // Re-run when favorites list changes
+    }, [items, token]); // Re-run when favorites list or auth token changes
 
     if (!token) {
         return (
@@ -243,11 +251,13 @@ export default function Favorites() {
                                     dish={item.dish}
                                     restaurantSlug={item.restaurantSlug}
                                     restaurantName={item.restaurantName}
+                                    isFreeAccess={item.isFreeAccess}
                                     onClick={() => openModal({
                                         id: item.dish.id,
                                         dishName: item.dish.name,
                                         restaurantSlug: item.restaurantSlug,
-                                        restaurantName: item.restaurantName
+                                        restaurantName: item.restaurantName,
+                                        isFreeAccess: item.isFreeAccess,
                                     })}
                                 />
                             ))}

@@ -90,12 +90,12 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
     },
 
     addEntry: async (token, entry) => {
-        const currentDate = get().selectedDate;
-        const isTodayEntry = currentDate === getTodayIso();
+        const targetDate = typeof entry.date === 'string' && entry.date ? entry.date : get().selectedDate;
+        const isTodayEntry = targetDate === getTodayIso();
         try {
             const res = await apiPost<{ ok: boolean, entry?: any }>(
                 '/api/diary',
-                { ...entry, date: currentDate },
+                { ...entry, date: targetDate },
                 token
             );
 
@@ -105,7 +105,7 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
                     set((state) => ({ todayEntriesCount: state.todayEntriesCount + 1 }));
                 }
                 // Refresh data
-                await get().fetchDay(token, currentDate);
+                await get().fetchDay(token, targetDate);
             } else {
                 toast.error('Ошибка добавления');
             }

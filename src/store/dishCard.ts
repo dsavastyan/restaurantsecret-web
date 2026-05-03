@@ -183,7 +183,10 @@ const findDishInMenu = (
 
   return menuDishes.find((item) => {
     const idsToCompare = [item.id, (item as any).dish_id, (item as any).dishId];
-    if (draft.id != null && idsToCompare.some((id) => id === draft.id)) {
+    if (
+      draft.id != null &&
+      idsToCompare.some((id) => id != null && String(id) === String(draft.id))
+    ) {
       return true;
     }
 
@@ -200,6 +203,13 @@ const findDishInMenu = (
   });
 };
 
+const buildDishAccessKey = (dish: Record<string, unknown>) => {
+  const id = dish?.id ?? (dish as any)?.dish_id ?? (dish as any)?.dishId;
+  if (id != null && id !== "") return `id:${id}`;
+
+  return `name:${String(dish?.name || "").trim().toLowerCase()}`;
+};
+
 const resolveRestaurantName = (menu: Record<string, unknown>, draft: DishCardDraft) => {
   const restaurantFromMenu =
     (menu?.name as string) ||
@@ -213,6 +223,7 @@ const deriveCardData = (
   draft: DishCardDraft,
   restaurantName?: string,
   capturedAt?: string | null,
+  isFreeAccess?: boolean,
 ): DishCardData => {
   const name =
     (dish?.name as string) ||
@@ -237,7 +248,7 @@ const deriveCardData = (
     name,
     restaurantSlug: draft.restaurantSlug,
     restaurantName: restaurantName || draft.restaurantName,
-    isFreeAccess: Boolean(draft.isFreeAccess),
+    isFreeAccess: Boolean(isFreeAccess ?? draft.isFreeAccess),
     portionLabel: buildPortionLabel(dish),
     kcal,
     proteins_g: proteins,
@@ -265,11 +276,15 @@ async function openDishCard(draft: DishCardDraft) {
       throw new Error("Блюдо не найдено в меню ресторана");
     }
 
+    const freeDishKeys = new Set(dishes.slice(0, 3).map((dish) => buildDishAccessKey(dish)));
+    const isFreeAccess = Boolean(draft.isFreeAccess) || freeDishKeys.has(buildDishAccessKey(match));
+
     const data = deriveCardData(
       match as Record<string, unknown>,
       draft,
       resolveRestaurantName(menu, draft),
       (menu as any)?.menuCapturedAt as string | null,
+      isFreeAccess,
     );
     updateState({
       ...state,
