@@ -731,11 +731,13 @@ export default function AccountSubscription() {
                           <span className="account-subscription-v2__current-pill">Текущий план</span>
                         </div>
 
-                        <h3 className="account-subscription-v2__active-title">{activePlanTitle}</h3>
-                        <p className="account-subscription-v2__active-price">
-                          <span>{activePlanPrice}</span>
-                          {activePlanPeriod && <small>{activePlanPeriod}</small>}
-                        </p>
+                        <div className="account-subscription-v2__active-plan-row">
+                          <h3 className="account-subscription-v2__active-title">{activePlanTitle}</h3>
+                          <p className="account-subscription-v2__active-price">
+                            <span>{activePlanPrice}</span>
+                            {activePlanPeriod && <small>{activePlanPeriod}</small>}
+                          </p>
+                        </div>
 
                         <div className="account-subscription-v2__active-meta">
                           <p>
@@ -765,16 +767,6 @@ export default function AccountSubscription() {
                         </p>
 
                         <div className="account-subscription-v2__active-actions">
-                          {canShowAnnualOffer && (
-                            <button
-                              className="account-subscription-v2__btn-renew"
-                              onClick={handleOpenAnnualOffer}
-                              disabled={Boolean(paymentPlan)}
-                            >
-                              Перейти на годовой
-                            </button>
-                          )}
-
                           {statusData?.can_cancel && (
                             <button
                               className="account-subscription-v2__btn-cancel-inline"
@@ -786,18 +778,6 @@ export default function AccountSubscription() {
                             </button>
                           )}
                         </div>
-                      </div>
-
-                      <div className="account-subscription-v2__active-visual" aria-hidden="true">
-                        <svg className="account-subscription-v2__active-ornament" viewBox="0 0 180 180" fill="none">
-                          <circle cx="91" cy="91" r="70" fill="#F3F0E5" />
-                          <circle cx="91" cy="91" r="48" fill="#E7EEDB" />
-                          <path d="M54 93c13-24 50-38 79-19-4 34-34 56-70 46-11-3-15-15-9-27Z" fill="#7A9349" />
-                          <path d="M68 96c15 6 35 6 58-13" stroke="#F9F7EF" strokeWidth="7" strokeLinecap="round" />
-                          <circle cx="96" cy="93" r="28" fill="#FBFCF5" stroke="#C9D4B4" strokeWidth="5" />
-                          <path d="m84 93 9 9 18-21" stroke="#6F873D" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-                          <path d="M65 45v16M57 53h16M135 116v14M128 123h14" stroke="#D7A23B" strokeWidth="5" strokeLinecap="round" />
-                        </svg>
                       </div>
                     </div>
 
