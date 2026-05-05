@@ -19195,7 +19195,7 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
   }
 
   .account-subscription-v2__active-card {
-    grid-template-columns: minmax(0, 1fr) 58px !important;
+    grid-template-columns: minmax(0, 1fr) !important;
     gap: 6px !important;
     min-height: 0 !important;
     padding: 10px !important;
@@ -19221,9 +19221,20 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
     font-size: 26px !important;
   }
 
+  .account-subscription-v2__active-plan-row {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+  }
+
   .account-subscription-v2__active-price {
     gap: 5px !important;
-    margin: 2px 0 7px !important;
+    margin: 0 0 7px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
   }
 
   .account-subscription-v2__active-price span {
@@ -19266,9 +19277,7 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
   }
 
   .account-subscription-v2__active-visual {
-    align-self: start !important;
-    width: 58px !important;
-    margin: 32px 0 0 !important;
+    display: none !important;
   }
 
   .account-subscription-v2__subscriber-note,
@@ -19304,12 +19313,11 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
 
 @media (max-width: 430px) {
   .account-subscription-v2__active-card {
-    grid-template-columns: minmax(0, 1fr) 48px !important;
+    grid-template-columns: minmax(0, 1fr) !important;
   }
 
   .account-subscription-v2__active-visual {
-    width: 48px !important;
-    margin-top: 34px !important;
+    display: none !important;
   }
 
   .account-subscription-v2__active-title {
@@ -20083,7 +20091,7 @@ html[data-rs-theme="night"] .account-subscription-v2__annual-summary p {
   }
 
   .account-subscription-v2__active-card {
-    grid-template-columns: minmax(0, 1fr) 58px !important;
+    grid-template-columns: minmax(0, 1fr) !important;
     gap: 6px !important;
     min-height: 0 !important;
     padding: 10px !important;
@@ -20109,9 +20117,20 @@ html[data-rs-theme="night"] .account-subscription-v2__annual-summary p {
     font-size: 26px !important;
   }
 
+  .account-subscription-v2__active-plan-row {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+  }
+
   .account-subscription-v2__active-price {
     gap: 5px !important;
-    margin: 2px 0 7px !important;
+    margin: 0 0 7px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
   }
 
   .account-subscription-v2__active-price span {
@@ -20154,9 +20173,7 @@ html[data-rs-theme="night"] .account-subscription-v2__annual-summary p {
   }
 
   .account-subscription-v2__active-visual {
-    align-self: start !important;
-    width: 58px !important;
-    margin: 32px 0 0 !important;
+    display: none !important;
   }
 
   .account-subscription-v2__subscriber-note,
@@ -20192,12 +20209,11 @@ html[data-rs-theme="night"] .account-subscription-v2__annual-summary p {
 
 @media (max-width: 430px) {
   .account-subscription-v2__active-card {
-    grid-template-columns: minmax(0, 1fr) 48px !important;
+    grid-template-columns: minmax(0, 1fr) !important;
   }
 
   .account-subscription-v2__active-visual {
-    width: 48px !important;
-    margin-top: 34px !important;
+    display: none !important;
   }
 
   .account-subscription-v2__active-title {
@@ -20658,7 +20674,7 @@ html[data-rs-theme="night"] .account-subscription-v2__annual-summary p {
 .account-subscription-v2__active-card {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 34%);
+  grid-template-columns: minmax(0, 1fr);
   gap: 28px;
   align-items: center;
   min-height: 430px;
@@ -20671,6 +20687,13 @@ html[data-rs-theme="night"] .account-subscription-v2__annual-summary p {
   position: relative;
   z-index: 2;
   min-width: 0;
+}
+
+.account-subscription-v2__active-plan-row {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
 }
 
 .account-subscription-v2__active-badges {
@@ -20728,6 +20751,10 @@ html[data-rs-theme="night"] .account-subscription-v2__annual-summary p {
   align-items: baseline;
   gap: 12px;
   margin: 12px 0 24px;
+  padding: 14px 18px;
+  border: 1px solid rgba(218, 203, 184, 0.9);
+  border-radius: 18px;
+  background: rgba(255, 253, 249, 0.78);
   color: #111827;
 }
 
@@ -24288,7 +24315,7 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
 
 .account-subscription-v2__active-card {
   min-height: 224px !important;
-  grid-template-columns: minmax(0, 1fr) 132px !important;
+  grid-template-columns: minmax(0, 1fr) !important;
   gap: 12px !important;
   padding: 17px 20px !important;
   border-radius: 16px !important;
@@ -24311,12 +24338,24 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
   line-height: 0.96 !important;
 }
 
+.account-subscription-v2__active-plan-row {
+  display: flex !important;
+  align-items: end !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+}
+
 .account-subscription-v2__active-price {
   display: flex !important;
   flex-wrap: nowrap !important;
   align-items: baseline !important;
   gap: 7px !important;
-  margin: 4px 0 9px !important;
+  margin: 0 0 9px !important;
+  padding: 9px 12px !important;
+  border: 1px solid rgba(218, 203, 184, 0.92) !important;
+  border-radius: 12px !important;
+  background: rgba(255, 253, 249, 0.82) !important;
+  box-shadow: 0 10px 20px rgba(67, 53, 32, 0.05) !important;
   white-space: nowrap !important;
 }
 
@@ -24354,7 +24393,7 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
 
 .account-subscription-v2__active-actions {
   display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-columns: minmax(0, 1fr) !important;
   gap: 8px !important;
   margin-top: 10px !important;
 }
@@ -24367,7 +24406,7 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
 }
 
 .account-subscription-v2__active-visual {
-  width: 118px !important;
+  display: none !important;
 }
 
 .account-subscription-v2__active-ornament {
@@ -24568,6 +24607,41 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
 
   .account-subscription-v2__active-price span {
     font-size: 32px !important;
+  }
+}
+
+@media (max-width: 899px) {
+  .account-subscription-v2__active-card {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .account-subscription-v2__active-plan-row {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+  }
+
+  .account-subscription-v2__active-price {
+    margin: 0 0 7px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .account-subscription-v2__active-visual {
+    display: none !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .account-subscription-v2__active-card {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .account-subscription-v2__active-visual {
+    display: none !important;
   }
 }
 /* Annual upgrade true EOF overrides. */
