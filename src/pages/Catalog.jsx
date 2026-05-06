@@ -8,7 +8,7 @@ import { useSWRLite } from '../hooks/useSWRLite.js'
 import { useFavoriteRestaurantsStore } from '@/store/favoriteRestaurants'
 import { useAuth } from '@/store/auth'
 import { analytics } from '@/services/analytics'
-import { getRussianPluralWord } from '@/lib/text'
+import { getRussianPluralWord, matchesSearchQuery } from '@/lib/text'
 import { getLandingStats } from '@/lib/api'
 
 // Fetch a large number to emulate "all" items since backend pagination seems flaky
@@ -184,14 +184,12 @@ export default function Catalog() {
   const filteredItems = useMemo(() => {
     if (!allItems.length) return []
 
-    const normalizedQuery = debouncedQuery.toLowerCase()
     const cuisines = selectedCuisines.map((c) => c?.toLowerCase())
     const metro = selectedMetro.trim().toLowerCase()
 
     return allItems.filter((item) => {
-      const name = item?.name?.toLowerCase() || ''
       const cuisine = item?.cuisine?.toLowerCase() || ''
-      const matchesQuery = !normalizedQuery || name.includes(normalizedQuery)
+      const matchesQuery = !debouncedQuery || matchesSearchQuery(item?.name, debouncedQuery)
 
       // Split cuisines by comma and check if any selected cuisine is in the list
       let matchesCuisine = !cuisines.length

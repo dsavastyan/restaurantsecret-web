@@ -608,6 +608,34 @@ export default function AccountSubscription() {
     }
   }, [accessToken, fetchStatus, resuming, statusData?.plan]);
 
+  const renderActiveSubscriptionAction = useCallback((modifier: "desktop" | "mobile") => {
+    if (!isCancellationScheduled && !statusData?.can_cancel) return null;
+
+    return (
+      <div className={`account-subscription-v2__active-actions account-subscription-v2__active-actions--${modifier}`}>
+        {isCancellationScheduled ? (
+          <button
+            className="account-subscription-v2__btn-resume-inline"
+            type="button"
+            onClick={handleResume}
+            disabled={resuming}
+          >
+            {resuming ? "Возобновляем..." : "Возобновить подписку"}
+          </button>
+        ) : (
+          <button
+            className="account-subscription-v2__btn-cancel-inline"
+            type="button"
+            onClick={handleCancel}
+            disabled={canceling}
+          >
+            {canceling ? "Отмена..." : "Отменить подписку"}
+          </button>
+        )}
+      </div>
+    );
+  }, [canceling, handleCancel, handleResume, isCancellationScheduled, resuming, statusData?.can_cancel]);
+
   return (
     <section className={`account-panel-v2 account-subscription-panel${isActive ? " is-active-subscription" : ""}${showAnnualOffer ? " is-annual-upgrade" : ""}`} aria-labelledby="account-subscription-heading">
       <header className="account-panel-v2__header">
@@ -758,10 +786,14 @@ export default function AccountSubscription() {
 
                         <div className="account-subscription-v2__active-plan-row">
                           <h3 className="account-subscription-v2__active-title">{activePlanTitle}</h3>
-                          <p className="account-subscription-v2__active-price">
-                            <span>{activePlanPrice}</span>
-                            {activePlanPeriod && <small>{activePlanPeriod}</small>}
-                          </p>
+                          <div className="account-subscription-v2__active-price-column">
+                            <p className="account-subscription-v2__active-price">
+                              <span>{activePlanPrice}</span>
+                              {activePlanPeriod && <small>{activePlanPeriod}</small>}
+                            </p>
+
+                            {renderActiveSubscriptionAction("desktop")}
+                          </div>
                         </div>
 
                         <div className="account-subscription-v2__active-meta">
@@ -783,29 +815,7 @@ export default function AccountSubscription() {
                           </p>
                         </div>
 
-                        {(isCancellationScheduled || statusData?.can_cancel) && (
-                          <div className="account-subscription-v2__active-actions">
-                            {isCancellationScheduled ? (
-                              <button
-                                className="account-subscription-v2__btn-resume-inline"
-                                type="button"
-                                onClick={handleResume}
-                                disabled={resuming}
-                              >
-                                {resuming ? "Возобновляем..." : "Возобновить подписку"}
-                              </button>
-                            ) : (
-                              <button
-                                className="account-subscription-v2__btn-cancel-inline"
-                                type="button"
-                                onClick={handleCancel}
-                                disabled={canceling}
-                              >
-                                {canceling ? "Отмена..." : "Отменить подписку"}
-                              </button>
-                            )}
-                          </div>
-                        )}
+                        {renderActiveSubscriptionAction("mobile")}
                       </div>
                     </div>
 

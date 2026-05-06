@@ -108,6 +108,118 @@ function normalizeSearchText(text: string): string {
     .trim();
 }
 
+function transliterateCyrillicToLatin(input: string): string {
+  const map: Record<string, string> = {
+    а: "a",
+    б: "b",
+    в: "v",
+    г: "g",
+    д: "d",
+    е: "e",
+    ж: "zh",
+    з: "z",
+    и: "i",
+    й: "y",
+    к: "k",
+    л: "l",
+    м: "m",
+    н: "n",
+    о: "o",
+    п: "p",
+    р: "r",
+    с: "s",
+    т: "t",
+    у: "u",
+    ф: "f",
+    х: "kh",
+    ц: "ts",
+    ч: "ch",
+    ш: "sh",
+    щ: "shch",
+    ы: "y",
+    э: "e",
+    ю: "yu",
+    я: "ya",
+  };
+
+  return input
+    .split("")
+    .map((char) => map[char] ?? char)
+    .join("");
+}
+
+function transliterateLatinToCyrillic(input: string): string {
+  const map: [string, string][] = [
+    ["shch", "щ"],
+    ["zh", "ж"],
+    ["kh", "х"],
+    ["ts", "ц"],
+    ["ch", "ч"],
+    ["sh", "ш"],
+    ["yo", "е"],
+    ["yu", "ю"],
+    ["ya", "я"],
+    ["ye", "е"],
+    ["e", "е"],
+    ["y", "й"],
+    ["a", "а"],
+    ["b", "б"],
+    ["v", "в"],
+    ["g", "г"],
+    ["d", "д"],
+    ["z", "з"],
+    ["i", "и"],
+    ["k", "к"],
+    ["l", "л"],
+    ["m", "м"],
+    ["n", "н"],
+    ["o", "о"],
+    ["p", "п"],
+    ["r", "р"],
+    ["s", "с"],
+    ["t", "т"],
+    ["u", "у"],
+    ["f", "ф"],
+  ];
+
+  let idx = 0;
+  let result = "";
+
+  while (idx < input.length) {
+    const substring = input.slice(idx);
+    const match = map.find(([latin]) => substring.startsWith(latin));
+
+    if (match) {
+      result += match[1];
+      idx += match[0].length;
+    } else {
+      result += substring[0];
+      idx += 1;
+    }
+  }
+
+  return result;
+}
+
+function buildTokenVariants(token: string): string[] {
+  const variants = new Set<string>();
+  const add = (value: string) => {
+    const normalized = normalizeSearchText(value).replace(/\s+/g, "");
+    if (!normalized) return;
+
+    variants.add(normalized);
+
+    const stem = stemRussianToken(normalized);
+    if (stem) variants.add(stem);
+  };
+
+  add(token);
+  add(transliterateCyrillicToLatin(token));
+  add(transliterateLatinToCyrillic(token));
+
+  return Array.from(variants);
+}
+
 function tokenizeSearchText(text: string): string[] {
   if (!text) return [];
   return normalizeSearchText(text)
@@ -152,25 +264,83 @@ function almostEqualByPrefix(a: string, b: string): boolean {
   return prefix >= minLen - 1;
 }
 
-function tokenMatches(queryToken: string, targetToken: string): boolean {
-  if (!queryToken || !targetToken) return false;
-  if (targetToken.includes(queryToken) || queryToken.includes(targetToken)) return true;
+function isNearSubsequence(queryToken: string, targetToken: string): boolean {
+  if (queryToken.length < 4 || targetToken.length < 4) return false;
+  if (Math.abs(queryToken.length - targetToken.length) > 2) return false;
 
-  const queryStem = stemRussianToken(queryToken);
-  const targetStem = stemRussianToken(targetToken);
+  const shorter = queryToken.length <= targetToken.length ? queryToken : targetToken;
+  const longer = queryToken.length <= targetToken.length ? targetToken : queryToken;
+  let cursor = 0;
 
-  if (queryStem === targetStem) return true;
-  if (targetStem.includes(queryStem) || queryStem.includes(targetStem)) return true;
-  if (almostEqualByPrefix(queryStem, targetStem)) return true;
+  for (const char of longer) {
+    if (char === shorter[cursor]) cursor += 1;
+    if (cursor === shorter.length) return true;
+  }
 
   return false;
+}
+
+function boundedEditDistance(a: string, b: string, maxDistance: number): number {
+  if (Math.abs(a.length - b.length) > maxDistance) return maxDistance + 1;
+
+  let previous = Array.from({ length: b.length + 1 }, (_, index) => index);
+
+  for (let i = 1; i <= a.length; i += 1) {
+    const current = [i];
+    let rowMin = current[0];
+
+    for (let j = 1; j <= b.length; j += 1) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      const value = Math.min(
+        previous[j] + 1,
+        current[j - 1] + 1,
+        previous[j - 1] + cost
+      );
+      current[j] = value;
+      rowMin = Math.min(rowMin, value);
+    }
+
+    if (rowMin > maxDistance) return maxDistance + 1;
+    previous = current;
+  }
+
+  return previous[b.length];
+}
+
+function isNearEditMatch(queryToken: string, targetToken: string): boolean {
+  const minLen = Math.min(queryToken.length, targetToken.length);
+  if (minLen < 4) return false;
+
+  const maxDistance = minLen <= 4 ? 2 : 1;
+  return boundedEditDistance(queryToken, targetToken, maxDistance) <= maxDistance;
+}
+
+function tokenVariantMatches(queryToken: string, targetToken: string): boolean {
+  if (!queryToken || !targetToken) return false;
+  if (targetToken.includes(queryToken) || queryToken.includes(targetToken)) return true;
+  if (almostEqualByPrefix(queryToken, targetToken)) return true;
+  if (isNearSubsequence(queryToken, targetToken)) return true;
+  if (isNearEditMatch(queryToken, targetToken)) return true;
+
+  return false;
+}
+
+function tokenMatches(queryToken: string, targetToken: string): boolean {
+  const queryVariants = buildTokenVariants(queryToken);
+  const targetVariants = buildTokenVariants(targetToken);
+
+  return queryVariants.some((queryVariant) =>
+    targetVariants.some((targetVariant) => tokenVariantMatches(queryVariant, targetVariant))
+  );
 }
 
 /**
  * Flexible search matcher for dish names:
  * - ignores word order
  * - tolerates common Russian inflections
+ * - matches Latin/Cyrillic transliteration both ways
  * - tolerates 1-char ending differences (e.g. "капучина" -> "капучино")
+ * - tolerates one or two missing letters (e.g. "пста" -> "паста")
  */
 export function matchesSearchQuery(candidate: unknown, query: unknown): boolean {
   const candidateText = typeof candidate === "string" ? candidate : "";

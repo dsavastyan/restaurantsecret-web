@@ -25009,6 +25009,10 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
   margin-top: 12px !important;
 }
 
+.account-subscription-v2__active-actions--mobile {
+  display: none !important;
+}
+
 .account-subscription-panel.is-active-subscription .account-subscription-v2__btn-resume-inline,
 .account-subscription-panel.is-active-subscription .account-subscription-v2__btn-cancel-inline {
   min-height: 40px !important;
@@ -25017,13 +25021,49 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
 }
 
 @media (max-width: 899px) {
-  .account-subscription-v2__active-actions {
-    margin-top: 8px !important;
+  .account-subscription-v2__active-actions--desktop {
+    display: none !important;
   }
 
-  .account-subscription-panel.is-active-subscription .account-subscription-v2__btn-resume-inline,
-  .account-subscription-panel.is-active-subscription .account-subscription-v2__btn-cancel-inline {
+  .account-subscription-v2__active-actions--mobile {
+    display: flex !important;
     width: 100% !important;
+    margin-top: 10px !important;
+    padding-left: 0 !important;
+    justify-content: flex-start !important;
+  }
+
+  .account-subscription-panel.is-active-subscription .account-subscription-v2__active-actions--mobile .account-subscription-v2__btn-resume-inline,
+  .account-subscription-panel.is-active-subscription .account-subscription-v2__active-actions--mobile .account-subscription-v2__btn-cancel-inline {
+    width: auto !important;
     min-height: 36px !important;
+    padding: 0 14px !important;
+    font-size: 13px !important;
+  }
+}
+
+.account-subscription-v2__active-price-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 0 0 auto;
+}
+
+@media (min-width: 900px) {
+  .account-subscription-v2__active-plan-row {
+    align-items: flex-start !important;
+  }
+
+  .account-subscription-v2__active-price-column {
+    margin-left: auto !important;
+  }
+
+  .account-subscription-v2__active-price-column .account-subscription-v2__active-price {
+    margin: 0 !important;
+  }
+
+  .account-subscription-v2__active-price-column .account-subscription-v2__active-actions {
+    margin-top: 14px !important;
+    width: auto !important;
   }
 }
