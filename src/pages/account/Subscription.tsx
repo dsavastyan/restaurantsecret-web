@@ -120,6 +120,7 @@ export default function AccountSubscription() {
   const [annualOfferOpen, setAnnualOfferOpen] = useState(false);
   const [promoQuote, setPromoQuote] = useState<PromoQuote | null>(null);
   const [canceling, setCanceling] = useState(false);
+  const [resuming, setResuming] = useState(false);
 
   const fetchStatus = useCallback(async () => {
     if (!accessToken) {
@@ -583,6 +584,30 @@ export default function AccountSubscription() {
     }
   }, [accessToken, canceling, fetchStatus, statusData?.plan]);
 
+  const handleResume = useCallback(async () => {
+    if (!accessToken || resuming) return;
+
+    setResuming(true);
+    try {
+      const res = await apiPost<{ ok: boolean; error?: string }>("/api/subscriptions/resume", {}, accessToken);
+      if (res?.ok) {
+        analytics.track("subscription_resumed", { plan: statusData?.plan || "unknown" }, { ignoreConsent: true });
+        await fetchStatus();
+      } else {
+        const message =
+          res?.error === "no_payment_method"
+            ? "Не удалось возобновить автопродление: нет привязанной карты"
+            : res?.error || "Не удалось возобновить подписку";
+        alert(message);
+      }
+    } catch (err) {
+      console.error("Resume sub error", err);
+      alert("Ошибка при возобновлении подписки");
+    } finally {
+      setResuming(false);
+    }
+  }, [accessToken, fetchStatus, resuming, statusData?.plan]);
+
   return (
     <section className={`account-panel-v2 account-subscription-panel${isActive ? " is-active-subscription" : ""}${showAnnualOffer ? " is-annual-upgrade" : ""}`} aria-labelledby="account-subscription-heading">
       <header className="account-panel-v2__header">
@@ -758,26 +783,29 @@ export default function AccountSubscription() {
                           </p>
                         </div>
 
-                        <p className="account-subscription-v2__active-note">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
-                            <circle cx="12" cy="12" r="9" />
-                            <path d="M12 10v6M12 7.5h.01" strokeLinecap="round" />
-                          </svg>
-                          Тариф можно изменить или отменить в любой момент.
-                        </p>
-
-                        <div className="account-subscription-v2__active-actions">
-                          {statusData?.can_cancel && (
-                            <button
-                              className="account-subscription-v2__btn-cancel-inline"
-                              type="button"
-                              onClick={handleCancel}
-                              disabled={canceling}
-                            >
-                              {canceling ? "Отмена..." : "Отменить подписку"}
-                            </button>
-                          )}
-                        </div>
+                        {(isCancellationScheduled || statusData?.can_cancel) && (
+                          <div className="account-subscription-v2__active-actions">
+                            {isCancellationScheduled ? (
+                              <button
+                                className="account-subscription-v2__btn-resume-inline"
+                                type="button"
+                                onClick={handleResume}
+                                disabled={resuming}
+                              >
+                                {resuming ? "Возобновляем..." : "Возобновить подписку"}
+                              </button>
+                            ) : (
+                              <button
+                                className="account-subscription-v2__btn-cancel-inline"
+                                type="button"
+                                onClick={handleCancel}
+                                disabled={canceling}
+                              >
+                                {canceling ? "Отмена..." : "Отменить подписку"}
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
 
