@@ -25066,4 +25066,9 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
     margin-top: 14px !important;
     width: auto !important;
   }
+
+  .account-subscription-v2__active-meta {
+    max-width: calc(100% - 250px) !important;
+    margin-top: -48px !important;
+  }
 }
