@@ -24931,11 +24931,33 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
   }
 
   .account-subscription-v2__active-plan-row {
+    align-items: flex-start !important;
     width: 100% !important;
   }
 
   .account-subscription-v2__active-price {
     margin-left: auto !important;
     margin-right: 0 !important;
+  }
+}
+
+@media (max-width: 899px) {
+  .account-subscription-v2__active-plan-row {
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+
+  .account-subscription-v2__active-title {
+    flex: 0 1 auto !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+
+  .account-subscription-v2__active-price {
+    flex: 0 0 auto !important;
+    margin: 0 0 7px auto !important;
   }
 }
