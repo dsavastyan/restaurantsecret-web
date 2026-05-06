@@ -24923,3 +24923,19 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
     font-size: 13px !important;
   }
 }
+
+@media (min-width: 900px) {
+  .account-subscription-v2__active-content {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .account-subscription-v2__active-plan-row {
+    width: 100% !important;
+  }
+
+  .account-subscription-v2__active-price {
+    margin-left: auto !important;
+    margin-right: 0 !important;
+  }
+}
