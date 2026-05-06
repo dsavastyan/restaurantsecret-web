@@ -248,6 +248,7 @@ export default function Menu() {
     }
     return `https://www.openstreetmap.org/search?query=${encodeURIComponent(`${menu?.name || slug} ресторан`)}`
   }, [menu?.name, restaurantPoint, slug])
+  const mobileMapOpenUrl = restaurantLinkUrl || mapOpenUrl
 
   useMeta({
     title: `Меню ${seoRestaurantName} с КБЖУ — калории, белки, жиры, углеводы`,
@@ -281,6 +282,10 @@ export default function Menu() {
 
   const openMapInBrowser = () => {
     window.open(mapOpenUrl, '_blank', 'noopener,noreferrer')
+  }
+
+  const openMobileMapInBrowser = () => {
+    window.open(mobileMapOpenUrl, '_blank', 'noopener,noreferrer')
   }
 
   const handleShare = async () => {
@@ -366,7 +371,7 @@ export default function Menu() {
             <button
               type="button"
               className="menu-mobile-hero__map"
-              onClick={openMapInBrowser}
+              onClick={openMobileMapInBrowser}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none">
                 <path d="M12 21s7-5.1 7-11a7 7 0 0 0-14 0c0 5.9 7 11 7 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -374,8 +379,6 @@ export default function Menu() {
               </svg>
               <span>На карте</span>
             </button>
-
-            {restaurantLinkUrl ? <RestaurantWebLink href={restaurantLinkUrl} className="menu-mobile-hero__web" /> : null}
 
             <button
               type="button"

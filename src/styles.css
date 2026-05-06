@@ -13260,24 +13260,6 @@ body:has(.account--sheet-open) {
     height: 16px;
   }
 
-  .menu-mobile-hero__web {
-    width: 46px;
-    height: 46px;
-    min-height: 46px;
-    border-radius: 999px;
-    border: 1px solid rgba(224, 213, 199, 0.95);
-    background: rgba(255, 255, 255, 0.82);
-    color: #4d463e;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    line-height: 1;
-    text-decoration: none;
-    box-shadow: 0 12px 22px rgba(62, 47, 30, 0.06);
-    flex: 0 0 46px;
-  }
-
   .menu-mobile-hero__favorite {
     width: 56px;
     height: 56px;
@@ -13572,14 +13554,6 @@ body:has(.account--sheet-open) {
     min-height: 42px;
     padding: 0 12px;
     font-size: 12px;
-  }
-
-  .menu-mobile-hero__web {
-    width: 42px;
-    height: 42px;
-    min-height: 42px;
-    flex-basis: 42px;
-    font-size: 20px;
   }
 
   .menu-mobile-hero__favorite {
@@ -15079,12 +15053,6 @@ html[data-rs-theme="night"] .menu-hero__back-catalog:hover {
 }
 
 html[data-rs-theme="night"] .menu-hero__web {
-  color: #7dd3c7;
-}
-
-html[data-rs-theme="night"] .menu-mobile-hero__web {
-  background: rgba(15, 26, 44, 0.9);
-  border-color: rgba(148, 163, 184, 0.34);
   color: #7dd3c7;
 }
 
