@@ -47,7 +47,7 @@ export default function Tariffs() {
   const subscriptionCheckoutLink = getSubscriptionCheckoutLink(accessToken, location.pathname + location.search)
 
   const handleProClick = () => {
-    analytics.track('cta_clicked', { location: 'tariffs', text: accessToken ? 'Попробовать Pro' : 'Попробовать бесплатно' })
+    analytics.track('cta_clicked', { location: 'tariffs', text: accessToken ? 'Попробовать Премиум' : 'Попробовать бесплатно' })
   }
 
   const handleTrialClick = () => {
@@ -181,7 +181,7 @@ export default function Tariffs() {
                   state={proState}
                   onClick={handleProClick}
                 >
-                  Попробовать Pro
+                  Попробовать Премиум
                 </Link>
               </div>
             </article>

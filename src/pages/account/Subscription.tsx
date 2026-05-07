@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ApiError, apiGet, apiPost, quotePromo, redeemPromo, isUnauthorizedError, PromoQuote, attachPaymentMethod, syncTrialPayment } from "@/lib/api";
 import { useAuth } from "@/store/auth";
@@ -48,6 +48,7 @@ const PLAN_PRICE_BADGES: Record<string, string> = {
 
 const INTRO_TRIAL_PROMO_CODE = "RS7FREE";
 const PENDING_TRIAL_PAYMENT_KEY = "rs_pending_intro_trial_payment_id";
+const RESUME_AFTER_CARD_BIND_KEY = "rs_resume_after_card_bind";
 
 const ERROR_LABELS: Record<string, string> = {
   invalid_code: "Промокод не найден",
@@ -80,6 +81,20 @@ function forgetPendingTrialPayment() {
   if (typeof window === "undefined") return;
   try {
     window.sessionStorage.removeItem(PENDING_TRIAL_PAYMENT_KEY);
+  } catch { /* ignore */ }
+}
+
+function rememberResumeAfterCardBind() {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(RESUME_AFTER_CARD_BIND_KEY, "1");
+  } catch { /* ignore */ }
+}
+
+function forgetResumeAfterCardBind() {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.removeItem(RESUME_AFTER_CARD_BIND_KEY);
   } catch { /* ignore */ }
 }
 
@@ -121,6 +136,7 @@ export default function AccountSubscription() {
   const [promoQuote, setPromoQuote] = useState<PromoQuote | null>(null);
   const [canceling, setCanceling] = useState(false);
   const [resuming, setResuming] = useState(false);
+  const resumingRef = useRef(false);
 
   const fetchStatus = useCallback(async () => {
     if (!accessToken) {
@@ -584,29 +600,131 @@ export default function AccountSubscription() {
     }
   }, [accessToken, canceling, fetchStatus, statusData?.plan]);
 
-  const handleResume = useCallback(async () => {
-    if (!accessToken || resuming) return;
+  const resumeAutopay = useCallback(async ({
+    attachIfMissing,
+    silentMissingCard = false,
+  }: {
+    attachIfMissing: boolean;
+    silentMissingCard?: boolean;
+  }) => {
+    if (!accessToken || resumingRef.current) return "busy" as const;
 
+    resumingRef.current = true;
     setResuming(true);
+    setPaymentError(null);
     try {
+      await apiGet(`/api/payment-methods?t=${Date.now()}`, accessToken).catch(() => null);
+
       const res = await apiPost<{ ok: boolean; error?: string }>("/api/subscriptions/resume", {}, accessToken);
       if (res?.ok) {
+        forgetResumeAfterCardBind();
         analytics.track("subscription_resumed", { plan: statusData?.plan || "unknown" }, { ignoreConsent: true });
         await fetchStatus();
-      } else {
-        const message =
-          res?.error === "no_payment_method"
-            ? "Не удалось возобновить автопродление: нет привязанной карты"
-            : res?.error || "Не удалось возобновить подписку";
-        alert(message);
+        return "resumed" as const;
       }
+
+      if (res?.error === "no_payment_method" && attachIfMissing) {
+        rememberResumeAfterCardBind();
+        analytics.track("payment_method_attach_started", {
+          source_page: "subscription_management",
+          reason: "resume_subscription",
+        });
+
+        const attachRes = await attachPaymentMethod(accessToken, {
+          return_url: `${window.location.origin}/account/subscription?resume_autopay=1`,
+        });
+
+        const confirmationUrl =
+          typeof attachRes?.confirmation_url === "string" && attachRes.confirmation_url.trim()
+            ? attachRes.confirmation_url.trim()
+            : null;
+
+        if (confirmationUrl) {
+          window.location.href = confirmationUrl;
+          return "attaching" as const;
+        }
+
+        forgetResumeAfterCardBind();
+        setPaymentError("Не удалось открыть привязку карты. Попробуйте позже.");
+        return "error" as const;
+      }
+
+      if (res?.error === "no_payment_method" && silentMissingCard) {
+        return "missing_card" as const;
+      }
+
+      const message =
+        res?.error === "no_payment_method"
+          ? "Карта ещё не привязалась. Попробуйте ещё раз через несколько секунд."
+          : res?.error || "Не удалось возобновить подписку";
+      setPaymentError(message);
+      return "error" as const;
     } catch (err) {
+      if (isUnauthorizedError(err)) {
+        logout();
+        setPaymentError(null);
+        return "unauthorized" as const;
+      }
       console.error("Resume sub error", err);
-      alert("Ошибка при возобновлении подписки");
+      setPaymentError("Ошибка при возобновлении подписки");
+      return "error" as const;
     } finally {
+      resumingRef.current = false;
       setResuming(false);
     }
-  }, [accessToken, fetchStatus, resuming, statusData?.plan]);
+  }, [accessToken, fetchStatus, logout, statusData?.plan]);
+
+  const handleResume = useCallback(() => {
+    resumeAutopay({ attachIfMissing: true });
+  }, [resumeAutopay]);
+
+  useEffect(() => {
+    if (!accessToken || typeof window === "undefined") return;
+
+    const shouldResume =
+      new URLSearchParams(window.location.search).get("resume_autopay") === "1" ||
+      window.sessionStorage.getItem(RESUME_AFTER_CARD_BIND_KEY) === "1";
+
+    if (!shouldResume) return;
+
+    let canceled = false;
+
+    const pollResume = async () => {
+      for (let attempt = 0; attempt < 10 && !canceled; attempt += 1) {
+        const result = await resumeAutopay({ attachIfMissing: false, silentMissingCard: true });
+        await fetchStatus();
+
+        const fresh = await apiGet<SubscriptionStatusResponse>(
+          `/api/subscriptions/status?t=${Date.now()}`,
+          accessToken,
+        ).catch(() => null);
+
+        if (fresh?.status === "active" && !fresh?.canceled_at) {
+          forgetResumeAfterCardBind();
+          if (window.location.search.includes("resume_autopay=1")) {
+            const cleanUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+          }
+          return;
+        }
+
+        if (result === "resumed") return;
+
+        await new Promise((resolve) => window.setTimeout(resolve, 1800));
+      }
+
+      if (!canceled) {
+        forgetResumeAfterCardBind();
+        setPaymentError("Карта ещё не привязалась. Попробуйте возобновить подписку через несколько секунд.");
+      }
+    };
+
+    pollResume();
+
+    return () => {
+      canceled = true;
+    };
+  }, [accessToken, fetchStatus, resumeAutopay]);
 
   const renderActiveSubscriptionAction = useCallback((modifier: "desktop" | "mobile") => {
     if (!isCancellationScheduled && !statusData?.can_cancel) return null;
