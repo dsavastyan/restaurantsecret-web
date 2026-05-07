@@ -26,6 +26,8 @@ type SubscriptionStatusResponse = {
   next_charge_at?: string | null;
   source?: string | null;
   is_trial?: boolean;
+  promo_requires_subscribing?: boolean | null;
+  auto_renewal_enabled?: boolean;
   error?: string | null;
 };
 
@@ -301,12 +303,21 @@ export default function AccountSubscription() {
   const expiredDescription = `Ваша подписка на ${planTitle} закончилась ${expiresLabel ?? ""}`.trim();
   const isAnnualPlan = currentPlanKey === "annual";
   const canShowAnnualOffer = isActive && currentPlanKey === "monthly";
-  const activePlanTitle = currentPlanKey === "annual" ? "Год" : currentPlanKey === "monthly" ? "Месяц" : planTitle;
-  const activePlanPrice = currentPlanKey === "annual" ? "1 490 ₽" : currentPlanKey === "monthly" ? "199 ₽" : planPriceBadge;
-  const activePlanPeriod = currentPlanKey === "annual" ? "/год" : currentPlanKey === "monthly" ? "/мес" : "";
-  const activeRenewalLabel = isCancellationScheduled ? "Автопродление отключено" : "Автопродление включено";
+  const isNonRenewingPromoAccess =
+    statusData?.source?.startsWith("promo:") && statusData?.promo_requires_subscribing === false;
+  const isAutoRenewalEnabled = Boolean(statusData?.auto_renewal_enabled);
+  const activePlanTitle = isNonRenewingPromoAccess ? "Промодоступ" : currentPlanKey === "annual" ? "Год" : currentPlanKey === "monthly" ? "Месяц" : planTitle;
+  const activePlanPrice = isNonRenewingPromoAccess ? "0 ₽" : currentPlanKey === "annual" ? "1 490 ₽" : currentPlanKey === "monthly" ? "199 ₽" : planPriceBadge;
+  const activePlanPeriod = isNonRenewingPromoAccess ? "" : currentPlanKey === "annual" ? "/год" : currentPlanKey === "monthly" ? "/мес" : "";
+  const activeRenewalLabel = isCancellationScheduled
+    ? "Автопродление отключено"
+    : isAutoRenewalEnabled
+      ? "Автопродление включено"
+      : "Автопродление не подключено";
   const activeBillingLabel = isCancellationScheduled
     ? `Подписка действует до: ${expiresLabel ?? "—"}`
+    : !isAutoRenewalEnabled
+      ? `${statusData?.is_trial || isNonRenewingPromoAccess ? "Доступ по промокоду" : "Подписка"} действует до: ${expiresLabel ?? "—"}`
     : statusData?.next_charge_at
       ? `Следующее списание: ${formatDate(statusData.next_charge_at) ?? "—"}`
       : statusData?.is_trial
@@ -315,7 +326,7 @@ export default function AccountSubscription() {
 
   const showHistory = (isActive || isCanceled || isExpired) && !loading;
   const isNeverSubscribed = status === "none" && !showHistory;
-  const showAnnualOffer = annualOfferOpen && canShowAnnualOffer;
+  const showAnnualOffer = annualOfferOpen && canShowAnnualOffer && !isNonRenewingPromoAccess;
   const showRenewCheckout = (isExpired || isCanceled) && renewPlansOpen;
 
   const pageTitle = showAnnualOffer
@@ -788,7 +799,9 @@ export default function AccountSubscription() {
           <p className="account-panel-v2__subtitle">Выберите месячный или годовой тариф</p>
         )}
         {isActive && !showAnnualOffer && (
-          <p className="account-panel-v2__subtitle">Управляйте тарифом и следите за продлением</p>
+          <p className="account-panel-v2__subtitle">
+            {isNonRenewingPromoAccess ? "Доступ активен до окончания промопериода" : "Управляйте тарифом и следите за продлением"}
+          </p>
         )}
         {showAnnualOffer && (
           <p className="account-panel-v2__subtitle">Сейчас у тебя месячный план — 199 ₽/мес</p>
@@ -993,7 +1006,7 @@ export default function AccountSubscription() {
                       </div>
                     </div>
 
-                    {!isAnnualPlan && (
+                    {!isAnnualPlan && !isNonRenewingPromoAccess && (
                       <button
                         className="account-subscription-v2__saving-card"
                         type="button"
