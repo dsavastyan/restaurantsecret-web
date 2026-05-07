@@ -316,9 +316,12 @@ export default function AccountSubscription() {
   const showHistory = (isActive || isCanceled || isExpired) && !loading;
   const isNeverSubscribed = status === "none" && !showHistory;
   const showAnnualOffer = annualOfferOpen && canShowAnnualOffer;
+  const showRenewCheckout = (isExpired || isCanceled) && renewPlansOpen;
 
   const pageTitle = showAnnualOffer
     ? "Сэкономь с годовым тарифом"
+    : showRenewCheckout
+      ? "Возобновить подписку"
     : isNeverSubscribed
       ? "Оформить подписку"
       : isActive
@@ -567,6 +570,18 @@ export default function AccountSubscription() {
     analytics.track("annual_upgrade_offer_opened", { source_page: "subscription_management" });
   }, []);
 
+  const handleOpenRenewCheckout = useCallback(() => {
+    setRenewPlansOpen(true);
+    setPaymentError(null);
+    if (!selectedPlan) {
+      setSelectedPlan("year");
+    }
+    analytics.track("renew_checkout_opened", {
+      plan: statusData?.plan || "unknown",
+      source_page: "subscription_management",
+    });
+  }, [selectedPlan, statusData?.plan]);
+
   const handleAnnualUpgrade = useCallback(() => {
     createPayment("year", undefined, Boolean(isActive && currentUiPlan === "month"));
   }, [createPayment, currentUiPlan, isActive]);
@@ -576,6 +591,12 @@ export default function AccountSubscription() {
       setAnnualOfferOpen(false);
     }
   }, [annualOfferOpen, canShowAnnualOffer]);
+
+  useEffect(() => {
+    if (!isExpired && !isCanceled && renewPlansOpen) {
+      setRenewPlansOpen(false);
+    }
+  }, [isCanceled, isExpired, renewPlansOpen]);
 
   const handleCancel = useCallback(async () => {
     if (!accessToken || canceling) return;
@@ -763,6 +784,9 @@ export default function AccountSubscription() {
         {isNeverSubscribed && (
           <p className="account-panel-v2__subtitle">Выберите подходящий тариф</p>
         )}
+        {showRenewCheckout && (
+          <p className="account-panel-v2__subtitle">Выберите месячный или годовой тариф</p>
+        )}
         {isActive && !showAnnualOffer && (
           <p className="account-panel-v2__subtitle">Управляйте тарифом и следите за продлением</p>
         )}
@@ -885,7 +909,7 @@ export default function AccountSubscription() {
 
           {!showAnnualOffer && (
             <>
-          {(isActive || isExpired || isCanceled) && (
+          {(isActive || ((isExpired || isCanceled) && !showRenewCheckout)) && (
             <div className={`account-subscription-v2__card ${isActive ? 'is-active' : 'is-expired'}`}>
               <div className="account-subscription-v2__mobile-surface">
                 {isActive ? (
@@ -1002,7 +1026,8 @@ export default function AccountSubscription() {
                       <p className="account-subscription-v2__expired-description">{expiredDescription}</p>
                       <button
                         className="account-subscription-v2__btn-renew"
-                        onClick={() => setRenewPlansOpen(true)}
+                        type="button"
+                        onClick={handleOpenRenewCheckout}
                         disabled={Boolean(paymentPlan)}
                       >
                         Возобновить подписку
@@ -1049,7 +1074,7 @@ export default function AccountSubscription() {
             </div>
           )}
 
-          {(isExpired || isCanceled) && renewPlansOpen && (
+          {showRenewCheckout && (
             <div className="account-subscription-v2__intro account-subscription-v2__intro--renew">
               <SubscriptionPlans
                 selectedPlan={selectedPlan}
