@@ -160,9 +160,11 @@ export default function Landing() {
   const dishesLabel = resolvedStats.dishes > 0
     ? resolvedStats.dishes.toLocaleString('ru-RU')
     : '—'
-  const weeklyAddedLabel = resolvedStats.weeklyAdded > 0
-    ? `+${resolvedStats.weeklyAdded}`
-    : '—'
+  // TODO: вернуть динамический расчет после временной промо-подмены.
+  // const weeklyAddedLabel = resolvedStats.weeklyAdded > 0
+  //   ? `+${resolvedStats.weeklyAdded}`
+  //   : '—'
+  const weeklyAddedLabel = '+9'
   const pointsLabel = resolvedStats.points > 0
     ? resolvedStats.points.toLocaleString('ru-RU')
     : '—'
