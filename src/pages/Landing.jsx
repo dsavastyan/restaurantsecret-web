@@ -23,6 +23,7 @@ const STATS_FALLBACK = {
   points: 0,
   weeklyAdded: 0,
 }
+const TEMP_WEEKLY_ADDED = 3
 const FEATURED_RESTAURANTS_LIMIT = 12
 const RestaurantMap = lazy(() => import('@/components/RestaurantMap'))
 
@@ -151,8 +152,8 @@ export default function Landing() {
     restaurants: heroStats.restaurants > 0 ? heroStats.restaurants : STATS_FALLBACK.restaurants,
     dishes: heroStats.dishes > 0 ? heroStats.dishes : STATS_FALLBACK.dishes,
     points: mapStats.points > 0 ? mapStats.points : STATS_FALLBACK.points,
-    weeklyAdded: heroStats.weeklyAdded > 0 ? heroStats.weeklyAdded : STATS_FALLBACK.weeklyAdded,
-  }), [heroStats.dishes, heroStats.restaurants, heroStats.weeklyAdded, mapStats.points])
+    weeklyAdded: TEMP_WEEKLY_ADDED,
+  }), [heroStats.dishes, heroStats.restaurants, mapStats.points])
 
   const restaurantsLabel = resolvedStats.restaurants > 0
     ? resolvedStats.restaurants.toLocaleString('ru-RU')
