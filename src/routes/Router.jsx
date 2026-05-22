@@ -6,6 +6,7 @@ import { BrowserRouter, HashRouter, Navigate, Outlet, Route, Routes, useLocation
 import AppShell from '../app/AppShell.jsx'
 import { isTelegramLaunch } from '../lib/telegram'
 import NotFound from '../pages/NotFound.jsx'
+import { analytics } from '../services/analytics'
 
 const Landing = lazy(() => import('../pages/Landing.jsx'))
 const Catalog = lazy(() => import('../pages/Catalog.jsx'))
@@ -124,6 +125,7 @@ export default function Router({ children, onReady, onRouteStart }) {
   return (
     <RouterImpl>
       <RouteSplashController onRouteStart={onRouteStart} />
+      <MetrikaRouteTracker />
       <AppRoutes onReady={onReady} />
       {children}
     </RouterImpl>
@@ -139,6 +141,23 @@ function RouteSplashController({ onRouteStart }) {
     previousKeyRef.current = location.key
     onRouteStart?.()
   }, [location.key, onRouteStart])
+
+  return null
+}
+
+function MetrikaRouteTracker() {
+  const location = useLocation()
+  const isInitialRenderRef = React.useRef(true)
+
+  React.useEffect(() => {
+    if (isInitialRenderRef.current) {
+      isInitialRenderRef.current = false
+      return
+    }
+
+    const url = `${window.location.origin}${location.pathname}${location.search}${location.hash}`
+    analytics.trackPageView(url)
+  }, [location.pathname, location.search, location.hash])
 
   return null
 }

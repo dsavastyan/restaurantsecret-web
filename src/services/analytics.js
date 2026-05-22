@@ -8,6 +8,7 @@ const ANON_ID_KEY = "rs_anon_id";
 const ATTRIBUTION_KEY = "rs_landing_attribution_v1";
 const ATTRIBUTION_EVENT_SENT_KEY = "rs_attribution_event_signature_v1";
 const ANALYTICS_SCHEMA_VERSION = "2026-02-20-utm-fix-v3";
+const YANDEX_METRIKA_COUNTER_ID = 108992733;
 
 // Helper to generate UUID v4
 function uuidv4() {
@@ -386,6 +387,35 @@ class AnalyticsService {
             return Boolean(res?.ok);
         } catch (err) {
             if (import.meta.env.DEV) console.warn("[Analytics] Track failed", err);
+            return false;
+        }
+    }
+
+    reachGoal(goalName, props = {}) {
+        if (!goalName || typeof window === "undefined") return false;
+
+        try {
+            window.__loadYandexMetrika?.();
+            if (typeof window.ym !== "function") return false;
+            window.ym(YANDEX_METRIKA_COUNTER_ID, "reachGoal", goalName, props);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    trackPageView(url = window.location.href) {
+        if (typeof window === "undefined") return false;
+
+        try {
+            window.__loadYandexMetrika?.();
+            if (typeof window.ym !== "function") return false;
+            window.ym(YANDEX_METRIKA_COUNTER_ID, "hit", url, {
+                title: document.title,
+                referer: document.referrer || undefined,
+            });
+            return true;
+        } catch {
             return false;
         }
     }

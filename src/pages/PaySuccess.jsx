@@ -35,6 +35,15 @@ export default function PaySuccess() {
   const [message, setMessage] = useState('')
   const [expiresAt, setExpiresAt] = useState(access?.expiresAt ?? null)
 
+  // Fire payment_success Metrika goal immediately on page load.
+  // We fire it here (not inside refreshAccess) because:
+  // 1. The user definitely completed payment to land on this page.
+  // 2. refreshAccess is manual and isActive may be false due to webhook delay.
+  useEffect(() => {
+    window.__loadYandexMetrika?.();
+    try { ym(108992733, 'reachGoal', 'payment_success'); } catch { /* ym not yet ready — queued */ }
+  }, []);
+
   // Keep the local expiration date in sync with context updates.
   useEffect(() => {
     setExpiresAt(access?.expiresAt ?? null)

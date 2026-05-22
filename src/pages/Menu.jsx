@@ -115,6 +115,7 @@ export default function Menu() {
             const normalizedMenu = normalizeMenu(data)
             setMenu(normalizedMenu)
             analytics.track('restaurant_menu_open', { slug, name: normalizedMenu.name || slug })
+            try { ym(108992733, 'reachGoal', 'restaurant_view'); } catch { /* ym not loaded */ }
           }
         } catch (err) {
           if (!aborted) {

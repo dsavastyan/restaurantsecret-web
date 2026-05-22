@@ -86,6 +86,7 @@ export default function LoginPage() {
         const needsOnboarding = res.onboarding_completed !== true;
 
         if (res.created && needsOnboarding) {
+          analytics.reachGoal("signup_completed", { source_page: "login" });
           analytics.track("signup_completed", { source_page: "login" });
           analytics.track("onboarding_started", { step: "welcome" });
         }

@@ -353,6 +353,9 @@ export default function AccountSubscription() {
       const apiPlan = mapUiPlanToApi(plan);
 
       analytics.track("checkout_started", { plan, source_page: "subscription_management" });
+      // Force Metrika to load now (it's normally lazy) so the goal is sent
+      // before we redirect away from this page.
+      window.__loadYandexMetrika?.();
       try { ym(108992733, 'reachGoal', 'checkout_started'); } catch { /* ym not loaded */ }
 
       try {
@@ -374,6 +377,9 @@ export default function AccountSubscription() {
         if (confirmationUrl) {
           // Persist plan so PaySuccess / PaymentResult can read it after redirect.
           try { sessionStorage.setItem("rs_checkout_plan", plan); } catch { /* ignore */ }
+          // Wait 400ms so Metrika has time to send the checkout_started beacon
+          // before the browser navigates away to YooKassa.
+          await new Promise((r) => setTimeout(r, 400));
           window.location.href = confirmationUrl;
           return;
         }
@@ -412,6 +418,7 @@ export default function AccountSubscription() {
         source_page: "subscription_management",
         method: "intro_trial_attach",
       });
+      window.__loadYandexMetrika?.();
       try { ym(108992733, 'reachGoal', 'checkout_started'); } catch { /* ym not loaded */ }
 
       try {
@@ -429,6 +436,7 @@ export default function AccountSubscription() {
         if (confirmationUrl) {
           try { sessionStorage.setItem("rs_checkout_plan", plan); } catch { /* ignore */ }
           rememberPendingTrialPayment(attachRes.payment_id);
+          await new Promise((r) => setTimeout(r, 400));
           window.location.href = confirmationUrl;
           return;
         }

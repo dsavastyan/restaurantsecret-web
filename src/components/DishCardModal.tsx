@@ -90,6 +90,11 @@ export default function DishCardModal() {
     }
   }, [accessToken, fetchStatus, isOpen, data]);
 
+  useEffect(() => {
+    if (!isOpen || !hasDishAccess || !data) return;
+    try { ym(108992733, 'reachGoal', 'dish_kbju_view'); } catch { /* ym not loaded */ }
+  }, [isOpen, hasDishAccess, data]);
+
   const handleSubscribeClick = () => {
     if (accessToken) {
       close();

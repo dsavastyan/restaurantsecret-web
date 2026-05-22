@@ -83,6 +83,7 @@ export default function RestaurantPage() {
           const m = normalizeMenu(data);
           setMenu(m);
           analytics.track("restaurant_menu_open", { slug, name: m.name });
+          try { ym(108992733, 'reachGoal', 'restaurant_view'); } catch { /* ym not loaded */ }
         }
       } catch (e) {
         if (!aborted) setErr('Не удалось загрузить меню');
