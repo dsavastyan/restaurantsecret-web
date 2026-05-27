@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom'
 const DRAW_DATE = new Date('2026-06-26T12:00:00+03:00')
 const SEEN_STORAGE_KEY = 'giveaway_seen'
 const TELEGRAM_URL = 'https://t.me/restaurantsecret'
-const INSTAGRAM_URL = 'https://www.instagram.com/restaurantsecret/'
+const INSTAGRAM_URL = 'https://www.instagram.com/restsecret?igsh=MTM2NG4zcW1kaG1uZg%3D%3D&utm_source=qr'
 const MAX_URL = 'https://max.ru/join/meMlKNXaG_1GdJymtTH9RACrGn0E8xJdidU5O_XfJ04'
 
 type CountdownState = {
