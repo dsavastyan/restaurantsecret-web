@@ -171,6 +171,9 @@ export default function Landing() {
   const extraRestaurantsLabel = totalRestaurantsCount > 0
     ? `- и ещё ${extraRestaurantsCount.toLocaleString('ru-RU')} заведений Москвы -`
     : '- и ещё — заведений Москвы -'
+  const showGiveawayPreview = useMemo(() => (
+    new URLSearchParams(location.search).get('giveaway') === '01122000'
+  ), [location.search])
 
   useEffect(() => {
     analytics.track('landing_open')
@@ -756,7 +759,7 @@ export default function Landing() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_SCHEMA) }}
       />
-      <GiveawayModal />
+      {showGiveawayPreview && <GiveawayModal />}
     </>
   )
 }
