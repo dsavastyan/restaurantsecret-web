@@ -111,11 +111,12 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, showRes
 
     const handleSubscribe = (e: React.MouseEvent) => {
         e.stopPropagation();
+        const returnTo = location.pathname + location.search;
         if (accessToken) {
-            navigate('/account/subscription', { state: { from: location.pathname + location.search } });
+            navigate('/account/subscription', { state: { from: returnTo } });
             return;
         }
-        navigate('/login', { state: { from: '/account/subscription' } });
+        navigate('/login', { state: { from: '/account/subscription', returnTo } });
     };
 
     const handleDetailsClick = (e: React.MouseEvent) => {

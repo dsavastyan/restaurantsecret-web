@@ -3,13 +3,33 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { apiPost } from "@/lib/api";
 import { resetImmersiveViewport, useImmersiveViewport } from "@/hooks/useImmersiveViewport";
+import { SUBSCRIPTION_CHECKOUT_PATH } from "@/lib/subscriptionCta";
 import { useAuth, selectSetToken } from "@/store/auth"; // <— меняем импорт
+import { useSubscriptionStore, selectFetchStatus } from "@/store/subscription";
 import { analytics } from "@/services/analytics";
 import mobileDayBackground from "@/assets/login/Login bacground mobile day.png";
 import desktopDayBackground from "@/assets/login/Login bachround desctop day.png";
 
+const normalizeAppPath = (value: unknown) => {
+  if (typeof value !== "string") return null;
+  if (!value.startsWith("/") || value.startsWith("//")) return null;
+  return value;
+};
+
+const toPathFromLocationState = (value: unknown) => {
+  if (value && typeof value === "object" && "pathname" in value) {
+    const locationLike = value as { pathname?: unknown; search?: unknown };
+    const pathname = typeof locationLike.pathname === "string" ? locationLike.pathname : "";
+    const search = typeof locationLike.search === "string" ? locationLike.search : "";
+    return normalizeAppPath(pathname + search);
+  }
+
+  return normalizeAppPath(value);
+};
+
 export default function LoginPage() {
   const setToken = useAuth(selectSetToken); // <— берём сеттер из стора
+  const fetchSubscriptionStatus = useSubscriptionStore(selectFetchStatus);
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -28,18 +48,34 @@ export default function LoginPage() {
   useImmersiveViewport(`${location.key}:${step}`);
 
   const redirectTo = useMemo(() => {
-    let from = location.state?.from;
-
-    // Handle case where 'from' is a Location object (from <Navigate />)
-    if (from && typeof from === "object" && from.pathname) {
-      from = from.pathname + (from.search || "");
-    }
-
+    const from = toPathFromLocationState(location.state?.from);
     const queryNext = searchParams.get("next");
-    if (queryNext && queryNext.startsWith("/")) return queryNext;
-    if (typeof from === "string" && from.startsWith("/")) return from;
+    const queryNextPath = normalizeAppPath(queryNext);
+    if (queryNextPath) return queryNextPath;
+    if (from) return from;
     return "/account";
   }, [location.state, searchParams]);
+
+  const returnTo = useMemo(() => {
+    const stateReturnTo = toPathFromLocationState(location.state?.returnTo);
+    if (stateReturnTo && stateReturnTo !== "/login" && stateReturnTo !== SUBSCRIPTION_CHECKOUT_PATH) {
+      return stateReturnTo;
+    }
+
+    const queryReturnTo = normalizeAppPath(searchParams.get("returnTo"));
+    if (queryReturnTo && queryReturnTo !== "/login" && queryReturnTo !== SUBSCRIPTION_CHECKOUT_PATH) {
+      return queryReturnTo;
+    }
+
+    return null;
+  }, [location.state, searchParams]);
+
+  const resolvePostLoginRedirect = async (token: string) => {
+    if (redirectTo !== SUBSCRIPTION_CHECKOUT_PATH || !returnTo) return redirectTo;
+
+    const hasActiveSubscription = await fetchSubscriptionStatus(token);
+    return hasActiveSubscription ? returnTo : redirectTo;
+  };
 
   useEffect(() => {
     if (timer <= 0) return;
@@ -82,6 +118,7 @@ export default function LoginPage() {
       const res = await apiPost("/auth/verify-otp", { email, code });
       if (res?.ok && res?.access_token) {
         setToken(res.access_token);       // <— сохраняем токен в твой стор (rs_access)
+        const nextPath = await resolvePostLoginRedirect(res.access_token);
 
         const needsOnboarding = res.onboarding_completed !== true;
 
@@ -95,10 +132,10 @@ export default function LoginPage() {
 
         if (needsOnboarding) {
           resetImmersiveViewport({ blurActiveElement: true });
-          navigate("/onboarding/welcome", { replace: true, state: { next: redirectTo } });
+          navigate("/onboarding/welcome", { replace: true, state: { next: nextPath } });
         } else {
           resetImmersiveViewport({ blurActiveElement: true });
-          navigate(redirectTo, { replace: true });
+          navigate(nextPath, { replace: true });
         }
       } else {
         setErr(res?.message || "Неверный код");

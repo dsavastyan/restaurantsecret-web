@@ -43,7 +43,7 @@ export default function Tariffs() {
   }))
   const showTrialAction = !accessToken || (isSubscriptionStatusLoaded && !showAccountAction)
   const proTo = accessToken ? '/account/subscription' : '/login'
-  const proState = accessToken ? undefined : { from: '/account/subscription' }
+  const proState = accessToken ? undefined : { from: '/account/subscription', returnTo: location.pathname + location.search }
   const subscriptionCheckoutLink = getSubscriptionCheckoutLink(accessToken, location.pathname + location.search)
 
   const handleProClick = () => {
