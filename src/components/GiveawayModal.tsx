@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 const DRAW_DATE = new Date('2026-06-26T12:00:00+03:00')
 const SEEN_STORAGE_KEY = 'giveaway_seen'
 const TELEGRAM_URL = 'https://t.me/restaurantsecret'
+const INSTAGRAM_URL = 'https://www.instagram.com/restaurantsecret/'
 const MAX_URL = 'https://max.ru/join/meMlKNXaG_1GdJymtTH9RACrGn0E8xJdidU5O_XfJ04'
 
 type CountdownState = {
@@ -108,6 +109,69 @@ function MaxIcon() {
       <rect width="24" height="24" rx="7" fill="url(#rsGiveawayMaxBg)" />
       <path d="M12 5C8.134 5 5 7.91 5 11.5c0 1.8.78 3.42 2.04 4.6L6.5 19l3.2-1.36A7.6 7.6 0 0 0 12 18c3.866 0 7-2.91 7-6.5S15.866 5 12 5z" fill="white" />
       <path d="M11.2 9.5h1.4c1.1 0 1.9.72 1.9 1.7 0 .98-.8 1.7-1.9 1.7h-.7v1.6h-.7V9.5zm.7 2.72h.66c.72 0 1.16-.38 1.16-.98 0-.6-.44-.98-1.16-.98h-.66v1.96z" fill="url(#rsGiveawayMaxBg)" />
+    </svg>
+  )
+}
+
+function InstagramIcon() {
+  const cells = [
+    [2, 2, 'rsGiveawayInstagramA'],
+    [9.25, 2, 'rsGiveawayInstagramB'],
+    [16.5, 2, 'rsGiveawayInstagramC'],
+    [2, 9.25, 'rsGiveawayInstagramD'],
+    [9.25, 9.25, 'rsGiveawayInstagramE'],
+    [16.5, 9.25, 'rsGiveawayInstagramF'],
+    [2, 16.5, 'rsGiveawayInstagramG'],
+    [9.25, 16.5, 'rsGiveawayInstagramH'],
+    [16.5, 16.5, 'rsGiveawayInstagramI'],
+  ] as const
+
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="rsGiveawayInstagramA" x1="2" y1="2" x2="7.5" y2="7.5" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#7C2DFF" />
+          <stop offset="0.55" stopColor="#E11DBA" />
+          <stop offset="1" stopColor="#FF3D57" />
+        </linearGradient>
+        <linearGradient id="rsGiveawayInstagramB" x1="9.25" y1="2" x2="14.75" y2="7.5" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#D316C5" />
+          <stop offset="1" stopColor="#FF315F" />
+        </linearGradient>
+        <linearGradient id="rsGiveawayInstagramC" x1="16.5" y1="2" x2="22" y2="7.5" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#F91C6D" />
+          <stop offset="1" stopColor="#FF7142" />
+        </linearGradient>
+        <linearGradient id="rsGiveawayInstagramD" x1="2" y1="9.25" x2="7.5" y2="14.75" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#D113BC" />
+          <stop offset="0.6" stopColor="#F82762" />
+          <stop offset="1" stopColor="#FF7A22" />
+        </linearGradient>
+        <linearGradient id="rsGiveawayInstagramE" x1="9.25" y1="9.25" x2="14.75" y2="14.75" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#F5256B" />
+          <stop offset="1" stopColor="#FF7A17" />
+        </linearGradient>
+        <linearGradient id="rsGiveawayInstagramF" x1="16.5" y1="9.25" x2="22" y2="14.75" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#FF6121" />
+          <stop offset="1" stopColor="#FFB70A" />
+        </linearGradient>
+        <linearGradient id="rsGiveawayInstagramG" x1="2" y1="16.5" x2="7.5" y2="22" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#FB2459" />
+          <stop offset="0.65" stopColor="#FF6E18" />
+          <stop offset="1" stopColor="#FFC20A" />
+        </linearGradient>
+        <linearGradient id="rsGiveawayInstagramH" x1="9.25" y1="16.5" x2="14.75" y2="22" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#FF611C" />
+          <stop offset="1" stopColor="#FFD20B" />
+        </linearGradient>
+        <linearGradient id="rsGiveawayInstagramI" x1="16.5" y1="16.5" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#FF8D11" />
+          <stop offset="1" stopColor="#FFE100" />
+        </linearGradient>
+      </defs>
+      {cells.map(([x, y, gradientId]) => (
+        <rect key={gradientId} x={x} y={y} width="5.5" height="5.5" rx="1.35" fill={`url(#${gradientId})`} />
+      ))}
     </svg>
   )
 }
@@ -255,6 +319,10 @@ export default function GiveawayModal() {
             <a className="rs-giveaway__social rs-giveaway__social--telegram" href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer">
               <TelegramIcon />
               Telegram
+            </a>
+            <a className="rs-giveaway__social rs-giveaway__social--instagram" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
+              <InstagramIcon />
+              Instagram
             </a>
             <a className="rs-giveaway__social rs-giveaway__social--max" href={MAX_URL} target="_blank" rel="noopener noreferrer">
               <MaxIcon />
