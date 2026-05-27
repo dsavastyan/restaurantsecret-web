@@ -302,13 +302,13 @@ function generateStaticRoutes(restaurants, menuBySlug) {
   const staticRoutes = [
     {
       path: '/',
-      title: 'Меню ресторанов с КБЖУ — RestaurantSecret',
-      description: 'Все меню ресторанов Москвы с калориями, белками, жирами и углеводами. Фильтруйте по целям и выбирайте осознанно.',
+      title: 'Меню ресторанов с КБЖУ',
+      description: 'Меню ресторанов Москвы с удобными фильтрами по составу и КБЖУ блюд',
       canonical: `${BASE_URL}/`,
       schema: websiteSchema(),
       fallbackHtml: fallbackPage({
         title: 'Меню ресторанов с КБЖУ',
-        description: 'RestaurantSecret помогает выбирать блюда в ресторанах Москвы по калориям, белкам, жирам и углеводам.',
+        description: 'Меню ресторанов Москвы с удобными фильтрами по составу и КБЖУ блюд',
         links: [{ href: '/catalog', label: 'Открыть каталог ресторанов' }],
       }),
     },

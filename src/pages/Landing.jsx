@@ -110,8 +110,8 @@ function formatDishesLabel(value) {
 
 export default function Landing() {
   useMeta({
-    title: 'Меню ресторанов с КБЖУ — RestaurantSecret',
-    description: 'Все меню ресторанов Москвы с калориями, белками, жирами и углеводами. Фильтруйте по целям и выбирайте осознанно.',
+    title: 'Меню ресторанов с КБЖУ',
+    description: 'Меню ресторанов Москвы с удобными фильтрами по составу и КБЖУ блюд',
     canonical: 'https://restaurantsecret.ru/',
   })
 
