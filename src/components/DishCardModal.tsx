@@ -96,13 +96,14 @@ export default function DishCardModal() {
   }, [isOpen, hasDishAccess, data]);
 
   const handleSubscribeClick = () => {
+    const returnTo = location.pathname + location.search;
     if (accessToken) {
       close();
-      navigate("/account/subscription", { state: { from: location.pathname + location.search } });
+      navigate("/account/subscription", { state: { from: returnTo } });
       return;
     }
     close();
-    navigate("/login", { state: { from: "/account/subscription" } });
+    navigate("/login", { state: { from: "/account/subscription", returnTo } });
   };
 
   const resetOutdatedForm = () => {

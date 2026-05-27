@@ -95,11 +95,12 @@ export default function RestaurantPage() {
   }, [accessToken, fetchStatus, slug]);
 
   const handleSubscribeClick = () => {
+    const returnTo = window.location.pathname + window.location.search;
     if (accessToken) {
-      navigate('/account/subscription', { state: { from: window.location.pathname + window.location.search } });
+      navigate('/account/subscription', { state: { from: returnTo } });
       return;
     }
-    navigate('/login', { state: { from: '/account/subscription' } });
+    navigate('/login', { state: { from: '/account/subscription', returnTo } });
   };
 
   // применение фильтров
