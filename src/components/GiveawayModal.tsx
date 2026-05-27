@@ -224,7 +224,7 @@ export default function GiveawayModal() {
             </h2>
 
             <p className="rs-giveaway__description">
-              Полный доступ к КБЖУ всех блюд, фильтрам и дневнику питания — бесплатно на год.
+              Полный доступ к КБЖУ всех блюд, фильтрам и дневнику питания – бесплатно на год
             </p>
           </div>
 
@@ -242,7 +242,7 @@ export default function GiveawayModal() {
             <div className="rs-giveaway__steps">
               <div className="rs-giveaway__step">
                 <span className="rs-giveaway__step-icon rs-giveaway__step-icon--green">→</span>
-                <span>Подпишитесь на одну или несколько наших соц сетей — больше подписок, больше шансов</span>
+                <span>Подпишитесь на одну или несколько наших соц сетей – больше подписок – больше шансов на победу</span>
               </div>
               <div className="rs-giveaway__step">
                 <span className="rs-giveaway__step-icon rs-giveaway__step-icon--orange">◎</span>

@@ -25256,7 +25256,9 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
 .rs-giveaway__countdown {
   display: flex;
   align-items: flex-end;
+  justify-content: center;
   gap: 8px;
+  width: 100%;
 }
 
 .rs-giveaway__countdown-part {
@@ -25309,7 +25311,8 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
 }
 
 .rs-giveaway__step {
-  display: flex;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
   align-items: flex-start;
   gap: 12px;
   color: var(--rs-giveaway-ink-soft);
@@ -25318,11 +25321,12 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
 }
 
 .rs-giveaway__step-icon {
-  flex: 0 0 auto;
+  width: 28px;
   margin-top: 2px;
   font-size: 15px;
   font-weight: 600;
   line-height: 1;
+  text-align: left;
 }
 
 .rs-giveaway__step-icon--green {
@@ -25368,6 +25372,11 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
   width: 18px;
   height: 18px;
   flex: 0 0 auto;
+}
+
+.rs-giveaway__social--max svg {
+  width: 16px;
+  height: 16px;
 }
 
 .rs-giveaway__social--telegram {
@@ -25509,9 +25518,11 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
   .rs-giveaway__step {
     gap: 10px;
     font-size: 12px;
+    grid-template-columns: 24px minmax(0, 1fr);
   }
 
   .rs-giveaway__step-icon {
+    width: 24px;
     font-size: 13px;
   }
 
@@ -25529,6 +25540,11 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
   .rs-giveaway__social svg {
     width: 17px;
     height: 17px;
+  }
+
+  .rs-giveaway__social--max svg {
+    width: 15px;
+    height: 15px;
   }
 
   .rs-giveaway__fine {
