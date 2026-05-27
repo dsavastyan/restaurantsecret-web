@@ -113,69 +113,6 @@ function MaxIcon() {
   )
 }
 
-function InstagramIcon() {
-  const cells = [
-    [2, 2, 'rsGiveawayInstagramA'],
-    [9.25, 2, 'rsGiveawayInstagramB'],
-    [16.5, 2, 'rsGiveawayInstagramC'],
-    [2, 9.25, 'rsGiveawayInstagramD'],
-    [9.25, 9.25, 'rsGiveawayInstagramE'],
-    [16.5, 9.25, 'rsGiveawayInstagramF'],
-    [2, 16.5, 'rsGiveawayInstagramG'],
-    [9.25, 16.5, 'rsGiveawayInstagramH'],
-    [16.5, 16.5, 'rsGiveawayInstagramI'],
-  ] as const
-
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="rsGiveawayInstagramA" x1="2" y1="2" x2="7.5" y2="7.5" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#7C2DFF" />
-          <stop offset="0.55" stopColor="#E11DBA" />
-          <stop offset="1" stopColor="#FF3D57" />
-        </linearGradient>
-        <linearGradient id="rsGiveawayInstagramB" x1="9.25" y1="2" x2="14.75" y2="7.5" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#D316C5" />
-          <stop offset="1" stopColor="#FF315F" />
-        </linearGradient>
-        <linearGradient id="rsGiveawayInstagramC" x1="16.5" y1="2" x2="22" y2="7.5" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#F91C6D" />
-          <stop offset="1" stopColor="#FF7142" />
-        </linearGradient>
-        <linearGradient id="rsGiveawayInstagramD" x1="2" y1="9.25" x2="7.5" y2="14.75" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#D113BC" />
-          <stop offset="0.6" stopColor="#F82762" />
-          <stop offset="1" stopColor="#FF7A22" />
-        </linearGradient>
-        <linearGradient id="rsGiveawayInstagramE" x1="9.25" y1="9.25" x2="14.75" y2="14.75" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#F5256B" />
-          <stop offset="1" stopColor="#FF7A17" />
-        </linearGradient>
-        <linearGradient id="rsGiveawayInstagramF" x1="16.5" y1="9.25" x2="22" y2="14.75" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#FF6121" />
-          <stop offset="1" stopColor="#FFB70A" />
-        </linearGradient>
-        <linearGradient id="rsGiveawayInstagramG" x1="2" y1="16.5" x2="7.5" y2="22" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#FB2459" />
-          <stop offset="0.65" stopColor="#FF6E18" />
-          <stop offset="1" stopColor="#FFC20A" />
-        </linearGradient>
-        <linearGradient id="rsGiveawayInstagramH" x1="9.25" y1="16.5" x2="14.75" y2="22" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#FF611C" />
-          <stop offset="1" stopColor="#FFD20B" />
-        </linearGradient>
-        <linearGradient id="rsGiveawayInstagramI" x1="16.5" y1="16.5" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#FF8D11" />
-          <stop offset="1" stopColor="#FFE100" />
-        </linearGradient>
-      </defs>
-      {cells.map(([x, y, gradientId]) => (
-        <rect key={gradientId} x={x} y={y} width="5.5" height="5.5" rx="1.35" fill={`url(#${gradientId})`} />
-      ))}
-    </svg>
-  )
-}
-
 function BotanicalDecor() {
   const dots = [
     ['8%', '72%', 'rgba(212,122,58,0.16)', 4],
@@ -321,7 +258,6 @@ export default function GiveawayModal() {
               Telegram
             </a>
             <a className="rs-giveaway__social rs-giveaway__social--instagram" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
-              <InstagramIcon />
               Instagram
             </a>
             <a className="rs-giveaway__social rs-giveaway__social--max" href={MAX_URL} target="_blank" rel="noopener noreferrer">

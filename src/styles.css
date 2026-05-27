@@ -25391,12 +25391,6 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
   background: linear-gradient(135deg, #7c2dff 0%, #e11dba 32%, #ff315f 58%, #ff7a17 78%, #ffd20b 100%);
 }
 
-.rs-giveaway__social--instagram svg {
-  width: 19px;
-  height: 19px;
-  filter: drop-shadow(0 1px 2px rgba(42, 38, 32, 0.12));
-}
-
 .rs-giveaway__social--max {
   background: linear-gradient(135deg, #4f6fff, #a259ff);
 }
@@ -25555,11 +25549,6 @@ html[data-rs-theme="night"] .account-benefit span:not(.account-benefit__icon) {
   .rs-giveaway__social--max svg {
     width: 15px;
     height: 15px;
-  }
-
-  .rs-giveaway__social--instagram svg {
-    width: 18px;
-    height: 18px;
   }
 
   .rs-giveaway__fine {
