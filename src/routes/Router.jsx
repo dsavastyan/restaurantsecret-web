@@ -10,7 +10,6 @@ import { analytics } from '../services/analytics'
 
 const Landing = lazy(() => import('../pages/Landing.jsx'))
 const Catalog = lazy(() => import('../pages/Catalog.jsx'))
-const RestaurantPage = lazy(() => import('../pages/RestaurantPage.jsx'))
 const Menu = lazy(() => import('../pages/Menu.jsx'))
 const Search = lazy(() => import('../pages/Search.jsx'))
 const PaySuccess = lazy(() => import('../pages/PaySuccess.jsx'))
@@ -72,7 +71,7 @@ function AppRoutes({ onReady }) {
           <Route path="catalog" element={<Catalog />} />
           <Route path="restaurants" element={<Catalog />} />
           <Route path="search" element={<Search />} />
-          <Route path="restaurants/:slug" element={<RestaurantPage />} />
+          <Route path="restaurants/:slug" element={<RestaurantMenuRedirect />} />
           <Route path="restaurants/:slug/menu" element={<Menu />} />
           <Route path="r/:slug" element={<ShortRestaurantRedirect />} />
           <Route path="r/:slug/menu" element={<ShortMenuRedirect />} />
@@ -175,7 +174,7 @@ function AppReadySignal({ onReady }) {
 // Redirect short public links to the canonical restaurant URL.
 function ShortRestaurantRedirect() {
   const { slug = '' } = useParams()
-  return <Navigate to={`/restaurants/${slug}`} replace />
+  return <Navigate to={`/restaurants/${slug}/menu`} replace />
 }
 
 // Redirect short public menu links to the canonical menu URL.
@@ -187,11 +186,17 @@ function ShortMenuRedirect() {
 // Redirect old `/restaurant/:slug` paths to the canonical structure.
 function LegacyRestaurantRedirect() {
   const { slug = '' } = useParams()
-  return <Navigate to={`/restaurants/${slug}`} replace />
+  return <Navigate to={`/restaurants/${slug}/menu`} replace />
 }
 
 // Redirect old `/restaurant/:slug/menu` paths to the canonical menu URL.
 function LegacyMenuRedirect() {
+  const { slug = '' } = useParams()
+  return <Navigate to={`/restaurants/${slug}/menu`} replace />
+}
+
+// Keep indexed/direct restaurant entrypoints on the same menu experience as catalog links.
+function RestaurantMenuRedirect() {
   const { slug = '' } = useParams()
   return <Navigate to={`/restaurants/${slug}/menu`} replace />
 }

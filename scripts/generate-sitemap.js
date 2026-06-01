@@ -232,7 +232,7 @@ function restaurantSchema(restaurant) {
     '@context': 'https://schema.org',
     '@type': 'Restaurant',
     name,
-    url: `${BASE_URL}/restaurants/${slug}`,
+    url: `${BASE_URL}/restaurants/${slug}/menu`,
     servesCuisine: stripEmpty(restaurant.cuisine),
     address: stripEmpty(restaurant.address)
       ? {
@@ -372,12 +372,10 @@ function generateStaticRoutes(restaurants, menuBySlug) {
 
     writeRouteHtml(
       `/restaurants/${slug}`,
-      applySeoTags(baseHtml, {
+      createRedirectHtml({
+        from: `/restaurants/${slug}`,
+        to: `/restaurants/${slug}/menu`,
         title,
-        description,
-        canonical: `${BASE_URL}/restaurants/${slug}`,
-        schema: restaurantSchema(restaurant),
-        fallbackHtml: restaurantFallback(restaurant, menu),
       }),
     )
 
@@ -386,7 +384,7 @@ function generateStaticRoutes(restaurants, menuBySlug) {
       applySeoTags(baseHtml, {
         title,
         description,
-        canonical: `${BASE_URL}/restaurants/${slug}`,
+        canonical: `${BASE_URL}/restaurants/${slug}/menu`,
         schema: restaurantSchema(restaurant),
         fallbackHtml: restaurantFallback(restaurant, menu),
       }),
@@ -396,7 +394,7 @@ function generateStaticRoutes(restaurants, menuBySlug) {
       `/r/${slug}`,
       createRedirectHtml({
         from: `/r/${slug}`,
-        to: `/restaurants/${slug}`,
+        to: `/restaurants/${slug}/menu`,
         title: `${name} — меню с КБЖУ | RestaurantSecret`,
       }),
     )
@@ -414,7 +412,7 @@ function generateStaticRoutes(restaurants, menuBySlug) {
       `/restaurant/${slug}`,
       createRedirectHtml({
         from: `/restaurant/${slug}`,
-        to: `/restaurants/${slug}`,
+        to: `/restaurants/${slug}/menu`,
         title: `${name} — меню с КБЖУ | RestaurantSecret`,
       }),
     )
@@ -525,7 +523,7 @@ async function main() {
   const restaurantUrls = restaurants
     .filter((r) => r.slug)
     .map((r) => ({
-      loc: `${BASE_URL}/restaurants/${r.slug}`,
+      loc: `${BASE_URL}/restaurants/${r.slug}/menu`,
       priority: '0.8',
       changefreq: 'weekly',
       lastmod: r.updatedAt?.split('T')[0] ?? today,
