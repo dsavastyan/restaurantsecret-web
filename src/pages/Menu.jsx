@@ -254,7 +254,7 @@ export default function Menu() {
   useMeta({
     title: `Меню ${seoRestaurantName} с КБЖУ — калории, белки, жиры, углеводы`,
     description: seoDescription,
-    canonical: `https://restaurantsecret.ru/restaurants/${slug}`,
+    canonical: `https://restaurantsecret.ru/restaurants/${slug}/menu`,
   })
 
   // Toggle a preset chip and re-run memoized filtering.
