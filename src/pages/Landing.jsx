@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import BotanicDecor from '@/components/BotanicDecor'
 import CityMapBackground from '@/components/CityMapBackground'
-import GiveawayModal from '@/components/GiveawayModal'
 import SearchInput from '@/components/SearchInput'
 import { CookieSettingsModal } from '@/components/CookieSettingsModal'
 import PublicAccountLink from '@/components/PublicAccountLink'
@@ -756,7 +755,6 @@ export default function Landing() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_SCHEMA) }}
       />
-      <GiveawayModal />
     </>
   )
 }
