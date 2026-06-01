@@ -14,6 +14,7 @@ const SearchInput = lazy(() => import('@/components/SearchInput'))
 const DishCardModal = lazy(() => import('@/components/DishCardModal'))
 const DiaryFloatingButton = lazy(() => import('@/components/DiaryFloatingButton'))
 const Footer = lazy(() => import('@/components/Footer.jsx'))
+const GiveawayModal = lazy(() => import('@/components/GiveawayModal'))
 
 // Default shape for the subscription/access status persisted in localStorage.
 const defaultAccess = { ok: false, isActive: false, expiresAt: null, event: null }
@@ -271,6 +272,11 @@ export default function AppShell() {
     normalizedPath === '/catalog' ||
     normalizedPath === '/app/catalog'
   const isSearchPage = normalizedPath === '/search' || normalizedPath === '/app/search'
+  const isRestaurantDiscoveryPage =
+    isRestaurantsCatalogPage ||
+    isSearchPage ||
+    /^\/(?:restaurants|r)\/[^/]+(?:\/menu)?$/.test(normalizedPath)
+  const shouldShowGiveawayModal = isLanding || isRestaurantDiscoveryPage
 
   useEffect(() => {
     if (!accessToken || isOnboardingPage || isLoginPage) return
@@ -369,6 +375,7 @@ export default function AppShell() {
       </main>
       <Suspense fallback={null}>
         {!isImmersivePage && !isMarketingPage && !isFeedbackPage && <Footer />}
+        {shouldShowGiveawayModal && <GiveawayModal />}
       </Suspense>
     </div>
   )
