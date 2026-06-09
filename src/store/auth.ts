@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { analytics } from "@/services/analytics";
 
 type AuthState = {
   accessToken: string | null;
@@ -42,9 +43,14 @@ const persistToken = (token: string | null) => {
 };
 
 export const setToken = (token: string | null) => {
+  const wasLoggedOut = !state.accessToken;
   persistToken(token);
   state = { ...state, accessToken: token };
   notify();
+  // После логина — линкуем анонимные события с пользователем
+  if (token && wasLoggedOut) {
+    analytics.identify().catch(() => {});
+  }
 };
 
 const logout = () => {

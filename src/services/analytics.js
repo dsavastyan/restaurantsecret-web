@@ -391,6 +391,30 @@ class AnalyticsService {
         }
     }
 
+    /**
+     * Вызывать сразу после успешного логина.
+     * Линкует все прошлые анонимные события с user_id на сервере.
+     */
+    async identify() {
+        const token = this.getAccessToken();
+        if (!token) return;
+        const anonId = this.getAnonId();
+        if (!anonId) return;
+
+        try {
+            await fetch(`${this.apiUrl}/api/analytics/identify`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify({ anon_id: anonId }),
+            });
+        } catch (err) {
+            if (import.meta.env.DEV) console.warn("[Analytics] Identify failed", err);
+        }
+    }
+
     reachGoal(goalName, props = {}) {
         if (!goalName || typeof window === "undefined") return false;
 
