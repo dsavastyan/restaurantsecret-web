@@ -74,6 +74,39 @@ export type FeedbackRequest = {
   message: string;
 };
 
+export type StoreProduct = {
+  id: number;
+  source: string;
+  sourceProductCode: string;
+  sourceUrl?: string | null;
+  barcode?: string | null;
+  productName: string;
+  brand?: string | null;
+  quantityText?: string | null;
+  productQuantity?: number | null;
+  productQuantityUnit?: string | null;
+  servingSize?: string | null;
+  servingQuantity?: number | null;
+  servingQuantityUnit?: string | null;
+  nutritionBasis?: string | null;
+  kcalPer100?: number | null;
+  proteinsGPer100?: number | null;
+  fatsGPer100?: number | null;
+  carbsGPer100?: number | null;
+  kcalPerServing?: number | null;
+  proteinsGPerServing?: number | null;
+  fatsGPerServing?: number | null;
+  carbsGPerServing?: number | null;
+  imageFrontUrl?: string | null;
+  updatedAt?: string | null;
+};
+
+export type StoreProductSearchResponse = {
+  ok: boolean;
+  query: string;
+  products: StoreProduct[];
+};
+
 export class ApiError extends Error {
   status?: number;
   payload?: unknown;
@@ -360,6 +393,12 @@ export async function searchSuggest(query: string): Promise<SearchSuggestions> {
 export async function searchFull(query: string): Promise<SearchResult> {
   return publicGet<SearchResult>(
     `/search?query=${encodeURIComponent(query)}`
+  );
+}
+
+export async function searchStoreProducts(query: string, limit = 12): Promise<StoreProductSearchResponse> {
+  return publicGet<StoreProductSearchResponse>(
+    `/products/search?q=${encodeURIComponent(query)}&limit=${limit}`
   );
 }
 

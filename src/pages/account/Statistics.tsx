@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { searchStoreProducts, type StoreProduct } from '@/lib/api';
 import { useAuth } from '@/store/auth';
 import { useDiaryStore } from '@/store/diary';
 import { useGoalsStore } from '@/store/goals';
@@ -25,6 +26,40 @@ const getProgress = (value: number, target?: number | null) => {
 const formatTarget = (value?: number | null, unit = '') => {
     if (!value || value <= 0) return '—';
     return `${Math.round(value)}${unit}`;
+};
+
+const formatProductValue = (value?: number | null, unit = '') => {
+    if (value == null || !Number.isFinite(Number(value))) return '—';
+    const rounded = Math.round(Number(value) * 10) / 10;
+    return `${Number.isInteger(rounded) ? Math.round(rounded) : rounded}${unit}`;
+};
+
+const getProductServingLabel = (product: StoreProduct) => {
+    if (product.servingSize) return product.servingSize;
+    if (product.servingQuantity && product.servingQuantityUnit) {
+        return `${formatProductValue(product.servingQuantity)} ${product.servingQuantityUnit}`;
+    }
+    if (product.quantityText) return product.quantityText;
+    return '100 г';
+};
+
+const getProductDiaryPayload = (product: StoreProduct) => {
+    const hasServingNutrition = product.kcalPerServing != null;
+    const weight =
+        hasServingNutrition && product.servingQuantity
+            ? product.servingQuantity
+            : product.productQuantityUnit === 'g' && product.productQuantity
+                ? product.productQuantity
+                : 100;
+
+    return {
+        name: product.brand ? `${product.productName}, ${product.brand}` : product.productName,
+        calories: hasServingNutrition ? product.kcalPerServing : product.kcalPer100,
+        protein: hasServingNutrition ? product.proteinsGPerServing : product.proteinsGPer100,
+        fat: hasServingNutrition ? product.fatsGPerServing : product.fatsGPer100,
+        carbs: hasServingNutrition ? product.carbsGPerServing : product.carbsGPer100,
+        weight
+    };
 };
 
 const NutritionIcon = ({ type }: { type: 'calories' | 'protein' | 'fat' | 'carbs' }) => {
@@ -92,6 +127,11 @@ export default function Statistics() {
         name: '', calories: '', protein: '', fat: '', carbs: '', weight: ''
     });
     const [isAdding, setIsAdding] = useState(false);
+    const [productQuery, setProductQuery] = useState('');
+    const [productResults, setProductResults] = useState<StoreProduct[]>([]);
+    const [isProductSearchLoading, setIsProductSearchLoading] = useState(false);
+    const [productSearchError, setProductSearchError] = useState('');
+    const [addingProductCode, setAddingProductCode] = useState<string | null>(null);
 
     useEffect(() => {
         if (token) {
@@ -133,6 +173,62 @@ export default function Statistics() {
 
         setManualForm({ name: '', calories: '', protein: '', fat: '', carbs: '', weight: '' });
         setIsAdding(false);
+    };
+
+    useEffect(() => {
+        const query = productQuery.trim();
+        if (query.length < 2) {
+            setProductResults([]);
+            setProductSearchError('');
+            setIsProductSearchLoading(false);
+            return;
+        }
+
+        let isCurrent = true;
+        setIsProductSearchLoading(true);
+        setProductSearchError('');
+
+        const timer = window.setTimeout(async () => {
+            try {
+                const response = await searchStoreProducts(query, 12);
+                if (!isCurrent) return;
+                setProductResults(response.products || []);
+            } catch (error) {
+                console.error(error);
+                if (!isCurrent) return;
+                setProductResults([]);
+                setProductSearchError('Не удалось загрузить продукты');
+            } finally {
+                if (isCurrent) setIsProductSearchLoading(false);
+            }
+        }, 260);
+
+        return () => {
+            isCurrent = false;
+            window.clearTimeout(timer);
+        };
+    }, [productQuery]);
+
+    const handleStoreProductAdd = async (product: StoreProduct) => {
+        if (!token) return;
+        if (!hasActiveSub) {
+            navigate('/account/subscription', { state: { from: window.location.pathname + window.location.search } });
+            return;
+        }
+
+        const payload = getProductDiaryPayload(product);
+        setAddingProductCode(product.sourceProductCode);
+        await addEntry(token, {
+            name: payload.name,
+            calories: Number(payload.calories) || 0,
+            protein: Number(payload.protein) || 0,
+            fat: Number(payload.fat) || 0,
+            carbs: Number(payload.carbs) || 0,
+            weight: Number(payload.weight) || null
+        });
+        setAddingProductCode(null);
+        setProductQuery('');
+        setProductResults([]);
     };
 
     const targets = {
@@ -290,19 +386,96 @@ export default function Statistics() {
                 </div>
             </div>
 
-            {/* Manual Entry Button */}
-            {!isAdding && (
-                <button className="btn-add-product w-full" onClick={() => {
-                    if (!hasActiveSub) {
-                        navigate('/account/subscription', { state: { from: window.location.pathname + window.location.search } });
-                        return;
-                    }
-                    setIsAdding(true);
-                }}>
-                    <span className="btn-add-product__icon">+</span>
-                    <span>Добавить продукт вручную</span>
-                </button>
-            )}
+            <section className="diary-product-search" aria-label="Поиск продуктов для дневника">
+                <div className="diary-product-search__field">
+                    <span className="diary-product-search__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.3-4.3" />
+                        </svg>
+                    </span>
+                    <input
+                        type="search"
+                        value={productQuery}
+                        onChange={(event) => setProductQuery(event.target.value)}
+                        placeholder="Найти продукт или блюдо из магазина"
+                        autoComplete="off"
+                    />
+                    {productQuery && (
+                        <button
+                            type="button"
+                            className="diary-product-search__clear"
+                            onClick={() => {
+                                setProductQuery('');
+                                setProductResults([]);
+                            }}
+                            aria-label="Очистить поиск"
+                        >
+                            ×
+                        </button>
+                    )}
+                </div>
+
+                <div className="diary-product-search__status" aria-live="polite">
+                    {productQuery.trim().length < 2 && 'Начните вводить название, например творог или батончик'}
+                    {productQuery.trim().length >= 2 && isProductSearchLoading && 'Ищем в базе продуктов...'}
+                    {productQuery.trim().length >= 2 && !isProductSearchLoading && productSearchError}
+                    {productQuery.trim().length >= 2 && !isProductSearchLoading && !productSearchError && productResults.length === 0 && 'Ничего не нашли'}
+                </div>
+
+                {productResults.length > 0 && (
+                    <div className="diary-product-results">
+                        {productResults.map((product) => {
+                            const payload = getProductDiaryPayload(product);
+                            const isAddingProduct = addingProductCode === product.sourceProductCode;
+                            return (
+                                <button
+                                    type="button"
+                                    key={`${product.source}:${product.sourceProductCode}`}
+                                    className="diary-product-result"
+                                    onClick={() => handleStoreProductAdd(product)}
+                                    disabled={isAddingProduct}
+                                >
+                                    {product.imageFrontUrl ? (
+                                        <img src={product.imageFrontUrl} alt="" loading="lazy" />
+                                    ) : (
+                                        <span className="diary-product-result__image-placeholder" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M4 11h16" />
+                                                <path d="M5 11c.8 5.3 2.9 8 7 8s6.2-2.7 7-8" />
+                                                <path d="M8 8c.7-2 2-3 4-3s3.3 1 4 3" />
+                                            </svg>
+                                        </span>
+                                    )}
+                                    <span className="diary-product-result__body">
+                                        <span className="diary-product-result__name">{product.productName}</span>
+                                        <span className="diary-product-result__meta">
+                                            {product.brand && <span>{product.brand}</span>}
+                                            <span>{getProductServingLabel(product)}</span>
+                                        </span>
+                                        <span className="diary-product-result__nutrition">
+                                            {formatProductValue(payload.calories, ' ккал')} • Б {formatProductValue(payload.protein)} • Ж {formatProductValue(payload.fat)} • У {formatProductValue(payload.carbs)}
+                                        </span>
+                                    </span>
+                                    <span className="diary-product-result__add">{isAddingProduct ? '...' : '+'}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
+
+                {!isAdding && (
+                    <button className="diary-product-search__manual" type="button" onClick={() => {
+                        if (!hasActiveSub) {
+                            navigate('/account/subscription', { state: { from: window.location.pathname + window.location.search } });
+                            return;
+                        }
+                        setIsAdding(true);
+                    }}>
+                        Добавить вручную
+                    </button>
+                )}
+            </section>
 
             {/* Manual Entry Form */}
             {isAdding && (
