@@ -62,13 +62,19 @@ const normalizeProductAmountText = (value: string) =>
 const normalizeServingSizeText = (value: string) => {
     const text = normalizeProductAmountText(value)
         .replace(/[()]/g, ' ')
-        .replace(/\b1\s*(portion|serving)\b/gi, '1 порция')
-        .replace(/\b([2-4])\s*(portions|servings|portion|serving)\b/gi, '$1 порции')
-        .replace(/\b(\d+)\s*(portions|servings|portion|serving)\b/gi, '$1 порций')
+        .replace(/\b1\s*(portion|serving|piece|item|unit)\b/gi, '1 порция')
+        .replace(/\b([2-4])\s*(portions|servings|pieces|items|units|portion|serving|piece|item|unit)\b/gi, '$1 порции')
+        .replace(/\b(\d+)\s*(portions|servings|pieces|items|units|portion|serving|piece|item|unit)\b/gi, '$1 порций')
         .replace(/\bportion\b/gi, 'порция')
         .replace(/\bserving\b/gi, 'порция')
+        .replace(/\bpiece\b/gi, 'порция')
+        .replace(/\bitem\b/gi, 'порция')
+        .replace(/\bunit\b/gi, 'порция')
         .replace(/\bportions\b/gi, 'порции')
         .replace(/\bservings\b/gi, 'порции')
+        .replace(/\bpieces\b/gi, 'порции')
+        .replace(/\bitems\b/gi, 'порции')
+        .replace(/\bunits\b/gi, 'порции')
         .replace(/\s+/g, ' ')
         .trim();
 
