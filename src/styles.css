@@ -11699,7 +11699,7 @@ body:has(.account--sheet-open) {
   background: rgba(255, 255, 255, 0.95);
   color: inherit;
   text-align: left;
-  cursor: pointer;
+  cursor: default;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
@@ -11709,7 +11709,7 @@ body:has(.account--sheet-open) {
   transform: translateY(-1px);
 }
 
-.diary-product-result:disabled {
+.diary-product-result--disabled {
   cursor: wait;
   opacity: 0.72;
   transform: none;
@@ -11771,9 +11771,46 @@ body:has(.account--sheet-open) {
   font-weight: 600;
 }
 
+.diary-product-result__basis {
+  min-width: 0;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.diary-product-result__basis-option {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 8px;
+  border: 1px solid rgba(201, 213, 190, 0.95);
+  border-radius: 7px;
+  background: rgba(255, 253, 248, 0.94);
+  color: #667085;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.diary-product-result__basis-option:hover {
+  border-color: rgba(77, 152, 73, 0.5);
+  color: #347f38;
+}
+
+.diary-product-result__basis-option--active {
+  border-color: rgba(77, 152, 73, 0.62);
+  background: rgba(77, 152, 73, 0.12);
+  color: #347f38;
+}
+
 .diary-product-result__add {
   width: 34px;
   height: 34px;
+  border: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -11783,6 +11820,11 @@ body:has(.account--sheet-open) {
   font-size: 24px;
   font-weight: 400;
   line-height: 1;
+  cursor: pointer;
+}
+
+.diary-product-result__add:disabled {
+  cursor: wait;
 }
 
 .diary-product-search__manual {
@@ -16274,6 +16316,23 @@ html[data-rs-theme="night"] .diary-product-result__meta {
 
 html[data-rs-theme="night"] .diary-product-result__nutrition {
   color: #b7c4d8;
+}
+
+html[data-rs-theme="night"] .diary-product-result__basis-option {
+  background: rgba(7, 15, 28, 0.72);
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #9badc4;
+}
+
+html[data-rs-theme="night"] .diary-product-result__basis-option:hover {
+  border-color: rgba(143, 209, 154, 0.48);
+  color: #8fd19a;
+}
+
+html[data-rs-theme="night"] .diary-product-result__basis-option--active {
+  background: rgba(143, 209, 154, 0.14);
+  border-color: rgba(143, 209, 154, 0.58);
+  color: #8fd19a;
 }
 
 html[data-rs-theme="night"] .diary-product-search__clear {

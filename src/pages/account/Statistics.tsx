@@ -34,30 +34,95 @@ const formatProductValue = (value?: number | null, unit = '') => {
     return `${Number.isInteger(rounded) ? Math.round(rounded) : rounded}${unit}`;
 };
 
+type ProductNutritionMode = 'serving' | 'per100';
+
+const getProductKey = (product: StoreProduct) => `${product.source}:${product.sourceProductCode}`;
+
+const normalizeProductUnit = (unit?: string | null) => {
+    const text = unit?.trim().toLowerCase();
+    if (!text) return '';
+    if (['g', 'gr', 'gram', 'grams', 'г', 'гр', 'грамм', 'грамма', 'граммов'].includes(text)) return 'г';
+    if (['ml', 'мл', 'milliliter', 'milliliters', 'миллилитр', 'миллилитра', 'миллилитров'].includes(text)) return 'мл';
+    return unit?.trim() || '';
+};
+
+const normalizeProductAmountText = (value: string) =>
+    value
+        .replace(/(\d)\s*(grams?|gr|g)\b/gi, '$1 г')
+        .replace(/(\d)\s*(milliliters?|ml)\b/gi, '$1 мл')
+        .replace(/\bgrams?\b/gi, 'г')
+        .replace(/\bgr\b/gi, 'г')
+        .replace(/\bg\b/gi, 'г')
+        .replace(/\bmilliliters?\b/gi, 'мл')
+        .replace(/\bml\b/gi, 'мл')
+        .replace(/(\d)\s*(г|мл)\b/gi, '$1 $2')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+const normalizeServingSizeText = (value: string) => {
+    const text = normalizeProductAmountText(value)
+        .replace(/[()]/g, ' ')
+        .replace(/\b1\s*(portion|serving)\b/gi, '1 порция')
+        .replace(/\b([2-4])\s*(portions|servings|portion|serving)\b/gi, '$1 порции')
+        .replace(/\b(\d+)\s*(portions|servings|portion|serving)\b/gi, '$1 порций')
+        .replace(/\bportion\b/gi, 'порция')
+        .replace(/\bserving\b/gi, 'порция')
+        .replace(/\bportions\b/gi, 'порции')
+        .replace(/\bservings\b/gi, 'порции')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    return text || value;
+};
+
 const getProductServingLabel = (product: StoreProduct) => {
-    if (product.servingSize) return product.servingSize;
+    if (product.servingSize) return normalizeServingSizeText(product.servingSize);
     if (product.servingQuantity && product.servingQuantityUnit) {
-        return `${formatProductValue(product.servingQuantity)} ${product.servingQuantityUnit}`;
+        return `1 порция ${formatProductValue(product.servingQuantity)} ${normalizeProductUnit(product.servingQuantityUnit)}`;
     }
-    if (product.quantityText) return product.quantityText;
+    if (product.quantityText) return normalizeProductAmountText(product.quantityText);
     return '100 г';
 };
 
-const getProductDiaryPayload = (product: StoreProduct) => {
-    const hasServingNutrition = product.kcalPerServing != null;
+const hasProductServingNutrition = (product: StoreProduct) =>
+    product.kcalPerServing != null ||
+    product.proteinsGPerServing != null ||
+    product.fatsGPerServing != null ||
+    product.carbsGPerServing != null;
+
+const hasProductPer100Nutrition = (product: StoreProduct) =>
+    product.kcalPer100 != null ||
+    product.proteinsGPer100 != null ||
+    product.fatsGPer100 != null ||
+    product.carbsGPer100 != null;
+
+const getDefaultProductNutritionMode = (product: StoreProduct): ProductNutritionMode =>
+    hasProductServingNutrition(product) ? 'serving' : 'per100';
+
+const getProductNutrition = (product: StoreProduct, mode = getDefaultProductNutritionMode(product)) => {
+    const useServing = mode === 'serving' && hasProductServingNutrition(product);
+    return {
+        calories: useServing ? product.kcalPerServing : product.kcalPer100,
+        protein: useServing ? product.proteinsGPerServing : product.proteinsGPer100,
+        fat: useServing ? product.fatsGPerServing : product.fatsGPer100,
+        carbs: useServing ? product.carbsGPerServing : product.carbsGPer100,
+    };
+};
+
+const getProductDiaryPayload = (product: StoreProduct, mode = getDefaultProductNutritionMode(product)) => {
+    const nutrition = getProductNutrition(product, mode);
+    const useServing = mode === 'serving' && hasProductServingNutrition(product);
     const weight =
-        hasServingNutrition && product.servingQuantity
+        useServing && product.servingQuantity
             ? product.servingQuantity
-            : product.productQuantityUnit === 'g' && product.productQuantity
-                ? product.productQuantity
-                : 100;
+            : 100;
 
     return {
         name: product.brand ? `${product.productName}, ${product.brand}` : product.productName,
-        calories: hasServingNutrition ? product.kcalPerServing : product.kcalPer100,
-        protein: hasServingNutrition ? product.proteinsGPerServing : product.proteinsGPer100,
-        fat: hasServingNutrition ? product.fatsGPerServing : product.fatsGPer100,
-        carbs: hasServingNutrition ? product.carbsGPerServing : product.carbsGPer100,
+        calories: nutrition.calories,
+        protein: nutrition.protein,
+        fat: nutrition.fat,
+        carbs: nutrition.carbs,
         weight
     };
 };
@@ -132,6 +197,7 @@ export default function Statistics() {
     const [isProductSearchLoading, setIsProductSearchLoading] = useState(false);
     const [productSearchError, setProductSearchError] = useState('');
     const [addingProductCode, setAddingProductCode] = useState<string | null>(null);
+    const [productNutritionModes, setProductNutritionModes] = useState<Record<string, ProductNutritionMode>>({});
 
     useEffect(() => {
         if (token) {
@@ -209,15 +275,15 @@ export default function Statistics() {
         };
     }, [productQuery]);
 
-    const handleStoreProductAdd = async (product: StoreProduct) => {
+    const handleStoreProductAdd = async (product: StoreProduct, mode = getDefaultProductNutritionMode(product)) => {
         if (!token) return;
         if (!hasActiveSub) {
             navigate('/account/subscription', { state: { from: window.location.pathname + window.location.search } });
             return;
         }
 
-        const payload = getProductDiaryPayload(product);
-        setAddingProductCode(product.sourceProductCode);
+        const payload = getProductDiaryPayload(product, mode);
+        setAddingProductCode(getProductKey(product));
         await addEntry(token, {
             name: payload.name,
             calories: Number(payload.calories) || 0,
@@ -426,15 +492,15 @@ export default function Statistics() {
                 {productResults.length > 0 && (
                     <div className="diary-product-results">
                         {productResults.map((product) => {
-                            const payload = getProductDiaryPayload(product);
-                            const isAddingProduct = addingProductCode === product.sourceProductCode;
+                            const productKey = getProductKey(product);
+                            const selectedMode = productNutritionModes[productKey] || getDefaultProductNutritionMode(product);
+                            const nutrition = getProductNutrition(product, selectedMode);
+                            const canToggleNutrition = hasProductServingNutrition(product) && hasProductPer100Nutrition(product);
+                            const isAddingProduct = addingProductCode === productKey;
                             return (
-                                <button
-                                    type="button"
+                                <div
                                     key={`${product.source}:${product.sourceProductCode}`}
-                                    className="diary-product-result"
-                                    onClick={() => handleStoreProductAdd(product)}
-                                    disabled={isAddingProduct}
+                                    className={`diary-product-result${isAddingProduct ? ' diary-product-result--disabled' : ''}`}
                                 >
                                     {product.imageFrontUrl ? (
                                         <img src={product.imageFrontUrl} alt="" loading="lazy" />
@@ -449,16 +515,49 @@ export default function Statistics() {
                                     )}
                                     <span className="diary-product-result__body">
                                         <span className="diary-product-result__name">{product.productName}</span>
-                                        <span className="diary-product-result__meta">
-                                            {product.brand && <span>{product.brand}</span>}
-                                            <span>{getProductServingLabel(product)}</span>
-                                        </span>
+                                        {product.brand && (
+                                            <span className="diary-product-result__meta">
+                                                <span>{product.brand}</span>
+                                            </span>
+                                        )}
+                                        {canToggleNutrition ? (
+                                            <span className="diary-product-result__basis" role="group" aria-label="Показать КБЖУ">
+                                                <button
+                                                    type="button"
+                                                    className={`diary-product-result__basis-option${selectedMode === 'serving' ? ' diary-product-result__basis-option--active' : ''}`}
+                                                    onClick={() => setProductNutritionModes((current) => ({ ...current, [productKey]: 'serving' }))}
+                                                    aria-pressed={selectedMode === 'serving'}
+                                                >
+                                                    {getProductServingLabel(product)}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className={`diary-product-result__basis-option${selectedMode === 'per100' ? ' diary-product-result__basis-option--active' : ''}`}
+                                                    onClick={() => setProductNutritionModes((current) => ({ ...current, [productKey]: 'per100' }))}
+                                                    aria-pressed={selectedMode === 'per100'}
+                                                >
+                                                    100 г
+                                                </button>
+                                            </span>
+                                        ) : (
+                                            <span className="diary-product-result__meta">
+                                                <span>{selectedMode === 'serving' ? getProductServingLabel(product) : '100 г'}</span>
+                                            </span>
+                                        )}
                                         <span className="diary-product-result__nutrition">
-                                            {formatProductValue(payload.calories, ' ккал')} • Б {formatProductValue(payload.protein)} • Ж {formatProductValue(payload.fat)} • У {formatProductValue(payload.carbs)}
+                                            {formatProductValue(nutrition.calories, ' ккал')} • Б {formatProductValue(nutrition.protein)} • Ж {formatProductValue(nutrition.fat)} • У {formatProductValue(nutrition.carbs)}
                                         </span>
                                     </span>
-                                    <span className="diary-product-result__add">{isAddingProduct ? '...' : '+'}</span>
-                                </button>
+                                    <button
+                                        type="button"
+                                        className="diary-product-result__add"
+                                        onClick={() => handleStoreProductAdd(product, selectedMode)}
+                                        disabled={isAddingProduct}
+                                        aria-label={`Добавить ${product.productName} в дневник`}
+                                    >
+                                        {isAddingProduct ? '...' : '+'}
+                                    </button>
+                                </div>
                             );
                         })}
                     </div>
