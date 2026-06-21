@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { searchStoreProducts, type StoreProduct } from '@/lib/api';
 import { useAuth } from '@/store/auth';
-import { useDiaryStore } from '@/store/diary';
+import { useDiaryStore, type DiaryEntry } from '@/store/diary';
 import { useGoalsStore } from '@/store/goals';
 import { useSubscriptionStore } from '@/store/subscription';
 const formatDateCompact = (dateStr: string) => {
@@ -35,6 +35,22 @@ const formatProductValue = (value?: number | null, unit = '') => {
 };
 
 type ProductNutritionMode = 'serving' | 'per100';
+type DiaryProductUnit = 'serving' | 'grams';
+
+type NutritionValues = {
+    calories: number;
+    protein: number;
+    fat: number;
+    carbs: number;
+};
+
+type DiaryProductEditor = {
+    unit: DiaryProductUnit;
+    amount: string;
+    servingQuantity?: number | null;
+    servingNutrition: NutritionValues;
+    per100Nutrition: NutritionValues;
+};
 
 const getProductKey = (product: StoreProduct) => `${product.source}:${product.sourceProductCode}`;
 
@@ -62,6 +78,8 @@ const normalizeProductAmountText = (value: string) =>
 const normalizeServingSizeText = (value: string) => {
     const text = normalizeProductAmountText(value)
         .replace(/[()]/g, ' ')
+        .replace(/\b1\s*порц(?:ия|ии|ий)?\.?\b/gi, '1 порция')
+        .replace(/\bпорц(?:ия|ии|ий)?\.?\b/gi, 'порция')
         .replace(/\b1\s*(portion|serving|piece|item|unit)\b/gi, '1 порция')
         .replace(/\b([2-4])\s*(portions|servings|pieces|items|units|portion|serving|piece|item|unit)\b/gi, '$1 порции')
         .replace(/\b(\d+)\s*(portions|servings|pieces|items|units|portion|serving|piece|item|unit)\b/gi, '$1 порций')
@@ -78,6 +96,7 @@ const normalizeServingSizeText = (value: string) => {
         .replace(/\s+/g, ' ')
         .trim();
 
+    if (/^порция\b/i.test(text)) return text.replace(/^порция\b/i, '1 порция');
     return text || value;
 };
 
@@ -112,6 +131,85 @@ const getProductNutrition = (product: StoreProduct, mode = getDefaultProductNutr
         protein: useServing ? product.proteinsGPerServing : product.proteinsGPer100,
         fat: useServing ? product.fatsGPerServing : product.fatsGPer100,
         carbs: useServing ? product.carbsGPerServing : product.carbsGPer100,
+    };
+};
+
+const toNutritionValues = (nutrition: ReturnType<typeof getProductNutrition>): NutritionValues => ({
+    calories: Number(nutrition.calories) || 0,
+    protein: Number(nutrition.protein) || 0,
+    fat: Number(nutrition.fat) || 0,
+    carbs: Number(nutrition.carbs) || 0,
+});
+
+const scaleNutrition = (nutrition: NutritionValues, factor: number): NutritionValues => ({
+    calories: nutrition.calories * factor,
+    protein: nutrition.protein * factor,
+    fat: nutrition.fat * factor,
+    carbs: nutrition.carbs * factor,
+});
+
+const getDerivedServingNutrition = (product: StoreProduct) => {
+    const serving = toNutritionValues(getProductNutrition(product, 'serving'));
+    if (hasProductServingNutrition(product)) return serving;
+
+    const per100 = toNutritionValues(getProductNutrition(product, 'per100'));
+    const servingQuantity = Number(product.servingQuantity) || 100;
+    return scaleNutrition(per100, servingQuantity / 100);
+};
+
+const getDerivedPer100Nutrition = (product: StoreProduct) => {
+    const per100 = toNutritionValues(getProductNutrition(product, 'per100'));
+    if (hasProductPer100Nutrition(product)) return per100;
+
+    const serving = toNutritionValues(getProductNutrition(product, 'serving'));
+    const servingQuantity = Number(product.servingQuantity) || 100;
+    return scaleNutrition(serving, 100 / servingQuantity);
+};
+
+const createDiaryProductEditor = (product: StoreProduct, mode: ProductNutritionMode): DiaryProductEditor => ({
+    unit: mode === 'serving' ? 'serving' : 'grams',
+    amount: mode === 'serving' ? '1' : '100',
+    servingQuantity: product.servingQuantity || null,
+    servingNutrition: getDerivedServingNutrition(product),
+    per100Nutrition: getDerivedPer100Nutrition(product),
+});
+
+const parseAmountInput = (value: string) => {
+    const amount = Number(value.replace(',', '.'));
+    return Number.isFinite(amount) && amount >= 0 ? amount : null;
+};
+
+const getDiaryEditorPayload = (editor: DiaryProductEditor) => {
+    const fallbackAmount = editor.unit === 'serving' ? 1 : 100;
+    const amount = parseAmountInput(editor.amount) ?? fallbackAmount;
+    const nutrition =
+        editor.unit === 'serving'
+            ? scaleNutrition(editor.servingNutrition, amount)
+            : scaleNutrition(editor.per100Nutrition, amount / 100);
+    const weight =
+        editor.unit === 'grams'
+            ? amount
+            : editor.servingQuantity
+                ? editor.servingQuantity * amount
+                : null;
+
+    return {
+        calories: Math.round(nutrition.calories),
+        protein: Math.round(nutrition.protein * 10) / 10,
+        fat: Math.round(nutrition.fat * 10) / 10,
+        carbs: Math.round(nutrition.carbs * 10) / 10,
+        weight,
+    };
+};
+
+const getDiaryEntryNutrition = (entry: DiaryEntry, editor?: DiaryProductEditor) => {
+    if (editor) return getDiaryEditorPayload(editor);
+    return {
+        calories: Number(entry.calories) || 0,
+        protein: Number(entry.protein) || 0,
+        fat: Number(entry.fat) || 0,
+        carbs: Number(entry.carbs) || 0,
+        weight: entry.weight == null ? null : Number(entry.weight),
     };
 };
 
@@ -176,7 +274,7 @@ const NutritionIcon = ({ type }: { type: 'calories' | 'protein' | 'fat' | 'carbs
 export default function Statistics() {
     const token = useAuth(s => s.accessToken);
     const {
-        entries, dayStats, selectedDate, isLoading, setDate, fetchDay, removeEntry, addEntry
+        entries, dayStats, selectedDate, isLoading, setDate, fetchDay, removeEntry, addEntry, updateEntry
     } = useDiaryStore(s => ({
         entries: s.entries,
         dayStats: s.dayStats,
@@ -185,7 +283,8 @@ export default function Statistics() {
         setDate: s.setDate,
         fetchDay: s.fetchDay,
         removeEntry: s.removeEntry,
-        addEntry: s.addEntry
+        addEntry: s.addEntry,
+        updateEntry: s.updateEntry
     }));
 
     const { hasActiveSub } = useSubscriptionStore(s => ({ hasActiveSub: s.hasActiveSub }));
@@ -204,6 +303,7 @@ export default function Statistics() {
     const [productSearchError, setProductSearchError] = useState('');
     const [addingProductCode, setAddingProductCode] = useState<string | null>(null);
     const [productNutritionModes, setProductNutritionModes] = useState<Record<string, ProductNutritionMode>>({});
+    const [diaryProductEditors, setDiaryProductEditors] = useState<Record<string, DiaryProductEditor>>({});
 
     useEffect(() => {
         if (token) {
@@ -223,7 +323,51 @@ export default function Statistics() {
     const handleDelete = async (id: string) => {
         if (confirm('Удалить запись?')) {
             if (token) await removeEntry(token, id);
+            setDiaryProductEditors((current) => {
+                const next = { ...current };
+                delete next[String(id)];
+                return next;
+            });
         }
+    };
+
+    const persistDiaryProductEditor = async (entry: DiaryEntry, editor: DiaryProductEditor) => {
+        if (!token) return;
+        await updateEntry(token, entry.id, getDiaryEditorPayload(editor));
+    };
+
+    const handleDiaryProductAmountChange = (entry: DiaryEntry, value: string) => {
+        setDiaryProductEditors((current) => {
+            const editor = current[String(entry.id)];
+            if (!editor) return current;
+            return {
+                ...current,
+                [String(entry.id)]: { ...editor, amount: value }
+            };
+        });
+    };
+
+    const handleDiaryProductUnitChange = async (entry: DiaryEntry, unit: DiaryProductUnit) => {
+        const currentEditor = diaryProductEditors[String(entry.id)];
+        if (!currentEditor) return;
+
+        const nextEditor = {
+            ...currentEditor,
+            unit,
+            amount: unit === 'serving' ? '1' : '100'
+        };
+
+        setDiaryProductEditors((current) => ({
+            ...current,
+            [String(entry.id)]: nextEditor
+        }));
+        await persistDiaryProductEditor(entry, nextEditor);
+    };
+
+    const handleDiaryProductAmountCommit = async (entry: DiaryEntry) => {
+        const editor = diaryProductEditors[String(entry.id)];
+        if (!editor || parseAmountInput(editor.amount) == null) return;
+        await persistDiaryProductEditor(entry, editor);
     };
 
     const handleManualSubmit = async (e: React.FormEvent) => {
@@ -290,7 +434,7 @@ export default function Statistics() {
 
         const payload = getProductDiaryPayload(product, mode);
         setAddingProductCode(getProductKey(product));
-        await addEntry(token, {
+        const addedEntry = await addEntry(token, {
             name: payload.name,
             calories: Number(payload.calories) || 0,
             protein: Number(payload.protein) || 0,
@@ -298,6 +442,12 @@ export default function Statistics() {
             carbs: Number(payload.carbs) || 0,
             weight: Number(payload.weight) || null
         });
+        if (addedEntry?.id) {
+            setDiaryProductEditors((current) => ({
+                ...current,
+                [String(addedEntry.id)]: createDiaryProductEditor(product, mode)
+            }));
+        }
         setAddingProductCode(null);
         setProductQuery('');
         setProductResults([]);
@@ -650,22 +800,54 @@ export default function Statistics() {
                     </div>
                 )}
 
-                {entries.map(entry => (
-                    <div key={entry.id} className="diary-item">
-                        <div className="diary-item-info">
-                            <div className="diary-item-name">{entry.name}</div>
-                            <div className="diary-item-meta">
-                                {entry.calories} ккал • Б {Math.round(Number(entry.protein))} • Ж {Math.round(Number(entry.fat))} • У {Math.round(Number(entry.carbs))}
-                                {entry.restaurant_slug && (
-                                    <Link to={`/r/${entry.restaurant_slug}/menu`} className="badge-restaurant badge-restaurant-link">
-                                        {entry.restaurant_name || entry.restaurant_slug}
-                                    </Link>
-                                )}
+                {entries.map(entry => {
+                    const editor = diaryProductEditors[String(entry.id)];
+                    const nutrition = getDiaryEntryNutrition(entry, editor);
+
+                    return (
+                        <div key={entry.id} className="diary-item">
+                            <div className="diary-item-info">
+                                <div className="diary-item-name">{entry.name}</div>
+                                <div className="diary-item-meta">
+                                    {nutrition.calories} ккал • Б {Math.round(Number(nutrition.protein))} • Ж {Math.round(Number(nutrition.fat))} • У {Math.round(Number(nutrition.carbs))}
+                                    {entry.restaurant_slug && (
+                                        <Link to={`/r/${entry.restaurant_slug}/menu`} className="badge-restaurant badge-restaurant-link">
+                                            {entry.restaurant_name || entry.restaurant_slug}
+                                        </Link>
+                                    )}
+                                </div>
                             </div>
+                            {editor && (
+                                <div className="diary-item-amount" aria-label="Количество продукта">
+                                    <input
+                                        type="number"
+                                        inputMode="decimal"
+                                        min="0"
+                                        step="any"
+                                        value={editor.amount}
+                                        onChange={(event) => handleDiaryProductAmountChange(entry, event.target.value)}
+                                        onBlur={() => handleDiaryProductAmountCommit(entry)}
+                                        onKeyDown={(event) => {
+                                            if (event.key === 'Enter') {
+                                                event.currentTarget.blur();
+                                            }
+                                        }}
+                                        aria-label={editor.unit === 'serving' ? 'Количество порций' : 'Количество граммов'}
+                                    />
+                                    <select
+                                        value={editor.unit}
+                                        onChange={(event) => handleDiaryProductUnitChange(entry, event.target.value as DiaryProductUnit)}
+                                        aria-label="Единица количества"
+                                    >
+                                        <option value="serving">порция</option>
+                                        <option value="grams">граммы</option>
+                                    </select>
+                                </div>
+                            )}
+                            <button className="btn-icon-danger" onClick={() => handleDelete(entry.id)}>×</button>
                         </div>
-                        <button className="btn-icon-danger" onClick={() => handleDelete(entry.id)}>×</button>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );

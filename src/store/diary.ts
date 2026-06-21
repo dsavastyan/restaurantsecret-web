@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { apiGet, apiDelete, apiPost } from '@/lib/api';
+import { apiGet, apiDelete, apiPost, apiPut } from '@/lib/api';
 import { toast } from '@/lib/toast';
 
 const getTodayIso = () => new Date().toISOString().split('T')[0];
@@ -37,7 +37,8 @@ type DiaryState = {
     setDate: (date: string) => void;
     fetchDay: (token: string, date?: string) => Promise<void>;
     fetchTodayEntriesCount: (token: string) => Promise<void>;
-    addEntry: (token: string, entry: Partial<DiaryEntry>) => Promise<void>;
+    addEntry: (token: string, entry: Partial<DiaryEntry>) => Promise<DiaryEntry | null>;
+    updateEntry: (token: string, id: string, entry: Partial<DiaryEntry>) => Promise<DiaryEntry | null>;
     removeEntry: (token: string, id: string) => Promise<void>;
 };
 
@@ -93,7 +94,7 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
         const targetDate = typeof entry.date === 'string' && entry.date ? entry.date : get().selectedDate;
         const isTodayEntry = targetDate === getTodayIso();
         try {
-            const res = await apiPost<{ ok: boolean, entry?: any }>(
+            const res = await apiPost<{ ok: boolean, entry?: DiaryEntry }>(
                 '/api/diary',
                 { ...entry, date: targetDate },
                 token
@@ -106,6 +107,7 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
                 }
                 // Refresh data
                 await get().fetchDay(token, targetDate);
+                return res.entry || null;
             } else {
                 toast.error('Ошибка добавления');
             }
@@ -113,6 +115,28 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
             console.error(e);
             toast.error('Ошибка соединения');
         }
+        return null;
+    },
+
+    updateEntry: async (token, id, entry) => {
+        try {
+            const res = await apiPut<{ ok: boolean, entry?: DiaryEntry }>(
+                `/api/diary/${id}`,
+                entry,
+                token
+            );
+
+            if (res?.ok) {
+                await get().fetchDay(token);
+                return res.entry || null;
+            }
+
+            toast.error('Ошибка обновления');
+        } catch (e) {
+            console.error(e);
+            toast.error('Ошибка соединения');
+        }
+        return null;
     },
 
     removeEntry: async (token, id) => {

@@ -140,9 +140,14 @@ const sanitizePortionLabel = (label: string) => {
   const withoutPerPrefix = label
     .trim()
     .replace(/^per\s+/i, "")
-    .replace(/^(portion|serving)\s*/i, "");
+    .replace(/\b1\s*порц(?:ия|ии|ий)?\.?\b/gi, "1 порция")
+    .replace(/\bпорц(?:ия|ии|ий)?\.?\b/gi, "порция")
+    .replace(/^1\s*(portion|serving)\s*/i, "1 порция ")
+    .replace(/^(portion|serving)\s*/i, "1 порция ");
 
-  return withoutPerPrefix.trim();
+  const cleaned = withoutPerPrefix.replace(/\s+/g, " ").trim();
+  if (/^порция\b/i.test(cleaned)) return cleaned.replace(/^порция\b/i, "1 порция");
+  return cleaned;
 };
 
 const buildPortionLabel = (dish: Record<string, unknown>) => {
