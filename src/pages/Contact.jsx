@@ -39,7 +39,7 @@ export default function Contact() {
   useMeta({
     title: 'Контакты — RestaurantSecret',
     description: 'Контакты и реквизиты RestaurantSecret. Поддержка по подписке и общие вопросы.',
-    canonical: 'https://restaurantsecret.ru/contact',
+    canonical: 'https://restaurantsecret.ru/contact/',
   })
 
   return (

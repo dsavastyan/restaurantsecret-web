@@ -232,7 +232,7 @@ function restaurantSchema(restaurant) {
     '@context': 'https://schema.org',
     '@type': 'Restaurant',
     name,
-    url: `${BASE_URL}/restaurants/${slug}/menu`,
+    url: `${BASE_URL}/restaurants/${slug}/menu/`,
     servesCuisine: stripEmpty(restaurant.cuisine),
     address: stripEmpty(restaurant.address)
       ? {
@@ -257,6 +257,16 @@ function fallbackPage({ title, description, links = [] }) {
 </main>`
 }
 
+function restaurantCatalogLinks(restaurants) {
+  return restaurants
+    .filter((restaurant) => restaurant.slug)
+    .map((restaurant) => ({
+      href: `/restaurants/${escapeHtml(restaurant.slug)}/menu/`,
+      label: getRestaurantName(restaurant),
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label, 'ru'))
+}
+
 function restaurantFallback(restaurant, menu) {
   const slug = restaurant.slug
   const name = getRestaurantName(restaurant)
@@ -274,8 +284,8 @@ function restaurantFallback(restaurant, menu) {
   <h1 aria-label="${escapeHtml(`Меню ${name} с КБЖУ`)}">${escapeHtml(name)}</h1>
   <p>${escapeHtml(description)}</p>
   ${details.length ? `<ul>${details.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : ''}
-  <p><a href="/restaurants/${escapeHtml(slug)}/menu">Открыть меню ресторана</a></p>
-  <p><a href="/catalog">Вернуться в каталог ресторанов</a></p>
+  <p><a href="/restaurants/${escapeHtml(slug)}/menu/">Открыть меню ресторана</a></p>
+  <p><a href="/catalog/">Вернуться в каталог ресторанов</a></p>
 </main>`
 }
 
@@ -316,17 +326,18 @@ function generateStaticRoutes(restaurants, menuBySlug) {
       path: '/catalog',
       title: 'Каталог ресторанов с КБЖУ — RestaurantSecret',
       description: 'Все рестораны Москвы с полным меню и данными КБЖУ. Фильтрация по кухне, метро и целям питания.',
-      canonical: `${BASE_URL}/catalog`,
+      canonical: `${BASE_URL}/catalog/`,
       fallbackHtml: fallbackPage({
         title: 'Каталог ресторанов с КБЖУ',
         description: 'Все рестораны Москвы с полным меню и данными КБЖУ. Фильтрация по кухне, метро и целям питания.',
+        links: restaurantCatalogLinks(restaurants),
       }),
     },
     {
       path: '/how-it-works',
       title: 'Как это работает — RestaurantSecret',
       description: 'Узнайте, как RestaurantSecret помогает следить КБЖУ в ресторанах Москвы. Реальные данные из меню каждого заведения, фильтры по целям питания.',
-      canonical: `${BASE_URL}/how-it-works`,
+      canonical: `${BASE_URL}/how-it-works/`,
       fallbackHtml: fallbackPage({
         title: 'Как это работает',
         description: 'RestaurantSecret собирает данные меню ресторанов и помогает находить блюда под ваши цели питания.',
@@ -337,7 +348,7 @@ function generateStaticRoutes(restaurants, menuBySlug) {
       path: '/tariffs',
       title: 'Подписка и тарифы — RestaurantSecret',
       description: 'Бесплатный и премиум доступ к КБЖУ всех ресторанов Москвы. Пробный период 7 дней бесплатно.',
-      canonical: `${BASE_URL}/tariffs`,
+      canonical: `${BASE_URL}/tariffs/`,
       fallbackHtml: fallbackPage({
         title: 'Подписка и тарифы',
         description: 'Бесплатный и премиум доступ к КБЖУ всех ресторанов Москвы. Пробный период 7 дней бесплатно.',
@@ -347,7 +358,7 @@ function generateStaticRoutes(restaurants, menuBySlug) {
       path: '/contact',
       title: 'Контакты — RestaurantSecret',
       description: 'Контакты и реквизиты RestaurantSecret. Поддержка по подписке и общие вопросы.',
-      canonical: `${BASE_URL}/contact`,
+      canonical: `${BASE_URL}/contact/`,
       fallbackHtml: fallbackPage({
         title: 'Контакты',
         description: 'Контакты и реквизиты RestaurantSecret. Поддержка по подписке и общие вопросы.',
@@ -359,7 +370,7 @@ function generateStaticRoutes(restaurants, menuBySlug) {
     writeRouteHtml(route.path, applySeoTags(baseHtml, route))
   }
 
-  writeRouteHtml('/restaurants', createRedirectHtml({ from: '/restaurants', to: '/catalog' }))
+  writeRouteHtml('/restaurants', createRedirectHtml({ from: '/restaurants', to: '/catalog/' }))
 
   let generatedCount = staticRoutes.length + 1
 
@@ -374,7 +385,7 @@ function generateStaticRoutes(restaurants, menuBySlug) {
       `/restaurants/${slug}`,
       createRedirectHtml({
         from: `/restaurants/${slug}`,
-        to: `/restaurants/${slug}/menu`,
+        to: `/restaurants/${slug}/menu/`,
         title,
       }),
     )
@@ -384,7 +395,7 @@ function generateStaticRoutes(restaurants, menuBySlug) {
       applySeoTags(baseHtml, {
         title,
         description,
-        canonical: `${BASE_URL}/restaurants/${slug}/menu`,
+        canonical: `${BASE_URL}/restaurants/${slug}/menu/`,
         schema: restaurantSchema(restaurant),
         fallbackHtml: restaurantFallback(restaurant, menu),
       }),
@@ -394,7 +405,7 @@ function generateStaticRoutes(restaurants, menuBySlug) {
       `/r/${slug}`,
       createRedirectHtml({
         from: `/r/${slug}`,
-        to: `/restaurants/${slug}/menu`,
+        to: `/restaurants/${slug}/menu/`,
         title: `${name} — меню с КБЖУ | RestaurantSecret`,
       }),
     )
@@ -403,7 +414,7 @@ function generateStaticRoutes(restaurants, menuBySlug) {
       `/r/${slug}/menu`,
       createRedirectHtml({
         from: `/r/${slug}/menu`,
-        to: `/restaurants/${slug}/menu`,
+        to: `/restaurants/${slug}/menu/`,
         title: `${name} — меню с КБЖУ | RestaurantSecret`,
       }),
     )
@@ -412,7 +423,7 @@ function generateStaticRoutes(restaurants, menuBySlug) {
       `/restaurant/${slug}`,
       createRedirectHtml({
         from: `/restaurant/${slug}`,
-        to: `/restaurants/${slug}/menu`,
+        to: `/restaurants/${slug}/menu/`,
         title: `${name} — меню с КБЖУ | RestaurantSecret`,
       }),
     )
@@ -421,7 +432,7 @@ function generateStaticRoutes(restaurants, menuBySlug) {
       `/restaurant/${slug}/menu`,
       createRedirectHtml({
         from: `/restaurant/${slug}/menu`,
-        to: `/restaurants/${slug}/menu`,
+        to: `/restaurants/${slug}/menu/`,
         title: `${name} — меню с КБЖУ | RestaurantSecret`,
       }),
     )
@@ -514,16 +525,16 @@ async function main() {
 
   const staticUrls = [
     { loc: `${BASE_URL}/`,             priority: '1.0', changefreq: 'weekly',  lastmod: today },
-    { loc: `${BASE_URL}/catalog`,      priority: '0.9', changefreq: 'daily',   lastmod: today },
-    { loc: `${BASE_URL}/how-it-works`, priority: '0.6', changefreq: 'monthly', lastmod: today },
-    { loc: `${BASE_URL}/tariffs`,      priority: '0.6', changefreq: 'monthly', lastmod: today },
-    { loc: `${BASE_URL}/contact`,      priority: '0.4', changefreq: 'monthly', lastmod: today },
+    { loc: `${BASE_URL}/catalog/`,      priority: '0.9', changefreq: 'daily',   lastmod: today },
+    { loc: `${BASE_URL}/how-it-works/`, priority: '0.6', changefreq: 'monthly', lastmod: today },
+    { loc: `${BASE_URL}/tariffs/`,      priority: '0.6', changefreq: 'monthly', lastmod: today },
+    { loc: `${BASE_URL}/contact/`,      priority: '0.4', changefreq: 'monthly', lastmod: today },
   ]
 
   const restaurantUrls = restaurants
     .filter((r) => r.slug)
     .map((r) => ({
-      loc: `${BASE_URL}/restaurants/${r.slug}/menu`,
+      loc: `${BASE_URL}/restaurants/${r.slug}/menu/`,
       priority: '0.8',
       changefreq: 'weekly',
       lastmod: r.updatedAt?.split('T')[0] ?? today,

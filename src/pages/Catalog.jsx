@@ -76,7 +76,7 @@ export default function Catalog() {
   useMeta({
     title: 'Каталог ресторанов с КБЖУ — RestaurantSecret',
     description: 'Все рестораны Москвы с полным меню и данными КБЖУ. Фильтрация по кухне, метро и целям питания.',
-    canonical: 'https://restaurantsecret.ru/catalog',
+    canonical: 'https://restaurantsecret.ru/catalog/',
   })
 
   const { data: filters } = useSWRLite('filters', () => api.filters())
@@ -141,7 +141,7 @@ export default function Catalog() {
   const openMenu = useCallback((slug) => {
     if (!slug) return
     if (ensureAccess()) {
-      navigate(`/r/${slug}/menu`)
+      navigate(`/restaurants/${slug}/menu/`)
     }
   }, [ensureAccess, navigate])
 

@@ -122,7 +122,7 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
       setHighlightedIndex(null);
       onChange("");
       analytics.track("search_submit", { type: "restaurant", slug: item.slug, name: item.name });
-      navigate(`/r/${item.slug}/menu`);
+      navigate(`/restaurants/${item.slug}/menu/`);
     } else {
       handleDishOpen(item);
     }

@@ -174,29 +174,29 @@ function AppReadySignal({ onReady }) {
 // Redirect short public links to the canonical restaurant URL.
 function ShortRestaurantRedirect() {
   const { slug = '' } = useParams()
-  return <Navigate to={`/restaurants/${slug}/menu`} replace />
+  return <Navigate to={`/restaurants/${slug}/menu/`} replace />
 }
 
 // Redirect short public menu links to the canonical menu URL.
 function ShortMenuRedirect() {
   const { slug = '' } = useParams()
-  return <Navigate to={`/restaurants/${slug}/menu`} replace />
+  return <Navigate to={`/restaurants/${slug}/menu/`} replace />
 }
 
 // Redirect old `/restaurant/:slug` paths to the canonical structure.
 function LegacyRestaurantRedirect() {
   const { slug = '' } = useParams()
-  return <Navigate to={`/restaurants/${slug}/menu`} replace />
+  return <Navigate to={`/restaurants/${slug}/menu/`} replace />
 }
 
 // Redirect old `/restaurant/:slug/menu` paths to the canonical menu URL.
 function LegacyMenuRedirect() {
   const { slug = '' } = useParams()
-  return <Navigate to={`/restaurants/${slug}/menu`} replace />
+  return <Navigate to={`/restaurants/${slug}/menu/`} replace />
 }
 
 // Keep indexed/direct restaurant entrypoints on the same menu experience as catalog links.
 function RestaurantMenuRedirect() {
   const { slug = '' } = useParams()
-  return <Navigate to={`/restaurants/${slug}/menu`} replace />
+  return <Navigate to={`/restaurants/${slug}/menu/`} replace />
 }

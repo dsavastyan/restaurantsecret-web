@@ -37,7 +37,7 @@ export default function NavBar({ forceGuest = false }: { forceGuest?: boolean })
           </Link>
 
           <nav className="navbar__center" aria-label="Разделы">
-            <Link to="/restaurants">Рестораны</Link>
+            <Link to="/catalog/">Рестораны</Link>
             <Link to="/how-it-works">Как работает</Link>
             <Link to="/tariffs">Тарифы</Link>
             <a href="https://t.me/RestSecretSupport_bot" target="_blank" rel="noopener noreferrer">Поддержка</a>
