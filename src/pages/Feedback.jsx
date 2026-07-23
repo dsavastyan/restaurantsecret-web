@@ -15,7 +15,7 @@ export default function Feedback() {
   useMeta({
     title: 'Оставить отзыв — RestaurantSecret',
     description: 'Поделитесь идеей, вопросом или проблемой по работе RestaurantSecret.',
-    canonical: 'https://restaurantsecret.ru/feedback',
+    canonical: 'https://restaurantsecret.ru/feedback/',
   })
 
   const accessToken = useAuth((state) => state.accessToken)

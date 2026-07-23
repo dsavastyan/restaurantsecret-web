@@ -156,7 +156,7 @@ function ClusterLayer({ restaurants, favoriteSlugs }) {
           <strong>${r.name}</strong><br/>
           ${r.cuisine || ''}<br/>
           <div class="popup-links">
-            <a href="/r/${r.slug}/menu" class="popup-link">Перейти к меню</a>
+            <a href="/restaurants/${r.slug}/menu/" class="popup-link">Перейти к меню</a>
             ${restaurantLink}
           </div>
         `
@@ -165,7 +165,7 @@ function ClusterLayer({ restaurants, favoriteSlugs }) {
         if (link) {
           link.addEventListener('click', (e) => {
             e.preventDefault()
-            navigate(`/r/${r.slug}/menu`)
+            navigate(`/restaurants/${r.slug}/menu/`)
           })
         }
 

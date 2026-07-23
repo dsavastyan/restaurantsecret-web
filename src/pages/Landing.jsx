@@ -391,7 +391,7 @@ export default function Landing() {
           </div>
 
           <nav className="landing-warm__nav-center" aria-label="Разделы">
-            <Link to="/restaurants">Рестораны</Link>
+            <Link to="/catalog/">Рестораны</Link>
             <Link to="/how-it-works">Как работает</Link>
             <Link to="/tariffs">Тарифы</Link>
             <a href="https://t.me/RestSecretSupport_bot" target="_blank" rel="noopener noreferrer">Поддержка</a>
@@ -463,7 +463,7 @@ export default function Landing() {
 
           <div className="landing-warm__stats">
             <Link
-              to="/restaurants"
+              to="/catalog/"
               className="landing-warm__stat"
               aria-label="Открыть список ресторанов"
             >
@@ -471,7 +471,7 @@ export default function Landing() {
               <span>ресторанов</span>
             </Link>
             <Link
-              to="/restaurants"
+              to="/catalog/"
               className="landing-warm__stat"
               aria-label="Открыть список ресторанов с блюдами КБЖУ"
             >
@@ -479,7 +479,7 @@ export default function Landing() {
               <span>блюд с КБЖУ</span>
             </Link>
             <Link
-              to="/restaurants"
+              to="/catalog/"
               className="landing-warm__stat"
               aria-label="Открыть список ресторанов с новыми блюдами"
             >
@@ -511,11 +511,11 @@ export default function Landing() {
                 <article
                   key={dishCard.id}
                   className="landing-warm__dish-card"
-                  onClick={() => navigate(`/r/${dishCard.restaurantSlug}/menu`)}
+                  onClick={() => navigate(`/restaurants/${dishCard.restaurantSlug}/menu/`)}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter' || event.key === ' ') {
                       event.preventDefault()
-                      navigate(`/r/${dishCard.restaurantSlug}/menu`)
+                      navigate(`/restaurants/${dishCard.restaurantSlug}/menu/`)
                     }
                   }}
                   role="link"
@@ -592,7 +592,7 @@ export default function Landing() {
               <Link
                 key={restaurantItem.slug}
                 className="landing-warm__featured-row"
-                to={`/r/${restaurantItem.slug}/menu`}
+                to={`/restaurants/${restaurantItem.slug}/menu/`}
                 aria-label={`Открыть меню ресторана ${restaurantItem.name}`}
               >
                 <span>{restaurantItem.name}</span>
@@ -601,7 +601,7 @@ export default function Landing() {
             ))}
           </div>
 
-          <Link className="landing-warm__featured-caption" to="/restaurants">
+          <Link className="landing-warm__featured-caption" to="/catalog/">
             {extraRestaurantsLabel}
           </Link>
 
@@ -721,7 +721,7 @@ export default function Landing() {
               >
                 Начать бесплатно
               </Link>
-              <Link to="/restaurants" className="landing-warm__cta-secondary" onClick={() => analytics.track('cta_clicked', { location: 'hero_bottom', text: 'Посмотреть меню' })}>Посмотреть меню</Link>
+              <Link to="/catalog/" className="landing-warm__cta-secondary" onClick={() => analytics.track('cta_clicked', { location: 'hero_bottom', text: 'Посмотреть меню' })}>Посмотреть меню</Link>
             </div>
           </section>
         )}

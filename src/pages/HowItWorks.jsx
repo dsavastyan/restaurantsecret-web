@@ -131,7 +131,7 @@ export default function HowItWorks() {
   useMeta({
     title: 'Как это работает — RestaurantSecret',
     description: 'Узнайте, как RestaurantSecret помогает следить КБЖУ в ресторанах Москвы. Реальные данные из меню каждого заведения, фильтры по целям питания.',
-    canonical: 'https://restaurantsecret.ru/how-it-works',
+    canonical: 'https://restaurantsecret.ru/how-it-works/',
   })
 
   const location = useLocation()
@@ -216,7 +216,7 @@ export default function HowItWorks() {
           </Link>
         </div>
         <nav className="landing-warm__nav-center" aria-label="Разделы">
-          <Link to="/restaurants">Рестораны</Link>
+          <Link to="/catalog/">Рестораны</Link>
           <Link to="/how-it-works" aria-current="page">Как работает</Link>
           <Link to="/tariffs">Тарифы</Link>
           <a href="https://t.me/RestSecretSupport_bot" target="_blank" rel="noopener noreferrer">Поддержка</a>

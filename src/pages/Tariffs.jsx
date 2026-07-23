@@ -32,7 +32,7 @@ export default function Tariffs() {
   useMeta({
     title: 'Подписка и тарифы — RestaurantSecret',
     description: 'Бесплатный и премиум доступ к КБЖУ всех ресторанов Москвы. Пробный период 7 дней бесплатно.',
-    canonical: 'https://restaurantsecret.ru/tariffs',
+    canonical: 'https://restaurantsecret.ru/tariffs/',
   })
 
   const location = useLocation()
@@ -65,7 +65,7 @@ export default function Tariffs() {
         </div>
 
         <nav className="tariffs-nav__center" aria-label="Разделы">
-          <Link to="/restaurants">Рестораны</Link>
+          <Link to="/catalog/">Рестораны</Link>
           <Link to="/how-it-works">Как работает</Link>
           <Link to="/tariffs" className="is-active">Тарифы</Link>
           <a href="https://t.me/RestSecretSupport_bot" target="_blank" rel="noopener noreferrer">Поддержка</a>

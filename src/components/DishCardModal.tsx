@@ -250,7 +250,7 @@ export default function DishCardModal() {
                   {data.name}
                 </h3>
                 <Link
-                  to={`/restaurants/${data.restaurantSlug}/menu#${anchorId}`}
+                  to={`/restaurants/${data.restaurantSlug}/menu/#${anchorId}`}
                   className="dish-card__restaurant"
                   onClick={close}
                 >

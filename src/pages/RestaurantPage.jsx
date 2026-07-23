@@ -143,7 +143,7 @@ export default function RestaurantPage() {
   useMeta({
     title: `Меню ${seoRestaurantName} с КБЖУ — калории, белки, жиры, углеводы`,
     description: seoDescription,
-    canonical: `https://restaurantsecret.ru/restaurants/${slug}`,
+    canonical: `https://restaurantsecret.ru/restaurants/${slug}/menu/`,
   });
 
   function togglePreset(key) {
@@ -283,7 +283,7 @@ function RestaurantSchema({ menu, slug }) {
     '@context': 'https://schema.org',
     '@type': 'Restaurant',
     name: menu.name,
-    url: `https://restaurantsecret.ru/restaurants/${slug}`,
+    url: `https://restaurantsecret.ru/restaurants/${slug}/menu/`,
     servesCuisine: menu.cuisine || undefined,
     address: menu.address
       ? {
