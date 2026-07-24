@@ -22,6 +22,11 @@ const Legal = lazy(() => import('../pages/Legal.jsx'))
 const Privacy = lazy(() => import('../pages/Privacy.jsx'))
 const Tariffs = lazy(() => import('../pages/Tariffs.jsx'))
 const Licenses = lazy(() => import('../pages/Licenses.jsx'))
+const PartnerShell = lazy(() => import('../pages/partners/PartnerShell.jsx'))
+const PartnersLogin = lazy(() => import('../pages/partners/Login.jsx'))
+const PartnersDashboard = lazy(() => import('../pages/partners/Dashboard.jsx'))
+const PartnersUploadMenu = lazy(() => import('../pages/partners/UploadMenu.jsx'))
+const PartnersUploadPhotos = lazy(() => import('../pages/partners/UploadPhotos.jsx'))
 const AccountLayout = lazy(() => import('../pages/account/Layout.tsx'))
 const AccountOverview = lazy(() => import('../pages/account/Overview.tsx'))
 const AccountSubscription = lazy(() => import('../pages/account/Subscription.tsx'))
@@ -95,6 +100,16 @@ function AppRoutes({ onReady }) {
 
           {/* 404 */}
           <Route path="*" element={<NotFound />} />
+        </Route>
+
+        {/* Restaurant self-serve portal — deliberately outside AppShell, own layout/auth. */}
+        <Route path="partners" element={<PartnerShell />}>
+          <Route index element={<Navigate to="/partners/dashboard" replace />} />
+          <Route path="login" element={<PartnersLogin />} />
+          <Route path="dashboard" element={<PartnersDashboard />} />
+          <Route path="upload" element={<PartnersUploadMenu />} />
+          <Route path="photos" element={<PartnersUploadPhotos />} />
+          <Route path="*" element={<Navigate to="/partners/dashboard" replace />} />
         </Route>
       </Routes>
       <AppReadySignal onReady={onReady} />
