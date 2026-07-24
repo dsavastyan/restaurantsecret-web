@@ -35,6 +35,15 @@ type UiPlan = "month" | "year";
 
 type ApiPlan = "monthly" | "annual";
 type SubscriptionLocationState = { from?: string } | null;
+type CancellationReason =
+  | "too_expensive"
+  | "rarely_use"
+  | "missing_restaurants"
+  | "missing_features"
+  | "other_app"
+  | "technical_issues"
+  | "taking_break"
+  | "other";
 
 const PLAN_LABELS: Record<string, string> = {
   monthly: "Месячная",
@@ -51,6 +60,88 @@ const PLAN_PRICE_BADGES: Record<string, string> = {
 const INTRO_TRIAL_PROMO_CODE = "RS7FREE";
 const PENDING_TRIAL_PAYMENT_KEY = "rs_pending_intro_trial_payment_id";
 const RESUME_AFTER_CARD_BIND_KEY = "rs_resume_after_card_bind";
+
+const CANCELLATION_REASONS: Array<{ value: CancellationReason; label: string }> = [
+  { value: "too_expensive", label: "Слишком дорого" },
+  { value: "rarely_use", label: "Пользуюсь редко" },
+  { value: "missing_restaurants", label: "Не нашел нужные рестораны" },
+  { value: "missing_features", label: "Не хватает нужных функций" },
+  { value: "other_app", label: "Есть другое приложение" },
+  { value: "technical_issues", label: "Были технические проблемы" },
+  { value: "taking_break", label: "Хочу сделать перерыв" },
+  { value: "other", label: "Другое" },
+];
+
+function CancellationReasonIcon({ reason }: { reason: CancellationReason }) {
+  if (reason === "too_expensive") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M9 7.2h4.8a2.4 2.4 0 0 1 0 4.8H9V5.8M9 12v6.2M9 14.8h6.2M7.2 12H15" />
+      </svg>
+    );
+  }
+
+  if (reason === "rarely_use") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M12 7.2V12l3.4 2.1" />
+        <path d="M7.5 4.8 5.2 2.8M16.5 4.8l2.3-2" />
+      </svg>
+    );
+  }
+
+  if (reason === "missing_restaurants") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 21s6.5-5.8 6.5-11.2A6.5 6.5 0 0 0 5.5 9.8C5.5 15.2 12 21 12 21Z" />
+      </svg>
+    );
+  }
+
+  if (reason === "missing_features") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 4.5v15M4.5 12h15" />
+        <path d="M6.4 6.4 17.6 17.6M17.6 6.4 6.4 17.6" />
+      </svg>
+    );
+  }
+
+  if (reason === "other_app") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="7" y="2.8" width="10" height="18.4" rx="2.6" />
+        <path d="M10.2 17.8h3.6M10 6h4" />
+      </svg>
+    );
+  }
+
+  if (reason === "technical_issues") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="5.5" y="7" width="13" height="11" rx="3" />
+        <path d="M8 4.5 10 7M16 4.5 14 7M9 11h.1M15 11h.1M9 15h6M3.5 11h2M18.5 11h2M3.5 15h2M18.5 15h2" />
+      </svg>
+    );
+  }
+
+  if (reason === "taking_break") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M9.2 8.5v7M14.8 8.5v7" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M5 19.2h4.2L19 9.4a2.8 2.8 0 0 0-4-4L5.2 15.2 5 19.2Z" />
+      <path d="m13.2 7.2 3.6 3.6M4.5 20h15" />
+    </svg>
+  );
+}
 
 const ERROR_LABELS: Record<string, string> = {
   invalid_code: "Промокод не найден",
@@ -138,6 +229,9 @@ export default function AccountSubscription() {
   const [promoQuote, setPromoQuote] = useState<PromoQuote | null>(null);
   const [canceling, setCanceling] = useState(false);
   const [resuming, setResuming] = useState(false);
+  const [isCancelReasonOpen, setIsCancelReasonOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState<CancellationReason | null>(null);
+  const [cancelReasonDetails, setCancelReasonDetails] = useState("");
   const resumingRef = useRef(false);
 
   const fetchStatus = useCallback(async () => {
@@ -617,17 +711,63 @@ export default function AccountSubscription() {
     }
   }, [isCanceled, isExpired, renewPlansOpen]);
 
-  const handleCancel = useCallback(async () => {
+  const handleOpenCancelReason = useCallback(() => {
     if (!accessToken || canceling) return;
-    if (!window.confirm("Вы уверены что хотите отменить подписку?")) {
-      return;
-    }
+    setCancelReason(null);
+    setCancelReasonDetails("");
+    setIsCancelReasonOpen(true);
+    analytics.track("subscription_cancel_reason_opened", {
+      plan: statusData?.plan || "unknown",
+      source_page: "subscription_management",
+    });
+  }, [accessToken, canceling, statusData?.plan]);
+
+  const handleCloseCancelReason = useCallback(() => {
+    if (canceling) return;
+    setIsCancelReasonOpen(false);
+  }, [canceling]);
+
+  useEffect(() => {
+    if (!isCancelReasonOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        handleCloseCancelReason();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleCloseCancelReason, isCancelReasonOpen]);
+
+  const handleCancel = useCallback(async () => {
+    if (!accessToken || canceling || !cancelReason) return;
+
+    const selectedReason = cancelReason;
+    const selectedReasonDetails = selectedReason === "other" ? cancelReasonDetails.trim().slice(0, 500) : "";
 
     setCanceling(true);
     try {
-      const res = await apiPost<{ ok: boolean; error?: string }>("/api/subscriptions/cancel", {}, accessToken);
+      const res = await apiPost<{ ok: boolean; error?: string }>(
+        "/api/subscriptions/cancel",
+        {
+          reason: selectedReason,
+          details: selectedReasonDetails || undefined,
+          source_page: "subscription_management",
+        },
+        accessToken,
+      );
       if (res?.ok) {
-        analytics.track("subscription_canceled", { plan: statusData?.plan || "unknown" }, { ignoreConsent: true });
+        analytics.track(
+          "subscription_canceled",
+          {
+            plan: statusData?.plan || "unknown",
+            cancel_reason: selectedReason,
+            cancel_reason_details: selectedReasonDetails || undefined,
+          },
+          { ignoreConsent: true },
+        );
+        setIsCancelReasonOpen(false);
         await fetchStatus();
       } else {
         alert(res?.error || "Не удалось отменить подписку");
@@ -638,7 +778,7 @@ export default function AccountSubscription() {
     } finally {
       setCanceling(false);
     }
-  }, [accessToken, canceling, fetchStatus, statusData?.plan]);
+  }, [accessToken, cancelReason, cancelReasonDetails, canceling, fetchStatus, statusData?.plan]);
 
   const resumeAutopay = useCallback(async ({
     attachIfMissing,
@@ -784,7 +924,7 @@ export default function AccountSubscription() {
           <button
             className="account-subscription-v2__btn-cancel-inline"
             type="button"
-            onClick={handleCancel}
+            onClick={handleOpenCancelReason}
             disabled={canceling}
           >
             {canceling ? "Отмена..." : "Отменить подписку"}
@@ -792,7 +932,7 @@ export default function AccountSubscription() {
         )}
       </div>
     );
-  }, [canceling, handleCancel, handleResume, isCancellationScheduled, resuming, statusData?.can_cancel]);
+  }, [canceling, handleOpenCancelReason, handleResume, isCancellationScheduled, resuming, statusData?.can_cancel]);
 
   return (
     <section className={`account-panel-v2 account-subscription-panel${isActive ? " is-active-subscription" : ""}${showAnnualOffer ? " is-annual-upgrade" : ""}`} aria-labelledby="account-subscription-heading">
@@ -1125,6 +1265,105 @@ export default function AccountSubscription() {
               <p>{paymentError}</p>
             </div>
           )}
+        </div>
+      )}
+
+      {isCancelReasonOpen && (
+        <div
+          className="subscription-cancel-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="subscription-cancel-modal-title"
+          aria-describedby="subscription-cancel-modal-description"
+          onMouseDown={handleCloseCancelReason}
+        >
+          <div className="subscription-cancel-modal__dialog" onMouseDown={(event) => event.stopPropagation()}>
+            <button
+              className="subscription-cancel-modal__close"
+              type="button"
+              onClick={handleCloseCancelReason}
+              disabled={canceling}
+              aria-label="Закрыть"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+                <path d="M18 6 6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+
+            <div className="subscription-cancel-modal__header">
+              <h3 id="subscription-cancel-modal-title" className="subscription-cancel-modal__title">
+                Жаль, что Вы уходите 😔
+              </h3>
+              <p id="subscription-cancel-modal-description" className="subscription-cancel-modal__description">
+                Что стало основной причиной? Ответ займет всего несколько секунд
+              </p>
+            </div>
+
+            <div className="subscription-cancel-modal__options" role="radiogroup" aria-label="Основная причина отмены подписки">
+              {CANCELLATION_REASONS.map((reason) => {
+                const isSelected = cancelReason === reason.value;
+
+                return (
+                  <label
+                    key={reason.value}
+                    className={`subscription-cancel-modal__option${isSelected ? " is-selected" : ""}`}
+                  >
+                    <input
+                      type="radio"
+                      name="subscription-cancel-reason"
+                      value={reason.value}
+                      checked={isSelected}
+                      onChange={() => {
+                        setCancelReason(reason.value);
+                        if (reason.value !== "other") {
+                          setCancelReasonDetails("");
+                        }
+                      }}
+                      disabled={canceling}
+                    />
+                    <span className={`subscription-cancel-modal__option-icon subscription-cancel-modal__option-icon--${reason.value}`}>
+                      <CancellationReasonIcon reason={reason.value} />
+                    </span>
+                    <span className="subscription-cancel-modal__option-label">{reason.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+
+            {cancelReason === "other" && (
+              <label className="subscription-cancel-modal__details">
+                <span>Расскажите коротко, что стало причиной</span>
+                <input
+                  type="text"
+                  value={cancelReasonDetails}
+                  onChange={(event) => setCancelReasonDetails(event.target.value)}
+                  placeholder="Например: не подошел формат"
+                  maxLength={500}
+                  disabled={canceling}
+                  autoFocus
+                />
+              </label>
+            )}
+
+            <div className="subscription-cancel-modal__actions">
+              <button
+                className="subscription-cancel-modal__secondary"
+                type="button"
+                onClick={handleCloseCancelReason}
+                disabled={canceling}
+              >
+                Оставить подписку
+              </button>
+              <button
+                className="subscription-cancel-modal__primary"
+                type="button"
+                onClick={handleCancel}
+                disabled={!cancelReason || canceling}
+              >
+                {canceling ? "Отмена..." : "Отменить подписку"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

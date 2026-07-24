@@ -8228,6 +8228,327 @@ body:has(.account--sheet-open) {
   cursor: default;
 }
 
+.subscription-cancel-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2200;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(17, 24, 39, 0.52);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.subscription-cancel-modal__dialog {
+  position: relative;
+  width: min(100%, 600px);
+  max-height: min(760px, calc(100vh - 36px));
+  overflow: auto;
+  border: 1px solid rgba(218, 202, 181, 0.82);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.98) 0%, rgba(251, 246, 235, 0.98) 100%);
+  box-shadow: 0 26px 64px rgba(15, 23, 42, 0.28);
+  padding: clamp(22px, 4vw, 30px);
+}
+
+.subscription-cancel-modal__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(17, 24, 39, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #273140;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.18s ease;
+}
+
+.subscription-cancel-modal__close:hover {
+  background: #ffffff;
+  border-color: rgba(17, 24, 39, 0.18);
+  transform: translateY(-1px);
+}
+
+.subscription-cancel-modal__close svg {
+  width: 18px;
+  height: 18px;
+}
+
+.subscription-cancel-modal__header {
+  padding-right: 42px;
+}
+
+.subscription-cancel-modal__title {
+  margin: 0;
+  color: #121826;
+  font-family: 'DM Serif Display', 'Fraunces', Georgia, serif;
+  font-size: clamp(28px, 3vw, 32px);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: 0;
+  padding-right: 30px;
+}
+
+.subscription-cancel-modal__description {
+  margin: 10px 0 0;
+  max-width: none;
+  color: #667085;
+  font-size: 16px;
+  line-height: 1.45;
+  white-space: nowrap;
+}
+
+.subscription-cancel-modal__options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.subscription-cancel-modal__option {
+  min-height: 54px;
+  border: 1px solid rgba(213, 202, 184, 0.86);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.7);
+  color: #1f2937;
+  display: grid;
+  grid-template-columns: 18px 30px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px 10px 12px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.16;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.18s ease;
+}
+
+.subscription-cancel-modal__option:hover {
+  background: #ffffff;
+  border-color: rgba(142, 154, 99, 0.58);
+  box-shadow: 0 10px 22px rgba(63, 53, 36, 0.08);
+  transform: translateY(-1px);
+}
+
+.subscription-cancel-modal__option.is-selected {
+  border-color: #7b8d58;
+  background: rgba(245, 248, 237, 0.96);
+  box-shadow: inset 0 0 0 1px rgba(123, 141, 88, 0.3);
+}
+
+.subscription-cancel-modal__option input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: #6f8d3f;
+}
+
+.subscription-cancel-modal__option-icon {
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(123, 141, 88, 0.16);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.66);
+  color: #65794b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.subscription-cancel-modal__option-icon svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.85;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.subscription-cancel-modal__option-icon--too_expensive {
+  color: #7f6b2e;
+  background: rgba(247, 238, 209, 0.76);
+}
+
+.subscription-cancel-modal__option-icon--rarely_use,
+.subscription-cancel-modal__option-icon--missing_restaurants {
+  color: #366d67;
+  background: rgba(232, 245, 242, 0.78);
+}
+
+.subscription-cancel-modal__option-icon--missing_features,
+.subscription-cancel-modal__option-icon--technical_issues {
+  color: #9a4a38;
+  background: rgba(252, 236, 229, 0.76);
+}
+
+.subscription-cancel-modal__option-icon--other_app,
+.subscription-cancel-modal__option-icon--taking_break,
+.subscription-cancel-modal__option-icon--other {
+  color: #62724b;
+  background: rgba(241, 245, 232, 0.78);
+}
+
+.subscription-cancel-modal__option-label {
+  min-width: 0;
+  display: block;
+}
+
+.subscription-cancel-modal__details {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.subscription-cancel-modal__details span {
+  color: #5d6678;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.subscription-cancel-modal__details input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid rgba(213, 202, 184, 0.9);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #1f2937;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 650;
+  padding: 0 16px;
+  outline: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.subscription-cancel-modal__details input:focus {
+  border-color: rgba(123, 141, 88, 0.58);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 0 0 4px rgba(123, 141, 88, 0.12);
+}
+
+.subscription-cancel-modal__details input::placeholder {
+  color: rgba(93, 102, 120, 0.66);
+}
+
+.subscription-cancel-modal__actions {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.subscription-cancel-modal__secondary,
+.subscription-cancel-modal__primary {
+  position: relative;
+  overflow: hidden;
+  min-height: 48px;
+  border-radius: 14px;
+  padding: 0 18px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  text-shadow: 0 1px 1px rgba(27, 37, 18, 0.22);
+  transition: transform 0.18s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.subscription-cancel-modal__secondary::before,
+.subscription-cancel-modal__primary::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 4px;
+  right: 4px;
+  height: 48%;
+  border-radius: 11px 11px 9px 9px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.08));
+  pointer-events: none;
+}
+
+.subscription-cancel-modal__secondary {
+  border: 1px solid rgba(93, 126, 55, 0.58);
+  background: linear-gradient(180deg, #b8db8f 0%, #8fba5f 48%, #6f9a45 100%);
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.66),
+    inset 0 -3px 0 rgba(55, 83, 31, 0.2),
+    0 10px 22px rgba(93, 126, 55, 0.24);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.subscription-cancel-modal__primary {
+  border: 1px solid rgba(185, 68, 47, 0.6);
+  background: linear-gradient(180deg, #f49a7d 0%, #dd674a 50%, #bf4a32 100%);
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    inset 0 -3px 0 rgba(112, 36, 24, 0.18),
+    0 10px 22px rgba(196, 74, 46, 0.26);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.subscription-cancel-modal__secondary:hover,
+.subscription-cancel-modal__primary:hover {
+  transform: translateY(-1px);
+}
+
+.subscription-cancel-modal__primary:disabled,
+.subscription-cancel-modal__secondary:disabled {
+  opacity: 1;
+  cursor: default;
+  filter: saturate(0.92) brightness(0.98);
+  transform: none;
+}
+
+@media (max-width: 560px) {
+  .subscription-cancel-modal {
+    align-items: end;
+    padding: 12px;
+  }
+
+  .subscription-cancel-modal__dialog {
+    width: 100%;
+    max-height: calc(100vh - 24px);
+    border-radius: 20px;
+    padding: 22px 16px 16px;
+  }
+
+  .subscription-cancel-modal__header {
+    padding-right: 38px;
+  }
+
+  .subscription-cancel-modal__description {
+    white-space: normal;
+  }
+
+  .subscription-cancel-modal__options,
+  .subscription-cancel-modal__actions {
+    grid-template-columns: 1fr;
+  }
+
+  .subscription-cancel-modal__option {
+    min-height: 50px;
+    font-size: 14px;
+  }
+}
+
 .account-subscription-v2__btn-resume-inline {
   border: 1px solid rgba(88, 114, 53, 0.24);
   background: linear-gradient(135deg, #6f8d3f, #587235);
