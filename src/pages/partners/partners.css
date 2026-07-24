@@ -1,0 +1,327 @@
+/* src/pages/partners/partners.css
+   Scoped to the restaurant portal (/partners/*). Reuses the site's CSS custom
+   properties (--rs-*) from src/styles.css for color/shadow consistency, but does
+   not depend on any consumer-app component styles. */
+
+.partners {
+  min-height: 100vh;
+  background: #f7f8f7;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  color: var(--rs-text, #111827);
+}
+
+.partners--centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.partners__loading,
+.partners__error {
+  color: var(--rs-muted, #6b7280);
+  margin-bottom: 12px;
+}
+
+.partners__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.partners__brand {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.partners__brand-name {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.partners__brand-sub {
+  font-size: 12px;
+  color: var(--rs-muted, #6b7280);
+}
+
+.partners__header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.partners__restaurant-name {
+  font-size: 14px;
+  color: var(--rs-muted, #6b7280);
+}
+
+.partners__main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+}
+
+.partners-card {
+  background: #fff;
+  border-radius: var(--rs-radius, 16px);
+  box-shadow: var(--rs-shadow, 0 12px 34px rgba(17, 24, 39, 0.08));
+  padding: 28px;
+  margin-bottom: 20px;
+}
+
+.partners__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 18px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: var(--rs-text, #111827);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.partners__btn:hover:not(:disabled) {
+  border-color: var(--rs-accent, #2f8f5b);
+}
+
+.partners__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.partners__btn--primary {
+  background: var(--rs-accent, #2f8f5b);
+  border-color: var(--rs-accent, #2f8f5b);
+  color: #fff;
+}
+
+.partners__btn--primary:hover:not(:disabled) {
+  filter: brightness(0.95);
+}
+
+.partners__logout {
+  background: none;
+  border: none;
+  color: var(--rs-muted, #6b7280);
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.partners__notice {
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 14px;
+  margin: 14px 0;
+}
+
+.partners__notice--success {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.partners__notice--warning {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.partners__notice--error {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+/* Login */
+
+.partners-login {
+  width: 100%;
+  max-width: 380px;
+}
+
+.partners-login__title {
+  font-family: 'DM Serif Display', 'Fraunces', Georgia, serif;
+  font-size: 24px;
+  margin: 0 0 4px;
+}
+
+.partners-login__subtitle {
+  color: var(--rs-muted, #6b7280);
+  font-size: 14px;
+  margin: 0 0 20px;
+}
+
+.partners-login__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.partners-login__label {
+  font-size: 13px;
+  color: var(--rs-muted, #6b7280);
+}
+
+.partners-login__input {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  font-size: 15px;
+}
+
+.partners-login__input:focus {
+  outline: none;
+  border-color: var(--rs-accent, #2f8f5b);
+}
+
+/* Dashboard */
+
+.partners-dashboard__title {
+  font-family: 'DM Serif Display', 'Fraunces', Georgia, serif;
+  font-size: 22px;
+  margin: 0 0 8px;
+}
+
+.partners-dashboard__status-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.partners-badge {
+  display: inline-block;
+  background: var(--rs-accent, #2f8f5b);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.partners-dashboard__freshness {
+  color: var(--rs-muted, #6b7280);
+  font-size: 14px;
+  margin: 4px 0 0;
+}
+
+.partners-dashboard__freshness--stale {
+  color: #b45309;
+  font-weight: 500;
+}
+
+.partners-dashboard__last-upload {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f1f0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--rs-muted, #6b7280);
+}
+
+.partners-status {
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.partners-status--published {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.partners-status--processing {
+  background: #eff6ff;
+  color: #1e40af;
+}
+
+.partners-status--error {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.partners-dashboard__error-text {
+  color: #991b1b;
+}
+
+.partners-dashboard__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Upload */
+
+.partners-upload__title {
+  font-family: 'DM Serif Display', 'Fraunces', Georgia, serif;
+  font-size: 22px;
+  margin: 0 0 10px;
+}
+
+.partners-upload__hint {
+  color: var(--rs-muted, #6b7280);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.partners-upload__hint a {
+  color: var(--rs-accent, #2f8f5b);
+}
+
+.partners-upload__form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  flex-wrap: wrap;
+}
+
+.partners-upload__errors-title {
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+
+.partners-upload__errors-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.partners-upload__errors-list li {
+  margin-bottom: 4px;
+}
+
+.partners-upload__unmatched {
+  margin-top: 16px;
+}
+
+.partners-upload__unmatched-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f1f0;
+}
+
+.partners-upload__unmatched-filename {
+  font-size: 14px;
+  color: var(--rs-muted, #6b7280);
+}
+
+.partners-upload__unmatched-row select {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
