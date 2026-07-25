@@ -96,12 +96,13 @@ export default function PartnerShell() {
     <div className="partners">
       <header className="partners__header">
         <div className="partners__brand">
+          <span className="partners__brand-mark" aria-hidden="true">R</span>
           <span className="partners__brand-name">RestaurantSecret</span>
           <span className="partners__brand-sub">Кабинет ресторана</span>
         </div>
         <div className="partners__header-right">
-          {restaurant?.name && <span className="partners__restaurant-name">{restaurant.name}</span>}
-          <button className="partners__logout" onClick={handleLogout}>Выйти</button>
+          {restaurant?.name && <span className="partners__restaurant-name"><span className="partners__online-dot" />{restaurant.name}</span>}
+          <button className="partners__logout" onClick={handleLogout}><span aria-hidden="true">↪</span> Выйти</button>
         </div>
       </header>
       <main className="partners__main">

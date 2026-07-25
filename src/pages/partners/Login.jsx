@@ -34,9 +34,21 @@ export default function PartnersLogin() {
 
   return (
     <div className="partners partners--centered">
-      <div className="partners-card partners-login">
-        <h1 className="partners-login__title">Кабинет ресторана</h1>
-        <p className="partners-login__subtitle">RestaurantSecret</p>
+      <div className="partners-login-layout">
+        <div className="partners-login__intro">
+          <div className="partners-login__logo" aria-hidden="true">R</div>
+          <p className="partners-login__kicker">RestaurantSecret · партнёрам</p>
+          <h1 className="partners-login__title">Ваш ресторан<br /><em>в центре внимания</em></h1>
+          <p className="partners-login__lead">Управляйте меню, фотографиями и присутствием ресторана на платформе из одного кабинета.</p>
+          <div className="partners-login__proof"><span>✓</span> Бесплатное размещение для партнёров</div>
+        </div>
+        <div className="partners-card partners-login">
+          <div className="partners-login__card-head">
+            <span className="partners-login__eyebrow">Вход для партнёров</span>
+            <span className="partners-login__lock" aria-hidden="true">⌁</span>
+          </div>
+          <h2 className="partners-login__card-title">Добро пожаловать</h2>
+          <p className="partners-login__subtitle">Войдите по ссылке из email — пароль не нужен.</p>
 
         {expired && (
           <div className="partners__notice partners__notice--warning">
@@ -68,6 +80,8 @@ export default function PartnersLogin() {
             </button>
           </form>
         )}
+        <p className="partners-login__privacy">Ссылка действительна 15 минут и используется только один раз.</p>
+        </div>
       </div>
     </div>
   )

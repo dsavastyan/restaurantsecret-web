@@ -24,10 +24,19 @@ export default function PartnersDashboard() {
 
   return (
     <div className="partners-dashboard">
+      <div className="partners-dashboard__intro">
+        <div>
+          <span className="partners-eyebrow">Рабочий стол</span>
+          <h1 className="partners-dashboard__welcome">Добрый день, {restaurant.name.split(' ')[0]}</h1>
+          <p>Следите за актуальностью меню и карточки ресторана.</p>
+        </div>
+        <span className="partners-dashboard__date">{new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' }).format(new Date())}</span>
+      </div>
       <section className="partners-card">
         <div className="partners-dashboard__status-row">
           <div>
-            <h1 className="partners-dashboard__title">{restaurant.name}</h1>
+            <span className="partners-eyebrow">Ваш ресторан</span>
+            <h2 className="partners-dashboard__title">{restaurant.name}</h2>
             {restaurant.is_partner && <span className="partners-badge">Партнёр</span>}
           </div>
         </div>
@@ -61,14 +70,18 @@ export default function PartnersDashboard() {
       </section>
 
       <section className="partners-card partners-dashboard__actions">
+        <div className="partners-dashboard__actions-heading">
+          <h2>Быстрые действия</h2>
+          <p>Обновите данные, чтобы гости видели всё самое актуальное.</p>
+        </div>
         <Link className="partners__btn partners__btn--primary" to="/partners/upload">
-          Обновить меню
+          <span aria-hidden="true">↥</span> Обновить меню
         </Link>
         <a className="partners__btn" href={restaurantPortalApi.templateDownloadUrl()} download>
-          Скачать шаблон Excel
+          <span aria-hidden="true">↓</span> Скачать шаблон Excel
         </a>
         <Link className="partners__btn" to="/partners/photos">
-          Фото блюд
+          <span aria-hidden="true">▧</span> Фото блюд
         </Link>
       </section>
     </div>
