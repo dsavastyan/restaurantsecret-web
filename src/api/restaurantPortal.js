@@ -59,6 +59,12 @@ export const restaurantPortalApi = {
 
   me: () => portalRequest('/api/restaurant/me'),
 
+  previewMenu: (file) => {
+    const form = new FormData()
+    form.append('file', file)
+    return portalRequest('/api/restaurant/menu/preview', { method: 'POST', body: form, isFormData: true })
+  },
+
   uploadMenu: (file) => {
     const form = new FormData()
     form.append('file', file)

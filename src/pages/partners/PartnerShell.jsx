@@ -67,6 +67,18 @@ export default function PartnerShell() {
     navigate('/partners/login', { replace: true })
   }
 
+  const isFirstPublication = restaurant
+    ? restaurant.has_published_menu === false ||
+      (restaurant.has_published_menu == null && lastUpload?.status !== 'published')
+    : false
+
+  useEffect(() => {
+    if (status !== 'ready' || !isFirstPublication) return
+    if (location.pathname.replace(/\/+$/, '') !== '/partners/dashboard') {
+      navigate('/partners/dashboard', { replace: true })
+    }
+  }, [isFirstPublication, location.pathname, navigate, status])
+
   if (isLoginPage) {
     return (
       <div className="partners">
@@ -92,6 +104,14 @@ export default function PartnerShell() {
     )
   }
 
+  if (isFirstPublication) {
+    return (
+      <div className="partners partners--setup">
+        <Outlet context={{ restaurant, lastUpload, refresh, handleLogout, isFirstPublication }} />
+      </div>
+    )
+  }
+
   return (
     <div className="partners">
       <header className="partners__header">
@@ -106,7 +126,7 @@ export default function PartnerShell() {
         </div>
       </header>
       <main className="partners__main">
-        <Outlet context={{ restaurant, lastUpload, refresh }} />
+        <Outlet context={{ restaurant, lastUpload, refresh, handleLogout, isFirstPublication }} />
       </main>
     </div>
   )

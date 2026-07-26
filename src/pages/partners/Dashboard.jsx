@@ -1,6 +1,7 @@
 // src/pages/partners/Dashboard.jsx
 import { Link, useOutletContext } from 'react-router-dom'
 import { restaurantPortalApi } from '@/api/restaurantPortal'
+import PartnersSetupFlow from './SetupFlow'
 
 const UPLOAD_STATUS_LABELS = {
   processing: 'Обрабатывается',
@@ -18,9 +19,12 @@ function formatDate(value) {
 }
 
 export default function PartnersDashboard() {
-  const { restaurant, lastUpload } = useOutletContext()
+  const { restaurant, lastUpload, refresh, handleLogout, isFirstPublication } = useOutletContext()
 
   if (!restaurant) return null
+  if (isFirstPublication) {
+    return <PartnersSetupFlow handleLogout={handleLogout} refresh={refresh} restaurant={restaurant} />
+  }
 
   return (
     <div className="partners-dashboard">
