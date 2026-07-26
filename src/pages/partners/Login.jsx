@@ -38,11 +38,11 @@ export default function PartnersLogin() {
     <div className="partners partners--centered">
       <div className="partners-login-layout">
         <div className="partners-login__intro">
-          <div className="partners-login__logo" aria-hidden="true">R</div>
-          <p className="partners-login__kicker">RestaurantSecret · партнёрам</p>
+          <div className="partners-login__brand">
+            <img className="partners-login__logo" src="/assets/logo.png" alt="RestaurantSecret" />
+            <span>RestaurantSecret</span>
+          </div>
           <h1 className="partners-login__title">Ваш ресторан<br /><em>в центре внимания</em></h1>
-          <p className="partners-login__lead">Управляйте меню, фотографиями и присутствием ресторана на платформе из одного кабинета.</p>
-          <div className="partners-login__proof"><span>✓</span> Бесплатное размещение для партнёров</div>
         </div>
         <div className="partners-card partners-login">
           <div className="partners-login__card-head">
