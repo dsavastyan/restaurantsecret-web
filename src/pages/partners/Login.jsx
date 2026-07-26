@@ -23,10 +23,12 @@ export default function PartnersLogin() {
     try {
       await restaurantPortalApi.requestLoginLink(email.trim().toLowerCase())
       setSent(true)
-    } catch {
-      // Backend always answers generically — a thrown error here means the
-      // request itself failed (network/infra), not "email not found".
-      setErr('Не получилось отправить ссылку. Попробуйте ещё раз.')
+    } catch (requestError) {
+      // Unknown emails still receive the same generic success response; an
+      // explicit provider failure means the message could not be delivered.
+      setErr(requestError.code === 'email_delivery_failed'
+        ? 'Не удалось отправить письмо. Попробуйте ещё раз позже или проверьте адрес отправителя.'
+        : 'Не получилось отправить ссылку. Попробуйте ещё раз.')
     } finally {
       setLoading(false)
     }
