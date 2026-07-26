@@ -1,38 +1,98 @@
 // src/pages/partners/Login.jsx
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { restaurantPortalApi } from '@/api/restaurantPortal'
 
+const RESEND_COOLDOWN_SECONDS = 60
+const SUPPORT_EMAIL = 'partners@restaurantsecret.ru'
+
+function formatCooldown(seconds) {
+  return `00:${String(Math.max(0, seconds - 1)).padStart(2, '0')}`
+}
+
 export default function PartnersLogin() {
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const expired = searchParams.get('error') === 'expired'
 
   const [email, setEmail] = useState('')
-  const [sent, setSent] = useState(false)
+  const [submittedEmail, setSubmittedEmail] = useState('')
+  const [screen, setScreen] = useState(expired ? 'expired' : 'form')
   const [loading, setLoading] = useState(false)
   const [err, setErr] = useState(null)
+  const [cooldown, setCooldown] = useState(0)
+  const [resent, setResent] = useState(false)
 
-  const submit = async (event) => {
-    event.preventDefault()
+  useEffect(() => {
+    setScreen(expired ? 'expired' : 'form')
+  }, [expired])
+
+  useEffect(() => {
+    if (screen !== 'sent' || cooldown <= 0) return undefined
+    const timer = window.setInterval(() => {
+      setCooldown((seconds) => Math.max(0, seconds - 1))
+    }, 1000)
+    return () => window.clearInterval(timer)
+  }, [screen, cooldown > 0])
+
+  const requestLink = async (address, { isResend = false } = {}) => {
     setErr(null)
-    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
-      setErr('Укажите корректный email.')
-      return
-    }
     setLoading(true)
+    if (isResend) setResent(false)
+
     try {
-      await restaurantPortalApi.requestLoginLink(email.trim().toLowerCase())
-      setSent(true)
+      const data = await restaurantPortalApi.requestLoginLink(address)
+
+      if (data?.registered === false) {
+        setScreen('not-found')
+        setCooldown(0)
+        return
+      }
+
+      setScreen('sent')
+      setCooldown(RESEND_COOLDOWN_SECONDS)
+      setResent(isResend)
     } catch (requestError) {
-      // Unknown emails still receive the same generic success response; an
-      // explicit provider failure means the message could not be delivered.
       setErr(requestError.code === 'email_delivery_failed'
-        ? 'Не удалось отправить письмо. Попробуйте ещё раз позже или проверьте адрес отправителя.'
+        ? 'Не удалось отправить письмо. Попробуйте ещё раз позже.'
         : 'Не получилось отправить ссылку. Попробуйте ещё раз.')
     } finally {
       setLoading(false)
     }
   }
+
+  const submit = async (event) => {
+    event.preventDefault()
+    setErr(null)
+    const normalizedEmail = email.trim().toLowerCase()
+
+    if (!normalizedEmail || !/^\S+@\S+\.\S+$/.test(normalizedEmail)) {
+      setErr('Укажите корректный email.')
+      return
+    }
+
+    setSubmittedEmail(normalizedEmail)
+    await requestLink(normalizedEmail)
+  }
+
+  const resend = async () => {
+    if (cooldown > 0 || loading) return
+    await requestLink(submittedEmail, { isResend: true })
+  }
+
+  const showForm = () => {
+    setSearchParams({}, { replace: true })
+    setScreen('form')
+    setErr(null)
+    setResent(false)
+    setCooldown(0)
+  }
+
+  const title = {
+    form: 'Вход для партнёров',
+    sent: 'Проверьте почту',
+    'not-found': `Email ${submittedEmail} не найден`,
+    expired: 'Ссылка больше не действует',
+  }[screen]
 
   return (
     <div className="partners partners--centered">
@@ -44,45 +104,112 @@ export default function PartnersLogin() {
           </div>
           <h1 className="partners-login__title">Ваш ресторан<br /><em>в центре внимания</em></h1>
         </div>
+
         <div className="partners-card partners-login">
           <div className="partners-login__card-head">
             <span className="partners-login__eyebrow">Вход для партнёров</span>
             <span className="partners-login__lock" aria-hidden="true">⌁</span>
           </div>
-          <h2 className="partners-login__card-title">Добро пожаловать</h2>
-          <p className="partners-login__subtitle">Войдите по ссылке из email — пароль не нужен.</p>
 
-        {expired && (
-          <div className="partners__notice partners__notice--warning">
-            Ссылка для входа устарела или уже использована. Запросите новую.
-          </div>
-        )}
+          <h2 className="partners-login__card-title">{title}</h2>
 
-        {sent ? (
-          <div className="partners__notice partners__notice--success">
-            Если такой email зарегистрирован, мы отправили на него ссылку для входа. Проверьте почту (и папку «Спам»).
+          {screen === 'form' && (
+            <>
+              <p className="partners-login__subtitle">
+                Введите email, указанный при регистрации ресторана. Мы отправим на него одноразовую ссылку для входа.
+              </p>
+              <form className="partners-login__form" onSubmit={submit}>
+                <label className="partners-login__label" htmlFor="partner-email">Email</label>
+                <input
+                  id="partner-email"
+                  type="email"
+                  className="partners-login__input"
+                  placeholder="you@restaurant.ru"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  autoComplete="email"
+                  autoFocus
+                  disabled={loading}
+                />
+                {err && <div className="partners__notice partners__notice--error" role="alert">{err}</div>}
+                <button className="partners__btn partners__btn--primary" type="submit" disabled={loading}>
+                  {loading ? 'Отправляем…' : 'Получить ссылку'}
+                </button>
+              </form>
+            </>
+          )}
+
+          {screen === 'sent' && (
+            <div className="partners-login__state">
+              <p className="partners-login__state-copy">
+                Мы отправили ссылку для входа на <strong>{submittedEmail}</strong>.
+              </p>
+              <p className="partners-login__state-copy">
+                Перейдите по ссылке из письма. Она действует 15 минут и может быть использована только один раз.
+              </p>
+              <p className="partners-login__state-copy partners-login__state-copy--muted">
+                Письмо может прийти в течение нескольких минут. Проверьте также папку «Спам».
+              </p>
+
+              {resent && (
+                <div className="partners__notice partners__notice--success partners-login__resend-confirmation" role="status">
+                  Новое письмо отправлено на {submittedEmail}.
+                </div>
+              )}
+              {err && <div className="partners__notice partners__notice--error" role="alert">{err}</div>}
+
+              <button
+                className="partners__btn partners__btn--primary partners-login__action"
+                type="button"
+                onClick={resend}
+                disabled={loading || cooldown > 0}
+              >
+                {loading
+                  ? 'Отправляем…'
+                  : cooldown > 0
+                    ? `Отправить повторно через ${formatCooldown(cooldown)}`
+                    : 'Отправить письмо ещё раз'}
+              </button>
+              <button className="partners-login__text-action" type="button" onClick={showForm}>
+                Указать другой email
+              </button>
+            </div>
+          )}
+
+          {screen === 'not-found' && (
+            <div className="partners-login__state">
+              <p className="partners-login__state-copy">
+                Этот email не привязан ни к одному ресторану-партнёру. Проверьте введённый адрес или напишите нам на{' '}
+                <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
+              </p>
+              <p className="partners-login__state-copy partners-login__state-copy--muted">
+                Проверьте написание адреса или обратитесь в поддержку.
+              </p>
+              <button className="partners-login__text-action" type="button" onClick={showForm}>
+                Указать другой email
+              </button>
+            </div>
+          )}
+
+          {screen === 'expired' && (
+            <div className="partners-login__state">
+              <p className="partners-login__state-copy">
+                Ссылка для входа устарела или уже была использована.
+              </p>
+              <button
+                className="partners__btn partners__btn--primary partners-login__action"
+                type="button"
+                onClick={showForm}
+              >
+                Получить новую ссылку
+              </button>
+            </div>
+          )}
+
+          <div className="partners-login__support">
+            <span>Возникли проблемы со входом?</span>
+            <span>Напишите нам на <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a></span>
           </div>
-        ) : (
-          <form className="partners-login__form" onSubmit={submit}>
-            <label className="partners-login__label" htmlFor="partner-email">Email</label>
-            <input
-              id="partner-email"
-              type="email"
-              className="partners-login__input"
-              placeholder="you@restaurant.ru"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-              autoFocus
-              disabled={loading}
-            />
-            {err && <div className="partners__notice partners__notice--error">{err}</div>}
-            <button className="partners__btn partners__btn--primary" type="submit" disabled={loading}>
-              {loading ? 'Отправляем…' : 'Получить ссылку для входа'}
-            </button>
-          </form>
-        )}
-        <p className="partners-login__privacy">Ссылка действительна 15 минут и используется только один раз.</p>
         </div>
       </div>
     </div>
