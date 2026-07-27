@@ -63,6 +63,12 @@ function Icon({ name, size = 24 }) {
         <circle cx="12" cy="13" r="3.2" />
       </>
     ),
+    file: (
+      <>
+        <path d="M6 3h8l4 4v14H6z" />
+        <path d="M14 3v5h5" />
+      </>
+    ),
     eye: (
       <>
         <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
@@ -533,6 +539,73 @@ function PreviewStep({ data, onBack, onContinue, photos, restaurant }) {
   )
 }
 
+function ProcessingAction({ description, icon, label, onClick }) {
+  return (
+    <button className="partners-setup__processing-action" onClick={onClick} type="button">
+      <span className="partners-setup__processing-action-icon"><Icon name={icon} size={31} /></span>
+      <span>
+        <strong>{label}</strong>
+        <small>{description}</small>
+      </span>
+      <span className="partners-setup__processing-chevron" aria-hidden="true">›</span>
+    </button>
+  )
+}
+
+function ProcessingPreviewStep({ error, file, onAddPhotos, onBack, onDownload, onReplace }) {
+  const failed = Boolean(error)
+
+  return (
+    <>
+      <section
+        className={`partners-setup__section partners-setup__section--standalone partners-setup__processing${failed ? ' partners-setup__processing--error' : ''}`}
+        aria-live="polite"
+      >
+        <div className="partners-setup__processing-status">
+          <span className="partners-setup__processing-mark" aria-hidden="true">
+            {failed ? <Icon name="close" size={33} /> : <span className="partners-setup__spinner" />}
+          </span>
+          <div>
+            <h2>{failed ? 'Не удалось подготовить превью' : 'Мы обрабатываем меню'}</h2>
+            <p>
+              Файл «{file?.name || 'Меню.xlsx'}» успешно загружен.<br />
+              {failed
+                ? 'Попробуйте заменить файл или повторить загрузку.'
+                : 'Мы сообщим, когда превью будет готово.'}
+            </p>
+            {failed && <div className="partners__notice partners__notice--error" role="alert">{error}</div>}
+          </div>
+        </div>
+
+        <div className="partners-setup__processing-options">
+          <h3>Что можно сделать сейчас:</h3>
+          <div>
+            <ProcessingAction
+              description="Вы сможете прикрепить фотографии блюд до публикации."
+              icon="camera"
+              label="Добавить фотографии"
+              onClick={onAddPhotos}
+            />
+            <ProcessingAction
+              description="Загрузите новый файл, если нужно внести изменения."
+              icon="file"
+              label="Заменить файл"
+              onClick={onReplace}
+            />
+            <ProcessingAction
+              description="Сохраните загруженный файл на компьютере."
+              icon="download"
+              label="Скачать загруженный файл"
+              onClick={onDownload}
+            />
+          </div>
+        </div>
+      </section>
+      <FlowFooter onBack={onBack} />
+    </>
+  )
+}
+
 function ConfirmStep({ error, loading, onBack, onPublish }) {
   return (
     <>
@@ -598,25 +671,33 @@ function FlowFooter({
 }
 
 export default function PartnersSetupFlow({ handleLogout, restaurant, refresh }) {
+  const previewRequestRef = useRef(0)
   const [step, setStep] = useState(1)
   const [menuFile, setMenuFile] = useState(null)
   const [photos, setPhotos] = useState([])
   const [preview, setPreview] = useState(null)
+  const [previewStatus, setPreviewStatus] = useState('idle')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
   const previewMenu = async () => {
     if (!menuFile) return
+    const requestId = ++previewRequestRef.current
     setLoading(true)
     setError(null)
+    setPreviewStatus('processing')
+    setStep(2)
     try {
       const data = await restaurantPortalApi.previewMenu(menuFile)
+      if (requestId !== previewRequestRef.current) return
       setPreview(data)
-      setStep(2)
+      setPreviewStatus('ready')
     } catch (err) {
+      if (requestId !== previewRequestRef.current) return
       setError(err.rowErrors?.map((item) => item.message).join(' ') || err.message || 'Не получилось проверить файл.')
+      setPreviewStatus('error')
     } finally {
-      setLoading(false)
+      if (requestId === previewRequestRef.current) setLoading(false)
     }
   }
 
@@ -640,9 +721,27 @@ export default function PartnersSetupFlow({ handleLogout, restaurant, refresh })
   }
 
   const setFile = (file) => {
+    previewRequestRef.current += 1
     setMenuFile(file)
     setPreview(null)
+    setPreviewStatus('idle')
+    setLoading(false)
     setError(null)
+  }
+
+  const replaceFile = () => {
+    setFile(null)
+    setStep(1)
+  }
+
+  const downloadMenuFile = () => {
+    if (!menuFile) return
+    const url = URL.createObjectURL(menuFile)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = menuFile.name
+    link.click()
+    window.setTimeout(() => URL.revokeObjectURL(url), 0)
   }
 
   return (
@@ -694,13 +793,24 @@ export default function PartnersSetupFlow({ handleLogout, restaurant, refresh })
               />
             )}
             {step === 3 && (
-              <PreviewStep
-                data={preview}
-                onBack={() => setStep(2)}
-                onContinue={() => setStep(4)}
-                photos={photos}
-                restaurant={restaurant}
-              />
+              previewStatus === 'ready' && preview ? (
+                <PreviewStep
+                  data={preview}
+                  onBack={() => setStep(2)}
+                  onContinue={() => setStep(4)}
+                  photos={photos}
+                  restaurant={restaurant}
+                />
+              ) : (
+                <ProcessingPreviewStep
+                  error={previewStatus === 'error' ? error : null}
+                  file={menuFile}
+                  onAddPhotos={() => setStep(2)}
+                  onBack={() => setStep(2)}
+                  onDownload={downloadMenuFile}
+                  onReplace={replaceFile}
+                />
+              )
             )}
             {step === 4 && (
               <ConfirmStep
