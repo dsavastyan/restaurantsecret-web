@@ -58,6 +58,25 @@ function Icon({ name, size = 24 }) {
         <circle cx="12" cy="13" r="3.2" />
       </>
     ),
+    image: (
+      <>
+        <rect x="3.5" y="4.5" width="17" height="15" rx="2" />
+        <circle cx="9" cy="10" r="1.5" />
+        <path d="m5.5 17 4.2-4.2 2.8 2.8 2.2-2.2 3.8 3.6" />
+      </>
+    ),
+    list: (
+      <>
+        <rect x="4" y="3.5" width="16" height="17" rx="2.5" />
+        <path d="M8 8h.01M11 8h5M8 12h.01M11 12h5M8 16h.01M11 16h5" />
+      </>
+    ),
+    search: (
+      <>
+        <circle cx="10.5" cy="10.5" r="5.5" />
+        <path d="m15 15 4.5 4.5" />
+      </>
+    ),
     file: (
       <>
         <path d="M6 3h8l4 4v14H6z" />
@@ -492,29 +511,213 @@ function UploadStep({
   )
 }
 
-function PhotosStep({ files, onBack, onContinue, onFiles }) {
+function getDishPhotoFile(files, dish) {
+  const dishName = normalizePhotoName(dish?.dish_name)
+  return files.find((file) => normalizePhotoName(file.name) === dishName) || null
+}
+
+function renamePhotoForDish(file, dishName) {
+  const extension = String(file.name || '').match(/\.([a-z0-9]+)$/i)?.[1]
+    || String(file.type || '').split('/')[1]
+    || 'jpg'
+  const safeName = String(dishName || 'Блюдо')
+    .replace(/[\\/:*?"<>|]+/g, '-')
+    .trim()
+    || 'Блюдо'
+
+  return new File([file], `${safeName}.${extension.toLocaleLowerCase('ru-RU')}`, {
+    type: file.type,
+    lastModified: file.lastModified,
+  })
+}
+
+function DishPhotoList({ dishes, files, onBack, onContinue, onDishPhoto, onSkip }) {
+  const [query, setQuery] = useState('')
+  const [category, setCategory] = useState('all')
+  const [withoutPhotoOnly, setWithoutPhotoOnly] = useState(false)
+  const [photoUrls, setPhotoUrls] = useState([])
+
+  useEffect(() => {
+    const next = files.map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+    }))
+    setPhotoUrls(next)
+    return () => next.forEach((item) => URL.revokeObjectURL(item.url))
+  }, [files])
+
+  const categories = [...new Set(dishes.map((dish) => dish.category || 'Меню'))]
+  const normalizedQuery = query.trim().toLocaleLowerCase('ru-RU')
+  const visibleDishes = dishes.filter((dish) => {
+    const hasPhoto = Boolean(getDishPhotoFile(files, dish))
+    const matchesQuery = !normalizedQuery
+      || String(dish.dish_name || '').toLocaleLowerCase('ru-RU').includes(normalizedQuery)
+    const matchesCategory = category === 'all' || (dish.category || 'Меню') === category
+    return matchesQuery && matchesCategory && (!withoutPhotoOnly || !hasPhoto)
+  })
+
+  return (
+    <>
+      <section className="partners-setup__section partners-setup__section--standalone partners-setup__dish-photos">
+        <h2>Добавьте фото к блюдам по одному</h2>
+        <p>Выберите фотографию для каждого блюда вручную.</p>
+
+        <div className="partners-setup__dish-photo-filters">
+          <label className="partners-setup__dish-search">
+            <span className="partners-setup__visually-hidden">Поиск по блюдам</span>
+            <input
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Поиск по блюдам"
+              type="search"
+              value={query}
+            />
+            <Icon name="search" size={19} />
+          </label>
+          <label className="partners-setup__dish-category">
+            <span className="partners-setup__visually-hidden">Раздел меню</span>
+            <select onChange={(event) => setCategory(event.target.value)} value={category}>
+              <option value="all">Все разделы ({categories.length})</option>
+              {categories.map((item) => <option key={item} value={item}>{item}</option>)}
+            </select>
+          </label>
+          <label className="partners-setup__photo-toggle">
+            <span>Без фото</span>
+            <input
+              checked={withoutPhotoOnly}
+              onChange={(event) => setWithoutPhotoOnly(event.target.checked)}
+              type="checkbox"
+            />
+            <i aria-hidden="true" />
+          </label>
+        </div>
+
+        <div className="partners-setup__dish-photo-list">
+          {visibleDishes.map((dish, index) => {
+            const file = getDishPhotoFile(files, dish)
+            const photo = file ? photoUrls.find((item) => item.file === file) : null
+            const dishKey = dish.id || dish.dish_id || `${dish.dish_name}-${dish.category}-${index}`
+            const calories = dish.kcal != null && dish.kcal !== '' ? `${dish.kcal} ккал` : null
+
+            return (
+              <article className="partners-setup__dish-photo-row" key={dishKey}>
+                {photo
+                  ? <img alt="" src={photo.url} />
+                  : (
+                    <span className="partners-setup__dish-photo-placeholder" aria-hidden="true">
+                      <Icon name="image" size={25} />
+                    </span>
+                  )}
+                <span className="partners-setup__dish-photo-copy">
+                  <strong>{dish.dish_name}</strong>
+                  <small>{dish.category || 'Меню'}</small>
+                  {calories && <small>{calories}</small>}
+                </span>
+                <label className="partners-setup__dish-photo-button">
+                  <input
+                    accept="image/*"
+                    onChange={(event) => {
+                      const nextFile = event.target.files?.[0]
+                      if (nextFile) onDishPhoto(dish, nextFile)
+                      event.target.value = ''
+                    }}
+                    type="file"
+                  />
+                  {file ? 'Заменить фото' : 'Выбрать фото'}
+                </label>
+              </article>
+            )
+          })}
+          {!visibleDishes.length && (
+            <div className="partners-setup__dish-photo-empty">
+              <Icon name="search" size={27} />
+              <strong>Блюда не найдены</strong>
+              <span>Попробуйте изменить поиск или фильтры.</span>
+            </div>
+          )}
+        </div>
+      </section>
+      <FlowFooter
+        continueIcon="arrowRight"
+        continueLabel="Продолжить"
+        onBack={onBack}
+        onContinue={onContinue}
+        onSecondary={onSkip}
+        secondaryLabel="Пропустить этот шаг"
+      />
+    </>
+  )
+}
+
+function PhotosStep({
+  dishes,
+  files,
+  menuReady,
+  onBack,
+  onContinue,
+  onDishPhoto,
+  onFiles,
+}) {
   const inputRef = useRef(null)
+  const [view, setView] = useState('options')
+
+  const skip = () => {
+    onFiles([])
+    onContinue()
+  }
+
+  if (view === 'dishes') {
+    return (
+      <DishPhotoList
+        dishes={dishes}
+        files={files}
+        onBack={() => setView('options')}
+        onContinue={onContinue}
+        onDishPhoto={onDishPhoto}
+        onSkip={skip}
+      />
+    )
+  }
 
   return (
     <>
       <section className="partners-setup__section partners-setup__section--standalone partners-setup__photos">
-        <h2>Загрузите фотографии</h2>
+        <h2>Загрузите фотографии блюд</h2>
         <p>
-          Перетащите файлы сюда или выберите на компьютере.<br />
-          Мы попробуем сопоставить их с названиями блюд автоматически.
+          Выберите, как вам удобнее добавить фото. Мы попробуем<br />
+          сопоставить их с названиями блюд автоматически.
         </p>
-        <FileDropzone
-          accept="image/*"
-          buttonLabel="Выбрать файлы"
-          className="partners-setup__photo-dropzone"
-          file={files.length ? files[0] : null}
-          icon="upload"
-          inputRef={inputRef}
-          label=""
-          multiple
-          onFiles={onFiles}
-          supportText="JPG, PNG или WEBP, не более 10 МБ на файл"
-        />
+        <div className="partners-setup__photo-options">
+          <FileDropzone
+            accept="image/*"
+            buttonLabel="Выбрать файлы"
+            className="partners-setup__photo-dropzone"
+            file={files.length ? files[0] : null}
+            icon="upload"
+            inputRef={inputRef}
+            label="Загрузить файлы одним пакетом"
+            multiple
+            onFiles={onFiles}
+            supportText="Перетащите файлы сюда или выберите на компьютере."
+          />
+          <div
+            className={`partners-setup__photo-manual${menuReady ? '' : ' partners-setup__photo-manual--disabled'}`}
+            title={menuReady ? undefined : 'Доступно после завершения обработки меню'}
+          >
+            <span className="partners-setup__photo-manual-icon"><Icon name="list" size={34} /></span>
+            <strong>Добавить фото к блюдам по одному</strong>
+            <span>Выберите фото для каждого блюда вручную.</span>
+            <button disabled={!menuReady} onClick={() => setView('dishes')} type="button">
+              Перейти к списку блюд
+            </button>
+            {!menuReady && (
+              <small>
+                <Icon name="info" size={16} />
+                Доступно после завершения обработки меню
+              </small>
+            )}
+          </div>
+        </div>
+        <p className="partners-setup__photo-formats">JPG, PNG или WEBP, не более 10 МБ на файл</p>
         {files.length > 0 && (
           <div className="partners-setup__photo-summary">
             <strong>Выбрано фотографий: {files.length}</strong>
@@ -539,10 +742,7 @@ function PhotosStep({ files, onBack, onContinue, onFiles }) {
         continueLabel="Продолжить"
         onBack={onBack}
         onContinue={onContinue}
-        onSecondary={() => {
-          onFiles([])
-          onContinue()
-        }}
+        onSecondary={skip}
         secondaryLabel="Пропустить этот шаг"
       />
     </>
@@ -943,6 +1143,15 @@ export default function PartnersSetupFlow({
     setStep(1)
   }
 
+  const setDishPhoto = (dish, file) => {
+    const renamedFile = renamePhotoForDish(file, dish.dish_name)
+    const dishName = normalizePhotoName(dish.dish_name)
+    setPhotos((current) => [
+      ...current.filter((item) => normalizePhotoName(item.name) !== dishName),
+      renamedFile,
+    ])
+  }
+
   const downloadMenuFile = () => {
     if (!menuFile) return
     const url = URL.createObjectURL(menuFile)
@@ -1003,9 +1212,12 @@ export default function PartnersSetupFlow({
             )}
             {step === 2 && (
               <PhotosStep
+                dishes={preview?.preview || []}
                 files={photos}
+                menuReady={previewStatus === 'ready' && Boolean(preview?.preview?.length)}
                 onBack={() => setStep(1)}
                 onContinue={() => setStep(3)}
+                onDishPhoto={setDishPhoto}
                 onFiles={setPhotos}
               />
             )}
