@@ -1,5 +1,5 @@
-const STATIC_CACHE = 'static-v2';
-const API_CACHE = 'api-v2';
+const STATIC_CACHE = 'static-v3';
+const API_CACHE = 'api-v3';
 const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest'];
 
 self.addEventListener('install', (event) => {
@@ -30,8 +30,21 @@ self.addEventListener('fetch', (event) => {
     event.respondWith((async () => {
       try {
         const networkResponse = await fetch(event.request);
-        const cache = await caches.open(STATIC_CACHE);
-        cache.put('/index.html', networkResponse.clone());
+        if (networkResponse.ok) {
+          const cache = await caches.open(STATIC_CACHE);
+          cache.put('/index.html', networkResponse.clone());
+          return networkResponse;
+        }
+
+        // GitHub Pages returns its 404 document for SPA deep links such as
+        // /partners/dashboard. Serve the cached app shell instead so React Router
+        // can render the requested route without surfacing a failed navigation.
+        if (networkResponse.status === 404) {
+          const cache = await caches.open(STATIC_CACHE);
+          const appShell = await cache.match('/index.html');
+          if (appShell) return appShell;
+        }
+
         return networkResponse;
       } catch (error) {
         const cache = await caches.open(STATIC_CACHE);
