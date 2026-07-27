@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { restaurantPortalApi } from '@/api/restaurantPortal'
 
 const SUPPORT_EMAIL = 'partners@restaurantsecret.ru'
@@ -12,12 +13,6 @@ const STEPS = [
 
 function Icon({ name, size = 24 }) {
   const paths = {
-    chef: (
-      <>
-        <path d="M8.2 17.7h7.6M8.7 20.8h6.6M8.1 17.5V12a4.3 4.3 0 0 1-.8-8.5 5 5 0 0 1 9.4 0 4.3 4.3 0 0 1-.8 8.5v5.5" />
-        <path d="M9.5 12h5" />
-      </>
-    ),
     store: (
       <>
         <path d="M4 9.5h16l-1.5-4h-13zM5.5 9.5v9h13v-9M9 18.5v-5h6v5" />
@@ -114,29 +109,53 @@ function formatBytes(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} МБ`
 }
 
-function RestaurantCard({ restaurant }) {
+function getFileBadge(filename) {
+  const parts = String(filename || '').split('.')
+  if (parts.length < 2) return 'FILE'
+  const extension = parts.pop()?.toLocaleUpperCase('ru-RU')
+  if (!extension) return 'FILE'
+  if (extension === 'JPEG') return 'JPG'
+  return extension.slice(0, 4)
+}
+
+function RestaurantSwitcher({ onRestaurantChange, restaurant, restaurants }) {
+  if (restaurants.length <= 1) return null
+
   return (
-    <div className="partners-setup__restaurant-card">
+    <label className="partners-setup__restaurant-card">
       <span className="partners-setup__restaurant-icon"><Icon name="store" size={19} /></span>
       <span>
-        <strong>{restaurant.name}</strong>
-        <small>Ресторан-партнёр</small>
+        <select
+          aria-label="Выберите ресторан"
+          onChange={(event) => onRestaurantChange?.(event.target.value)}
+          value={restaurant.id}
+        >
+          {restaurants.map((item) => (
+            <option key={item.id} value={item.id}>{item.name}</option>
+          ))}
+        </select>
+        <small>Выберите ресторан</small>
       </span>
-      <span className="partners-setup__chevron" aria-hidden="true">⌄</span>
-    </div>
+    </label>
   )
 }
 
-function SetupSidebar({ restaurant, step }) {
+function SetupSidebar({ onRestaurantChange, restaurant, restaurants, step }) {
+  const hasMultipleRestaurants = restaurants.length > 1
+
   return (
-    <aside className="partners-setup__sidebar">
+    <aside className={`partners-setup__sidebar${hasMultipleRestaurants ? ' partners-setup__sidebar--multiple' : ''}`}>
       <div>
-        <div className="partners-setup__brand">
-          <Icon name="chef" size={42} />
+        <Link className="partners-setup__brand" to="/" aria-label="RestaurantSecret — на главную">
+          <img src="/assets/logo-64.png" width="42" height="42" alt="" aria-hidden="true" />
           <span>RestaurantSecret</span>
-        </div>
+        </Link>
         <p className="partners-setup__cabinet-label">Партнёрский кабинет</p>
-        <RestaurantCard restaurant={restaurant} />
+        <RestaurantSwitcher
+          onRestaurantChange={onRestaurantChange}
+          restaurant={restaurant}
+          restaurants={restaurants}
+        />
 
         <div className="partners-setup__progress-copy">
           <strong>Публикация меню</strong>
@@ -252,7 +271,7 @@ function FileDropzone({
 function MenuFileSummary({ file, onRemove }) {
   return (
     <div className="partners-setup__file-summary">
-      <span className="partners-setup__file-type">XLS</span>
+      <span className="partners-setup__file-type">{getFileBadge(file.name)}</span>
       <span>
         <strong>{file.name}</strong>
         <small>{formatBytes(file.size)}</small>
@@ -262,7 +281,162 @@ function MenuFileSummary({ file, onRemove }) {
   )
 }
 
-function UploadStep({ error, file, loading, onContinue, onFile }) {
+function formatErrorRows(rows) {
+  const uniqueRows = [...new Set(rows.filter(Boolean))].sort((a, b) => a - b)
+  if (!uniqueRows.length) return ''
+  if (uniqueRows.length === 1) return `В строке ${uniqueRows[0]}`
+  if (uniqueRows.length === 2) return `В строках ${uniqueRows[0]} и ${uniqueRows[1]}`
+  if (uniqueRows.length === 3) return `В строках ${uniqueRows[0]}, ${uniqueRows[1]} и ${uniqueRows[2]}`
+  return `В ${uniqueRows.length} строках`
+}
+
+function pluralizeDishes(count) {
+  const mod10 = count % 10
+  const mod100 = count % 100
+  if (mod10 === 1 && mod100 !== 11) return 'блюдо'
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'блюда'
+  return 'блюд'
+}
+
+function summarizeValidationErrors(errors) {
+  const groups = new Map()
+  for (const error of errors) {
+    const key = `${error.type || 'other'}:${error.field || ''}`
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key).push(error)
+  }
+
+  return Array.from(groups.values()).map((group) => {
+    const first = group[0]
+    const rows = group.map((error) => Number(error.row)).filter(Number.isFinite)
+    const rowPrefix = formatErrorRows(rows)
+    const fieldLabels = {
+      kcal: 'калорийность',
+      proteins_g: 'белки',
+      fats_g: 'жиры',
+      carbs_g: 'углеводы',
+      portion_g: 'выход блюда',
+    }
+    const fieldLabel = fieldLabels[first.field] || first.field
+
+    if (first.type === 'duplicate_dish') {
+      return `Найдено ${group.length} дублирующихся ${pluralizeDishes(group.length)}.`
+    }
+    if (first.type === 'blank_row') return `${rowPrefix} отсутствуют данные.`
+    if (first.type === 'missing_value' && first.field === 'dish_name') {
+      return `${rowPrefix} не указано название блюда.`
+    }
+    if (first.type === 'missing_value') return `${rowPrefix} не заполнено поле «${fieldLabel}».`
+    if (first.type === 'invalid_number') return `${rowPrefix} значение «${fieldLabel}» указано в неверном формате.`
+    if (first.type === 'negative_value') return `${rowPrefix} значение «${fieldLabel}» отрицательное.`
+    if (first.type === 'suspicious_nutrition') return `${rowPrefix} значение «${fieldLabel}» выглядит ошибочным.`
+    return first.message
+  })
+}
+
+function UploadValidationResult({
+  errors,
+  loading,
+  onReplace,
+  status,
+  validationKey,
+}) {
+  const [expanded, setExpanded] = useState(false)
+  const summaries = summarizeValidationErrors(errors)
+  const visibleSummaries = expanded ? summaries : summaries.slice(0, 4)
+
+  if (loading || status === 'validating') {
+    return (
+      <div className="partners-setup__validation-result partners-setup__validation-result--checking" role="status">
+        <span className="partners-setup__validation-spinner" aria-hidden="true" />
+        <div>
+          <h3>Проверяем данные</h3>
+          <p>Запускаем автоматическую проверку:</p>
+          <ul className="partners-setup__validation-checks">
+            <li>обязательные поля и пустые значения</li>
+            <li>корректность чисел и отрицательные значения</li>
+            <li>дубли блюд</li>
+            <li>потенциально ошибочные КБЖУ</li>
+          </ul>
+        </div>
+      </div>
+    )
+  }
+
+  if (status === 'processing') {
+    return (
+      <div className="partners-setup__validation-result partners-setup__validation-result--processing" role="status">
+        <span className="partners-setup__validation-success"><Icon name="check" size={24} /></span>
+        <div>
+          <h3>Файл успешно загружен</h3>
+          <p>
+            Спасибо за загрузку. Файл заполнен не по шаблону, поэтому нам понадобится немного больше
+            времени, чтобы обработать меню. Мы сообщим, когда превью будет готово.
+          </p>
+          <span className="partners-setup__processing-status-badge">Статус: На обработке</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (status === 'ready') {
+    return (
+      <div className="partners-setup__validation-result partners-setup__validation-result--success" role="status">
+        <span className="partners-setup__validation-success"><Icon name="check" size={24} /></span>
+        <div>
+          <h3>Файл успешно загружен</h3>
+          <p>Автоматическая проверка завершена. Ошибок не найдено.</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!errors.length) return null
+
+  return (
+    <div className="partners-setup__validation-result partners-setup__validation-result--issues">
+      <div className="partners-setup__validation-issues-heading">
+        <span className="partners-setup__validation-success"><Icon name="check" size={24} /></span>
+        <div>
+          <h3>Файл успешно загружен</h3>
+          <p>Автоматическая проверка нашла данные, которые нужно исправить.</p>
+        </div>
+      </div>
+      <ul className="partners-setup__validation-errors">
+        {visibleSummaries.map((message, index) => <li key={`${message}-${index}`}>{message}</li>)}
+      </ul>
+      {summaries.length > 4 && (
+        <button
+          className="partners-setup__validation-expand"
+          onClick={() => setExpanded((value) => !value)}
+          type="button"
+        >
+          {expanded ? 'Скрыть ошибки' : `Показать все ошибки (${summaries.length})`}
+        </button>
+      )}
+      <div className="partners-setup__validation-actions">
+        {validationKey && (
+          <a href={restaurantPortalApi.validationDownloadUrl(validationKey)} download>
+            <Icon name="download" size={19} />
+            Скачать Excel с результатами проверки
+          </a>
+        )}
+        <button onClick={onReplace} type="button">Заменить файл</button>
+      </div>
+    </div>
+  )
+}
+
+function UploadStep({
+  error,
+  file,
+  loading,
+  onContinue,
+  onFile,
+  previewStatus,
+  validationErrors,
+  validationKey,
+}) {
   const inputRef = useRef(null)
 
   return (
@@ -270,8 +444,8 @@ function UploadStep({ error, file, loading, onContinue, onFile }) {
       <div className="partners-setup__template">
         <span className="partners-setup__template-icon"><Icon name="calculator" size={29} /></span>
         <span>
-          <strong>Быстрее всего — через шаблон Excel</strong>
-          <small>Структурированный файл помогает быстрее обработать меню и сократить количество уточнений.</small>
+          <strong>Рекомендуем использовать шаблон Excel</strong>
+          <small>Так мы быстрее обработаем меню и реже будем обращаться к вам за уточнениями.</small>
         </span>
         <a href={restaurantPortalApi.templateDownloadUrl()} download>
           <Icon name="download" size={23} />
@@ -282,22 +456,36 @@ function UploadStep({ error, file, loading, onContinue, onFile }) {
       <section className="partners-setup__section">
         <h2>Загрузите меню</h2>
         <FileDropzone
-          accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,application/pdf,image/jpeg,image/png,image/webp"
           file={file}
           icon="upload"
           inputRef={inputRef}
           label="Перетащите файл сюда или выберите на компьютере"
           onFiles={onFile}
-          supportText="Поддерживается Excel (.xlsx)"
+          supportText="Поддерживаются Excel, PDF, JPG, PNG и WEBP"
         />
         {file && <MenuFileSummary file={file} onRemove={() => onFile(null)} />}
-        <p className="partners-setup__note">Можно загрузить и обычное меню ресторана — шаблон необязателен.</p>
+        {file && (
+          <UploadValidationResult
+            errors={validationErrors}
+            loading={loading}
+            onReplace={() => inputRef.current?.click()}
+            status={previewStatus}
+            validationKey={validationKey}
+          />
+        )}
         {error && <div className="partners__notice partners__notice--error" role="alert">{error}</div>}
       </section>
 
       <FlowFooter
-        continueDisabled={!file || loading}
-        continueLabel={loading ? 'Проверяем файл…' : 'Продолжить'}
+        continueDisabled={!file || loading || validationErrors.length > 0}
+        continueLabel={
+          loading
+            ? 'Проверяем данные…'
+            : previewStatus === 'ready' || previewStatus === 'processing'
+              ? 'Продолжить'
+              : 'Проверить файл'
+        }
         onContinue={onContinue}
       />
     </>
@@ -670,32 +858,51 @@ function FlowFooter({
   )
 }
 
-export default function PartnersSetupFlow({ handleLogout, restaurant, refresh }) {
+export default function PartnersSetupFlow({
+  handleLogout,
+  onRestaurantChange,
+  restaurant,
+  restaurants = [],
+  refresh,
+}) {
   const previewRequestRef = useRef(0)
   const [step, setStep] = useState(1)
   const [menuFile, setMenuFile] = useState(null)
   const [photos, setPhotos] = useState([])
   const [preview, setPreview] = useState(null)
   const [previewStatus, setPreviewStatus] = useState('idle')
+  const [validationErrors, setValidationErrors] = useState([])
+  const [validationKey, setValidationKey] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
   const previewMenu = async () => {
     if (!menuFile) return
+    if ((previewStatus === 'ready' || previewStatus === 'processing') && !validationErrors.length) {
+      setStep(2)
+      return
+    }
     const requestId = ++previewRequestRef.current
     setLoading(true)
     setError(null)
-    setPreviewStatus('processing')
-    setStep(2)
+    setValidationErrors([])
+    setValidationKey(null)
+    setPreviewStatus('validating')
     try {
       const data = await restaurantPortalApi.previewMenu(menuFile)
       if (requestId !== previewRequestRef.current) return
       setPreview(data)
-      setPreviewStatus('ready')
+      setPreviewStatus(data?.status === 'processing' ? 'processing' : 'ready')
     } catch (err) {
       if (requestId !== previewRequestRef.current) return
-      setError(err.rowErrors?.map((item) => item.message).join(' ') || err.message || 'Не получилось проверить файл.')
-      setPreviewStatus('error')
+      if (err.rowErrors?.length) {
+        setValidationErrors(err.rowErrors)
+        setValidationKey(err.validationKey || null)
+        setPreviewStatus('validation_errors')
+      } else {
+        setError(err.message || 'Не получилось проверить файл.')
+        setPreviewStatus('idle')
+      }
     } finally {
       if (requestId === previewRequestRef.current) setLoading(false)
     }
@@ -725,6 +932,8 @@ export default function PartnersSetupFlow({ handleLogout, restaurant, refresh })
     setMenuFile(file)
     setPreview(null)
     setPreviewStatus('idle')
+    setValidationErrors([])
+    setValidationKey(null)
     setLoading(false)
     setError(null)
   }
@@ -746,22 +955,27 @@ export default function PartnersSetupFlow({ handleLogout, restaurant, refresh })
 
   return (
     <div className="partners-setup">
-      <SetupSidebar restaurant={restaurant} step={step} />
+      <SetupSidebar
+        onRestaurantChange={onRestaurantChange}
+        restaurant={restaurant}
+        restaurants={restaurants}
+        step={step}
+      />
       <main className="partners-setup__main">
         <header className="partners-setup__topbar">
           <button className="partners-setup__logout" onClick={handleLogout} type="button">Выйти</button>
-          <span className="partners-setup__avatar">{restaurant.name.trim().charAt(0).toLocaleUpperCase('ru-RU')}</span>
         </header>
         <div className="partners-setup__content">
-          <div className={`partners-setup__heading${step === 2 ? ' partners-setup__heading--with-note' : ''}`}>
+          <div className={`partners-setup__heading${step === 1 ? ' partners-setup__heading--title-only' : ''}${step === 2 ? ' partners-setup__heading--with-note' : ''}`}>
             <div>
               <h1>{restaurant.name.toLocaleUpperCase('ru-RU')}</h1>
-              <p>
-                {step === 1 && 'Загрузите меню, чтобы мы могли подготовить его к публикации для гостей.'}
-                {step === 2 && 'Добавьте фотографии блюд, чтобы меню выглядело ещё привлекательнее для гостей.'}
-                {step === 3 && 'Проверьте названия блюд, цены, описания и фотографии перед публикацией.'}
-                {step === 4 && 'Проверьте названия блюд, цены, описания и фотографии перед публикацией.'}
-              </p>
+              {step !== 1 && (
+                <p>
+                  {step === 2 && 'Добавьте фотографии блюд, чтобы меню выглядело ещё привлекательнее для гостей.'}
+                  {step === 3 && 'Проверьте названия блюд, цены, описания и фотографии перед публикацией.'}
+                  {step === 4 && 'Проверьте названия блюд, цены, описания и фотографии перед публикацией.'}
+                </p>
+              )}
             </div>
             {step === 2 && (
               <aside className="partners-setup__optional-note">
@@ -782,6 +996,9 @@ export default function PartnersSetupFlow({ handleLogout, restaurant, refresh })
                 loading={loading}
                 onContinue={previewMenu}
                 onFile={setFile}
+                previewStatus={previewStatus}
+                validationErrors={validationErrors}
+                validationKey={validationKey}
               />
             )}
             {step === 2 && (

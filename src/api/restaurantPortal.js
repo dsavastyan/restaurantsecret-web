@@ -45,7 +45,9 @@ async function portalRequest(path, { method = 'GET', body, headers = {}, isFormD
       res.status,
       data?.error?.message || data?.error?.code || res.statusText,
       data?.error?.code,
-      data?.errors ? { rowErrors: data.errors } : null
+      data?.errors
+        ? { rowErrors: data.errors, validationKey: data.validation_key || null }
+        : null
     )
   }
 
@@ -58,6 +60,12 @@ export const restaurantPortalApi = {
   logout: () => portalRequest('/api/restaurant/auth/logout', { method: 'POST' }),
 
   me: () => portalRequest('/api/restaurant/me'),
+
+  switchRestaurant: (restaurantId) =>
+    portalRequest('/api/restaurant/switch', {
+      method: 'POST',
+      body: { restaurant_id: restaurantId },
+    }),
 
   previewMenu: (file) => {
     const form = new FormData()
@@ -84,6 +92,9 @@ export const restaurantPortalApi = {
     }),
 
   templateDownloadUrl: () => `${RESTAURANT_API_BASE}/api/restaurant/menu/template`,
+
+  validationDownloadUrl: (key) =>
+    `${RESTAURANT_API_BASE}/api/restaurant/menu/validation-result?key=${encodeURIComponent(key)}`,
 }
 
 export { createPortalError }

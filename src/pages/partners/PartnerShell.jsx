@@ -31,6 +31,7 @@ export default function PartnerShell() {
 
   const [status, setStatus] = useState(isLoginPage ? 'idle' : 'loading') // idle | loading | ready | error
   const [restaurant, setRestaurant] = useState(null)
+  const [restaurants, setRestaurants] = useState([])
   const [lastUpload, setLastUpload] = useState(null)
   const [loadError, setLoadError] = useState(null)
 
@@ -40,6 +41,7 @@ export default function PartnerShell() {
     try {
       const data = await restaurantPortalApi.me()
       setRestaurant(data.restaurant)
+      setRestaurants(data.restaurants?.length ? data.restaurants : data.restaurant ? [data.restaurant] : [])
       setLastUpload(data.last_upload)
       setStatus('ready')
     } catch (err) {
@@ -67,6 +69,19 @@ export default function PartnerShell() {
     navigate('/partners/login', { replace: true })
   }
 
+  const handleRestaurantChange = async (restaurantId) => {
+    if (Number(restaurantId) === Number(restaurant?.id)) return
+    setStatus('loading')
+    setLoadError(null)
+    try {
+      await restaurantPortalApi.switchRestaurant(Number(restaurantId))
+      await refresh()
+    } catch (err) {
+      setLoadError(err.message || 'Не получилось переключить ресторан.')
+      setStatus('error')
+    }
+  }
+
   const isFirstPublication = restaurant
     ? restaurant.has_published_menu === false ||
       (restaurant.has_published_menu == null && lastUpload?.status !== 'published')
@@ -82,7 +97,7 @@ export default function PartnerShell() {
   if (isLoginPage) {
     return (
       <div className="partners">
-        <Outlet context={{ restaurant: null, lastUpload: null, refresh }} />
+        <Outlet context={{ restaurant: null, restaurants: [], lastUpload: null, refresh }} />
       </div>
     )
   }
@@ -107,7 +122,15 @@ export default function PartnerShell() {
   if (isFirstPublication) {
     return (
       <div className="partners partners--setup">
-        <Outlet context={{ restaurant, lastUpload, refresh, handleLogout, isFirstPublication }} />
+        <Outlet context={{
+          restaurant,
+          restaurants,
+          lastUpload,
+          refresh,
+          handleLogout,
+          handleRestaurantChange,
+          isFirstPublication,
+        }} />
       </div>
     )
   }
@@ -115,8 +138,8 @@ export default function PartnerShell() {
   return (
     <div className="partners">
       <header className="partners__header">
-        <div className="partners__brand">
-          <span className="partners__brand-mark" aria-hidden="true">R</span>
+        <div className="partners__brand" aria-label="RestaurantSecret">
+          <img className="partners__brand-logo" src="/assets/logo-64.png" width="40" height="40" alt="" aria-hidden="true" />
           <span className="partners__brand-name">RestaurantSecret</span>
           <span className="partners__brand-sub">Кабинет ресторана</span>
         </div>
@@ -126,7 +149,15 @@ export default function PartnerShell() {
         </div>
       </header>
       <main className="partners__main">
-        <Outlet context={{ restaurant, lastUpload, refresh, handleLogout, isFirstPublication }} />
+        <Outlet context={{
+          restaurant,
+          restaurants,
+          lastUpload,
+          refresh,
+          handleLogout,
+          handleRestaurantChange,
+          isFirstPublication,
+        }} />
       </main>
     </div>
   )

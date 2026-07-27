@@ -19,11 +19,27 @@ function formatDate(value) {
 }
 
 export default function PartnersDashboard() {
-  const { restaurant, lastUpload, refresh, handleLogout, isFirstPublication } = useOutletContext()
+  const {
+    restaurant,
+    restaurants,
+    lastUpload,
+    refresh,
+    handleLogout,
+    handleRestaurantChange,
+    isFirstPublication,
+  } = useOutletContext()
 
   if (!restaurant) return null
   if (isFirstPublication) {
-    return <PartnersSetupFlow handleLogout={handleLogout} refresh={refresh} restaurant={restaurant} />
+    return (
+      <PartnersSetupFlow
+        handleLogout={handleLogout}
+        onRestaurantChange={handleRestaurantChange}
+        refresh={refresh}
+        restaurant={restaurant}
+        restaurants={restaurants}
+      />
+    )
   }
 
   return (
