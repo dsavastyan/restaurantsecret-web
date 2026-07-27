@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { CircleSlash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { restaurantPortalApi } from '@/api/restaurantPortal'
 
@@ -250,7 +251,9 @@ function FileDropzone({
   label,
   multiple = false,
   onFiles,
+  secondaryText,
   supportText,
+  footerText,
 }) {
   const inputId = useId()
   const [dragging, setDragging] = useState(false)
@@ -288,10 +291,12 @@ function FileDropzone({
       />
       <span className="partners-setup__drop-icon"><Icon name={icon} size={54} /></span>
       {label && <strong>{label}</strong>}
-      <span>{supportText}</span>
+      <span className="partners-setup__drop-support">{supportText}</span>
+      {secondaryText && <span className="partners-setup__drop-secondary">{secondaryText}</span>}
       <label className="partners-setup__choose-button" htmlFor={inputId}>
         {file ? 'Заменить файл' : buttonLabel || (multiple ? 'Выбрать фотографии' : 'Выбрать файл')}
       </label>
+      {footerText && <small className="partners-setup__drop-footer">{footerText}</small>}
     </div>
   )
 }
@@ -690,11 +695,17 @@ function PhotosStep({
   return (
     <>
       <section className="partners-setup__section partners-setup__section--standalone partners-setup__photos">
-        <h2>Загрузите фотографии блюд</h2>
-        <p>
-          Выберите, как вам удобнее добавить фото. Мы попробуем<br />
-          сопоставить их с названиями блюд автоматически.
-        </p>
+        <aside className="partners-setup__optional-note partners-setup__optional-note--in-card">
+          <CircleSlash2 aria-hidden="true" size={29} strokeWidth={1.8} />
+          <span>
+            <strong>Этот шаг можно пропустить</strong>
+            <small>Вы сможете добавить фотографии позже<br />в любое время в кабинете.</small>
+          </span>
+        </aside>
+        <div className="partners-setup__photo-heading">
+          <h2>Загрузите фотографии блюд</h2>
+          <p>Выберите, как вам удобнее добавить фото.</p>
+        </div>
         <div className="partners-setup__photo-options">
           <FileDropzone
             accept="image/*"
@@ -706,7 +717,9 @@ function PhotosStep({
             label="Загрузить файлы одним пакетом"
             multiple
             onFiles={onFiles}
+            secondaryText="Мы попробуем сопоставить их с названиями блюд автоматически."
             supportText="Перетащите файлы сюда или выберите на компьютере."
+            footerText="JPG, PNG или WEBP, не более 10 МБ на файл"
           />
           <div
             className={`partners-setup__photo-manual${menuReady ? '' : ' partners-setup__photo-manual--disabled'}`}
@@ -726,7 +739,6 @@ function PhotosStep({
             )}
           </div>
         </div>
-        <p className="partners-setup__photo-formats">JPG, PNG или WEBP, не более 10 МБ на файл</p>
         {files.length > 0 && (
           <div className="partners-setup__photo-summary">
             <strong>Выбрано фотографий: {files.length}</strong>
@@ -1185,7 +1197,7 @@ export default function PartnersSetupFlow({
           <button className="partners-setup__logout" onClick={handleLogout} type="button">Выйти</button>
         </header>
         <div className="partners-setup__content">
-          <div className={`partners-setup__heading${step === 1 ? ' partners-setup__heading--title-only' : ''}${step === 2 ? ' partners-setup__heading--with-note' : ''}`}>
+          <div className={`partners-setup__heading${step === 1 ? ' partners-setup__heading--title-only' : ''}`}>
             <div>
               <h1>{restaurant.name.toLocaleUpperCase('ru-RU')}</h1>
               {step !== 1 && (
@@ -1196,15 +1208,6 @@ export default function PartnersSetupFlow({
                 </p>
               )}
             </div>
-            {step === 2 && (
-              <aside className="partners-setup__optional-note">
-                <Icon name="edit" size={29} />
-                <span>
-                  <strong>Этот шаг можно пропустить</strong>
-                  <small>Вы сможете добавить фотографии позже<br />в любое время в кабинете.</small>
-                </span>
-              </aside>
-            )}
           </div>
 
           <div className="partners-setup__card">
