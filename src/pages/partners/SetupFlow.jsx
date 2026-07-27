@@ -159,7 +159,7 @@ function RestaurantSwitcher({ onRestaurantChange, restaurant, restaurants }) {
   )
 }
 
-function SetupSidebar({ onRestaurantChange, restaurant, restaurants, step }) {
+function SetupSidebar({ onRestaurantChange, onStepSelect, restaurant, restaurants, step }) {
   const hasMultipleRestaurants = restaurants.length > 1
 
   return (
@@ -194,18 +194,27 @@ function SetupSidebar({ onRestaurantChange, restaurant, restaurants, step }) {
         <ol className="partners-setup__steps">
           {STEPS.map((item) => {
             const state = item.number < step ? 'complete' : item.number === step ? 'active' : 'pending'
+            const canNavigate = state === 'complete'
             return (
               <li className={`partners-setup__step partners-setup__step--${state}`} key={item.number}>
-                <span className="partners-setup__step-number">
-                  {state === 'complete' ? <Icon name="check" size={18} /> : item.number}
-                </span>
-                <span className="partners-setup__step-copy">
-                  <strong>{item.title}</strong>
-                  <small>{getStepStatusLabel(item, state, step)}</small>
-                </span>
-                {state === 'complete' && (
-                  <span className="partners-setup__step-check"><Icon name="check" size={18} /></span>
-                )}
+                <button
+                  aria-current={state === 'active' ? 'step' : undefined}
+                  className="partners-setup__step-button"
+                  disabled={!canNavigate}
+                  onClick={() => onStepSelect?.(item.number)}
+                  type="button"
+                >
+                  <span className="partners-setup__step-number">
+                    {state === 'complete' ? <Icon name="check" size={18} /> : item.number}
+                  </span>
+                  <span className="partners-setup__step-copy">
+                    <strong>{item.title}</strong>
+                    <small>{getStepStatusLabel(item, state, step)}</small>
+                  </span>
+                  {state === 'complete' && (
+                    <span className="partners-setup__step-check"><Icon name="check" size={18} /></span>
+                  )}
+                </button>
               </li>
             )
           })}
@@ -1166,6 +1175,7 @@ export default function PartnersSetupFlow({
     <div className="partners-setup">
       <SetupSidebar
         onRestaurantChange={onRestaurantChange}
+        onStepSelect={setStep}
         restaurant={restaurant}
         restaurants={restaurants}
         step={step}

@@ -273,14 +273,34 @@
 .partners-setup__step {
   position: relative;
   z-index: 1;
+  min-height: 82px;
+  border-radius: 15px;
+  color: #686b68;
+}
+.partners-setup__step-button {
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr) auto;
   align-items: center;
   gap: 14px;
+  width: 100%;
   min-height: 82px;
   padding: 13px 15px;
-  border-radius: 15px;
-  color: #686b68;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.partners-setup__step-button:not(:disabled) {
+  cursor: pointer;
+}
+.partners-setup__step-button:not(:disabled):hover {
+  background: rgba(239, 240, 233, .72);
+}
+.partners-setup__step-button:focus-visible {
+  outline: 2px solid #628249;
+  outline-offset: 2px;
 }
 .partners-setup__step--active {
   background: linear-gradient(110deg, #eff0e9, rgba(239, 240, 233, .62));
@@ -332,15 +352,6 @@
 .partners-setup__main {
   min-width: 0;
   min-height: calc(100vh - (var(--setup-window-gap) * 2));
-  overflow: hidden;
-  border: 1px solid rgba(226, 219, 209, .8);
-  border-radius: 24px;
-  background: rgba(255, 254, 251, .72);
-  box-shadow:
-    0 3px 9px rgba(62, 48, 31, .05),
-    0 20px 48px rgba(62, 48, 31, .105),
-    0 44px 96px rgba(62, 48, 31, .065);
-  backdrop-filter: blur(16px);
 }
 .partners-setup__topbar {
   display: flex;
@@ -417,10 +428,14 @@
   display: flex;
   flex-direction: column;
   padding: 27px 29px 25px;
-  border: 1px solid #e8e3dc;
-  border-radius: 19px;
-  background: rgba(255, 255, 255, .76);
-  box-shadow: 0 12px 31px rgba(64, 50, 35, .065);
+  border: 1px solid rgba(226, 219, 209, .86);
+  border-radius: 24px;
+  background: rgba(255, 254, 251, .92);
+  box-shadow:
+    0 3px 9px rgba(62, 48, 31, .05),
+    0 20px 48px rgba(62, 48, 31, .11),
+    0 44px 96px rgba(62, 48, 31, .07);
+  backdrop-filter: blur(16px);
 }
 .partners-setup__template {
   display: grid;
@@ -1695,7 +1710,7 @@
   .partners-setup__cabinet-label { margin-inline: 7px; }
   .partners-setup__progress-copy { margin-inline: 7px; }
   .partners-setup__progress { margin-inline: 7px; }
-  .partners-setup__step { padding-inline: 10px; }
+  .partners-setup__step-button { padding-inline: 10px; }
   .partners-setup__template { grid-template-columns: 52px minmax(0, 1fr); gap: 17px; }
   .partners-setup__template a { grid-column: 1 / -1; min-width: 0; }
   .partners-setup__heading--with-note { grid-template-columns: 1fr; align-items: start; }
