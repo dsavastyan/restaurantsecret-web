@@ -60,7 +60,8 @@ export default function PartnersUploadMenu() {
       <h1 className="partners-upload__title">Обновить меню</h1>
       <p className="partners-upload__hint">
         Заполните <a href={restaurantPortalApi.templateDownloadUrl()} download>шаблон Excel</a> и загрузите файл.
-        КБЖУ указывайте на порцию. Новая загрузка полностью заменяет предыдущее меню.
+        КБЖУ можно указать на порцию или на 100 грамм — достаточно полностью заполнить один из двух блоков.
+        Новая загрузка полностью заменяет предыдущее меню.
       </p>
 
       <form className="partners-upload__form" onSubmit={submit}>

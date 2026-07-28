@@ -344,11 +344,19 @@ function summarizeValidationErrors(errors) {
     const rows = group.map((error) => Number(error.row)).filter(Number.isFinite)
     const rowPrefix = formatErrorRows(rows)
     const fieldLabels = {
-      kcal: 'калорийность',
-      proteins_g: 'белки',
-      fats_g: 'жиры',
-      carbs_g: 'углеводы',
+      dish_name: 'название блюда',
+      category: 'категория',
       portion_g: 'выход блюда',
+      composition_text: 'состав',
+      price_rub: 'цена',
+      serving_kcal: 'калорийность на порцию',
+      serving_proteins_g: 'белки на порцию',
+      serving_fats_g: 'жиры на порцию',
+      serving_carbs_g: 'углеводы на порцию',
+      per_100_kcal: 'калорийность на 100 грамм',
+      per_100_proteins_g: 'белки на 100 грамм',
+      per_100_fats_g: 'жиры на 100 грамм',
+      per_100_carbs_g: 'углеводы на 100 грамм',
     }
     const fieldLabel = fieldLabels[first.field] || first.field
 
