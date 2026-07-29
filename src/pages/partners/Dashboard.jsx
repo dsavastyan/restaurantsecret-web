@@ -120,6 +120,45 @@ function RestoreVersionModal({ version, busy, error, onCancel, onConfirm }) {
   )
 }
 
+function ConfirmFreshnessModal({ busy, error, onCancel, onConfirm }) {
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape' && !busy) onCancel()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [busy, onCancel])
+
+  return (
+    <div className="partners-history-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-freshness-title">
+      <button
+        className="partners-history-modal__backdrop"
+        type="button"
+        aria-label="Закрыть подтверждение"
+        onClick={busy ? undefined : onCancel}
+      />
+      <section className="partners-history-modal__panel partners-history-modal__panel--confirm partners-freshness-modal">
+        <span className="partners-eyebrow">Актуальность меню</span>
+        <h2 id="confirm-freshness-title">Подтверждаете актуальность меню?</h2>
+        <p>Дата обновления будет установлена на сегодня. Состав меню и фотографии не изменятся.</p>
+        {error && <div className="partners__notice partners__notice--error">{error}</div>}
+        <div className="partners-history-modal__footer">
+          <button className="partners__btn" type="button" disabled={busy} onClick={onCancel}>Отмена</button>
+          <button
+            className="partners__btn partners__btn--primary"
+            type="button"
+            disabled={busy}
+            autoFocus
+            onClick={onConfirm}
+          >
+            {busy ? 'Подтверждаем…' : 'Да, подтвердить'}
+          </button>
+        </div>
+      </section>
+    </div>
+  )
+}
+
 function MenuHistory({ restaurantId, refresh }) {
   const [versions, setVersions] = useState([])
   const [status, setStatus] = useState('loading')
@@ -298,6 +337,9 @@ export default function PartnersDashboard() {
   const navigate = useNavigate()
   const [activeDraft, setActiveDraft] = useState(null)
   const [draftLoading, setDraftLoading] = useState(false)
+  const [confirmFreshnessOpen, setConfirmFreshnessOpen] = useState(false)
+  const [confirmFreshnessBusy, setConfirmFreshnessBusy] = useState(false)
+  const [confirmFreshnessError, setConfirmFreshnessError] = useState(null)
 
   useEffect(() => {
     if (!restaurant?.id) return undefined
@@ -340,88 +382,124 @@ export default function PartnersDashboard() {
     ? `/restaurants/${encodeURIComponent(restaurant.slug)}/menu/`
     : null
 
+  const confirmFreshness = async () => {
+    setConfirmFreshnessBusy(true)
+    setConfirmFreshnessError(null)
+    try {
+      await restaurantPortalApi.confirmMenuFreshness()
+      setConfirmFreshnessOpen(false)
+      await refresh()
+    } catch (err) {
+      setConfirmFreshnessError(err.message || 'Не получилось подтвердить актуальность меню.')
+    } finally {
+      setConfirmFreshnessBusy(false)
+    }
+  }
+
   return (
-    <div className="partners-dashboard">
-      <div className="partners-dashboard__intro">
-        <span className="partners-eyebrow">Панель ресторана</span>
-        <h1 className="partners-dashboard__welcome">{restaurant.name}</h1>
-      </div>
+    <>
+      <div className="partners-dashboard">
+        <div className="partners-dashboard__intro">
+          <span className="partners-eyebrow">Панель ресторана</span>
+          <h1 className="partners-dashboard__welcome">{restaurant.name}</h1>
+        </div>
 
-      <div className="partners-dashboard__grid">
-        <section className="partners-card partners-dashboard__menu-card">
-          <div className="partners-dashboard__menu-summary">
-            <span className="partners-dashboard__feature-icon" aria-hidden="true">
-              <BookOpenText size={42} strokeWidth={1.65} />
-            </span>
-            <div className="partners-dashboard__dish-count">
-              <strong>{publishedDishes}</strong>
-              <span>{dishCountLabel(publishedDishes)}</span>
-            </div>
-            <p className="partners-dashboard__updated">
-              {menuUpdatedAt ? `Обновлено ${formatDate(menuUpdatedAt)}` : 'Меню ещё не опубликовано'}
-            </p>
-          </div>
-
-          <div className={`partners-dashboard__freshness${menuIsCurrent ? '' : ' partners-dashboard__freshness--stale'}`}>
-            <strong>Меню актуально?</strong>
-            <span className="partners-dashboard__freshness-status">
-              <span className="partners-dashboard__freshness-check" aria-hidden="true">
-                {menuIsCurrent ? <Check size={20} strokeWidth={2.2} /> : '!'}
+        <div className="partners-dashboard__grid">
+          <section className="partners-card partners-dashboard__menu-card">
+            <div className="partners-dashboard__menu-summary">
+              <span className="partners-dashboard__feature-icon" aria-hidden="true">
+                <BookOpenText size={42} strokeWidth={1.65} />
               </span>
-              {menuIsCurrent ? 'Актуально' : 'Требует обновления'}
-            </span>
-          </div>
-
-          {lastUpload?.status === 'error' && lastUpload.error_message && (
-            <div className="partners__notice partners__notice--error">{lastUpload.error_message}</div>
-          )}
-
-          <div className="partners-dashboard__menu-actions">
-            <Link
-              className="partners__btn partners__btn--primary"
-              to={activeDraft ? `/partners/upload?draft=${activeDraft.id}` : '/partners/upload?new=1'}
-            >
-              {activeDraft
-                ? (activeDraft.status === 'submitted' ? 'Посмотреть обновление' : 'Продолжить обновление')
-                : 'Обновить меню'}
-            </Link>
-            {menuUrl && (
-              <a className="partners__btn" href={menuUrl} target="_blank" rel="noreferrer">
-                Посмотреть меню
-              </a>
-            )}
-            {activeDraft?.status !== 'submitted' && activeDraft && (
-              <button
-                className="partners-dashboard__restart"
-                type="button"
-                onClick={() => {
-                  if (window.confirm('Начать обновление заново? Текущий черновик будет удалён.')) {
-                    navigate('/partners/upload?new=1')
-                  }
-                }}
-              >
-                Начать заново
-              </button>
-            )}
-            {draftLoading && <span className="partners-dashboard__draft-loading">Проверяем черновики…</span>}
-          </div>
-        </section>
-
-        <section className="partners-card partners-dashboard__photos-card">
-          <div className="partners-dashboard__photos-summary">
-            <span className="partners-dashboard__feature-icon" aria-hidden="true">
-              <ImageIcon size={42} strokeWidth={1.65} />
-            </span>
-            <div>
-              <h2>Фото блюд</h2>
-              <p>Добавляйте и заменяйте фотографии позиций</p>
+              <div className="partners-dashboard__dish-count">
+                <strong>{publishedDishes}</strong>
+                <span>{dishCountLabel(publishedDishes)}</span>
+              </div>
+              <p className="partners-dashboard__updated">
+                {menuUpdatedAt ? `Обновлено ${formatDate(menuUpdatedAt)}` : 'Меню ещё не опубликовано'}
+              </p>
             </div>
-          </div>
-          <Link className="partners__btn" to="/partners/photos">Управлять фото</Link>
-        </section>
+
+            <button
+              className={`partners-dashboard__freshness${menuIsCurrent ? '' : ' partners-dashboard__freshness--stale'}`}
+              type="button"
+              aria-haspopup="dialog"
+              onClick={() => {
+                setConfirmFreshnessError(null)
+                setConfirmFreshnessOpen(true)
+              }}
+            >
+              <strong>Меню актуально?</strong>
+              <span className="partners-dashboard__freshness-status">
+                <span className="partners-dashboard__freshness-check" aria-hidden="true">
+                  {menuIsCurrent ? <Check size={20} strokeWidth={2.2} /> : '!'}
+                </span>
+                <span className="partners-dashboard__freshness-copy">
+                  <span>{menuIsCurrent ? 'Актуально' : 'Требует обновления'}</span>
+                  <small>Подтвердить</small>
+                </span>
+              </span>
+            </button>
+
+            {lastUpload?.status === 'error' && lastUpload.error_message && (
+              <div className="partners__notice partners__notice--error">{lastUpload.error_message}</div>
+            )}
+
+            <div className="partners-dashboard__menu-actions">
+              <Link
+                className="partners__btn partners__btn--primary"
+                to={activeDraft ? `/partners/upload?draft=${activeDraft.id}` : '/partners/upload?new=1'}
+              >
+                {activeDraft
+                  ? (activeDraft.status === 'submitted' ? 'Посмотреть обновление' : 'Продолжить обновление')
+                  : 'Обновить меню'}
+              </Link>
+              {menuUrl && (
+                <a className="partners__btn" href={menuUrl} target="_blank" rel="noreferrer">
+                  Посмотреть меню
+                </a>
+              )}
+              {activeDraft?.status !== 'submitted' && activeDraft && (
+                <button
+                  className="partners-dashboard__restart"
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm('Начать обновление заново? Текущий черновик будет удалён.')) {
+                      navigate('/partners/upload?new=1')
+                    }
+                  }}
+                >
+                  Начать заново
+                </button>
+              )}
+              {draftLoading && <span className="partners-dashboard__draft-loading">Проверяем черновики…</span>}
+            </div>
+          </section>
+
+          <section className="partners-card partners-dashboard__photos-card">
+            <div className="partners-dashboard__photos-summary">
+              <span className="partners-dashboard__feature-icon" aria-hidden="true">
+                <ImageIcon size={42} strokeWidth={1.65} />
+              </span>
+              <div>
+                <h2>Фото блюд</h2>
+                <p>Добавляйте и заменяйте фотографии позиций</p>
+              </div>
+            </div>
+            <Link className="partners__btn" to="/partners/photos">Управлять фото</Link>
+          </section>
+        </div>
+
+        <MenuHistory restaurantId={restaurant.id} refresh={refresh} />
       </div>
 
-      <MenuHistory restaurantId={restaurant.id} refresh={refresh} />
-    </div>
+      {confirmFreshnessOpen && (
+        <ConfirmFreshnessModal
+          busy={confirmFreshnessBusy}
+          error={confirmFreshnessError}
+          onCancel={() => setConfirmFreshnessOpen(false)}
+          onConfirm={confirmFreshness}
+        />
+      )}
+    </>
   )
 }
