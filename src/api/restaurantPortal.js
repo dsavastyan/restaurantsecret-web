@@ -61,6 +61,9 @@ export const restaurantPortalApi = {
 
   me: () => portalRequest('/api/restaurant/me'),
 
+  confirmMenuFreshness: () =>
+    portalRequest('/api/restaurant/menu/confirm-freshness', { method: 'POST' }),
+
   switchRestaurant: (restaurantId) =>
     portalRequest('/api/restaurant/switch', {
       method: 'POST',
