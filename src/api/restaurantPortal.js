@@ -79,6 +79,101 @@ export const restaurantPortalApi = {
     return portalRequest('/api/restaurant/menu/upload', { method: 'POST', body: form, isFormData: true })
   },
 
+  menuHistory: () => portalRequest('/api/restaurant/menu/history'),
+
+  menuVersion: (snapshotId) =>
+    portalRequest(`/api/restaurant/menu/history/${encodeURIComponent(snapshotId)}`),
+
+  restoreMenuVersion: (snapshotId) =>
+    portalRequest(`/api/restaurant/menu/history/${encodeURIComponent(snapshotId)}/restore`, {
+      method: 'POST',
+    }),
+
+  activeDraft: () => portalRequest('/api/restaurant/menu/drafts/active'),
+
+  createDraft: ({ replaceActive = false } = {}) =>
+    portalRequest('/api/restaurant/menu/drafts', {
+      method: 'POST',
+      body: { replace_active: replaceActive },
+    }),
+
+  draft: (draftId) =>
+    portalRequest(`/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}`),
+
+  updateDraft: (draftId, body) =>
+    portalRequest(`/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}`, {
+      method: 'PATCH',
+      body,
+    }),
+
+  resetDraft: (draftId, method) =>
+    portalRequest(`/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/reset`, {
+      method: 'POST',
+      body: { method },
+    }),
+
+  uploadDraftSource: (draftId, file) => {
+    const form = new FormData()
+    form.append('file', file)
+    return portalRequest(`/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/source`, {
+      method: 'POST',
+      body: form,
+      isFormData: true,
+    })
+  },
+
+  addDraftItem: (draftId, item) =>
+    portalRequest(`/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/items`, {
+      method: 'POST',
+      body: item,
+    }),
+
+  updateDraftItem: (draftId, itemId, item) =>
+    portalRequest(
+      `/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/items/${encodeURIComponent(itemId)}`,
+      { method: 'PATCH', body: item },
+    ),
+
+  deleteDraftItem: (draftId, itemId) =>
+    portalRequest(
+      `/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/items/${encodeURIComponent(itemId)}`,
+      { method: 'DELETE' },
+    ),
+
+  restoreDraftItem: (draftId, itemId) =>
+    portalRequest(
+      `/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/items/${encodeURIComponent(itemId)}/restore`,
+      { method: 'POST' },
+    ),
+
+  uploadDraftPhotos: (draftId, files, itemId = null) => {
+    const form = new FormData()
+    for (const file of files) form.append('photos', file)
+    if (itemId != null) form.append('item_id', String(itemId))
+    return portalRequest(`/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/photos`, {
+      method: 'POST',
+      body: form,
+      isFormData: true,
+    })
+  },
+
+  assignDraftPhoto: (draftId, photoId, itemId) =>
+    portalRequest(
+      `/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/photos/${encodeURIComponent(photoId)}/assign`,
+      { method: 'POST', body: { item_id: itemId } },
+    ),
+
+  deleteDraftItemPhoto: (draftId, itemId) =>
+    portalRequest(
+      `/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/items/${encodeURIComponent(itemId)}/photo`,
+      { method: 'DELETE' },
+    ),
+
+  submitDraft: (draftId) =>
+    portalRequest(`/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/submit`, {
+      method: 'POST',
+    }),
+
   uploadPhotos: (files) => {
     const form = new FormData()
     for (const file of files) form.append('photos', file)

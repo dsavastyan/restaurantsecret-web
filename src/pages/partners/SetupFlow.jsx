@@ -704,10 +704,10 @@ function PhotosStep({
     <>
       <section className="partners-setup__section partners-setup__section--standalone partners-setup__photos">
         <aside className="partners-setup__optional-note partners-setup__optional-note--in-card">
-          <CircleSlash2 aria-hidden="true" size={29} strokeWidth={1.8} />
+          <CircleSlash2 aria-hidden="true" size={20} strokeWidth={1.8} />
           <span>
             <strong>Этот шаг можно пропустить</strong>
-            <small>Вы сможете добавить фотографии позже<br />в любое время в кабинете.</small>
+            <small>Вы сможете добавить фотографии позже в любое время в кабинете.</small>
           </span>
         </aside>
         <div className="partners-setup__photo-heading">
@@ -888,6 +888,7 @@ function MenuPreviewDialog({ data, onClose, photos, restaurant }) {
                       <div>
                         <h4>{item.dish_name}</h4>
                         {item.composition_text && <p>{item.composition_text}</p>}
+                        {item.price_rub != null && <strong>{item.price_rub} ₽</strong>}
                         <dl>
                           <div><dt>Ккал</dt><dd>{item.kcal}</dd></div>
                           <div><dt>Белки</dt><dd>{item.proteins_g}</dd></div>
