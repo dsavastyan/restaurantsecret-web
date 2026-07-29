@@ -411,8 +411,12 @@ export default function PartnersDashboard() {
                 <BookOpenText size={42} strokeWidth={1.65} />
               </span>
               <div className="partners-dashboard__dish-count">
-                <strong>{publishedDishes}</strong>
-                <span>{dishCountLabel(publishedDishes)}</span>
+                <span className="partners-dashboard__menu-label">Меню</span>
+                <span className="partners-dashboard__menu-separator" aria-hidden="true" />
+                <span className="partners-dashboard__dish-total">
+                  <strong>{publishedDishes}</strong>
+                  <span>{dishCountLabel(publishedDishes)}</span>
+                </span>
               </div>
               <p className="partners-dashboard__updated">
                 {menuUpdatedAt ? `Обновлено ${formatDate(menuUpdatedAt)}` : 'Меню ещё не опубликовано'}
