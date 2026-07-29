@@ -77,7 +77,7 @@
 .partners-login__support { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--partner-line); color: #928b82; font-size: 11px; line-height: 1.5; text-align: center; }
 
 /* Dashboard */
-.partners-dashboard__intro { margin-bottom: 16px; }
+.partners-dashboard__intro { margin-bottom: 26px; }
 .partners-dashboard__intro .partners-eyebrow {
   display: block;
   margin-bottom: 8px;
@@ -133,17 +133,34 @@
 }
 .partners-dashboard__dish-count {
   display: flex;
-  align-items: baseline;
-  gap: 12px;
+  align-items: center;
+  gap: 14px;
+  white-space: nowrap;
 }
-.partners-dashboard__dish-count strong {
+.partners-dashboard__menu-label {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 22px;
+}
+.partners-dashboard__menu-separator {
+  width: 5px;
+  height: 5px;
+  flex: none;
+  border-radius: 50%;
+  background: #8b8b82;
+}
+.partners-dashboard__dish-total {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 9px;
+}
+.partners-dashboard__dish-total strong {
   color: #4c7b32;
   font-family: 'DM Serif Display', Georgia, serif;
   font-size: 42px;
   font-weight: 400;
   line-height: 1;
 }
-.partners-dashboard__dish-count span {
+.partners-dashboard__dish-total > span {
   font-family: 'DM Serif Display', Georgia, serif;
   font-size: 20px;
 }
@@ -292,7 +309,7 @@
 .partners-dashboard__photos-card > .partners__btn {
   width: min(100%, 255px);
   min-height: 50px;
-  margin: auto auto 20px;
+  margin: 18px auto auto;
   border-color: #4c7639;
   border-radius: 6px;
   background: transparent;
@@ -2091,7 +2108,7 @@
   .partners-login__brand { margin-bottom: 24px; }
   .partners-login__lead { margin-top: 16px; }
   .partners-login__proof { margin-top: 16px; }
-  .partners-dashboard__intro { display: block; margin-bottom: 20px; }
+  .partners-dashboard__intro { display: block; margin-bottom: 26px; }
   .partners-dashboard__intro .partners-eyebrow { margin-bottom: 10px; font-size: 12px; }
   .partners-dashboard__welcome { font-size: clamp(36px, 11vw, 47px); overflow-wrap: anywhere; }
   .partners-dashboard { width: 100%; }
@@ -2106,9 +2123,11 @@
   }
   .partners-dashboard__feature-icon { width: 72px; height: 72px; }
   .partners-dashboard__feature-icon svg { width: 31px; height: 31px; }
-  .partners-dashboard__dish-count { gap: 9px; }
-  .partners-dashboard__dish-count strong { font-size: 38px; }
-  .partners-dashboard__dish-count span { font-size: 19px; }
+  .partners-dashboard__dish-count { gap: 10px; }
+  .partners-dashboard__menu-label { font-size: 20px; }
+  .partners-dashboard__dish-total { gap: 7px; }
+  .partners-dashboard__dish-total strong { font-size: 34px; }
+  .partners-dashboard__dish-total > span { font-size: 18px; }
   .partners-dashboard__updated {
     grid-column: 1 / -1;
     padding-left: 88px;
