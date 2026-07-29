@@ -1,19 +1,20 @@
 // src/pages/partners/Dashboard.jsx
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useOutletContext } from 'react-router-dom'
+import {
+  BookOpenText,
+  Check,
+  ChevronRight,
+  Image as ImageIcon,
+} from 'lucide-react'
 import { restaurantPortalApi } from '@/api/restaurantPortal'
-import PartnersSetupFlow from './SetupFlow'
-
-const UPLOAD_STATUS_LABELS = {
-  processing: 'Обрабатывается',
-  published: 'Опубликовано',
-  error: 'Ошибка',
-}
 
 function formatDate(value) {
   if (!value) return '—'
   try {
-    return new Date(value).toLocaleString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' })
+    return new Date(value)
+      .toLocaleString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' })
+      .replace(/\s*г\.$/, '')
   } catch {
     return value
   }
@@ -27,6 +28,15 @@ function versionActionLabel(action) {
 
 function nutritionBasisLabel(per) {
   return per === '100g' ? 'на 100 г' : 'на порцию'
+}
+
+function dishCountLabel(value) {
+  const count = Number(value) || 0
+  const mod10 = count % 10
+  const mod100 = count % 100
+  if (mod10 === 1 && mod100 !== 11) return 'блюдо'
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'блюда'
+  return 'блюд'
 }
 
 function MenuVersionModal({ data, loading, onClose, onRestore }) {
@@ -114,6 +124,7 @@ function MenuHistory({ restaurantId, refresh }) {
   const [versions, setVersions] = useState([])
   const [status, setStatus] = useState('loading')
   const [error, setError] = useState(null)
+  const [expanded, setExpanded] = useState(false)
   const [preview, setPreview] = useState(null)
   const [previewLoading, setPreviewLoading] = useState(false)
   const [restoreTarget, setRestoreTarget] = useState(null)
@@ -187,54 +198,72 @@ function MenuHistory({ restaurantId, refresh }) {
 
   return (
     <>
-      <section className="partners-card partners-history">
-        <div className="partners-history__heading">
-          <div>
-            <span className="partners-eyebrow">Архив изменений</span>
-            <h2>История меню</h2>
-            <p>Просматривайте опубликованные версии и при необходимости возвращайте предыдущую.</p>
-          </div>
-          {status === 'error' && (
-            <button className="partners__btn" type="button" onClick={loadHistory}>Повторить</button>
-          )}
-        </div>
+      <section className="partners-card partners-history partners-dashboard__recent">
+        <h2>Последние изменения</h2>
 
-        {status === 'loading' && <p className="partners-history__state">Загружаем версии…</p>}
-        {status === 'error' && <div className="partners__notice partners__notice--error">{error}</div>}
+        {status === 'loading' && <p className="partners-history__state">Загружаем изменения…</p>}
+        {status === 'error' && (
+          <div className="partners-history__error">
+            <div className="partners__notice partners__notice--error">{error}</div>
+            <button className="partners__btn" type="button" onClick={loadHistory}>Повторить</button>
+          </div>
+        )}
         {status === 'ready' && error && <div className="partners__notice partners__notice--error">{error}</div>}
         {status === 'ready' && versions.length === 0 && (
-          <p className="partners-history__state">Опубликованные версии появятся здесь после первой загрузки.</p>
+          <p className="partners-history__state">Изменения появятся здесь после первой публикации меню.</p>
         )}
         {status === 'ready' && versions.length > 0 && (
-          <div className="partners-history__list">
-            {versions.map((version) => (
-              <article className={`partners-history__row${version.is_current ? ' partners-history__row--current' : ''}`} key={version.id}>
-                <div className="partners-history__version">
-                  <span className="partners-history__marker" aria-hidden="true" />
-                  <div>
-                    <div className="partners-history__version-title">
-                      <strong>Версия {version.version_number}</strong>
-                      {version.is_current && <span className="partners-history__current">Текущая</span>}
-                      {version.action === 'restored' && <span className="partners-history__restored">Восстановлена</span>}
-                    </div>
-                    <span>{formatDate(version.captured_at)} · {versionActionLabel(version.action)}</span>
-                  </div>
+          <>
+            <div className="partners-history__latest">
+              <span className="partners-history__latest-check" aria-hidden="true"><Check size={18} strokeWidth={2.2} /></span>
+              <strong>{versions[0].action === 'restored' ? 'Версия меню восстановлена' : 'Меню опубликовано'}</strong>
+              <span>{formatDate(versions[0].captured_at)}</span>
+              <button
+                className="partners-history__toggle"
+                type="button"
+                aria-expanded={expanded}
+                onClick={() => setExpanded((value) => !value)}
+              >
+                {expanded ? 'Скрыть историю' : 'История изменений'}
+                <ChevronRight className={expanded ? 'partners-history__toggle-icon partners-history__toggle-icon--open' : 'partners-history__toggle-icon'} size={19} />
+              </button>
+            </div>
+
+            {expanded && (
+              <div className="partners-history__archive">
+                <p>Просматривайте опубликованные версии и при необходимости возвращайте предыдущую.</p>
+                <div className="partners-history__list">
+                  {versions.map((version) => (
+                    <article className={`partners-history__row${version.is_current ? ' partners-history__row--current' : ''}`} key={version.id}>
+                      <div className="partners-history__version">
+                        <span className="partners-history__marker" aria-hidden="true" />
+                        <div>
+                          <div className="partners-history__version-title">
+                            <strong>Версия {version.version_number}</strong>
+                            {version.is_current && <span className="partners-history__current">Текущая</span>}
+                            {version.action === 'restored' && <span className="partners-history__restored">Восстановлена</span>}
+                          </div>
+                          <span>{formatDate(version.captured_at)} · {versionActionLabel(version.action)}</span>
+                        </div>
+                      </div>
+                      <div className="partners-history__counts">
+                        <strong>{version.dishes_count} {dishCountLabel(version.dishes_count)}</strong>
+                        <span>{version.items_count} позиций</span>
+                      </div>
+                      <div className="partners-history__actions">
+                        <button className="partners__btn" type="button" onClick={() => openPreview(version)}>Просмотреть</button>
+                        {!version.is_current && (
+                          <button className="partners-history__restore" type="button" onClick={() => askToRestore(version)}>
+                            Вернуться к версии
+                          </button>
+                        )}
+                      </div>
+                    </article>
+                  ))}
                 </div>
-                <div className="partners-history__counts">
-                  <strong>{version.dishes_count} блюд</strong>
-                  <span>{version.items_count} позиций</span>
-                </div>
-                <div className="partners-history__actions">
-                  <button className="partners__btn" type="button" onClick={() => openPreview(version)}>Просмотреть</button>
-                  {!version.is_current && (
-                    <button className="partners-history__restore" type="button" onClick={() => askToRestore(version)}>
-                      Вернуться к версии
-                    </button>
-                  )}
-                </div>
-              </article>
-            ))}
-          </div>
+              </div>
+            )}
+          </>
         )}
       </section>
 
@@ -262,11 +291,8 @@ function MenuHistory({ restaurantId, refresh }) {
 export default function PartnersDashboard() {
   const {
     restaurant,
-    restaurants,
     lastUpload,
     refresh,
-    handleLogout,
-    handleRestaurantChange,
     isFirstPublication,
   } = useOutletContext()
   const navigate = useNavigate()
@@ -274,7 +300,7 @@ export default function PartnersDashboard() {
   const [draftLoading, setDraftLoading] = useState(false)
 
   useEffect(() => {
-    if (!restaurant?.id || isFirstPublication) return undefined
+    if (!restaurant?.id) return undefined
     let cancelled = false
     setDraftLoading(true)
     restaurantPortalApi.activeDraft()
@@ -288,82 +314,85 @@ export default function PartnersDashboard() {
         if (!cancelled) setDraftLoading(false)
       })
     return () => { cancelled = true }
-  }, [isFirstPublication, restaurant?.id])
+  }, [restaurant?.id])
 
   if (!restaurant) return null
   if (isFirstPublication) {
     return (
-      <PartnersSetupFlow
-        handleLogout={handleLogout}
-        onRestaurantChange={handleRestaurantChange}
-        refresh={refresh}
-        restaurant={restaurant}
-        restaurants={restaurants}
-      />
+      <section className="partners-setup__section partners-setup__section--standalone">
+        <span className="partners-eyebrow">Первичная публикация</span>
+        <h1>Добавьте меню ресторана</h1>
+        <p>Загрузка, фотографии, превью и подтверждение собраны в одном четырёхшаговом процессе.</p>
+        <Link
+          className="partners__btn partners__btn--primary"
+          to={activeDraft ? `/partners/upload?draft=${activeDraft.id}` : '/partners/upload?new=1'}
+        >
+          {activeDraft ? 'Продолжить загрузку' : 'Начать загрузку меню'}
+        </Link>
+      </section>
     )
   }
+
+  const publishedDishes = lastUpload?.status === 'published' ? (lastUpload.dishes_count ?? 0) : 0
+  const menuUpdatedAt = restaurant.menu_updated_at || lastUpload?.created_at
+  const menuIsCurrent = Boolean(menuUpdatedAt) && !restaurant.menu_stale
+  const menuUrl = restaurant.slug
+    ? `/restaurants/${encodeURIComponent(restaurant.slug)}/menu/`
+    : null
 
   return (
     <div className="partners-dashboard">
       <div className="partners-dashboard__intro">
-        <div>
-          <span className="partners-eyebrow">Рабочий стол</span>
-          <h1 className="partners-dashboard__welcome">Добрый день, {restaurant.name.split(' ')[0]}</h1>
-          <p>Следите за актуальностью меню и карточки ресторана.</p>
-        </div>
-        <span className="partners-dashboard__date">{new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' }).format(new Date())}</span>
+        <span className="partners-eyebrow">Панель ресторана</span>
+        <h1 className="partners-dashboard__welcome">{restaurant.name}</h1>
       </div>
-      <section className="partners-card">
-        <div className="partners-dashboard__status-row">
-          <div>
-            <span className="partners-eyebrow">Ваш ресторан</span>
-            <h2 className="partners-dashboard__title">{restaurant.name}</h2>
-            {restaurant.is_partner && <span className="partners-badge">Партнёр</span>}
-          </div>
-        </div>
 
-        {restaurant.menu_updated_at ? (
-          <p className={`partners-dashboard__freshness${restaurant.menu_stale ? ' partners-dashboard__freshness--stale' : ''}`}>
-            Меню обновлено: {formatDate(restaurant.menu_updated_at)}
-            {restaurant.menu_stale_days != null && ` (${restaurant.menu_stale_days} дн. назад)`}
-            {restaurant.menu_stale && ' — пора обновить'}
-          </p>
-        ) : (
-          <p className="partners-dashboard__freshness partners-dashboard__freshness--stale">Меню ещё не загружено</p>
-        )}
-
-        {lastUpload && (
-          <div className="partners-dashboard__last-upload">
-            <span>Последняя загрузка: {formatDate(lastUpload.created_at)}</span>
-            <span className={`partners-status partners-status--${lastUpload.status}`}>
-              {UPLOAD_STATUS_LABELS[lastUpload.status] || lastUpload.status}
+      <div className="partners-dashboard__grid">
+        <section className="partners-card partners-dashboard__menu-card">
+          <div className="partners-dashboard__menu-summary">
+            <span className="partners-dashboard__feature-icon" aria-hidden="true">
+              <BookOpenText size={42} strokeWidth={1.65} />
             </span>
-            {lastUpload.status === 'published' && (
-              <span className="partners-dashboard__counts">
-                {lastUpload.dishes_count ?? 0} блюд, {lastUpload.items_count ?? 0} позиций
-              </span>
-            )}
-            {lastUpload.status === 'error' && lastUpload.error_message && (
-              <span className="partners-dashboard__error-text">{lastUpload.error_message}</span>
-            )}
+            <div className="partners-dashboard__dish-count">
+              <strong>{publishedDishes}</strong>
+              <span>{dishCountLabel(publishedDishes)}</span>
+            </div>
+            <p className="partners-dashboard__updated">
+              {menuUpdatedAt ? `Обновлено ${formatDate(menuUpdatedAt)}` : 'Меню ещё не опубликовано'}
+            </p>
           </div>
-        )}
-      </section>
 
-      <section className="partners-card partners-dashboard__actions">
-        <div className="partners-dashboard__actions-heading">
-          <h2>Быстрые действия</h2>
-          <p>Обновите данные, чтобы гости видели всё самое актуальное.</p>
-        </div>
-        {activeDraft ? (
-          <>
-            <Link className="partners__btn partners__btn--primary" to={`/partners/upload?draft=${activeDraft.id}`}>
-              <span aria-hidden="true">↥</span>
-              {activeDraft.status === 'submitted' ? 'Посмотреть обновление' : 'Продолжить обновление'}
+          <div className={`partners-dashboard__freshness${menuIsCurrent ? '' : ' partners-dashboard__freshness--stale'}`}>
+            <strong>Меню актуально?</strong>
+            <span className="partners-dashboard__freshness-status">
+              <span className="partners-dashboard__freshness-check" aria-hidden="true">
+                {menuIsCurrent ? <Check size={20} strokeWidth={2.2} /> : '!'}
+              </span>
+              {menuIsCurrent ? 'Актуально' : 'Требует обновления'}
+            </span>
+          </div>
+
+          {lastUpload?.status === 'error' && lastUpload.error_message && (
+            <div className="partners__notice partners__notice--error">{lastUpload.error_message}</div>
+          )}
+
+          <div className="partners-dashboard__menu-actions">
+            <Link
+              className="partners__btn partners__btn--primary"
+              to={activeDraft ? `/partners/upload?draft=${activeDraft.id}` : '/partners/upload?new=1'}
+            >
+              {activeDraft
+                ? (activeDraft.status === 'submitted' ? 'Посмотреть обновление' : 'Продолжить обновление')
+                : 'Обновить меню'}
             </Link>
-            {activeDraft.status !== 'submitted' && (
+            {menuUrl && (
+              <a className="partners__btn" href={menuUrl} target="_blank" rel="noreferrer">
+                Посмотреть меню
+              </a>
+            )}
+            {activeDraft?.status !== 'submitted' && activeDraft && (
               <button
-                className="partners__btn"
+                className="partners-dashboard__restart"
                 type="button"
                 onClick={() => {
                   if (window.confirm('Начать обновление заново? Текущий черновик будет удалён.')) {
@@ -374,20 +403,23 @@ export default function PartnersDashboard() {
                 Начать заново
               </button>
             )}
-          </>
-        ) : (
-          <Link className="partners__btn partners__btn--primary" to="/partners/upload?new=1">
-            <span aria-hidden="true">↥</span> Обновить меню
-          </Link>
-        )}
-        {draftLoading && <span className="partners-dashboard__draft-loading">Проверяем черновики…</span>}
-        <a className="partners__btn" href={restaurantPortalApi.templateDownloadUrl()} download>
-          <span aria-hidden="true">↓</span> Скачать шаблон Excel
-        </a>
-        <Link className="partners__btn" to="/partners/photos">
-          <span aria-hidden="true">▧</span> Фото блюд
-        </Link>
-      </section>
+            {draftLoading && <span className="partners-dashboard__draft-loading">Проверяем черновики…</span>}
+          </div>
+        </section>
+
+        <section className="partners-card partners-dashboard__photos-card">
+          <div className="partners-dashboard__photos-summary">
+            <span className="partners-dashboard__feature-icon" aria-hidden="true">
+              <ImageIcon size={42} strokeWidth={1.65} />
+            </span>
+            <div>
+              <h2>Фото блюд</h2>
+              <p>Добавляйте и заменяйте фотографии позиций</p>
+            </div>
+          </div>
+          <Link className="partners__btn" to="/partners/photos">Управлять фото</Link>
+        </section>
+      </div>
 
       <MenuHistory restaurantId={restaurant.id} refresh={refresh} />
     </div>

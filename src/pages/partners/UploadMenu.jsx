@@ -73,7 +73,7 @@ function changeSummary(summary) {
   return `${summary.added || 0} новых · ${summary.updated || 0} изменено · ${summary.deleted || 0} будет удалено`
 }
 
-function FlowSidebar({ restaurant, step, onStep }) {
+function FlowSidebar({ restaurant, step, onStep, initial = false, locked = false }) {
   return (
     <aside className="partners-update__sidebar">
       <div>
@@ -84,7 +84,7 @@ function FlowSidebar({ restaurant, step, onStep }) {
         <small className="partners-update__cabinet">Партнёрский кабинет</small>
         <div className="partners-update__restaurant">{restaurant.name}</div>
         <div className="partners-update__progress-copy">
-          <strong>Обновление меню</strong>
+          <strong>{initial ? 'Публикация меню' : 'Обновление меню'}</strong>
           <span>Шаг {step} из 4</span>
         </div>
         <div className="partners-update__progress"><span style={{ width: `${step * 25}%` }} /></div>
@@ -94,7 +94,7 @@ function FlowSidebar({ restaurant, step, onStep }) {
             const state = number < step ? 'complete' : number === step ? 'active' : 'pending'
             return (
               <li className={`partners-update__step partners-update__step--${state}`} key={title}>
-                <button type="button" disabled={number > step} onClick={() => onStep(number)}>
+                <button type="button" disabled={locked || number > step} onClick={() => onStep(number)}>
                   <span>{state === 'complete' ? <Check size={16} /> : number}</span>
                   <span><strong>{title}</strong><small>{description}</small></span>
                 </button>
@@ -110,13 +110,13 @@ function FlowSidebar({ restaurant, step, onStep }) {
   )
 }
 
-function MethodCards({ onSelect }) {
+function MethodCards({ onSelect, initial = false }) {
   return (
     <section className="partners-update__method-step">
       <div className="partners-update__section-heading">
         <span>Шаг 1</span>
-        <h2>Как вы хотите обновить меню?</h2>
-        <p>Выберите удобный способ. Опубликованное меню продолжит работать, пока вы готовите изменения.</p>
+        <h2>{initial ? 'Как вы хотите добавить меню?' : 'Как вы хотите обновить меню?'}</h2>
+        <p>{initial ? 'Выберите удобный способ загрузки меню ресторана.' : 'Выберите удобный способ. Опубликованное меню продолжит работать, пока вы готовите изменения.'}</p>
       </div>
       <div className="partners-update__methods">
         <button className="partners-update__method partners-update__method--recommended" type="button" onClick={() => onSelect('manual')}>
@@ -314,20 +314,74 @@ function ManualStep({ payload, busy, error, onAdd, onBackToMethods, onConfirmMat
   )
 }
 
-function UploadStep({ payload, busy, error, onBackToMethods, onFile, onNext }) {
+function RevisionWaiting({ payload, busy, error, onReply }) {
+  const [message, setMessage] = useState('')
+  const [files, setFiles] = useState([])
+  const revision = payload.revision
+  const lastClarification = [...(revision?.messages || [])]
+    .reverse()
+    .find((item) => item.message_type === 'clarification')
+  const submit = async (event) => {
+    event.preventDefault()
+    const saved = await onReply(message, files)
+    if (saved) {
+      setMessage('')
+      setFiles([])
+      event.currentTarget.reset()
+    }
+  }
+  return (
+    <section className="partners-update__waiting">
+      <span className="partners-update__waiting-icon"><Upload size={34} /></span>
+      <span>Файл принят</span>
+      <h2>Меню загружено — ожидает подготовки</h2>
+      <p>Мы сохранили исходные файлы без изменений. Специалист подготовит меню по шаблону, после чего автоматически откроется шаг с фотографиями.</p>
+      {lastClarification && (
+        <div className="partners-update__clarification">
+          <strong>Нужно уточнение</strong>
+          <p>{lastClarification.body}</p>
+        </div>
+      )}
+      <div className="partners-update__conversation">
+        {(revision?.messages || []).filter((item) => item.sender_role !== 'system').map((item) => (
+          <article className={`partners-update__message partners-update__message--${item.sender_role}`} key={item.id}>
+            <strong>{item.sender_role === 'admin' ? 'RestaurantSecret' : 'Вы'}</strong>
+            <p>{item.body}</p>
+          </article>
+        ))}
+      </div>
+      <form onSubmit={submit}>
+        <label>
+          Ответ или дополнительная информация
+          <textarea value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Напишите комментарий для специалиста" />
+        </label>
+        <label className="partners-update__attach">
+          <input type="file" multiple accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp" onChange={(event) => setFiles(Array.from(event.target.files || []))} />
+          <Plus size={17} /> {files.length ? `Выбрано файлов: ${files.length}` : 'Приложить дополнительные файлы'}
+        </label>
+        <button className="partners-update__primary" disabled={busy || (!message.trim() && !files.length)} type="submit">{busy ? 'Отправляем…' : 'Отправить ответ'}</button>
+      </form>
+      {error && <div className="partners__notice partners__notice--error">{error}</div>}
+    </section>
+  )
+}
+
+function UploadStep({ payload, busy, error, onBackToMethods, onFile, onNext, onReply }) {
   const inputRef = useRef(null)
   const extracting = payload.draft.status === 'extracting'
+  if (extracting && payload.revision) {
+    return <RevisionWaiting payload={payload} busy={busy} error={error} onReply={onReply} />
+  }
   return (
     <section className="partners-update__upload-step">
       <button className="partners-update__text-back" type="button" onClick={onBackToMethods}><ArrowLeft size={16} /> Выбрать другой способ</button>
       <div className="partners-update__section-heading"><span>Новое меню</span><h2>Загрузите файл</h2><p>Мы сравним новую версию с опубликованной и сохраним подходящие фотографии.</p></div>
       <a className="partners-update__template" href={restaurantPortalApi.templateDownloadUrl()} download><FileSpreadsheet size={25} /><span><strong>Шаблон Excel</strong><small>Используйте шаблон для быстрой автоматической проверки</small></span><span>Скачать</span></a>
       <label className="partners-update__dropzone">
-        <input ref={inputRef} type="file" accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp" onChange={(event) => event.target.files?.[0] && onFile(event.target.files[0])} />
+        <input ref={inputRef} multiple type="file" accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp" onChange={(event) => event.target.files?.length && onFile(Array.from(event.target.files))} />
         <Upload size={42} /><strong>{busy ? 'Проверяем файл…' : 'Перетащите файл сюда или выберите на компьютере'}</strong>
         <span>Excel, PDF, JPG, PNG или WEBP</span><i>Выбрать файл</i>
       </label>
-      {extracting && <div className="partners-update__processing"><span /><div><strong>Меню обрабатывается</strong><p>Текущее меню продолжает работать. Когда распознавание завершится, черновик можно будет продолжить с дашборда.</p></div></div>}
       {!extracting && payload.draft.source_kind === 'structured' && (
         <div className="partners-update__comparison">
           <Check size={23} /><div><strong>Файл проверен и сопоставлен</strong><p>{changeSummary(payload.summary)}</p></div>
@@ -384,8 +438,14 @@ function PhotosStep({ payload, busy, onBack, onBulkPhoto, onDeletePhoto, onNext,
   )
 }
 
-function PreviewStep({ payload, onBack, onNext }) {
+function PreviewStep({ payload, busy, error, onBack, onNext, onMessage }) {
   const [mode, setMode] = useState('all')
+  const [comment, setComment] = useState('')
+  const send = async (type) => {
+    if (!comment.trim()) return
+    const saved = await onMessage(comment, type)
+    if (saved && type === 'comment') setComment('')
+  }
   const visible = payload.items.filter((item) => mode === 'changes' ? item.change_type !== 'unchanged' : item.change_type !== 'deleted')
   return (
     <section className="partners-update__preview-step">
@@ -404,18 +464,30 @@ function PreviewStep({ payload, onBack, onNext }) {
           </article>
         ))}
       </div>
+      {payload.revision && (
+        <section className="partners-update__preview-feedback">
+          <h3>Нужно что-то уточнить?</h3>
+          <p>Комментарий не останавливает проверку. Если меню нужно переделать, отправьте запрос изменений.</p>
+          <textarea value={comment} onChange={(event) => setComment(event.target.value)} placeholder="Опишите вопрос или необходимые изменения" />
+          <div>
+            <button disabled={busy || !comment.trim()} type="button" onClick={() => send('comment')}>Отправить комментарий</button>
+            <button className="partners-update__request-changes" disabled={busy || !comment.trim()} type="button" onClick={() => send('change_request')}>Запросить изменения</button>
+          </div>
+          {error && <div className="partners__notice partners__notice--error">{error}</div>}
+        </section>
+      )}
       <FlowActions onBack={onBack} onNext={onNext} nextLabel="Продолжить" />
     </section>
   )
 }
 
-function ConfirmStep({ payload, busy, error, onBack, onSubmit }) {
+function ConfirmStep({ payload, busy, error, onBack, onSubmit, initial = false }) {
   const summary = payload.summary
   return (
     <section className="partners-update__confirm-step">
       <span className="partners-update__confirm-icon"><Check size={34} /></span>
-      <h2>Отправьте обновления</h2>
-      <p>Проверьте изменения перед отправкой. Текущее меню продолжит работать, пока новая версия проходит обработку.</p>
+      <h2>{initial ? 'Подтвердите меню' : 'Отправьте обновления'}</h2>
+      <p>{initial ? 'Проверьте меню перед публикацией. После подтверждения оно станет доступно гостям.' : 'Проверьте изменения перед отправкой. Текущее меню продолжит работать, пока новая версия проходит обработку.'}</p>
       <div className="partners-update__confirm-summary">
         <div><strong>{summary.added || 0}</strong><span>блюд добавлено</span></div>
         <div><strong>{summary.updated || 0}</strong><span>блюд изменено</span></div>
@@ -423,7 +495,7 @@ function ConfirmStep({ payload, busy, error, onBack, onSubmit }) {
         <div><strong>{summary.photos || 0}</strong><span>фотографий добавлено или заменено</span></div>
       </div>
       {error && <div className="partners__notice partners__notice--error">{error}</div>}
-      <button className="partners-update__submit" type="button" disabled={busy} onClick={onSubmit}>{busy ? 'Отправляем…' : 'Отправить обновления'}</button>
+      <button className="partners-update__submit" type="button" disabled={busy} onClick={onSubmit}>{busy ? 'Отправляем…' : initial ? 'Опубликовать меню' : 'Отправить обновления'}</button>
       <button className="partners-update__confirm-back" type="button" disabled={busy} onClick={onBack}><ArrowLeft size={17} /> Вернуться к превью</button>
     </section>
   )
@@ -450,7 +522,7 @@ function FlowActions({ onBack, onNext, nextLabel }) {
 }
 
 export default function PartnersUploadMenu() {
-  const { restaurant, refresh } = useOutletContext()
+  const { restaurant, refresh, isFirstPublication } = useOutletContext()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [payload, setPayload] = useState(null)
@@ -508,6 +580,16 @@ export default function PartnersUploadMenu() {
   // Open a draft only when the route target changes.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newDraftRequested, requestedDraftId])
+
+  useEffect(() => {
+    if (payload?.draft?.status !== 'extracting' || !payload?.draft?.id) return undefined
+    const timer = window.setInterval(() => {
+      reload(payload.draft.id).catch(() => null)
+    }, 15000)
+    return () => window.clearInterval(timer)
+  // Poll only while a menu is waiting for the administrator.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [payload?.draft?.id, payload?.draft?.status])
 
   const run = async (operation, fallback) => {
     setBusy(true)
@@ -573,9 +655,32 @@ export default function PartnersUploadMenu() {
     if (result) await reload()
   }
 
-  const uploadSource = async (file) => {
-    const result = await run(() => restaurantPortalApi.uploadDraftSource(payload.draft.id, file), 'Не получилось обработать файл.')
+  const uploadSource = async (files) => {
+    const result = await run(
+      () => restaurantPortalApi.uploadDraftSources(payload.draft.id, files),
+      'Не получилось обработать файлы.',
+    )
     if (result) setPayload(result)
+  }
+
+  const replyToRevision = async (message, files) => {
+    const result = await run(
+      () => restaurantPortalApi.replyToRevision(payload.draft.id, message, files),
+      'Не получилось отправить ответ.',
+    )
+    if (!result) return false
+    setPayload(result)
+    return true
+  }
+
+  const sendRevisionMessage = async (message, type) => {
+    const result = await run(
+      () => restaurantPortalApi.sendRevisionMessage(payload.draft.id, message, type),
+      'Не получилось отправить комментарий.',
+    )
+    if (!result) return false
+    setPayload(result)
+    return true
   }
 
   const uploadPhoto = async (item, file) => {
@@ -609,15 +714,23 @@ export default function PartnersUploadMenu() {
   if (status === 'error' || !payload) return <div className="partners partners--centered"><div className="partners__notice partners__notice--error">{error}</div><button className="partners__btn" onClick={() => navigate('/partners/dashboard')}>Вернуться в кабинет</button></div>
 
   const step = payload.draft.current_step
+  const waitingForPreparation = payload.draft.status === 'extracting' && payload.revision
   return (
     <div className="partners-update">
-      <FlowSidebar restaurant={restaurant} step={step} onStep={payload.draft.status === 'submitted' ? () => {} : setStep} />
+      <FlowSidebar
+        initial={isFirstPublication}
+        locked={Boolean(waitingForPreparation)}
+        restaurant={restaurant}
+        step={step}
+        onStep={payload.draft.status === 'submitted' ? () => {} : setStep}
+      />
       <main className="partners-update__main">
         <header className="partners-update__topbar"><button type="button" onClick={() => navigate('/partners/dashboard')}>Сохранить и выйти</button></header>
         <div className="partners-update__content">
           {payload.draft.status === 'submitted' && <SubmittedState onExit={() => navigate('/partners/dashboard')} />}
-          {payload.draft.status !== 'submitted' && step === 1 && !payload.draft.method && <MethodCards onSelect={chooseMethod} />}
-          {payload.draft.status !== 'submitted' && step === 1 && payload.draft.method === 'manual' && (
+          {waitingForPreparation && <RevisionWaiting payload={payload} busy={busy} error={error} onReply={replyToRevision} />}
+          {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 1 && !payload.draft.method && <MethodCards initial={isFirstPublication} onSelect={chooseMethod} />}
+          {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 1 && payload.draft.method === 'manual' && (
             <ManualStep
               payload={payload}
               busy={busy}
@@ -632,12 +745,12 @@ export default function PartnersUploadMenu() {
               onRestore={restoreItem}
             />
           )}
-          {payload.draft.status !== 'submitted' && step === 1 && payload.draft.method === 'upload' && (
-            <UploadStep payload={payload} busy={busy} error={error} onBackToMethods={() => chooseMethod('manual')} onFile={uploadSource} onNext={() => setStep(2)} />
+          {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 1 && payload.draft.method === 'upload' && (
+            <UploadStep payload={payload} busy={busy} error={error} onBackToMethods={() => chooseMethod('manual')} onFile={uploadSource} onNext={() => setStep(2)} onReply={replyToRevision} />
           )}
-          {payload.draft.status !== 'submitted' && step === 2 && <PhotosStep payload={payload} busy={busy} onBack={() => setStep(1)} onBulkPhoto={uploadBulkPhotos} onDeletePhoto={deletePhoto} onNext={() => setStep(3)} onPhoto={uploadPhoto} onAssign={assignPhoto} />}
-          {payload.draft.status !== 'submitted' && step === 3 && <PreviewStep payload={payload} onBack={() => setStep(2)} onNext={() => setStep(4)} />}
-          {payload.draft.status !== 'submitted' && step === 4 && <ConfirmStep payload={payload} busy={busy} error={error} onBack={() => setStep(3)} onSubmit={submit} />}
+          {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 2 && <PhotosStep payload={payload} busy={busy} onBack={() => setStep(1)} onBulkPhoto={uploadBulkPhotos} onDeletePhoto={deletePhoto} onNext={() => setStep(3)} onPhoto={uploadPhoto} onAssign={assignPhoto} />}
+          {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 3 && <PreviewStep payload={payload} busy={busy} error={error} onBack={() => setStep(2)} onNext={() => setStep(4)} onMessage={sendRevisionMessage} />}
+          {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 4 && <ConfirmStep initial={isFirstPublication} payload={payload} busy={busy} error={error} onBack={() => setStep(3)} onSubmit={submit} />}
         </div>
       </main>
       {drawerItem !== undefined && (

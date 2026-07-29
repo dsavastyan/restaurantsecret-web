@@ -122,6 +122,33 @@ export const restaurantPortalApi = {
     })
   },
 
+  uploadDraftSources: (draftId, files) => {
+    const form = new FormData()
+    for (const file of files) form.append('files', file)
+    return portalRequest(`/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/source`, {
+      method: 'POST',
+      body: form,
+      isFormData: true,
+    })
+  },
+
+  replyToRevision: (draftId, message, files = []) => {
+    const form = new FormData()
+    form.append('message', message || '')
+    for (const file of files) form.append('files', file)
+    return portalRequest(`/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/revision/reply`, {
+      method: 'POST',
+      body: form,
+      isFormData: true,
+    })
+  },
+
+  sendRevisionMessage: (draftId, message, type = 'comment') =>
+    portalRequest(`/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/revision/messages`, {
+      method: 'POST',
+      body: { message, type },
+    }),
+
   addDraftItem: (draftId, item) =>
     portalRequest(`/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/items`, {
       method: 'POST',

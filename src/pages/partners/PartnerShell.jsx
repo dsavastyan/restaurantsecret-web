@@ -6,6 +6,7 @@
 // misfire if Дарья tests this while also logged in as a subscriber in the same browser.
 import { useCallback, useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { LogOut } from 'lucide-react'
 import { restaurantPortalApi } from '@/api/restaurantPortal'
 import './partners.css'
 
@@ -88,13 +89,6 @@ export default function PartnerShell() {
       (restaurant.has_published_menu == null && lastUpload?.status !== 'published')
     : false
 
-  useEffect(() => {
-    if (status !== 'ready' || !isFirstPublication) return
-    if (location.pathname.replace(/\/+$/, '') !== '/partners/dashboard') {
-      navigate('/partners/dashboard', { replace: true })
-    }
-  }, [isFirstPublication, location.pathname, navigate, status])
-
   if (isLoginPage) {
     return (
       <div className="partners">
@@ -161,8 +155,10 @@ export default function PartnerShell() {
           <span className="partners__brand-sub">Кабинет ресторана</span>
         </div>
         <div className="partners__header-right">
-          {restaurant?.name && <span className="partners__restaurant-name"><span className="partners__online-dot" />{restaurant.name}</span>}
-          <button className="partners__logout" onClick={handleLogout}><span aria-hidden="true">↪</span> Выйти</button>
+          <button className="partners__logout" onClick={handleLogout}>
+            Выйти
+            <LogOut size={30} strokeWidth={1.55} aria-hidden="true" />
+          </button>
         </div>
       </header>
       <main className="partners__main">

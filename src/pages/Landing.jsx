@@ -468,7 +468,14 @@ export default function Landing() {
               aria-label="Открыть список ресторанов"
             >
               <p>{restaurantsLabel}</p>
-              <span>ресторанов</span>
+              <span>
+                {getRussianPluralWord(
+                  resolvedStats.restaurants,
+                  'ресторан',
+                  'ресторана',
+                  'ресторанов',
+                )}
+              </span>
             </Link>
             <Link
               to="/catalog/"

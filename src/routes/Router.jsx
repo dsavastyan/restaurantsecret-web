@@ -27,6 +27,10 @@ const PartnersLogin = lazy(() => import('../pages/partners/Login.jsx'))
 const PartnersDashboard = lazy(() => import('../pages/partners/Dashboard.jsx'))
 const PartnersUploadMenu = lazy(() => import('../pages/partners/UploadMenu.jsx'))
 const PartnersUploadPhotos = lazy(() => import('../pages/partners/UploadPhotos.jsx'))
+const AdminShell = lazy(() => import('../pages/admin/AdminShell.jsx'))
+const AdminLogin = lazy(() => import('../pages/admin/AdminLogin.jsx'))
+const AdminMenuRevisions = lazy(() => import('../pages/admin/MenuRevisionList.jsx'))
+const AdminMenuRevisionDetail = lazy(() => import('../pages/admin/MenuRevisionDetail.jsx'))
 const AccountLayout = lazy(() => import('../pages/account/Layout.tsx'))
 const AccountOverview = lazy(() => import('../pages/account/Overview.tsx'))
 const AccountSubscription = lazy(() => import('../pages/account/Subscription.tsx'))
@@ -110,6 +114,14 @@ function AppRoutes({ onReady }) {
           <Route path="upload" element={<PartnersUploadMenu />} />
           <Route path="photos" element={<PartnersUploadPhotos />} />
           <Route path="*" element={<Navigate to="/partners/dashboard" replace />} />
+        </Route>
+
+        <Route path="admin" element={<AdminShell />}>
+          <Route index element={<Navigate to="/admin/menu-revisions" replace />} />
+          <Route path="login" element={<AdminLogin />} />
+          <Route path="menu-revisions" element={<AdminMenuRevisions />} />
+          <Route path="menu-revisions/:revisionId" element={<AdminMenuRevisionDetail />} />
+          <Route path="*" element={<Navigate to="/admin/menu-revisions" replace />} />
         </Route>
       </Routes>
       <AppReadySignal onReady={onReady} />
