@@ -278,9 +278,29 @@ export function hasFiniteNumber(value) {
 }
 
 // Format a price in rubles with a thin thousands separator, e.g. 1450 -> "1 450 ₽".
+// Returns null when the price is absent or non-positive, so callers can simply
+// omit the price rather than rendering a meaningless "0 ₽".
 export function formatPriceRub(value) {
   if (!Number.isFinite(value)) return null
+  if (value <= 0) return null
   return `${Math.round(value).toLocaleString('ru-RU')} ₽`
+}
+
+// Format the portion size shown on a dish card. The API exposes `portion_g`
+// (grams) alongside `per`, which tells us whether the KБЖУ figures describe a
+// whole portion (`per_portion`) or 100 g of the dish (`per_100g`). Labelling
+// these identically would be misleading, so the per-100g case says so.
+// Returns null when there is no usable weight.
+export function formatPortionLabel(dish) {
+  if (!dish) return null
+
+  const grams = readNumber(dish, ['portion_g', ...WEIGHT_PATHS])
+  const per = String(dish.per ?? '').toLowerCase()
+
+  if (per.includes('100')) return 'на 100 г'
+  if (!Number.isFinite(grams) || grams <= 0) return null
+
+  return `${Math.round(grams)} г`
 }
 
 // Derive the calorie-ring conic-gradient angles and macro-bar widths shared

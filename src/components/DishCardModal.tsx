@@ -554,6 +554,10 @@ function DishModalBodyV2({
     [data.proteins_g, data.fats_g, data.carbs_g],
   );
   const price = formatPriceRub(data.price);
+  // `portionLabel` is already derived in the dishCard store (falls back to
+  // "1 порция" when the restaurant gave us no weight), so we only surface it
+  // when it carries a real number.
+  const portion = /\d/.test(String(data.portionLabel || '')) ? data.portionLabel : null;
 
   const macroRows = [
     { key: "proteins_g", label: "Белки", value: data.proteins_g, pct: geometry.proteinPct, dot: "var(--rsm2-protein)" },
@@ -564,7 +568,9 @@ function DishModalBodyV2({
   return (
     <div className="rsm2-modal__body">
       <div>
-        <div className="rsm2-modal__eyebrow">{data.restaurantName || "Ресторан"}</div>
+        <div className="rsm2-modal__eyebrow">
+          {[data.restaurantName || "Ресторан", portion].filter(Boolean).join(" · ")}
+        </div>
         <div className="rsm2-modal__title-row">
           <h3 id="dish-card-title-v2" className="rsm2-modal__title">{data.name}</h3>
           {price && <span className="rsm2-modal__price">{price}</span>}

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { computeMacroGeometry, formatNumeric, formatPriceRub } from '@/lib/nutrition';
+import { computeMacroGeometry, formatNumeric, formatPortionLabel, formatPriceRub } from '@/lib/nutrition';
 import { useAuth } from '@/store/auth';
 import { useSubscriptionStore } from '@/store/subscription';
 import { useFavoritesStore } from '@/store/favorites';
@@ -44,6 +44,7 @@ export default function DishTileV2({ dish, restaurantSlug, restaurantName, isFre
 
   const geometry = useMemo(() => computeMacroGeometry(dish.protein, dish.fat, dish.carbs), [dish.protein, dish.fat, dish.carbs]);
   const price = formatPriceRub(dish.price);
+  const portion = formatPortionLabel(dish);
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -120,7 +121,10 @@ export default function DishTileV2({ dish, restaurantSlug, restaurantName, isFre
             <img src={photoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             {hasDishAccess && (
               <div style={{ position: 'absolute', left: 14, right: 14, bottom: 12, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 10 }}>
-                <span className="rsm2-serif" style={{ font: '400 22px/1.05 "DM Serif Display", Georgia, serif', color: '#fffdf8' }}>{dish.name}</span>
+                <span style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 }}>
+                  <span className="rsm2-serif" style={{ font: '400 22px/1.05 "DM Serif Display", Georgia, serif', color: '#fffdf8' }}>{dish.name}</span>
+                  {portion && <span style={{ font: '700 11px/1 Inter, sans-serif', letterSpacing: '.04em', color: 'rgba(255,253,248,.78)' }}>{portion}</span>}
+                </span>
                 {price && <span style={{ flex: 'none', padding: '7px 12px', borderRadius: 999, background: 'rgba(255,253,251,.94)', font: '800 13px/1 Inter, sans-serif', color: '#25221d' }}>{price}</span>}
               </div>
             )}
@@ -133,7 +137,13 @@ export default function DishTileV2({ dish, restaurantSlug, restaurantName, isFre
             {hasDishAccess && (
               <>
                 <span className="rsm2-tile__cover-name">{dish.name}</span>
-                {price && <span className="rsm2-tile__cover-price">{price}</span>}
+                {(portion || price) && (
+                  <div className="rsm2-tile__cover-meta">
+                    {portion && <span className="rsm2-tile__portion">{portion}</span>}
+                    {portion && price && <span className="rsm2-tile__meta-sep" aria-hidden="true">·</span>}
+                    {price && <span className="rsm2-tile__cover-price">{price}</span>}
+                  </div>
+                )}
               </>
             )}
           </div>
