@@ -77,6 +77,18 @@ test('published restaurant opens the shared four-step menu update flow', async (
   await page.getByRole('button', { name: /Изменить отдельные блюда/ }).click()
   await expect(page.getByRole('heading', { name: 'Блюда меню' })).toBeVisible()
   await expect(page.getByText('Омлет с форелью')).toBeVisible()
+  await expect(page.getByText('Обновить меню можно двумя способами: загрузить файл целиком или вручную отредактировать блюда.')).toBeVisible()
+
+  const uploadMethod = page.getByRole('button', { name: 'Обновить с помощью файла', exact: true })
+  const manualMethod = page.getByRole('button', { name: 'Редактировать блюда', exact: true })
+  await expect(manualMethod).toHaveAttribute('aria-pressed', 'true')
+
+  await uploadMethod.click()
+  await expect(page.getByRole('heading', { name: 'Загрузите файл' })).toBeVisible()
+  await expect(uploadMethod).toHaveAttribute('aria-pressed', 'true')
+
+  await manualMethod.click()
+  await expect(page.getByRole('heading', { name: 'Блюда меню' })).toBeVisible()
 
   await page.getByRole('button', { name: /Перейти к фотографиям/ }).click()
   await expect(page.getByRole('heading', { name: 'Добавьте фотографии (опционально)' })).toBeVisible()

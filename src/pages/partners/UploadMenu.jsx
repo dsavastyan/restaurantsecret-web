@@ -251,6 +251,39 @@ function MethodCards({ onSelect, initial = false }) {
   )
 }
 
+function MethodSwitcher({ activeMethod, busy, onSelect }) {
+  return (
+    <section className="partners-update__method-switcher" aria-labelledby="partners-update-method-switcher-title">
+      <div>
+        <strong id="partners-update-method-switcher-title">Выберите способ обновления меню</strong>
+        <p>Обновить меню можно двумя способами: загрузить файл целиком или вручную отредактировать блюда.</p>
+      </div>
+      <div className="partners-update__method-switcher-actions" role="group" aria-label="Способ обновления меню">
+        <button
+          className={activeMethod === 'upload' ? 'active' : ''}
+          type="button"
+          aria-pressed={activeMethod === 'upload'}
+          disabled={busy}
+          onClick={() => activeMethod !== 'upload' && onSelect('upload')}
+        >
+          <FileSpreadsheet size={18} />
+          Обновить с помощью файла
+        </button>
+        <button
+          className={activeMethod === 'manual' ? 'active' : ''}
+          type="button"
+          aria-pressed={activeMethod === 'manual'}
+          disabled={busy}
+          onClick={() => activeMethod !== 'manual' && onSelect('manual')}
+        >
+          <Pencil size={18} />
+          Редактировать блюда
+        </button>
+      </div>
+    </section>
+  )
+}
+
 function ItemDrawer({ item, categories, busy, onClose, onSave }) {
   const [form, setForm] = useState(item ? { ...EMPTY_ITEM, ...item } : { ...EMPTY_ITEM })
   const [addAnother, setAddAnother] = useState(false)
@@ -410,7 +443,7 @@ function ItemDrawer({ item, categories, busy, onClose, onSave }) {
   )
 }
 
-function ManualStep({ payload, busy, error, onAdd, onBackToMethods, onConfirmMatch, onDelete, onEdit, onExit, onNext, onRestore }) {
+function ManualStep({ payload, busy, error, onAdd, onConfirmMatch, onDelete, onEdit, onExit, onNext, onRestore, onSelectMethod }) {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('all')
   const [status, setStatus] = useState('all')
@@ -422,9 +455,10 @@ function ManualStep({ payload, busy, error, onAdd, onBackToMethods, onConfirmMat
   })
   return (
     <>
+      <MethodSwitcher activeMethod="manual" busy={busy} onSelect={onSelectMethod} />
       <section className="partners-update__catalog">
         <div className="partners-update__catalog-heading">
-          <div><button type="button" onClick={onBackToMethods}><ArrowLeft size={16} /> Выбрать другой способ</button><h2>Блюда меню</h2><p>Изменения сохраняются в черновике и не видны гостям до отправки.</p></div>
+          <div><h2>Блюда меню</h2><p>Изменения сохраняются в черновике и не видны гостям до отправки.</p></div>
           <button className="partners-update__primary" type="button" onClick={onAdd}><Plus size={18} /> Добавить блюдо</button>
         </div>
         <div className="partners-update__filters">
@@ -575,7 +609,7 @@ function RevisionWaiting({ payload, busy, error, onReply }) {
   )
 }
 
-function UploadStep({ payload, busy, error, onBackToMethods, onFile, onNext, onReply }) {
+function UploadStep({ payload, busy, error, onFile, onNext, onReply, onSelectMethod }) {
   const inputRef = useRef(null)
   const extracting = payload.draft.status === 'extracting'
   if (extracting && payload.revision) {
@@ -583,7 +617,7 @@ function UploadStep({ payload, busy, error, onBackToMethods, onFile, onNext, onR
   }
   return (
     <section className="partners-update__upload-step">
-      <button className="partners-update__text-back" type="button" onClick={onBackToMethods}><ArrowLeft size={16} /> Выбрать другой способ</button>
+      <MethodSwitcher activeMethod="upload" busy={busy} onSelect={onSelectMethod} />
       <div className="partners-update__section-heading"><span>Новое меню</span><h2>Загрузите файл</h2><p>Мы сравним новую версию с опубликованной и сохраним подходящие фотографии.</p></div>
       <a className="partners-update__template" href={restaurantPortalApi.templateDownloadUrl()} download><FileSpreadsheet size={25} /><span><strong>Шаблон Excel</strong><small>Используйте шаблон для быстрой автоматической проверки</small></span><span>Скачать</span></a>
       <label className="partners-update__dropzone">
@@ -941,17 +975,17 @@ export default function PartnersUploadMenu() {
               busy={busy}
               error={error}
               onAdd={() => setDrawerItem(null)}
-              onBackToMethods={() => chooseMethod(payload.draft.method === 'manual' ? 'upload' : 'manual')}
               onConfirmMatch={confirmMatch}
               onDelete={deleteItem}
               onEdit={setDrawerItem}
               onExit={() => navigate('/partners/dashboard')}
               onNext={() => setStep(2)}
               onRestore={restoreItem}
+              onSelectMethod={chooseMethod}
             />
           )}
           {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 1 && payload.draft.method === 'upload' && (
-            <UploadStep payload={payload} busy={busy} error={error} onBackToMethods={() => chooseMethod('manual')} onFile={uploadSource} onNext={() => setStep(2)} onReply={replyToRevision} />
+            <UploadStep payload={payload} busy={busy} error={error} onFile={uploadSource} onNext={() => setStep(2)} onReply={replyToRevision} onSelectMethod={chooseMethod} />
           )}
           {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 2 && <PhotosStep payload={payload} busy={busy} onBack={() => setStep(1)} onDeletePhoto={deletePhoto} onNext={() => setStep(3)} onPhoto={uploadPhoto} onAssign={assignPhoto} />}
           {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 3 && <PreviewStep payload={payload} busy={busy} error={error} onBack={() => setStep(2)} onNext={() => setStep(4)} onMessage={sendRevisionMessage} />}
