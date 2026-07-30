@@ -6,6 +6,7 @@ import {
   Check,
   ChevronRight,
   Download,
+  ExternalLink,
   FileSpreadsheet,
   Image as ImageIcon,
   MessageCircle,
@@ -497,6 +498,13 @@ function PhotosStep({ payload, busy, onBack, onDeletePhoto, onNext, onPhoto, onA
 function PreviewStep({ payload, busy, error, onBack, onNext, onMessage }) {
   const [mode, setMode] = useState('all')
   const [comment, setComment] = useState('')
+  const openMenuPreview = () => {
+    window.open(
+      `/partners/menu-preview/${encodeURIComponent(payload.draft.id)}`,
+      '_blank',
+      'noopener,noreferrer',
+    )
+  }
   const send = async (type) => {
     if (!comment.trim()) return
     const saved = await onMessage(comment, type)
@@ -510,6 +518,10 @@ function PreviewStep({ payload, busy, error, onBack, onNext, onMessage }) {
         <div><button className={mode === 'all' ? 'active' : ''} type="button" onClick={() => setMode('all')}>Всё меню</button><button className={mode === 'changes' ? 'active' : ''} type="button" onClick={() => setMode('changes')}>Только изменения</button></div>
         <span>Добавлено {payload.summary.added || 0} · Изменено {payload.summary.updated || 0} · Удалено {payload.summary.deleted || 0}</span>
       </div>
+      <button className="partners-update__open-menu-preview" type="button" onClick={openMenuPreview}>
+        Просмотреть превью
+        <ExternalLink size={18} aria-hidden="true" />
+      </button>
       <div className="partners-update__preview-grid">
         {visible.map((item) => (
           <article className={`partners-update__preview-card partners-update__preview-card--${item.change_type}`} key={item.id}>

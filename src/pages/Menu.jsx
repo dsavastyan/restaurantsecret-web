@@ -59,8 +59,13 @@ const normalizeRestaurantLinkUrl = (rawUrl) => {
   }
 }
 
-export default function Menu() {
-  const { slug } = useParams()
+export default function Menu({
+  previewMenu = null,
+  previewRestaurantSlug = '',
+  previewMode = false,
+}) {
+  const { slug: routeSlug } = useParams()
+  const slug = previewRestaurantSlug || routeSlug
   const navigate = useNavigate()
   const isPreview = useMenuPreview()
   const accessToken = useAuth((state) => state.accessToken)
@@ -78,8 +83,8 @@ export default function Menu() {
     loadFavoriteRestaurants: state.load,
   }))
 
-  const [menu, setMenu] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [menu, setMenu] = useState(() => previewMode ? normalizeMenu(previewMenu) : null)
+  const [loading, setLoading] = useState(!previewMode)
   const [error, setError] = useState('')
   const [isOutdatedOpen, setIsOutdatedOpen] = useState(false)
   const [isMapOpen, setIsMapOpen] = useState(false)
@@ -107,6 +112,13 @@ export default function Menu() {
 
   // Fetch the menu.
   useEffect(() => {
+    if (previewMode) {
+      setMenu(normalizeMenu(previewMenu))
+      setLoading(false)
+      setError('')
+      return undefined
+    }
+
     let aborted = false
 
       ; (async () => {
@@ -138,17 +150,17 @@ export default function Menu() {
     return () => {
       aborted = true
     }
-  }, [accessToken, fetchStatus, slug])
+  }, [accessToken, fetchStatus, previewMenu, previewMode, slug])
 
   useEffect(() => {
     setIsMapOpen(false)
   }, [slug])
 
   useEffect(() => {
-    if (accessToken) {
+    if (!previewMode && accessToken) {
       loadFavoriteRestaurants(accessToken)
     }
-  }, [accessToken, loadFavoriteRestaurants])
+  }, [accessToken, loadFavoriteRestaurants, previewMode])
 
   useEffect(() => {
     let aborted = false
@@ -177,10 +189,10 @@ export default function Menu() {
   }, [slug])
 
   const dishes = useMemo(() => flattenMenuDishes(menu), [menu])
-  const freeDishKeys = useMemo(
-    () => new Set(dishes.slice(0, 3).map((dish) => buildDishAccessKey(dish))),
-    [dishes]
-  )
+  const freeDishKeys = useMemo(() => {
+    const visibleDishes = previewMode ? dishes : dishes.slice(0, 3)
+    return new Set(visibleDishes.map((dish) => buildDishAccessKey(dish)))
+  }, [dishes, previewMode])
   const capturedAt = useMemo(() => formatMenuCapturedAt(menu?.menuCapturedAt), [menu?.menuCapturedAt])
 
   // Apply search and macro filters locally to keep the UI responsive.
@@ -274,9 +286,11 @@ export default function Menu() {
   const mobileMapOpenUrl = restaurantLinkUrl || mapOpenUrl
 
   useMeta({
-    title: `Меню ${seoRestaurantName} с КБЖУ — калории, белки, жиры, углеводы`,
+    title: previewMode
+      ? `Превью меню ${seoRestaurantName} — не опубликовано`
+      : `Меню ${seoRestaurantName} с КБЖУ — калории, белки, жиры, углеводы`,
     description: seoDescription,
-    canonical: `https://restaurantsecret.ru/restaurants/${slug}/menu/`,
+    canonical: previewMode ? undefined : `https://restaurantsecret.ru/restaurants/${slug}/menu/`,
   })
 
   // Toggle a preset chip and re-run memoized filtering.
@@ -338,6 +352,7 @@ export default function Menu() {
   }
 
   const handleToggleRestaurantFavorite = async () => {
+    if (previewMode) return
     if (!slug) return
     if (!accessToken) {
       navigate('/login', { state: { from: window.location.pathname + window.location.search } })
@@ -388,6 +403,7 @@ export default function Menu() {
         isOutdatedOpen={isOutdatedOpen}
         setIsOutdatedOpen={setIsOutdatedOpen}
         openDishCard={open}
+        readOnly={previewMode}
       />
     )
   }
@@ -447,7 +463,9 @@ export default function Menu() {
             <button
               type="button"
               className="menu-mobile-hero__report"
-              onClick={() => setIsOutdatedOpen(true)}
+              onClick={() => {
+                if (!previewMode) setIsOutdatedOpen(true)
+              }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none">
                 <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
@@ -498,7 +516,9 @@ export default function Menu() {
             <button
               type="button"
               className="menu-outdated"
-              onClick={() => setIsOutdatedOpen(true)}
+              onClick={() => {
+                if (!previewMode) setIsOutdatedOpen(true)
+              }}
             >
               Меню устарело?
             </button>
@@ -698,6 +718,8 @@ export default function Menu() {
                         restaurantSlug={slug}
                         restaurantName={menu?.name || slug}
                         isFreeAccess={isFreeAccess}
+                        interactive={!previewMode}
+                        readOnly={previewMode}
                         onClick={() => open({
                           id: dish.id,
                           dishName: dish.name,
@@ -720,11 +742,13 @@ export default function Menu() {
           )
         )}
       </section>
-      <MenuOutdatedModal
-        restaurantName={menu?.name || slug}
-        isOpen={isOutdatedOpen}
-        onClose={() => setIsOutdatedOpen(false)}
-      />
+      {!previewMode && (
+        <MenuOutdatedModal
+          restaurantName={menu?.name || slug}
+          isOpen={isOutdatedOpen}
+          onClose={() => setIsOutdatedOpen(false)}
+        />
+      )}
     </div>
   )
 }
