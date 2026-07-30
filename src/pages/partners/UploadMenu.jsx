@@ -448,29 +448,30 @@ function UploadStep({ payload, busy, error, onBackToMethods, onFile, onNext, onR
   )
 }
 
-function PhotosStep({ payload, busy, onBack, onBulkPhoto, onDeletePhoto, onNext, onPhoto, onAssign }) {
-  const [tab, setTab] = useState('attention')
+function PhotosStep({ payload, busy, onBack, onDeletePhoto, onNext, onPhoto, onAssign }) {
   const activeItems = payload.items.filter((item) => item.change_type !== 'deleted')
+  const hasTransferredPhotos = activeItems.some((item) => Boolean(item.photo_transferred))
+  const [tab, setTab] = useState(hasTransferredPhotos ? 'attention' : 'all')
   const needsAttention = (item) => Boolean(item.photo_attention)
   const visible = tab === 'attention' ? activeItems.filter(needsAttention) : activeItems
   const unmatched = payload.photos.filter((photo) => photo.status === 'unmatched')
   return (
     <section className="partners-update__photos-step">
-      <div className="partners-update__section-heading"><span>Шаг 2</span><h2>Проверьте фотографии</h2><p>Существующие фотографии уже перенесены. Загрузите новые только там, где это необходимо.</p></div>
+      <div className="partners-update__section-heading">
+        <span>Шаг 2</span>
+        <h2>{hasTransferredPhotos ? 'Проверьте фотографии' : 'Добавьте фотографии (опционально)'}</h2>
+        {hasTransferredPhotos && <p>Существующие фотографии уже перенесены. Загрузите новые только там, где это необходимо.</p>}
+      </div>
       <div className="partners-update__tabs-row">
         <div className="partners-update__tabs">
           <button className={tab === 'attention' ? 'active' : ''} type="button" onClick={() => setTab('attention')}>Требуют внимания · {activeItems.filter(needsAttention).length}</button>
           <button className={tab === 'all' ? 'active' : ''} type="button" onClick={() => setTab('all')}>Все блюда · {activeItems.length}</button>
         </div>
-        <label className="partners-update__bulk-photo">
-          <input type="file" accept="image/*" multiple onChange={(event) => event.target.files?.length && onBulkPhoto(Array.from(event.target.files))} />
-          <Upload size={16} /> Загрузить несколько фото
-        </label>
       </div>
       <div className="partners-update__photo-grid">
         {visible.map((item) => (
           <article className="partners-update__photo-card" key={item.id}>
-            {item.photo_url && !item.photo_removed ? <img src={item.photo_url} alt="" /> : <span className="partners-update__photo-placeholder"><ImageIcon size={30} /></span>}
+            {item.photo_url && !item.photo_removed ? <img src={restaurantPortalApi.draftItemPhotoUrl(payload.draft.id, item.id)} alt="" /> : <span className="partners-update__photo-placeholder"><ImageIcon size={30} /></span>}
             <div><span className={`partners-update__status partners-update__status--${item.change_type}`}>{item.photo_changed ? 'Фото заменено' : item.change_type === 'added' ? 'Новое блюдо' : item.photo_attention ? 'Блюдо изменено' : 'Фото сохранено'}</span><h3>{item.dish_name}</h3><p>{item.category}</p></div>
             <footer>
               <label><input type="file" accept="image/*" onChange={(event) => event.target.files?.[0] && onPhoto(item, event.target.files[0])} />{item.photo_url ? 'Заменить' : 'Добавить фото'}</label>
@@ -514,7 +515,7 @@ function PreviewStep({ payload, busy, error, onBack, onNext, onMessage }) {
           <article className={`partners-update__preview-card partners-update__preview-card--${item.change_type}`} key={item.id}>
             {item.change_type === 'deleted'
               ? <span className="partners-update__photo-placeholder"><Trash2 size={30} /></span>
-              : item.photo_url && !item.photo_removed ? <img src={item.photo_url} alt="" /> : <span className="partners-update__photo-placeholder"><ImageIcon size={30} /></span>}
+              : item.photo_url && !item.photo_removed ? <img src={restaurantPortalApi.draftItemPhotoUrl(payload.draft.id, item.id)} alt="" /> : <span className="partners-update__photo-placeholder"><ImageIcon size={30} /></span>}
             <div><span className={`partners-update__status partners-update__status--${item.change_type}`}>{STATUS_LABELS[item.change_type]}</span><h3>{item.dish_name}</h3><p>{item.composition_text}</p><dl><div><dt>Ккал</dt><dd>{formatValue(item.kcal)}</dd></div><div><dt>Б</dt><dd>{formatValue(item.proteins_g)}</dd></div><div><dt>Ж</dt><dd>{formatValue(item.fats_g)}</dd></div><div><dt>У</dt><dd>{formatValue(item.carbs_g)}</dd></div></dl><strong>{formatValue(item.price_rub, ' ₽')}</strong></div>
           </article>
         ))}
@@ -743,11 +744,6 @@ export default function PartnersUploadMenu() {
     if (result) await reload()
   }
 
-  const uploadBulkPhotos = async (files) => {
-    const result = await run(() => restaurantPortalApi.uploadDraftPhotos(payload.draft.id, files), 'Не получилось загрузить фотографии.')
-    if (result) await reload()
-  }
-
   const deletePhoto = async (item) => {
     const result = await run(() => restaurantPortalApi.deleteDraftItemPhoto(payload.draft.id, item.id), 'Не получилось удалить фото.')
     if (result) await reload()
@@ -803,7 +799,7 @@ export default function PartnersUploadMenu() {
           {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 1 && payload.draft.method === 'upload' && (
             <UploadStep payload={payload} busy={busy} error={error} onBackToMethods={() => chooseMethod('manual')} onFile={uploadSource} onNext={() => setStep(2)} onReply={replyToRevision} />
           )}
-          {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 2 && <PhotosStep payload={payload} busy={busy} onBack={() => setStep(1)} onBulkPhoto={uploadBulkPhotos} onDeletePhoto={deletePhoto} onNext={() => setStep(3)} onPhoto={uploadPhoto} onAssign={assignPhoto} />}
+          {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 2 && <PhotosStep payload={payload} busy={busy} onBack={() => setStep(1)} onDeletePhoto={deletePhoto} onNext={() => setStep(3)} onPhoto={uploadPhoto} onAssign={assignPhoto} />}
           {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 3 && <PreviewStep payload={payload} busy={busy} error={error} onBack={() => setStep(2)} onNext={() => setStep(4)} onMessage={sendRevisionMessage} />}
           {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 4 && <ConfirmStep initial={isFirstPublication} payload={payload} busy={busy} error={error} onBack={() => setStep(3)} onSubmit={submit} />}
         </div>
