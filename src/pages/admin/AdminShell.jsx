@@ -6,7 +6,7 @@ import './admin-menu.css'
 export default function AdminShell() {
   const location = useLocation()
   const navigate = useNavigate()
-  const loginPage = location.pathname === '/admin/login'
+  const loginPage = location.pathname.replace(/\/+$/, '') === '/admin/login'
   const [status, setStatus] = useState(loginPage ? 'ready' : 'loading')
 
   const verify = useCallback(async () => {

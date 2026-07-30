@@ -87,3 +87,70 @@ test('published restaurant opens the shared four-step menu update flow', async (
   await expect(page.getByRole('heading', { name: 'Отправьте обновления' })).toBeVisible()
   await expect(page.getByText(/QR-код появится/)).toHaveCount(0)
 })
+
+test('waiting menu update shows uploaded source and lets the restaurant download it', async ({ page }) => {
+  const payload = {
+    draft: {
+      id: 91,
+      restaurant_id: 42,
+      current_step: 1,
+      status: 'extracting',
+      method: 'upload',
+      source_kind: 'unstructured',
+      revision: 2,
+    },
+    items: [],
+    photos: [],
+    summary: { added: 0, updated: 0, deleted: 0, unchanged: 0, photos: 0 },
+    revision: {
+      id: 12,
+      status: 'needs_preparation',
+      messages: [],
+      source_files: [{
+        id: 5,
+        original_name: 'Меню — июль.pdf',
+        content_type: 'application/pdf',
+        size_bytes: 153600,
+        page_count: 4,
+        sheet_count: null,
+      }],
+    },
+  }
+
+  await page.route('**/api/restaurant/**', async (route) => {
+    const path = new URL(route.request().url()).pathname
+    if (path === '/api/restaurant/me') {
+      await route.fulfill({
+        json: {
+          restaurant: { id: 42, name: 'Aero Menu', has_published_menu: true },
+          restaurants: [{ id: 42, name: 'Aero Menu' }],
+          last_upload: { status: 'processing' },
+        },
+      })
+      return
+    }
+    if (path === '/api/restaurant/menu/drafts/91/revision/files/5') {
+      await route.fulfill({
+        body: 'source file',
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': 'attachment; filename="menu-july.pdf"',
+        },
+      })
+      return
+    }
+    if (path === '/api/restaurant/menu/drafts/91') {
+      await route.fulfill({ json: { ok: true, ...payload } })
+      return
+    }
+    await route.fulfill({ json: { ok: true } })
+  })
+
+  await page.goto('/partners/upload?draft=91')
+
+  await expect(page.getByText('Загруженный файл')).toBeVisible()
+  const sourceLink = page.getByRole('link', { name: /Меню — июль\.pdf.*Скачать/ })
+  await expect(sourceLink).toBeVisible()
+  await expect(sourceLink).toContainText('150 КБ · 4 стр.')
+  await expect(sourceLink).toHaveAttribute('href', /\/api\/restaurant\/menu\/drafts\/91\/revision\/files\/5$/)
+})
