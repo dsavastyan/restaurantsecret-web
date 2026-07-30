@@ -149,6 +149,21 @@ export const restaurantPortalApi = {
   revisionSourceDownloadUrl: (draftId, fileId) =>
     `${RESTAURANT_API_BASE}/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/revision/files/${encodeURIComponent(fileId)}`,
 
+  replaceRevisionSource: (draftId, fileId, file) => {
+    const form = new FormData()
+    form.append('file', file)
+    return portalRequest(
+      `/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/revision/files/${encodeURIComponent(fileId)}`,
+      { method: 'PUT', body: form, isFormData: true },
+    )
+  },
+
+  deleteRevisionSource: (draftId, fileId) =>
+    portalRequest(
+      `/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/revision/files/${encodeURIComponent(fileId)}`,
+      { method: 'DELETE' },
+    ),
+
   sendRevisionMessage: (draftId, message, type = 'comment') =>
     portalRequest(`/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/revision/messages`, {
       method: 'POST',

@@ -330,7 +330,7 @@ function ManualStep({ payload, busy, error, onAdd, onBackToMethods, onConfirmMat
   )
 }
 
-function RevisionWaiting({ payload, busy, error, onReply }) {
+function RevisionWaiting({ payload, busy, error, onAddFiles, onDeleteFile, onReplaceFile, onReply }) {
   const [message, setMessage] = useState('')
   const [files, setFiles] = useState([])
   const revision = payload.revision
@@ -350,13 +350,33 @@ function RevisionWaiting({ payload, busy, error, onReply }) {
   return (
     <section className="partners-update__waiting">
       <span className="partners-update__waiting-icon"><Upload size={34} /></span>
-      <span>Файл принят</span>
-      <h2>Меню загружено — ожидает подготовки</h2>
-      <p>Мы сохранили исходные файлы без изменений. Специалист подготовит меню по шаблону, после чего автоматически откроется шаг с фотографиями и превью.</p>
-      {sourceFiles.length > 0 && (
-        <div className="partners-update__source-files">
+      <span>{sourceFiles.length ? 'Файл принят' : 'Ожидаем файл'}</span>
+      <h2>{sourceFiles.length ? 'Меню загружено — ожидает подготовки' : 'Добавьте файл меню'}</h2>
+      <p>
+        {sourceFiles.length
+          ? 'Мы сохранили исходные файлы без изменений. Специалист подготовит меню по шаблону, после чего автоматически откроется шаг с фотографиями и превью.'
+          : 'Все исходные файлы удалены. Загрузите актуальную версию меню, чтобы специалист мог продолжить подготовку.'}
+      </p>
+      <div className="partners-update__source-files">
+        <div className="partners-update__source-files-heading">
           <strong>{sourceFiles.length === 1 ? 'Загруженный файл' : 'Загруженные файлы'}</strong>
-          <div>
+          <label className={`partners-update__source-file-add${busy ? ' is-disabled' : ''}`}>
+            <input
+              type="file"
+              multiple
+              disabled={busy}
+              accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp"
+              onChange={(event) => {
+                const selected = Array.from(event.target.files || [])
+                if (selected.length) onAddFiles(selected)
+                event.target.value = ''
+              }}
+            />
+            <Plus size={15} /> Добавить файлы
+          </label>
+        </div>
+        {sourceFiles.length > 0 ? (
+          <div className="partners-update__source-file-list">
             {sourceFiles.map((file) => {
               const details = [
                 formatFileSize(file.size_bytes),
@@ -364,23 +384,47 @@ function RevisionWaiting({ payload, busy, error, onReply }) {
                 file.sheet_count ? `${file.sheet_count} лист.` : '',
               ].filter(Boolean).join(' · ')
               return (
-                <a
-                  href={restaurantPortalApi.revisionSourceDownloadUrl(payload.draft.id, file.id)}
-                  download={file.original_name}
-                  key={file.id}
-                >
+                <article className="partners-update__source-file" key={file.id}>
                   <span className="partners-update__source-file-icon"><FileSpreadsheet size={20} /></span>
-                  <span>
+                  <span className="partners-update__source-file-info">
                     <strong title={file.original_name}>{file.original_name}</strong>
                     {details && <small>{details}</small>}
                   </span>
-                  <span className="partners-update__source-file-download">Скачать <Download size={16} /></span>
-                </a>
+                  <span className="partners-update__source-file-actions">
+                    <a
+                      className="partners-update__source-file-download"
+                      href={restaurantPortalApi.revisionSourceDownloadUrl(payload.draft.id, file.id)}
+                      download={file.original_name}
+                    >
+                      Скачать <Download size={16} />
+                    </a>
+                    <label className={busy ? 'is-disabled' : ''}>
+                      <input
+                        type="file"
+                        disabled={busy}
+                        accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp"
+                        onChange={(event) => {
+                          const replacement = event.target.files?.[0]
+                          if (replacement) onReplaceFile(file, replacement)
+                          event.target.value = ''
+                        }}
+                      />
+                      Заменить
+                    </label>
+                    <button type="button" disabled={busy} onClick={() => onDeleteFile(file)}>
+                      <Trash2 size={15} /> Удалить
+                    </button>
+                  </span>
+                </article>
               )
             })}
           </div>
-        </div>
-      )}
+        ) : (
+          <p className="partners-update__source-files-empty">
+            Файлов пока нет. Добавьте новый файл, чтобы специалист мог продолжить подготовку меню.
+          </p>
+        )}
+      </div>
       <div className="partners-update__chat">
         <header className="partners-update__chat-header">
           <span className="partners-update__chat-icon" aria-hidden="true">
@@ -421,11 +465,11 @@ function RevisionWaiting({ payload, busy, error, onReply }) {
   )
 }
 
-function UploadStep({ payload, busy, error, onBackToMethods, onFile, onNext, onReply }) {
+function UploadStep({ payload, busy, error, onBackToMethods, onDeleteFile, onFile, onNext, onReplaceFile, onReply }) {
   const inputRef = useRef(null)
   const extracting = payload.draft.status === 'extracting'
   if (extracting && payload.revision) {
-    return <RevisionWaiting payload={payload} busy={busy} error={error} onReply={onReply} />
+    return <RevisionWaiting payload={payload} busy={busy} error={error} onAddFiles={onFile} onDeleteFile={onDeleteFile} onReplaceFile={onReplaceFile} onReply={onReply} />
   }
   return (
     <section className="partners-update__upload-step">
@@ -728,6 +772,27 @@ export default function PartnersUploadMenu() {
     return true
   }
 
+  const replaceRevisionSource = async (sourceFile, replacement) => {
+    const result = await run(
+      () => restaurantPortalApi.replaceRevisionSource(payload.draft.id, sourceFile.id, replacement),
+      'Не получилось заменить файл.',
+    )
+    if (!result) return false
+    setPayload(result)
+    return true
+  }
+
+  const deleteRevisionSource = async (sourceFile) => {
+    if (!window.confirm(`Удалить файл «${sourceFile.original_name}»?`)) return false
+    const result = await run(
+      () => restaurantPortalApi.deleteRevisionSource(payload.draft.id, sourceFile.id),
+      'Не получилось удалить файл.',
+    )
+    if (!result) return false
+    setPayload(result)
+    return true
+  }
+
   const sendRevisionMessage = async (message, type) => {
     const result = await run(
       () => restaurantPortalApi.sendRevisionMessage(payload.draft.id, message, type),
@@ -783,7 +848,7 @@ export default function PartnersUploadMenu() {
         <header className="partners-update__topbar"><button type="button" onClick={() => navigate('/partners/dashboard')}>Сохранить и выйти</button></header>
         <div className="partners-update__content">
           {payload.draft.status === 'submitted' && <SubmittedState onExit={() => navigate('/partners/dashboard')} />}
-          {waitingForPreparation && <RevisionWaiting payload={payload} busy={busy} error={error} onReply={replyToRevision} />}
+          {waitingForPreparation && <RevisionWaiting payload={payload} busy={busy} error={error} onAddFiles={uploadSource} onDeleteFile={deleteRevisionSource} onReplaceFile={replaceRevisionSource} onReply={replyToRevision} />}
           {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 1 && !payload.draft.method && <MethodCards initial={isFirstPublication} onSelect={chooseMethod} />}
           {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 1 && payload.draft.method === 'manual' && (
             <ManualStep
@@ -801,7 +866,7 @@ export default function PartnersUploadMenu() {
             />
           )}
           {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 1 && payload.draft.method === 'upload' && (
-            <UploadStep payload={payload} busy={busy} error={error} onBackToMethods={() => chooseMethod('manual')} onFile={uploadSource} onNext={() => setStep(2)} onReply={replyToRevision} />
+            <UploadStep payload={payload} busy={busy} error={error} onBackToMethods={() => chooseMethod('manual')} onDeleteFile={deleteRevisionSource} onFile={uploadSource} onNext={() => setStep(2)} onReplaceFile={replaceRevisionSource} onReply={replyToRevision} />
           )}
           {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 2 && <PhotosStep payload={payload} busy={busy} onBack={() => setStep(1)} onBulkPhoto={uploadBulkPhotos} onDeletePhoto={deletePhoto} onNext={() => setStep(3)} onPhoto={uploadPhoto} onAssign={assignPhoto} />}
           {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 3 && <PreviewStep payload={payload} busy={busy} error={error} onBack={() => setStep(2)} onNext={() => setStep(4)} onMessage={sendRevisionMessage} />}
