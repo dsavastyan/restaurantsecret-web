@@ -217,6 +217,9 @@ export const restaurantPortalApi = {
       { method: 'DELETE' },
     ),
 
+  draftItemPhotoUrl: (draftId, itemId) =>
+    `${RESTAURANT_API_BASE}/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/items/${encodeURIComponent(itemId)}/photo`,
+
   submitDraft: (draftId) =>
     portalRequest(`/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/submit`, {
       method: 'POST',

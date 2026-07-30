@@ -25,6 +25,7 @@ type DishCardData = {
   proteins_g?: number | null;
   fats_g?: number | null;
   carbs_g?: number | null;
+  price?: number | null;
   composition_text?: string | null;
   allergensList: string[];
   weight?: number | null;
@@ -259,6 +260,7 @@ const deriveCardData = (
     proteins_g: proteins,
     fats_g: fats,
     carbs_g: carbs,
+    price: pickNumber(dish, ["price", "price_rub", "priceRub", "cost"]),
     composition_text: composition,
     allergensList: normalizeAllergens(dish),
     weight: pickNumber(dish, ["weight", "weight_g", "weightGrams", "portion_weight", "serving_weight", "grammage", "portion_size", "portionSize"]),
