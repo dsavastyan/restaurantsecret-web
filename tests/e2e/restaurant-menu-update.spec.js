@@ -91,6 +91,105 @@ test('published restaurant opens the shared four-step menu update flow', async (
   await expect(page.getByText(/QR-код появится/)).toHaveCount(0)
 })
 
+test('manual dish form blocks invalid numbers and submits only valid values', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('rs_consent_v1', JSON.stringify({
+      analytics: 'denied',
+      updatedAt: new Date().toISOString(),
+      policyVersion: 'cookies_v1_2026-01-16',
+    }))
+  })
+  const payload = {
+    draft: {
+      id: 93,
+      restaurant_id: 42,
+      current_step: 1,
+      status: 'editing',
+      method: 'manual',
+      source_kind: null,
+      revision: 1,
+    },
+    items: [],
+    photos: [],
+    summary: { added: 0, updated: 0, deleted: 0, unchanged: 0, photos: 0 },
+  }
+  const submittedItems = []
+
+  await page.route('**/api/restaurant/**', async (route) => {
+    const request = route.request()
+    const path = new URL(request.url()).pathname
+    if (path === '/api/restaurant/me') {
+      await route.fulfill({
+        json: {
+          restaurant: { id: 42, name: 'Aero Menu', has_published_menu: true },
+          restaurants: [{ id: 42, name: 'Aero Menu' }],
+          last_upload: { status: 'published' },
+        },
+      })
+      return
+    }
+    if (path === '/api/restaurant/menu/drafts/93/items' && request.method() === 'POST') {
+      submittedItems.push(request.postDataJSON())
+      await route.fulfill({ status: 201, json: { ok: true } })
+      return
+    }
+    if (path === '/api/restaurant/menu/drafts/93') {
+      await route.fulfill({ json: { ok: true, ...payload } })
+      return
+    }
+    await route.fulfill({ json: { ok: true } })
+  })
+
+  await page.goto('/partners/upload?draft=93')
+  await page.getByRole('button', { name: /Добавить блюдо/ }).click()
+
+  const drawer = page.getByRole('dialog')
+  const price = drawer.getByLabel('Цена, ₽')
+  await price.fill('abc')
+  await expect(price).toHaveValue('')
+  await expect(page.getByText('Используйте только цифры и один десятичный разделитель.')).toBeVisible()
+
+  await price.fill('-10')
+  await expect(price).toHaveValue('')
+  await expect(page.getByText('Значение не может быть отрицательным.')).toBeVisible()
+
+  await drawer.getByLabel('Название блюда').fill('   ')
+  await drawer.getByLabel('Раздел меню').fill('Завтраки')
+  await price.fill('450,50')
+  await drawer.getByLabel('Состав').fill('Яйца, молоко')
+  await drawer.getByLabel('Вес порции, г').fill('0')
+  await drawer.getByLabel('Калории').fill('6000')
+  await drawer.getByLabel('Белки, г').fill('501')
+  await drawer.getByLabel('Жиры, г').fill('18')
+  await drawer.getByLabel('Углеводы, г').fill('4')
+  await drawer.getByRole('button', { name: 'Добавить блюдо', exact: true }).click()
+
+  await expect(page.getByText('Укажите название блюда.')).toBeVisible()
+  await expect(page.getByText('Введите вес больше 0 и не более 5 000 г.')).toBeVisible()
+  await expect(page.getByText('Введите калорийность от 0 до 5 000.')).toBeVisible()
+  await expect(page.getByText('Введите значение от 0 до 500 г.')).toBeVisible()
+  expect(submittedItems).toHaveLength(0)
+
+  await drawer.getByLabel('Название блюда').fill('Омлет')
+  await drawer.getByLabel('Вес порции, г').fill('250')
+  await drawer.getByLabel('Калории').fill('390')
+  await drawer.getByLabel('Белки, г').fill('24')
+  await drawer.getByRole('button', { name: 'Добавить блюдо', exact: true }).click()
+
+  await expect.poll(() => submittedItems.length).toBe(1)
+  expect(submittedItems[0]).toMatchObject({
+    dish_name: 'Омлет',
+    category: 'Завтраки',
+    price_rub: 450.5,
+    portion_g: 250,
+    kcal: 390,
+    proteins_g: 24,
+    fats_g: 18,
+    carbs_g: 4,
+    composition_text: 'Яйца, молоко',
+  })
+})
+
 test('photo step explains transferred photos and loads them through the authenticated API', async ({ page }) => {
   const payload = {
     draft: {
