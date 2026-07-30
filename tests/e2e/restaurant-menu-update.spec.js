@@ -105,7 +105,12 @@ test('waiting menu update shows uploaded source and lets the restaurant download
     revision: {
       id: 12,
       status: 'needs_preparation',
-      messages: [],
+      messages: [{
+        id: 18,
+        sender_role: 'admin',
+        message_type: 'clarification',
+        body: 'КБЖУ блюда 12 расходится с фактом',
+      }],
       source_files: [{
         id: 5,
         original_name: 'Меню — июль.pdf',
@@ -153,4 +158,10 @@ test('waiting menu update shows uploaded source and lets the restaurant download
   await expect(sourceLink).toBeVisible()
   await expect(sourceLink).toContainText('150 КБ · 4 стр.')
   await expect(sourceLink).toHaveAttribute('href', /\/api\/restaurant\/menu\/drafts\/91\/revision\/files\/5$/)
+
+  const chat = page.locator('.partners-update__chat')
+  await expect(chat.getByText('Переписка со специалистом')).toBeVisible()
+  await expect(chat.getByText('Нужно уточнение')).toBeVisible()
+  await expect(chat.getByText('КБЖУ блюда 12 расходится с фактом')).toHaveCount(1)
+  await expect(chat.getByPlaceholder('Напишите комментарий для специалиста')).toBeVisible()
 })

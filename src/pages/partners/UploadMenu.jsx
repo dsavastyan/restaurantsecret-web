@@ -8,6 +8,7 @@ import {
   Download,
   FileSpreadsheet,
   Image as ImageIcon,
+  MessageCircle,
   Pencil,
   Plus,
   Search,
@@ -380,31 +381,41 @@ function RevisionWaiting({ payload, busy, error, onReply }) {
           </div>
         </div>
       )}
-      {lastClarification && (
-        <div className="partners-update__clarification">
-          <strong>Нужно уточнение</strong>
-          <p>{lastClarification.body}</p>
+      <div className="partners-update__chat">
+        <header className="partners-update__chat-header">
+          <span className="partners-update__chat-icon" aria-hidden="true">
+            <MessageCircle size={20} />
+          </span>
+          <div>
+            <strong>Переписка со специалистом</strong>
+            <span>Здесь можно уточнить детали подготовки меню</span>
+          </div>
+          {lastClarification && (
+            <span className="partners-update__clarification-badge">Нужно уточнение</span>
+          )}
+        </header>
+        <div className="partners-update__conversation">
+          {(revision?.messages || []).filter((item) => item.sender_role !== 'system').map((item) => (
+            <article className={`partners-update__message partners-update__message--${item.sender_role}`} key={item.id}>
+              <strong>{item.sender_role === 'admin' ? 'RestaurantSecret' : 'Вы'}</strong>
+              <p>{item.body}</p>
+            </article>
+          ))}
         </div>
-      )}
-      <div className="partners-update__conversation">
-        {(revision?.messages || []).filter((item) => item.sender_role !== 'system').map((item) => (
-          <article className={`partners-update__message partners-update__message--${item.sender_role}`} key={item.id}>
-            <strong>{item.sender_role === 'admin' ? 'RestaurantSecret' : 'Вы'}</strong>
-            <p>{item.body}</p>
-          </article>
-        ))}
+        <form className="partners-update__chat-form" onSubmit={submit}>
+          <label>
+            Ответ или дополнительная информация
+            <textarea value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Напишите комментарий для специалиста" />
+          </label>
+          <div className="partners-update__chat-actions">
+            <label className="partners-update__attach">
+              <input type="file" multiple accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp" onChange={(event) => setFiles(Array.from(event.target.files || []))} />
+              <Plus size={17} /> {files.length ? `Выбрано файлов: ${files.length}` : 'Приложить дополнительные файлы'}
+            </label>
+            <button className="partners-update__primary" disabled={busy || (!message.trim() && !files.length)} type="submit">{busy ? 'Отправляем…' : 'Отправить ответ'}</button>
+          </div>
+        </form>
       </div>
-      <form onSubmit={submit}>
-        <label>
-          Ответ или дополнительная информация
-          <textarea value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Напишите комментарий для специалиста" />
-        </label>
-        <label className="partners-update__attach">
-          <input type="file" multiple accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp" onChange={(event) => setFiles(Array.from(event.target.files || []))} />
-          <Plus size={17} /> {files.length ? `Выбрано файлов: ${files.length}` : 'Приложить дополнительные файлы'}
-        </label>
-        <button className="partners-update__primary" disabled={busy || (!message.trim() && !files.length)} type="submit">{busy ? 'Отправляем…' : 'Отправить ответ'}</button>
-      </form>
       {error && <div className="partners__notice partners__notice--error">{error}</div>}
     </section>
   )
