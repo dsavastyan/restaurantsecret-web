@@ -5,6 +5,7 @@ import {
   ArrowRight,
   Check,
   ChevronRight,
+  Download,
   FileSpreadsheet,
   Image as ImageIcon,
   Pencil,
@@ -19,7 +20,7 @@ import './update-flow.css'
 
 const STEPS = [
   ['Меню', 'Выберите способ обновления'],
-  ['Фотографии', 'Проверьте фото блюд'],
+  ['Фотографии', 'Проверьте фото блюд', true],
   ['Превью', 'Посмотрите результат'],
   ['Подтверждение', 'Отправьте обновления'],
 ]
@@ -69,6 +70,14 @@ function formatValue(value, suffix = '') {
   return value == null || value === '' ? '—' : `${value}${suffix}`
 }
 
+function formatFileSize(bytes) {
+  const value = Number(bytes)
+  if (!Number.isFinite(value) || value < 0) return ''
+  if (value < 1024) return `${value} Б`
+  if (value < 1024 * 1024) return `${Math.round(value / 1024)} КБ`
+  return `${(value / (1024 * 1024)).toFixed(value < 10 * 1024 * 1024 ? 1 : 0)} МБ`
+}
+
 function changeSummary(summary) {
   return `${summary.added || 0} новых · ${summary.updated || 0} изменено · ${summary.deleted || 0} будет удалено`
 }
@@ -89,14 +98,20 @@ function FlowSidebar({ restaurant, step, onStep, initial = false, locked = false
         </div>
         <div className="partners-update__progress"><span style={{ width: `${step * 25}%` }} /></div>
         <ol className="partners-update__steps">
-          {STEPS.map(([title, description], index) => {
+          {STEPS.map(([title, description, optional], index) => {
             const number = index + 1
             const state = number < step ? 'complete' : number === step ? 'active' : 'pending'
             return (
               <li className={`partners-update__step partners-update__step--${state}`} key={title}>
                 <button type="button" disabled={locked || number > step} onClick={() => onStep(number)}>
                   <span>{state === 'complete' ? <Check size={16} /> : number}</span>
-                  <span><strong>{title}</strong><small>{description}</small></span>
+                  <span>
+                    <span className="partners-update__step-title">
+                      <strong>{title}</strong>
+                      {optional && <i>Необязательно</i>}
+                    </span>
+                    <small>{description}</small>
+                  </span>
                 </button>
               </li>
             )
@@ -318,6 +333,7 @@ function RevisionWaiting({ payload, busy, error, onReply }) {
   const [message, setMessage] = useState('')
   const [files, setFiles] = useState([])
   const revision = payload.revision
+  const sourceFiles = revision?.source_files || []
   const lastClarification = [...(revision?.messages || [])]
     .reverse()
     .find((item) => item.message_type === 'clarification')
@@ -335,7 +351,35 @@ function RevisionWaiting({ payload, busy, error, onReply }) {
       <span className="partners-update__waiting-icon"><Upload size={34} /></span>
       <span>Файл принят</span>
       <h2>Меню загружено — ожидает подготовки</h2>
-      <p>Мы сохранили исходные файлы без изменений. Специалист подготовит меню по шаблону, после чего автоматически откроется шаг с фотографиями.</p>
+      <p>Мы сохранили исходные файлы без изменений. Специалист подготовит меню по шаблону, после чего автоматически откроется шаг с фотографиями и превью.</p>
+      {sourceFiles.length > 0 && (
+        <div className="partners-update__source-files">
+          <strong>{sourceFiles.length === 1 ? 'Загруженный файл' : 'Загруженные файлы'}</strong>
+          <div>
+            {sourceFiles.map((file) => {
+              const details = [
+                formatFileSize(file.size_bytes),
+                file.page_count ? `${file.page_count} стр.` : '',
+                file.sheet_count ? `${file.sheet_count} лист.` : '',
+              ].filter(Boolean).join(' · ')
+              return (
+                <a
+                  href={restaurantPortalApi.revisionSourceDownloadUrl(payload.draft.id, file.id)}
+                  download={file.original_name}
+                  key={file.id}
+                >
+                  <span className="partners-update__source-file-icon"><FileSpreadsheet size={20} /></span>
+                  <span>
+                    <strong title={file.original_name}>{file.original_name}</strong>
+                    {details && <small>{details}</small>}
+                  </span>
+                  <span className="partners-update__source-file-download">Скачать <Download size={16} /></span>
+                </a>
+              )
+            })}
+          </div>
+        </div>
+      )}
       {lastClarification && (
         <div className="partners-update__clarification">
           <strong>Нужно уточнение</strong>

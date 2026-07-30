@@ -105,7 +105,7 @@ function RestoreVersionModal({ version, busy, error, onCancel, onConfirm }) {
         <span className="partners-eyebrow">Возврат к версии</span>
         <h2 id="restore-version-title">Опубликовать версию {version.version_number}?</h2>
         <p>
-          Меню от {formatDate(version.captured_at)} станет текущим. Нынешняя версия сохранится в истории,
+          Меню от {formatDate(version.captured_at)} станет актуальным. Текущая версия сохранится в истории,
           и к ней можно будет вернуться позднее.
         </p>
         {error && <div className="partners__notice partners__notice--error">{error}</div>}

@@ -146,6 +146,9 @@ export const restaurantPortalApi = {
     })
   },
 
+  revisionSourceDownloadUrl: (draftId, fileId) =>
+    `${RESTAURANT_API_BASE}/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/revision/files/${encodeURIComponent(fileId)}`,
+
   sendRevisionMessage: (draftId, message, type = 'comment') =>
     portalRequest(`/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/revision/messages`, {
       method: 'POST',
