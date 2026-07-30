@@ -209,6 +209,7 @@
 .partners-update__source-files-heading > strong { font-size: 13px; }
 .partners-update__source-file-add { display: inline-flex; align-items: center; gap: 5px; color: var(--u-green-dark); font-size: 11px; font-weight: 750; cursor: pointer; }
 .partners-update__source-file-add input,.partners-update__source-file-actions input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.partners-update__source-files-hint { margin: 0 0 10px; color: var(--u-muted); font-size: 11px; line-height: 1.45; }
 .partners-update__source-file-list { display: grid; gap: 8px; }
 .partners-update__source-file { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 11px; padding: 12px 14px; color: var(--u-ink); border: 1px solid var(--u-line); border-radius: 12px; background: #faf8f3; }
 .partners-update__source-file-icon { display: grid; place-items: center; width: 38px; height: 38px; color: var(--u-green); border-radius: 9px; background: #e9efe1; }
