@@ -15,6 +15,7 @@ type DishTileV2Props = {
   restaurantName?: string;
   isFreeAccess?: boolean;
   interactive?: boolean;
+  readOnly?: boolean;
   onClick?: () => void;
 };
 
@@ -23,7 +24,7 @@ type DishTileV2Props = {
 // the new visual language. Photos are not yet part of the data model, so
 // every card renders the "plaque" (photo-less) cover today — the photo
 // branch below is future-proofing per the design handoff.
-export default function DishTileV2({ dish, restaurantSlug, restaurantName, isFreeAccess = false, interactive = true, onClick }: DishTileV2Props) {
+export default function DishTileV2({ dish, restaurantSlug, restaurantName, isFreeAccess = false, interactive = true, readOnly = false, onClick }: DishTileV2Props) {
   const navigate = useNavigate();
   const location = useLocation();
   const accessToken = useAuth((state) => state.accessToken);
@@ -48,6 +49,7 @@ export default function DishTileV2({ dish, restaurantSlug, restaurantName, isFre
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (readOnly) return;
     if (!accessToken) {
       navigate('/login', { state: { from: location.pathname + location.search } });
       return;
@@ -66,6 +68,7 @@ export default function DishTileV2({ dish, restaurantSlug, restaurantName, isFre
 
   const handleDiaryAdd = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (readOnly) return;
     if (!accessToken) {
       navigate('/login', { state: { from: location.pathname + location.search } });
       return;

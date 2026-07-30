@@ -15,12 +15,13 @@ type DishRowV2Props = {
   restaurantName?: string;
   isFreeAccess?: boolean;
   interactive?: boolean;
+  readOnly?: boolean;
   onClick?: () => void;
 };
 
 // Redesigned mobile feed row. Same data/handlers as DishTileV2 — the two
 // only differ in markup so they read correctly at 72px-row vs. tile scale.
-export default function DishRowV2({ dish, restaurantSlug, restaurantName, isFreeAccess = false, interactive = true, onClick }: DishRowV2Props) {
+export default function DishRowV2({ dish, restaurantSlug, restaurantName, isFreeAccess = false, interactive = true, readOnly = false, onClick }: DishRowV2Props) {
   const navigate = useNavigate();
   const location = useLocation();
   const accessToken = useAuth((state) => state.accessToken);
@@ -45,6 +46,7 @@ export default function DishRowV2({ dish, restaurantSlug, restaurantName, isFree
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (readOnly) return;
     if (!accessToken) {
       navigate('/login', { state: { from: location.pathname + location.search } });
       return;
@@ -63,6 +65,7 @@ export default function DishRowV2({ dish, restaurantSlug, restaurantName, isFree
 
   const handleDiaryAdd = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (readOnly) return;
     if (!accessToken) {
       navigate('/login', { state: { from: location.pathname + location.search } });
       return;

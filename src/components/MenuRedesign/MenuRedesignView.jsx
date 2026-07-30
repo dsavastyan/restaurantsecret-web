@@ -73,6 +73,7 @@ export default function MenuRedesignView({
   setIsOutdatedOpen,
 
   openDishCard,
+  readOnly = false,
 }) {
   useFullBleedLayout();
 
@@ -133,7 +134,13 @@ export default function MenuRedesignView({
   return (
     <div className="rsm2-root">
       <div className="rsm2-hero">
-        <button type="button" className="rsm2-hero__report" onClick={() => setIsOutdatedOpen(true)}>
+        <button
+          type="button"
+          className="rsm2-hero__report"
+          onClick={() => {
+            if (!readOnly) setIsOutdatedOpen(true);
+          }}
+        >
           Меню устарело?
         </button>
         <div className="rsm2-hero__grid">
@@ -264,6 +271,8 @@ export default function MenuRedesignView({
                         restaurantSlug={slug}
                         restaurantName={menu?.name || slug}
                         isFreeAccess={isFreeAccess}
+                        interactive={!readOnly}
+                        readOnly={readOnly}
                         onClick={() => openDish(dish)}
                       />
                     );
@@ -280,6 +289,8 @@ export default function MenuRedesignView({
                         restaurantSlug={slug}
                         restaurantName={menu?.name || slug}
                         isFreeAccess={isFreeAccess}
+                        interactive={!readOnly}
+                        readOnly={readOnly}
                         onClick={() => openDish(dish)}
                       />
                     );
@@ -302,11 +313,13 @@ export default function MenuRedesignView({
         )}
       </div>
 
-      <MenuOutdatedModal
-        restaurantName={menu?.name || slug}
-        isOpen={isOutdatedOpen}
-        onClose={() => setIsOutdatedOpen(false)}
-      />
+      {!readOnly && (
+        <MenuOutdatedModal
+          restaurantName={menu?.name || slug}
+          isOpen={isOutdatedOpen}
+          onClose={() => setIsOutdatedOpen(false)}
+        />
+      )}
     </div>
   );
 }

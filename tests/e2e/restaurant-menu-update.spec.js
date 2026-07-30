@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 test('published restaurant opens the shared four-step menu update flow', async ({ page }) => {
+  let publicMenuRequests = 0
   const payload = {
     draft: {
       id: 91,
@@ -30,19 +31,42 @@ test('published restaurant opens the shared four-step menu update flow', async (
         photo_transferred: false,
         change_type: 'unchanged',
       },
+      {
+        id: 8,
+        dish_name: 'Старое сезонное блюдо',
+        category: 'Завтраки',
+        price_rub: 540,
+        per: 'portion',
+        portion_g: 220,
+        kcal: 350,
+        proteins_g: 18,
+        fats_g: 12,
+        carbs_g: 42,
+        composition_text: 'Больше не входит в меню',
+        photo_url: null,
+        photo_changed: 0,
+        photo_removed: 0,
+        photo_transferred: false,
+        change_type: 'deleted',
+      },
     ],
     photos: [],
-    summary: { added: 0, updated: 0, deleted: 0, unchanged: 1, photos: 0 },
+    summary: { added: 0, updated: 0, deleted: 1, unchanged: 1, photos: 0 },
   }
 
-  await page.route('**/api/restaurant/**', async (route) => {
+  await page.context().route('**/restaurants/aero-menu/menu', async (route) => {
+    publicMenuRequests += 1
+    await route.fulfill({ json: { name: 'Опубликованное меню', categories: [] } })
+  })
+
+  await page.context().route('**/api/restaurant/**', async (route) => {
     const request = route.request()
     const path = new URL(request.url()).pathname
     if (path === '/api/restaurant/me') {
       await route.fulfill({
         json: {
-          restaurant: { id: 42, name: 'Aero Menu', has_published_menu: true },
-          restaurants: [{ id: 42, name: 'Aero Menu' }],
+          restaurant: { id: 42, name: 'Aero Menu', slug: 'aero-menu', has_published_menu: true },
+          restaurants: [{ id: 42, name: 'Aero Menu', slug: 'aero-menu' }],
           last_upload: { status: 'published' },
         },
       })
@@ -97,6 +121,25 @@ test('published restaurant opens the shared four-step menu update flow', async (
 
   await page.getByRole('button', { name: /Перейти к превью/ }).click()
   await expect(page.getByRole('heading', { name: 'Проверьте превью' })).toBeVisible()
+
+  const popupPromise = page.waitForEvent('popup')
+  await page.getByRole('button', { name: 'Просмотреть превью' }).click()
+  const previewPage = await popupPromise
+
+  await expect(previewPage).toHaveURL(/\/partners\/menu-preview\/91$/)
+  await expect(previewPage.getByText('Безопасное превью')).toBeVisible()
+  await expect(previewPage.getByText('Эта версия меню ещё не опубликована и не видна гостям')).toBeVisible()
+  await expect(previewPage.getByRole('heading', { name: 'Меню Aero Menu с КБЖУ' })).toBeVisible()
+  await expect(previewPage.getByRole('heading', { name: 'Омлет с форелью' })).toBeVisible()
+  await expect(previewPage.getByText('790 ₽')).toBeVisible()
+  await expect(previewPage.getByText('Старое сезонное блюдо')).toHaveCount(0)
+  await expect(previewPage.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow')
+  expect(publicMenuRequests).toBe(0)
+
+  await previewPage.setViewportSize({ width: 390, height: 844 })
+  await expect(previewPage.getByRole('link', { name: /Вернуться к редактированию/ })).toBeVisible()
+  await expect(previewPage.getByRole('heading', { name: 'Омлет с форелью' })).toBeVisible()
+  await previewPage.close()
 
   await page.getByRole('button', { name: 'Продолжить' }).click()
   await expect(page.getByRole('heading', { name: 'Отправьте обновления' })).toBeVisible()

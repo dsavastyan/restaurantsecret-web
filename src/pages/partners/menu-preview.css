@@ -1,0 +1,105 @@
+.partner-menu-page-preview {
+  min-height: 100vh;
+  background: #fffdfa;
+  color: #242723;
+}
+
+.partner-menu-page-preview__bar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 12px clamp(16px, 3vw, 40px);
+  border-bottom: 1px solid #d8e3d0;
+  background: rgba(242, 247, 238, .96);
+  box-shadow: 0 8px 26px rgba(49, 68, 38, .08);
+  backdrop-filter: blur(12px);
+}
+
+.partner-menu-page-preview__status {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.partner-menu-page-preview__status > span {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #dfeeda;
+  color: #456b32;
+}
+
+.partner-menu-page-preview__status div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.partner-menu-page-preview__status strong {
+  color: #29461e;
+  font-size: 14px;
+}
+
+.partner-menu-page-preview__status small {
+  color: #63705d;
+  font-size: 12px;
+}
+
+.partner-menu-page-preview__bar > a,
+.partner-menu-page-preview__state a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 15px;
+  border: 1px solid #b8caae;
+  border-radius: 10px;
+  background: #fff;
+  color: #365429;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.partner-menu-page-preview__content {
+  margin: 0 auto;
+}
+
+.partner-menu-page-preview__state {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  min-height: calc(100vh - 72px);
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.partner-menu-page-preview__state h1,
+.partner-menu-page-preview__state p {
+  margin: 0;
+}
+
+@media (max-width: 680px) {
+  .partner-menu-page-preview__bar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .partner-menu-page-preview__status small {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .partner-menu-page-preview__bar > a {
+    min-height: 36px;
+  }
+}
