@@ -27,6 +27,7 @@ test('published restaurant opens the shared four-step menu update flow', async (
         photo_url: null,
         photo_changed: 0,
         photo_removed: 0,
+        photo_transferred: false,
         change_type: 'unchanged',
       },
     ],
@@ -78,7 +79,9 @@ test('published restaurant opens the shared four-step menu update flow', async (
   await expect(page.getByText('Омлет с форелью')).toBeVisible()
 
   await page.getByRole('button', { name: /Перейти к фотографиям/ }).click()
-  await expect(page.getByRole('heading', { name: 'Проверьте фотографии' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Добавьте фотографии (опционально)' })).toBeVisible()
+  await expect(page.getByText('Существующие фотографии уже перенесены.')).toHaveCount(0)
+  await expect(page.getByText('Загрузить несколько фото')).toHaveCount(0)
 
   await page.getByRole('button', { name: /Перейти к превью/ }).click()
   await expect(page.getByRole('heading', { name: 'Проверьте превью' })).toBeVisible()
@@ -86,6 +89,66 @@ test('published restaurant opens the shared four-step menu update flow', async (
   await page.getByRole('button', { name: 'Продолжить' }).click()
   await expect(page.getByRole('heading', { name: 'Отправьте обновления' })).toBeVisible()
   await expect(page.getByText(/QR-код появится/)).toHaveCount(0)
+})
+
+test('photo step explains transferred photos and loads them through the authenticated API', async ({ page }) => {
+  const payload = {
+    draft: {
+      id: 92,
+      restaurant_id: 42,
+      current_step: 2,
+      status: 'editing',
+      method: 'manual',
+      source_kind: null,
+      revision: 1,
+    },
+    items: [{
+      id: 8,
+      dish_name: 'Цезарь с курицей',
+      category: 'Салаты',
+      photo_url: '/DishPhotos/aero-menu/8.webp',
+      photo_changed: 0,
+      photo_removed: 0,
+      photo_transferred: true,
+      photo_attention: true,
+      change_type: 'updated',
+    }],
+    photos: [],
+    summary: { added: 0, updated: 1, deleted: 0, unchanged: 0, photos: 0 },
+  }
+
+  await page.route('**/api/restaurant/**', async (route) => {
+    const path = new URL(route.request().url()).pathname
+    if (path === '/api/restaurant/me') {
+      await route.fulfill({
+        json: {
+          restaurant: { id: 42, name: 'Aero Menu', has_published_menu: true },
+          restaurants: [{ id: 42, name: 'Aero Menu' }],
+          last_upload: { status: 'published' },
+        },
+      })
+      return
+    }
+    if (path === '/api/restaurant/menu/drafts/92/items/8/photo') {
+      await route.fulfill({ body: 'photo', contentType: 'image/webp' })
+      return
+    }
+    if (path === '/api/restaurant/menu/drafts/92') {
+      await route.fulfill({ json: { ok: true, ...payload } })
+      return
+    }
+    await route.fulfill({ json: { ok: true } })
+  })
+
+  await page.goto('/partners/upload?draft=92')
+
+  await expect(page.getByRole('heading', { name: 'Проверьте фотографии' })).toBeVisible()
+  await expect(page.getByText('Существующие фотографии уже перенесены. Загрузите новые только там, где это необходимо.')).toBeVisible()
+  await expect(page.getByText('Загрузить несколько фото')).toHaveCount(0)
+  await expect(page.locator('.partners-update__photo-card img')).toHaveAttribute(
+    'src',
+    'https://tg.restaurantsecret.ru/api/restaurant/menu/drafts/92/items/8/photo',
+  )
 })
 
 test('waiting menu update shows uploaded source and lets the restaurant download it', async ({ page }) => {

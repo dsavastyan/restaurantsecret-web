@@ -154,8 +154,6 @@
 .partners-update__comparison button { margin-left: auto; }
 .partners-update__tabs { display: flex; gap: 8px; margin-bottom: 20px; }
 .partners-update__tabs-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.partners-update__bulk-photo { position: relative; display: inline-flex; align-items: center; gap: 7px; padding: 9px 13px; border: 1px solid var(--u-line); border-radius: 9px; background: var(--u-paper); color: var(--u-green-dark); font-size: 10px; font-weight: 750; cursor: pointer; }
-.partners-update__bulk-photo input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .partners-update__tabs button,
 .partners-update__preview-toolbar button { padding: 9px 13px; border: 1px solid var(--u-line); border-radius: 9px; background: var(--u-paper); color: var(--u-muted); font-size: 11px; cursor: pointer; }
 .partners-update__tabs button.active,
