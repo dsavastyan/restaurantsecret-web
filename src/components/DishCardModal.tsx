@@ -9,8 +9,12 @@ import { postSuggest } from "@/lib/api";
 import { toast } from "@/lib/toast";
 import { useFavoritesStore } from "@/store/favorites";
 import { useDiaryStore } from "@/store/diary";
-import { formatNumeric } from "@/lib/nutrition";
+import { computeMacroGeometry, formatNumeric, formatPriceRub } from "@/lib/nutrition";
 import { analytics } from "@/services/analytics";
+import { useMenuPreview } from "@/lib/designPreview";
+import MacroRing from "@/components/MenuRedesign/MacroRing";
+import { HeartIcon } from "@/components/MenuRedesign/icons";
+import "@/pages/menu-redesign.css";
 
 const root = typeof document !== "undefined" ? document.body : null;
 
@@ -44,6 +48,7 @@ function MacroCell({
 export default function DishCardModal() {
   const navigate = useNavigate();
   const location = useLocation();
+  const isPreview = useMenuPreview();
   const { isOpen, isLoading, data, error, close } = useDishCardStore((s) => ({
     isOpen: s.isOpen,
     isLoading: s.isLoading,
@@ -209,6 +214,119 @@ export default function DishCardModal() {
 
   if (!isOpen || !root) return null;
 
+  // Shared between the legacy and redesigned modal — the "report outdated
+  // menu" flow isn't part of the visual redesign, only the trigger button is.
+  const outdatedFormOverlay = isOutdatedOpen && (
+    <div
+      className="feedback-modal__backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Сообщить об устаревшем меню"
+      onClick={(event) => {
+        event.stopPropagation();
+        setIsOutdatedOpen(false);
+        resetOutdatedForm();
+      }}
+    >
+      <div
+        className="feedback-modal"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="feedback-modal__header">
+          <h4 className="feedback-modal__title">Меню устарело</h4>
+          <button
+            type="button"
+            className="feedback-modal__close"
+            aria-label="Закрыть"
+            onClick={() => {
+              setIsOutdatedOpen(false);
+              resetOutdatedForm();
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <form className="feedback-modal__form" onSubmit={handleOutdatedSubmit}>
+          <fieldset className="feedback-modal__fieldset">
+            <legend className="feedback-modal__legend">Причина</legend>
+            <label className="feedback-modal__option">
+              <input
+                type="radio"
+                name="outdated-reason"
+                value="wrong_kbju"
+                checked={reason === "wrong_kbju"}
+                onChange={() => setReason("wrong_kbju")}
+              />
+              <span>Неверное КБЖУ</span>
+            </label>
+            <label className="feedback-modal__option">
+              <input
+                type="radio"
+                name="outdated-reason"
+                value="missing_from_menu"
+                checked={reason === "missing_from_menu"}
+                onChange={() => setReason("missing_from_menu")}
+              />
+              <span>Блюда нет в меню</span>
+            </label>
+            <label className="feedback-modal__option">
+              <input
+                type="radio"
+                name="outdated-reason"
+                value="other"
+                checked={reason === "other"}
+                onChange={() => setReason("other")}
+              />
+              <span>Другое</span>
+            </label>
+          </fieldset>
+
+          {reason === "other" && (
+            <label className="feedback-modal__field">
+              <span>Комментарий</span>
+              <textarea
+                value={comment}
+                onChange={(event) => setComment(event.target.value)}
+                placeholder="Опишите проблему"
+                rows={3}
+              />
+            </label>
+          )}
+
+          {formError && (
+            <p className="feedback-modal__error" role="status">
+              {formError}
+            </p>
+          )}
+
+          <div className="feedback-modal__actions">
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() => {
+                setIsOutdatedOpen(false);
+                resetOutdatedForm();
+              }}
+            >
+              Отмена
+            </button>
+            <button
+              type="submit"
+              className="btn btn--primary"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Отправляем…" : "Отправить"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+
   const content = (
     <div
       className="dish-card-overlay"
@@ -358,118 +476,154 @@ export default function DishCardModal() {
         )}
       </div>
 
-      {isOutdatedOpen && (
-        <div
-          className="feedback-modal__backdrop"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Сообщить об устаревшем меню"
-          onClick={(event) => {
-            event.stopPropagation();
-            setIsOutdatedOpen(false);
-            resetOutdatedForm();
-          }}
-        >
-          <div
-            className="feedback-modal"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="feedback-modal__header">
-              <h4 className="feedback-modal__title">Меню устарело</h4>
-              <button
-                type="button"
-                className="feedback-modal__close"
-                aria-label="Закрыть"
-                onClick={() => {
-                  setIsOutdatedOpen(false);
-                  resetOutdatedForm();
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
+      {outdatedFormOverlay}
+    </div>
+  );
 
-            <form className="feedback-modal__form" onSubmit={handleOutdatedSubmit}>
-              <fieldset className="feedback-modal__fieldset">
-                <legend className="feedback-modal__legend">Причина</legend>
-                <label className="feedback-modal__option">
-                  <input
-                    type="radio"
-                    name="outdated-reason"
-                    value="wrong_kbju"
-                    checked={reason === "wrong_kbju"}
-                    onChange={() => setReason("wrong_kbju")}
-                  />
-                  <span>Неверное КБЖУ</span>
-                </label>
-                <label className="feedback-modal__option">
-                  <input
-                    type="radio"
-                    name="outdated-reason"
-                    value="missing_from_menu"
-                    checked={reason === "missing_from_menu"}
-                    onChange={() => setReason("missing_from_menu")}
-                  />
-                  <span>Блюда нет в меню</span>
-                </label>
-                <label className="feedback-modal__option">
-                  <input
-                    type="radio"
-                    name="outdated-reason"
-                    value="other"
-                    checked={reason === "other"}
-                    onChange={() => setReason("other")}
-                  />
-                  <span>Другое</span>
-                </label>
-              </fieldset>
+  const contentV2 = (
+    <div className="rsm2-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="dish-card-title-v2" onClick={close}>
+      <div className="rsm2-modal" onClick={(event) => event.stopPropagation()}>
+        <div className="rsm2-modal__hero">
+          <div className="rsm2-modal__hero-mark" aria-hidden="true" />
+          <button className="rsm2-modal__close" type="button" aria-label="Закрыть" onClick={close}>
+            ✕
+          </button>
+        </div>
 
-              {reason === "other" && (
-                <label className="feedback-modal__field">
-                  <span>Комментарий</span>
-                  <textarea
-                    value={comment}
-                    onChange={(event) => setComment(event.target.value)}
-                    placeholder="Опишите проблему"
-                    rows={3}
-                  />
-                </label>
-              )}
-
-              {formError && (
-                <p className="feedback-modal__error" role="status">
-                  {formError}
-                </p>
-              )}
-
-              <div className="feedback-modal__actions">
-                <button
-                  type="button"
-                  className="btn btn--ghost"
-                  onClick={() => {
-                    setIsOutdatedOpen(false);
-                    resetOutdatedForm();
-                  }}
-                >
-                  Отмена
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn--primary"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Отправляем…" : "Отправить"}
-                </button>
-              </div>
-            </form>
+        {isLoading && (
+          <div className="dish-card__loading">
+            <div className="dish-card__spinner" aria-hidden />
+            <p>Загружаем карточку блюда…</p>
           </div>
+        )}
+
+        {!isLoading && error && (
+          <div className="dish-card__error">
+            <p>{error}</p>
+            <button type="button" className="btn btn--primary" onClick={close}>
+              Закрыть
+            </button>
+          </div>
+        )}
+
+        {!isLoading && data && (
+          <DishModalBodyV2
+            data={data}
+            hasDishAccess={hasDishAccess}
+            subscriptionCtaText={subscriptionCtaText}
+            isFavorite={isFavorite}
+            onSubscribeClick={handleSubscribeClick}
+            onFavoriteClick={handleFavoriteClick}
+            onDiaryAdd={handleDiaryAdd}
+            onReportOutdated={() => setIsOutdatedOpen(true)}
+          />
+        )}
+      </div>
+
+      {outdatedFormOverlay}
+    </div>
+  );
+
+  return createPortal(isPreview ? contentV2 : content, root);
+}
+
+// Body of the redesigned full dish card (design_handoff_restaurant_menu,
+// section 1d). Pure presentation — all data comes from the dishCard store via
+// props, all mutations go back through the same handlers as the legacy card.
+function DishModalBodyV2({
+  data,
+  hasDishAccess,
+  subscriptionCtaText,
+  isFavorite,
+  onSubscribeClick,
+  onFavoriteClick,
+  onDiaryAdd,
+  onReportOutdated,
+}: {
+  data: any;
+  hasDishAccess: boolean;
+  subscriptionCtaText: string;
+  isFavorite: boolean;
+  onSubscribeClick: () => void;
+  onFavoriteClick: (e: React.MouseEvent) => void;
+  onDiaryAdd: (e: React.MouseEvent) => void;
+  onReportOutdated: () => void;
+}) {
+  const geometry = useMemo(
+    () => computeMacroGeometry(data.proteins_g, data.fats_g, data.carbs_g),
+    [data.proteins_g, data.fats_g, data.carbs_g],
+  );
+  const price = formatPriceRub(data.price);
+
+  const macroRows = [
+    { key: "proteins_g", label: "Белки", value: data.proteins_g, pct: geometry.proteinPct, dot: "var(--rsm2-protein)" },
+    { key: "fats_g", label: "Жиры", value: data.fats_g, pct: geometry.fatPct, dot: "var(--rsm2-fat)" },
+    { key: "carbs_g", label: "Углеводы", value: data.carbs_g, pct: geometry.carbPct, dot: "var(--rsm2-carb)" },
+  ];
+
+  return (
+    <div className="rsm2-modal__body">
+      <div>
+        <div className="rsm2-modal__eyebrow">{data.restaurantName || "Ресторан"}</div>
+        <div className="rsm2-modal__title-row">
+          <h3 id="dish-card-title-v2" className="rsm2-modal__title">{data.name}</h3>
+          {price && <span className="rsm2-modal__price">{price}</span>}
+        </div>
+        <p className="rsm2-modal__composition">
+          {hasDishAccess
+            ? data.composition_text || "Ресторан не поделился данными о составе"
+            : "Состав доступен по подписке."}
+        </p>
+      </div>
+
+      {hasDishAccess ? (
+        <div className="rsm2-modal__panel">
+          <MacroRing geometry={geometry} kcal={data.kcal} size="modal" />
+          <div className="rsm2-modal__macros">
+            {macroRows.map((row) => (
+              <div className="rsm2-modal__macro-row" key={row.key}>
+                <span className="rsm2-modal__macro-dot" style={{ background: row.dot }} />
+                <span className="rsm2-modal__macro-label">{row.label}</span>
+                <span className="rsm2-modal__macro-value">{formatNumeric(row.value)} г</span>
+                <span className="rsm2-modal__macro-pct">{Math.round(row.pct)}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="rsm2-modal__paywall">
+          <p className="rsm2-modal__paywall-text">Эта информация доступна только по подписке.</p>
+          <button type="button" className="rsm2-paywall__cta" onClick={onSubscribeClick}>
+            {subscriptionCtaText}
+          </button>
+        </div>
+      )}
+
+      <div className="rsm2-modal__actions">
+        <button type="button" className="rsm2-modal__cta" onClick={onDiaryAdd}>
+          <span>В дневник</span>
+          <span aria-hidden="true">→</span>
+        </button>
+        <button
+          type="button"
+          className="rsm2-modal__fav"
+          onClick={onFavoriteClick}
+          aria-label={isFavorite ? "Удалить из избранного" : "Добавить в избранное"}
+        >
+          <HeartIcon filled={isFavorite} size={22} />
+        </button>
+        {data.menuCapturedAtLabel && (
+          <span className="rsm2-modal__meta">Данные ресторана от {data.menuCapturedAtLabel}</span>
+        )}
+      </div>
+
+      {data.menuCapturedAtLabel && (
+        <div className="rsm2-modal__footer-note">
+          <button type="button" className="rsm2-modal__outdated" onClick={onReportOutdated}>
+            <span aria-hidden="true">⟳</span> Меню устарело?
+          </button>
         </div>
       )}
     </div>
   );
-
-  return createPortal(content, root);
 }

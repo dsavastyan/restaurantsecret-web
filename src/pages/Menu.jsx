@@ -16,6 +16,8 @@ import { useFavoriteRestaurantsStore } from '@/store/favoriteRestaurants'
 import { analytics } from '@/services/analytics'
 import { toast } from '@/lib/toast'
 import { useMeta } from '@/lib/useMeta'
+import { useMenuPreview } from '@/lib/designPreview'
+import MenuRedesignView from '@/components/MenuRedesign/MenuRedesignView'
 
 const createDefaultPresets = () => ({ highProtein: false, lowFat: false, lowKcal: false })
 const createDefaultRange = () => ({
@@ -60,6 +62,7 @@ const normalizeRestaurantLinkUrl = (rawUrl) => {
 export default function Menu() {
   const { slug } = useParams()
   const navigate = useNavigate()
+  const isPreview = useMenuPreview()
   const accessToken = useAuth((state) => state.accessToken)
   const { fetchStatus } = useSubscriptionStore((state) => ({
     fetchStatus: state.fetchStatus,
@@ -87,6 +90,9 @@ export default function Menu() {
   const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false)
   const [presets, setPresets] = useState(createDefaultPresets)
   const [range, setRange] = useState(createDefaultRange)
+  // Redesign-only UI state (design_handoff_restaurant_menu/menu-page.dc.html).
+  const [allCategoriesExpanded, setAllCategoriesExpanded] = useState(false)
+  const [isIngredientFilterOpen, setIsIngredientFilterOpen] = useState(false)
 
   // Reset filters whenever the restaurant slug changes.
   useEffect(() => {
@@ -95,6 +101,8 @@ export default function Menu() {
     setIsAdvancedFiltersOpen(false)
     setPresets(createDefaultPresets())
     setRange(createDefaultRange())
+    setAllCategoriesExpanded(false)
+    setIsIngredientFilterOpen(false)
   }, [slug])
 
   // Fetch the menu.
@@ -232,6 +240,20 @@ export default function Menu() {
 
     return ordered.filter((section) => section.dishes.length)
   }, [filtered, menu?.categories])
+  // Redesign requirement: within each category, dishes with a photo come
+  // first (stable sort), so the grid never mixes photo/photo-less rhythm.
+  // No-op today since dishes don't carry photo data yet — see DishTileV2.
+  const groupedDishesForPreview = useMemo(() => {
+    if (!isPreview) return groupedDishes
+    return groupedDishes.map((section) => ({
+      ...section,
+      dishes: [...section.dishes].sort((a, b) => {
+        const aHasPhoto = a.photoUrl || a.photo_url ? 1 : 0
+        const bHasPhoto = b.photoUrl || b.photo_url ? 1 : 0
+        return bHasPhoto - aHasPhoto
+      }),
+    }))
+  }, [groupedDishes, isPreview])
   const restaurantLinkUrl = useMemo(() => normalizeRestaurantLinkUrl(menu?.instagramUrl), [menu?.instagramUrl])
   const seoRestaurantName = menu?.name || slug || 'ресторана'
   const seoDescription = useMemo(
@@ -327,6 +349,47 @@ export default function Menu() {
       analytics.track('favorite_remove', { type: 'restaurant', slug, name: menu?.name || slug })
     }
     await toggleFavoriteRestaurant(accessToken, slug)
+  }
+
+  if (isPreview) {
+    return (
+      <MenuRedesignView
+        seoRestaurantName={seoRestaurantName}
+        dishes={dishes}
+        filtered={filtered}
+        groupedDishes={groupedDishesForPreview}
+        capturedAt={capturedAt}
+        freeDishKeys={freeDishKeys}
+        slug={slug}
+        loading={loading}
+        error={error}
+        menu={menu}
+        query={query}
+        setQuery={setQuery}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        categoryOptions={categoryOptions}
+        allCategoriesExpanded={allCategoriesExpanded}
+        setAllCategoriesExpanded={setAllCategoriesExpanded}
+        presets={presets}
+        togglePreset={togglePreset}
+        isAdvancedFiltersOpen={isAdvancedFiltersOpen}
+        setIsAdvancedFiltersOpen={setIsAdvancedFiltersOpen}
+        range={range}
+        updateRange={updateRange}
+        resetFilters={resetFilters}
+        isIngredientFilterOpen={isIngredientFilterOpen}
+        setIsIngredientFilterOpen={setIsIngredientFilterOpen}
+        isFavoriteRestaurant={isFavoriteRestaurant}
+        handleToggleRestaurantFavorite={handleToggleRestaurantFavorite}
+        handleShare={handleShare}
+        openMapInBrowser={openMapInBrowser}
+        openMobileMapInBrowser={openMobileMapInBrowser}
+        isOutdatedOpen={isOutdatedOpen}
+        setIsOutdatedOpen={setIsOutdatedOpen}
+        openDishCard={open}
+      />
+    )
   }
 
   return (

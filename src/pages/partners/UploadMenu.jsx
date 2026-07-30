@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useOutletContext, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useOutletContext, useSearchParams } from 'react-router-dom'
 import {
   ArrowLeft,
   ArrowRight,
@@ -87,11 +87,11 @@ function FlowSidebar({ restaurant, step, onStep, initial = false, locked = false
   return (
     <aside className="partners-update__sidebar">
       <div>
-        <a className="partners-update__brand" href="/">
+        <Link className="partners-update__brand" to="/partners/dashboard">
           <img src="/assets/logo-64.png" alt="" width="42" height="42" />
           <span>RestaurantSecret</span>
-        </a>
-        <small className="partners-update__cabinet">Партнёрский кабинет</small>
+        </Link>
+        <Link className="partners-update__cabinet" to="/partners/dashboard">Партнёрский кабинет</Link>
         <div className="partners-update__restaurant">{restaurant.name}</div>
         <div className="partners-update__progress-copy">
           <strong>{initial ? 'Публикация меню' : 'Обновление меню'}</strong>

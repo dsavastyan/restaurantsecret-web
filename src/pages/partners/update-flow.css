@@ -21,7 +21,7 @@
 }
 .partners-update__brand { display: flex; align-items: center; gap: 11px; color: #2a2b27; font: 20px 'DM Serif Display', Georgia, serif; text-decoration: none; }
 .partners-update__brand img { border-radius: 12px; box-shadow: 0 7px 18px rgba(88,83,69,.16); }
-.partners-update__cabinet { display: block; margin: 7px 0 26px 53px; color: #8a877e; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+.partners-update__cabinet { display: block; margin: 7px 0 26px 53px; color: #8a877e; font-size: 10px; letter-spacing: .08em; text-decoration: none; text-transform: uppercase; }
 .partners-update__restaurant { overflow: hidden; margin-bottom: 30px; padding: 13px 14px; border: 1px solid #ddd7cc; border-radius: 12px; background: var(--u-paper); font-size: 13px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
 .partners-update__progress-copy { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
 .partners-update__progress-copy span { color: var(--u-muted); }
