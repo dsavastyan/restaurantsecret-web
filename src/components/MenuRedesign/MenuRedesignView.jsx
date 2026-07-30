@@ -3,6 +3,7 @@
 // see src/lib/designPreview.js. All data-fetching, filtering and mutation
 // logic lives in Menu.jsx; this component is presentation only, so it can't
 // drift from the legacy page's actual behavior.
+import { useEffect } from 'react';
 import { MenuOutdatedModal } from '@/components/MenuOutdatedModal';
 import DishTileV2 from './DishTileV2';
 import DishRowV2 from './DishRowV2';
@@ -10,6 +11,20 @@ import { HeartIcon, MapPinIcon, ShareIcon, SearchIcon } from './icons';
 import '@/pages/menu-redesign.css';
 
 const CATS_VISIBLE = 3;
+
+// AppShell wraps every page in `.container--menu`, which adds a max-width and
+// side/top padding. The redesigned page is edge-to-edge by design, so we flag
+// the body while it is mounted and let the CSS strip that padding — scoped to
+// this page only, and reverted on unmount so no other route is affected.
+function useFullBleedLayout() {
+  useEffect(() => {
+    if (typeof document === 'undefined') return undefined;
+    document.body.setAttribute('data-rs-menu-v2', '');
+    return () => {
+      document.body.removeAttribute('data-rs-menu-v2');
+    };
+  }, []);
+}
 
 function buildDishAccessKey(dish) {
   if (dish?.id != null && dish?.id !== '') return `id:${dish.id}`;
@@ -58,7 +73,10 @@ export default function MenuRedesignView({
   setIsOutdatedOpen,
 
   openDishCard,
+  readOnly = false,
 }) {
+  useFullBleedLayout();
+
   const visibleCats = allCategoriesExpanded ? categoryOptions : categoryOptions.slice(0, CATS_VISIBLE);
   const hasMoreCats = !allCategoriesExpanded && categoryOptions.length > CATS_VISIBLE;
 
@@ -116,7 +134,13 @@ export default function MenuRedesignView({
   return (
     <div className="rsm2-root">
       <div className="rsm2-hero">
-        <button type="button" className="rsm2-hero__report" onClick={() => setIsOutdatedOpen(true)}>
+        <button
+          type="button"
+          className="rsm2-hero__report"
+          onClick={() => {
+            if (!readOnly) setIsOutdatedOpen(true);
+          }}
+        >
           Меню устарело?
         </button>
         <div className="rsm2-hero__grid">
@@ -177,20 +201,23 @@ export default function MenuRedesignView({
 
         <div className="rsm2-chips">{renderChips()}</div>
 
-        <button
-          type="button"
-          className={`rsm2-disclosure ${isAdvancedFiltersOpen ? 'is-on' : ''}`}
-          onClick={() => setIsAdvancedFiltersOpen((prev) => !prev)}
-        >
-          Свои КБЖУ<span className="rsm2-disclosure__caret">{isAdvancedFiltersOpen ? '▴' : '▾'}</span>
-        </button>
-        <button
-          type="button"
-          className={`rsm2-disclosure ${isIngredientFilterOpen ? 'is-on' : ''}`}
-          onClick={() => setIsIngredientFilterOpen((prev) => !prev)}
-        >
-          Фильтр по ингредиентам<span className="rsm2-disclosure__caret">{isIngredientFilterOpen ? '▴' : '▾'}</span>
-        </button>
+        {/* Grouped so the two disclosures always share a single row */}
+        <div className="rsm2-disclosures">
+          <button
+            type="button"
+            className={`rsm2-disclosure ${isAdvancedFiltersOpen ? 'is-on' : ''}`}
+            onClick={() => setIsAdvancedFiltersOpen((prev) => !prev)}
+          >
+            Свои КБЖУ<span className="rsm2-disclosure__caret">{isAdvancedFiltersOpen ? '▴' : '▾'}</span>
+          </button>
+          <button
+            type="button"
+            className={`rsm2-disclosure ${isIngredientFilterOpen ? 'is-on' : ''}`}
+            onClick={() => setIsIngredientFilterOpen((prev) => !prev)}
+          >
+            Фильтр по ингредиентам<span className="rsm2-disclosure__caret">{isIngredientFilterOpen ? '▴' : '▾'}</span>
+          </button>
+        </div>
 
         <div className={`rsm2-advanced ${isAdvancedFiltersOpen ? 'is-open' : ''}`}>
           <div className="rsm2-advanced__panel">
@@ -244,6 +271,8 @@ export default function MenuRedesignView({
                         restaurantSlug={slug}
                         restaurantName={menu?.name || slug}
                         isFreeAccess={isFreeAccess}
+                        interactive={!readOnly}
+                        readOnly={readOnly}
                         onClick={() => openDish(dish)}
                       />
                     );
@@ -260,6 +289,8 @@ export default function MenuRedesignView({
                         restaurantSlug={slug}
                         restaurantName={menu?.name || slug}
                         isFreeAccess={isFreeAccess}
+                        interactive={!readOnly}
+                        readOnly={readOnly}
                         onClick={() => openDish(dish)}
                       />
                     );
@@ -282,11 +313,13 @@ export default function MenuRedesignView({
         )}
       </div>
 
-      <MenuOutdatedModal
-        restaurantName={menu?.name || slug}
-        isOpen={isOutdatedOpen}
-        onClose={() => setIsOutdatedOpen(false)}
-      />
+      {!readOnly && (
+        <MenuOutdatedModal
+          restaurantName={menu?.name || slug}
+          isOpen={isOutdatedOpen}
+          onClose={() => setIsOutdatedOpen(false)}
+        />
+      )}
     </div>
   );
 }

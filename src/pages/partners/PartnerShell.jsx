@@ -30,6 +30,7 @@ export default function PartnerShell() {
   const navigate = useNavigate()
   const isLoginPage = location.pathname.replace(/\/+$/, '') === '/partners/login'
   const isMenuFlowPage = location.pathname.replace(/\/+$/, '') === '/partners/upload'
+  const isMenuPreviewPage = /^\/partners\/menu-preview\/[^/]+\/?$/.test(location.pathname)
 
   const [status, setStatus] = useState(isLoginPage ? 'idle' : 'loading') // idle | loading | ready | error
   const [restaurant, setRestaurant] = useState(null)
@@ -111,6 +112,18 @@ export default function PartnerShell() {
         <p className="partners__error">{loadError}</p>
         <button className="partners__btn" onClick={refresh}>Повторить</button>
       </div>
+    )
+  }
+
+  if (isMenuPreviewPage) {
+    return (
+      <Outlet context={{
+        restaurant,
+        restaurants,
+        lastUpload,
+        refresh,
+        isFirstPublication,
+      }} />
     )
   }
 

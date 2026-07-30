@@ -6,6 +6,7 @@ import {
   Check,
   ChevronRight,
   Download,
+  ExternalLink,
   FileSpreadsheet,
   Image as ImageIcon,
   MessageCircle,
@@ -39,6 +40,68 @@ const EMPTY_ITEM = {
   composition_text: '',
 }
 
+const DECIMAL_INPUT_PATTERN = /^\d*(?:[.,]\d*)?$/
+const DECIMAL_VALUE_PATTERN = /^\d+(?:[.,]\d+)?$/
+const ITEM_FIELD_ORDER = [
+  'dish_name',
+  'category',
+  'price_rub',
+  'composition_text',
+  'portion_g',
+  'kcal',
+  'proteins_g',
+  'fats_g',
+  'carbs_g',
+]
+const REQUIRED_TEXT_MESSAGES = {
+  dish_name: 'Укажите название блюда.',
+  category: 'Укажите раздел меню.',
+  composition_text: 'Укажите состав блюда.',
+}
+const NUMERIC_FIELD_RULES = {
+  price_rub: {
+    empty: 'Укажите цену.',
+    range: 'Введите цену больше 0 и не более 1 000 000 ₽.',
+    min: 0,
+    max: 1_000_000,
+    positive: true,
+  },
+  portion_g: {
+    empty: 'Укажите вес порции.',
+    range: 'Введите вес больше 0 и не более 5 000 г.',
+    min: 0,
+    max: 5_000,
+    positive: true,
+  },
+  kcal: {
+    empty: 'Укажите калорийность.',
+    range: 'Введите калорийность от 0 до 5 000.',
+    min: 0,
+    max: 5_000,
+    rejectSuspiciousYear: true,
+  },
+  proteins_g: {
+    empty: 'Укажите количество белков.',
+    range: 'Введите значение от 0 до 500 г.',
+    min: 0,
+    max: 500,
+  },
+  fats_g: {
+    empty: 'Укажите количество жиров.',
+    range: 'Введите значение от 0 до 500 г.',
+    min: 0,
+    max: 500,
+  },
+  carbs_g: {
+    empty: 'Укажите количество углеводов.',
+    range: 'Введите значение от 0 до 500 г.',
+    min: 0,
+    max: 500,
+  },
+}
+const SUSPICIOUS_NUTRITION_YEARS = new Set([2024, 2025, 2026, 2027, 2028, 2029, 2030])
+const NUMBER_FORMAT_ERROR = 'Используйте только цифры и один десятичный разделитель.'
+
 const STATUS_LABELS = {
   unchanged: 'Без изменений',
   updated: 'Изменено',
@@ -50,6 +113,40 @@ function numberOrNull(value) {
   if (value === '' || value == null) return null
   const parsed = Number(String(value).replace(',', '.'))
   return Number.isFinite(parsed) ? parsed : null
+}
+
+function validateItemField(field, value) {
+  if (REQUIRED_TEXT_MESSAGES[field]) {
+    return String(value ?? '').trim() ? '' : REQUIRED_TEXT_MESSAGES[field]
+  }
+
+  const rule = NUMERIC_FIELD_RULES[field]
+  if (!rule) return ''
+  const source = String(value ?? '').trim()
+  if (!source) return rule.empty
+  if (!DECIMAL_VALUE_PATTERN.test(source)) return NUMBER_FORMAT_ERROR
+
+  const parsed = numberOrNull(source)
+  if (
+    parsed == null
+    || parsed < rule.min
+    || (rule.positive && parsed === rule.min)
+    || parsed > rule.max
+  ) {
+    return rule.range
+  }
+  if (rule.rejectSuspiciousYear && SUSPICIOUS_NUTRITION_YEARS.has(Math.round(parsed))) {
+    return 'Проверьте калорийность: значение похоже на год.'
+  }
+  return ''
+}
+
+function validateItemForm(form) {
+  return ITEM_FIELD_ORDER.reduce((errors, field) => {
+    const message = validateItemField(field, form[field])
+    if (message) errors[field] = message
+    return errors
+  }, {})
 }
 
 function itemFormPayload(form) {
@@ -164,9 +261,43 @@ function MethodCards({ onSelect, initial = false }) {
   )
 }
 
+function MethodSwitcher({ activeMethod, busy, onSelect }) {
+  return (
+    <section className="partners-update__method-switcher" aria-labelledby="partners-update-method-switcher-title">
+      <div>
+        <strong id="partners-update-method-switcher-title">Выберите способ обновления меню</strong>
+        <p>Обновить меню можно двумя способами: загрузить файл целиком или вручную отредактировать блюда.</p>
+      </div>
+      <div className="partners-update__method-switcher-actions" role="group" aria-label="Способ обновления меню">
+        <button
+          className={activeMethod === 'upload' ? 'active' : ''}
+          type="button"
+          aria-pressed={activeMethod === 'upload'}
+          disabled={busy}
+          onClick={() => activeMethod !== 'upload' && onSelect('upload')}
+        >
+          <FileSpreadsheet size={18} />
+          Обновить с помощью файла
+        </button>
+        <button
+          className={activeMethod === 'manual' ? 'active' : ''}
+          type="button"
+          aria-pressed={activeMethod === 'manual'}
+          disabled={busy}
+          onClick={() => activeMethod !== 'manual' && onSelect('manual')}
+        >
+          <Pencil size={18} />
+          Редактировать блюда
+        </button>
+      </div>
+    </section>
+  )
+}
+
 function ItemDrawer({ item, categories, busy, onClose, onSave }) {
   const [form, setForm] = useState(item ? { ...EMPTY_ITEM, ...item } : { ...EMPTY_ITEM })
   const [addAnother, setAddAnother] = useState(false)
+  const [errors, setErrors] = useState({})
   const titleId = 'partners-item-drawer-title'
   const firstInputRef = useRef(null)
   const drawerRef = useRef(null)
@@ -193,12 +324,63 @@ function ItemDrawer({ item, categories, busy, onClose, onSave }) {
     return () => document.removeEventListener('keydown', onKey)
   }, [busy, onClose])
 
-  const set = (field) => (event) => setForm((current) => ({ ...current, [field]: event.target.value }))
+  const updateVisibleError = (field, value) => {
+    setErrors((current) => {
+      if (!Object.hasOwn(current, field)) return current
+      const message = validateItemField(field, value)
+      const next = { ...current }
+      if (message) next[field] = message
+      else delete next[field]
+      return next
+    })
+  }
+  const set = (field) => (event) => {
+    const value = event.target.value
+    setForm((current) => ({ ...current, [field]: value }))
+    updateVisibleError(field, value)
+  }
+  const setNumeric = (field) => (event) => {
+    const value = event.target.value
+    if (!DECIMAL_INPUT_PATTERN.test(value)) {
+      setErrors((current) => ({
+        ...current,
+        [field]: value.includes('-') ? 'Значение не может быть отрицательным.' : NUMBER_FORMAT_ERROR,
+      }))
+      return
+    }
+    setForm((current) => ({ ...current, [field]: value }))
+    updateVisibleError(field, value)
+  }
+  const validateOnBlur = (field) => () => {
+    const message = validateItemField(field, form[field])
+    setErrors((current) => {
+      const next = { ...current }
+      if (message) next[field] = message
+      else delete next[field]
+      return next
+    })
+  }
+  const fieldA11y = (field) => ({
+    name: field,
+    'aria-invalid': Boolean(errors[field]),
+    'aria-describedby': errors[field] ? `${field}-error` : undefined,
+  })
+  const fieldError = (field) => errors[field]
+    ? <small className="partners-update__field-error" id={`${field}-error`} role="alert">{errors[field]}</small>
+    : null
   const submit = async (event) => {
     event.preventDefault()
+    const validationErrors = validateItemForm(form)
+    if (Object.keys(validationErrors).length) {
+      setErrors(validationErrors)
+      const firstInvalidField = ITEM_FIELD_ORDER.find((field) => validationErrors[field])
+      drawerRef.current?.querySelector(`[name="${firstInvalidField}"]`)?.focus()
+      return
+    }
     const saved = await onSave(itemFormPayload(form))
     if (saved && addAnother && !item) {
       setForm({ ...EMPTY_ITEM, category: form.category })
+      setErrors({})
       firstInputRef.current?.focus()
     }
   }
@@ -206,7 +388,7 @@ function ItemDrawer({ item, categories, busy, onClose, onSave }) {
   return (
     <div className="partners-update__drawer-layer" role="dialog" aria-modal="true" aria-labelledby={titleId}>
       <button className="partners-update__drawer-backdrop" type="button" aria-label="Закрыть" onClick={onClose} />
-      <form className="partners-update__drawer" onSubmit={submit} ref={drawerRef}>
+      <form className="partners-update__drawer" onSubmit={submit} ref={drawerRef} noValidate>
         <header>
           <div><small>{item ? 'Редактирование' : 'Новое блюдо'}</small><h2 id={titleId}>{item ? item.dish_name : 'Добавить блюдо'}</h2></div>
           <button type="button" aria-label="Закрыть" onClick={onClose}><X size={22} /></button>
@@ -214,24 +396,29 @@ function ItemDrawer({ item, categories, busy, onClose, onSave }) {
         <div className="partners-update__drawer-body">
           <label className="partners-update__field partners-update__field--wide">
             <span>Название блюда</span>
-            <input ref={firstInputRef} value={form.dish_name} onChange={set('dish_name')} required />
+            <input {...fieldA11y('dish_name')} ref={firstInputRef} value={form.dish_name} onChange={set('dish_name')} onBlur={validateOnBlur('dish_name')} required />
+            {fieldError('dish_name')}
           </label>
           <label className="partners-update__field">
             <span>Раздел меню</span>
-            <input list="partners-menu-categories" value={form.category} onChange={set('category')} required />
+            <input {...fieldA11y('category')} list="partners-menu-categories" value={form.category} onChange={set('category')} onBlur={validateOnBlur('category')} required />
             <datalist id="partners-menu-categories">{categories.map((category) => <option value={category} key={category} />)}</datalist>
+            {fieldError('category')}
           </label>
           <label className="partners-update__field">
             <span>Цена, ₽</span>
-            <input inputMode="decimal" value={form.price_rub ?? ''} onChange={set('price_rub')} required />
+            <input {...fieldA11y('price_rub')} type="text" inputMode="decimal" autoComplete="off" value={form.price_rub ?? ''} onChange={setNumeric('price_rub')} onBlur={validateOnBlur('price_rub')} required />
+            {fieldError('price_rub')}
           </label>
           <label className="partners-update__field partners-update__field--wide">
             <span>Состав</span>
-            <textarea rows="4" value={form.composition_text ?? ''} onChange={set('composition_text')} required />
+            <textarea {...fieldA11y('composition_text')} rows="4" value={form.composition_text ?? ''} onChange={set('composition_text')} onBlur={validateOnBlur('composition_text')} required />
+            {fieldError('composition_text')}
           </label>
           <label className="partners-update__field">
             <span>Вес порции, г</span>
-            <input inputMode="decimal" value={form.portion_g ?? ''} onChange={set('portion_g')} required />
+            <input {...fieldA11y('portion_g')} type="text" inputMode="decimal" autoComplete="off" value={form.portion_g ?? ''} onChange={setNumeric('portion_g')} onBlur={validateOnBlur('portion_g')} required />
+            {fieldError('portion_g')}
           </label>
           <fieldset className="partners-update__basis">
             <legend>КБЖУ указаны</legend>
@@ -246,7 +433,8 @@ function ItemDrawer({ item, categories, busy, onClose, onSave }) {
           ].map(([field, label]) => (
             <label className="partners-update__field" key={field}>
               <span>{label}</span>
-              <input inputMode="decimal" value={form[field] ?? ''} onChange={set(field)} required />
+              <input {...fieldA11y(field)} type="text" inputMode="decimal" autoComplete="off" value={form[field] ?? ''} onChange={setNumeric(field)} onBlur={validateOnBlur(field)} required />
+              {fieldError(field)}
             </label>
           ))}
           {!item && (
@@ -265,7 +453,7 @@ function ItemDrawer({ item, categories, busy, onClose, onSave }) {
   )
 }
 
-function ManualStep({ payload, busy, error, onAdd, onBackToMethods, onConfirmMatch, onDelete, onEdit, onExit, onNext, onRestore }) {
+function ManualStep({ payload, busy, error, onAdd, onConfirmMatch, onDelete, onEdit, onExit, onNext, onRestore, onSelectMethod }) {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('all')
   const [status, setStatus] = useState('all')
@@ -277,9 +465,10 @@ function ManualStep({ payload, busy, error, onAdd, onBackToMethods, onConfirmMat
   })
   return (
     <>
+      <MethodSwitcher activeMethod="manual" busy={busy} onSelect={onSelectMethod} />
       <section className="partners-update__catalog">
         <div className="partners-update__catalog-heading">
-          <div><button type="button" onClick={onBackToMethods}><ArrowLeft size={16} /> Выбрать другой способ</button><h2>Блюда меню</h2><p>Изменения сохраняются в черновике и не видны гостям до отправки.</p></div>
+          <div><h2>Блюда меню</h2><p>Изменения сохраняются в черновике и не видны гостям до отправки.</p></div>
           <button className="partners-update__primary" type="button" onClick={onAdd}><Plus size={18} /> Добавить блюдо</button>
         </div>
         <div className="partners-update__filters">
@@ -486,7 +675,7 @@ function RevisionWaiting({ payload, busy, error, onAddFiles, onDeleteFile, onRep
   )
 }
 
-function UploadStep({ payload, busy, error, onBackToMethods, onDeleteFile, onFile, onNext, onReplaceFile, onReply }) {
+function UploadStep({ payload, busy, error, onDeleteFile, onFile, onNext, onReplaceFile, onReply, onSelectMethod }) {
   const inputRef = useRef(null)
   const extracting = payload.draft.status === 'extracting'
   const sourceFiles = payload.revision?.source_files || []
@@ -496,7 +685,7 @@ function UploadStep({ payload, busy, error, onBackToMethods, onDeleteFile, onFil
   }
   return (
     <section className="partners-update__upload-step">
-      <button className="partners-update__text-back" type="button" onClick={onBackToMethods}><ArrowLeft size={16} /> Выбрать другой способ</button>
+      <MethodSwitcher activeMethod="upload" busy={busy} onSelect={onSelectMethod} />
       <div className="partners-update__section-heading">
         <span>Новое меню</span>
         <h2>{hasPreparedSources ? 'Файлы меню' : 'Загрузите файл'}</h2>
@@ -578,6 +767,13 @@ function PhotosStep({ payload, busy, onBack, onDeletePhoto, onNext, onPhoto, onA
 function PreviewStep({ payload, busy, error, onBack, onNext, onMessage }) {
   const [mode, setMode] = useState('all')
   const [comment, setComment] = useState('')
+  const openMenuPreview = () => {
+    window.open(
+      `/partners/menu-preview/${encodeURIComponent(payload.draft.id)}`,
+      '_blank',
+      'noopener,noreferrer',
+    )
+  }
   const send = async (type) => {
     if (!comment.trim()) return
     const saved = await onMessage(comment, type)
@@ -591,6 +787,10 @@ function PreviewStep({ payload, busy, error, onBack, onNext, onMessage }) {
         <div><button className={mode === 'all' ? 'active' : ''} type="button" onClick={() => setMode('all')}>Всё меню</button><button className={mode === 'changes' ? 'active' : ''} type="button" onClick={() => setMode('changes')}>Только изменения</button></div>
         <span>Добавлено {payload.summary.added || 0} · Изменено {payload.summary.updated || 0} · Удалено {payload.summary.deleted || 0}</span>
       </div>
+      <button className="partners-update__open-menu-preview" type="button" onClick={openMenuPreview}>
+        Просмотреть превью
+        <ExternalLink size={18} aria-hidden="true" />
+      </button>
       <div className="partners-update__preview-grid">
         {visible.map((item) => (
           <article className={`partners-update__preview-card partners-update__preview-card--${item.change_type}`} key={item.id}>
@@ -905,17 +1105,17 @@ export default function PartnersUploadMenu() {
               busy={busy}
               error={error}
               onAdd={() => setDrawerItem(null)}
-              onBackToMethods={() => chooseMethod(payload.draft.method === 'manual' ? 'upload' : 'manual')}
               onConfirmMatch={confirmMatch}
               onDelete={deleteItem}
               onEdit={setDrawerItem}
               onExit={() => navigate('/partners/dashboard')}
               onNext={() => setStep(2)}
               onRestore={restoreItem}
+              onSelectMethod={chooseMethod}
             />
           )}
           {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 1 && payload.draft.method === 'upload' && (
-            <UploadStep payload={payload} busy={busy} error={error} onBackToMethods={() => chooseMethod('manual')} onDeleteFile={deleteRevisionSource} onFile={uploadSource} onNext={() => setStep(2)} onReplaceFile={replaceRevisionSource} onReply={replyToRevision} />
+            <UploadStep payload={payload} busy={busy} error={error} onDeleteFile={deleteRevisionSource} onFile={uploadSource} onNext={() => setStep(2)} onReplaceFile={replaceRevisionSource} onReply={replyToRevision} onSelectMethod={chooseMethod} />
           )}
           {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 2 && <PhotosStep payload={payload} busy={busy} onBack={() => setStep(1)} onDeletePhoto={deletePhoto} onNext={() => setStep(3)} onPhoto={uploadPhoto} onAssign={assignPhoto} />}
           {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 3 && <PreviewStep payload={payload} busy={busy} error={error} onBack={() => setStep(2)} onNext={() => setStep(4)} onMessage={sendRevisionMessage} />}

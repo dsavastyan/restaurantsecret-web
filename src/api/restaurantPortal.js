@@ -231,6 +231,23 @@ export const restaurantPortalApi = {
     return portalRequest('/api/restaurant/menu/photos', { method: 'POST', body: form, isFormData: true })
   },
 
+  menuPhotos: () => portalRequest('/api/restaurant/menu/photos'),
+
+  replaceMenuPhoto: (dishId, file) => {
+    const form = new FormData()
+    form.append('photo', file)
+    return portalRequest(`/api/restaurant/menu/photos/${encodeURIComponent(dishId)}`, {
+      method: 'PUT',
+      body: form,
+      isFormData: true,
+    })
+  },
+
+  deleteMenuPhoto: (dishId) =>
+    portalRequest(`/api/restaurant/menu/photos/${encodeURIComponent(dishId)}`, {
+      method: 'DELETE',
+    }),
+
   assignPhoto: (r2Key, dishId) =>
     portalRequest('/api/restaurant/menu/photos/assign', {
       method: 'POST',

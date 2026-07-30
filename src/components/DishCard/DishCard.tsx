@@ -15,11 +15,12 @@ type DishCardProps = {
     isFreeAccess?: boolean;
     // If true, clicking on the card opens the modal (default behavior)
     interactive?: boolean;
+    readOnly?: boolean;
     // Custom click handler if needed
     onClick?: () => void;
 };
 
-export default function DishCard({ dish, restaurantSlug, restaurantName, showRestaurantName = true, isFreeAccess = false, interactive = true, onClick }: DishCardProps) {
+export default function DishCard({ dish, restaurantSlug, restaurantName, showRestaurantName = true, isFreeAccess = false, interactive = true, readOnly = false, onClick }: DishCardProps) {
     const navigate = useNavigate();
     const location = useLocation();
     const accessToken = useAuth((state) => state.accessToken);
@@ -56,6 +57,7 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, showRes
 
     const handleFavoriteClick = async (e: React.MouseEvent) => {
         e.stopPropagation();
+        if (readOnly) return;
         if (!accessToken) {
             navigate('/login', { state: { from: location.pathname + location.search } });
             return;
@@ -78,6 +80,7 @@ export default function DishCard({ dish, restaurantSlug, restaurantName, showRes
 
     const handleDiaryAdd = async (e: React.MouseEvent) => {
         e.stopPropagation();
+        if (readOnly) return;
         if (!accessToken) {
             navigate('/login', { state: { from: location.pathname + location.search } });
             return;
