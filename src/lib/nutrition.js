@@ -277,3 +277,46 @@ export function hasFiniteNumber(value) {
   return Number.isFinite(value)
 }
 
+// Format a price in rubles with a thin thousands separator, e.g. 1450 -> "1 450 ₽".
+export function formatPriceRub(value) {
+  if (!Number.isFinite(value)) return null
+  return `${Math.round(value).toLocaleString('ru-RU')} ₽`
+}
+
+// Derive the calorie-ring conic-gradient angles and macro-bar widths shared
+// by the redesigned dish tile, dish row and full dish card. Kcal shares are
+// computed from the macros themselves (protein/carbs = 4 kcal/g, fat = 9
+// kcal/g) so the ring stays visually consistent even when the dish's stored
+// kcal total doesn't perfectly match p/f/c*4/9/4 (rounding at the source).
+export function computeMacroGeometry(proteinRaw, fatRaw, carbsRaw) {
+  const protein = Number.isFinite(proteinRaw) ? Math.max(0, proteinRaw) : 0
+  const fat = Number.isFinite(fatRaw) ? Math.max(0, fatRaw) : 0
+  const carbs = Number.isFinite(carbsRaw) ? Math.max(0, carbsRaw) : 0
+
+  const kcalProtein = protein * 4
+  const kcalFat = fat * 9
+  const kcalCarb = carbs * 4
+  const total = kcalProtein + kcalFat + kcalCarb
+
+  const fallbackPct = 100 / 3
+  const proteinPct = total > 0 ? (kcalProtein / total) * 100 : fallbackPct
+  const fatPct = total > 0 ? (kcalFat / total) * 100 : fallbackPct
+  const carbPct = total > 0 ? Math.max(0, 100 - proteinPct - fatPct) : fallbackPct
+
+  const proteinDeg = Math.round((proteinPct / 100) * 360)
+  const fatDeg = Math.round((fatPct / 100) * 360)
+  const proteinFatDeg = proteinDeg + fatDeg
+
+  return {
+    protein,
+    fat,
+    carbs,
+    proteinPct,
+    fatPct,
+    carbPct,
+    proteinDeg,
+    proteinFatDeg,
+    ringGradient: `conic-gradient(var(--rsm2-protein) 0deg ${proteinDeg}deg, var(--rsm2-fat) ${proteinDeg}deg ${proteinFatDeg}deg, var(--rsm2-carb) ${proteinFatDeg}deg 360deg)`,
+  }
+}
+
