@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { computeMacroGeometry, formatNumeric, formatPriceRub } from '@/lib/nutrition';
+import { computeMacroGeometry, formatNumeric, formatPortionLabel, formatPriceRub } from '@/lib/nutrition';
 import { useAuth } from '@/store/auth';
 import { useSubscriptionStore } from '@/store/subscription';
 import { useFavoritesStore } from '@/store/favorites';
@@ -41,6 +41,7 @@ export default function DishRowV2({ dish, restaurantSlug, restaurantName, isFree
 
   const geometry = useMemo(() => computeMacroGeometry(dish.protein, dish.fat, dish.carbs), [dish.protein, dish.fat, dish.carbs]);
   const price = formatPriceRub(dish.price);
+  const portion = formatPortionLabel(dish);
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -124,7 +125,12 @@ export default function DishRowV2({ dish, restaurantSlug, restaurantName, isFree
       <div className="rsm2-row__body">
         <div className="rsm2-row__title-row">
           <span className="rsm2-row__name">{dish.name}</span>
-          {price && <span className="rsm2-row__price">{price}</span>}
+          {(portion || price) && (
+            <span className="rsm2-row__meta">
+              {portion && <span className="rsm2-row__portion">{portion}</span>}
+              {price && <span className="rsm2-row__price">{price}</span>}
+            </span>
+          )}
         </div>
 
         <div className={`rsm2-row__nutrition ${hasDishAccess ? '' : 'rsm2-row__nutrition--teaser'}`}>
