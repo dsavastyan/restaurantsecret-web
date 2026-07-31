@@ -583,6 +583,43 @@
   background: #f5f7f2;
 }
 
+/* Seasonal menus live independently from the main published snapshot. */
+.partners-seasonal { grid-column: 1 / -1; }
+.partners-seasonal__heading,
+.partners-seasonal__heading > div,
+.partners-seasonal__card-heading,
+.partners-seasonal__actions { display: flex; align-items: center; }
+.partners-seasonal__heading { justify-content: space-between; gap: 22px; }
+.partners-seasonal__heading > div { min-width: 0; gap: 18px; }
+.partners-seasonal__heading .partners-dashboard__feature-icon { width: 64px; height: 64px; flex: 0 0 auto; }
+.partners-seasonal__heading h2 { margin: 0; font: 400 25px 'DM Serif Display', Georgia, serif; }
+.partners-seasonal__heading p { margin: 5px 0 0; color: var(--partner-muted); font-size: 13px; }
+.partners-seasonal__heading > .partners__btn { flex: 0 0 auto; min-height: 44px; }
+.partners-seasonal__list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 13px; margin-top: 19px; }
+.partners-seasonal__card { padding: 18px; border: 1px solid #d8d5cd; border-radius: 13px; background: rgba(255,255,255,.65); }
+.partners-seasonal__card-heading { align-items: flex-start; justify-content: space-between; gap: 14px; }
+.partners-seasonal__card h3 { margin: 0; font: 400 22px 'DM Serif Display', Georgia, serif; }
+.partners-seasonal__card-heading > div > span { display: block; margin-top: 5px; color: var(--partner-muted); font-size: 12px; }
+.partners-seasonal__status { padding: 5px 9px; border-radius: 999px; background: #ecebe7; color: #575a54; font-size: 9px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.partners-seasonal__status--active { background: #e0edd8; color: #35652c; }
+.partners-seasonal__status--scheduled { background: #e7edf5; color: #3f5e79; }
+.partners-seasonal__status--draft { background: #f0ece4; color: #77674e; }
+.partners-seasonal__status--moderation { background: #fff0cc; color: #7c5b16; }
+.partners-seasonal__status--completed { background: #ececec; color: #656565; }
+.partners-seasonal__period { display: flex; align-items: center; gap: 7px; margin-top: 15px; color: #4f5d49; font-size: 12px; }
+.partners-seasonal__actions { gap: 8px; margin-top: 16px; }
+.partners-seasonal__actions > .partners__btn { min-height: 36px; padding: 7px 12px; font-size: 11px; }
+.partners-seasonal__more { position: relative; margin-left: auto; }
+.partners-seasonal__more summary { display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid var(--partner-line); border-radius: 8px; background: #fff; color: var(--partner-green); cursor: pointer; list-style: none; }
+.partners-seasonal__more summary::-webkit-details-marker { display: none; }
+.partners-seasonal__more > div { position: absolute; z-index: 3; right: 0; bottom: calc(100% + 6px); width: 190px; padding: 10px; border: 1px solid var(--partner-line); border-radius: 9px; background: #fff; box-shadow: 0 10px 30px rgba(35,35,28,.14); }
+.partners-seasonal__more button { width: 100%; padding: 8px; border: 0; border-radius: 6px; background: #fff2ef; color: #8b3f36; font: inherit; font-size: 11px; cursor: pointer; }
+.partners-seasonal__more span { display: block; color: var(--partner-muted); font-size: 10px; line-height: 1.45; }
+.partners-seasonal__empty { margin: 18px 0 0; color: var(--partner-muted); font-size: 12px; }
+.partners-seasonal__empty-state { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 18px; padding: 17px; border: 1px dashed #cbc8c0; border-radius: 11px; background: rgba(255,255,255,.38); }
+.partners-seasonal__empty-state p { margin: 0; color: var(--partner-muted); font-size: 12px; line-height: 1.5; }
+.partners-seasonal__empty-state .partners__btn { flex: 0 0 auto; }
+
 /* Menu history */
 .partners-history { padding-bottom: 16px; }
 .partners-dashboard__recent {
@@ -2420,6 +2457,13 @@
     margin: 19px 0 0;
     font-size: 15px;
   }
+  .partners-seasonal__heading,
+  .partners-seasonal__heading > div,
+  .partners-seasonal__empty-state { align-items: stretch; flex-direction: column; }
+  .partners-seasonal__heading > .partners__btn,
+  .partners-seasonal__empty-state .partners__btn { width: 100%; }
+  .partners-seasonal__list { grid-template-columns: 1fr; }
+  .partners-seasonal__actions { flex-wrap: wrap; }
   .partners-dashboard__recent { min-height: 0; padding: 18px !important; }
   .partners-dashboard__recent > h2 { font-size: 22px; }
   .partners-history__latest {

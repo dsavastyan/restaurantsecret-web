@@ -28,6 +28,7 @@ const PartnersDashboard = lazy(() => import('../pages/partners/Dashboard.jsx'))
 const PartnersUploadMenu = lazy(() => import('../pages/partners/UploadMenu.jsx'))
 const PartnersUploadPhotos = lazy(() => import('../pages/partners/UploadPhotos.jsx'))
 const PartnersMenuPreview = lazy(() => import('../pages/partners/MenuPreview.jsx'))
+const PartnersSeasonalMenu = lazy(() => import('../pages/partners/SeasonalMenuFlow.jsx'))
 const AdminShell = lazy(() => import('../pages/admin/AdminShell.jsx'))
 const AdminLogin = lazy(() => import('../pages/admin/AdminLogin.jsx'))
 const AdminMenuRevisions = lazy(() => import('../pages/admin/MenuRevisionList.jsx'))
@@ -115,6 +116,7 @@ function AppRoutes({ onReady }) {
           <Route path="upload" element={<PartnersUploadMenu />} />
           <Route path="photos" element={<PartnersUploadPhotos />} />
           <Route path="menu-preview/:draftId" element={<PartnersMenuPreview />} />
+          <Route path="seasonal/:menuId" element={<PartnersSeasonalMenu />} />
           <Route path="*" element={<Navigate to="/partners/dashboard" replace />} />
         </Route>
 

@@ -3,8 +3,10 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useOutletContext } from 'react-router-dom'
 import {
   BookOpenText,
+  CalendarDays,
   Check,
   ChevronRight,
+  Ellipsis,
   Image as ImageIcon,
 } from 'lucide-react'
 import { restaurantPortalApi } from '@/api/restaurantPortal'
@@ -37,6 +39,48 @@ function dishCountLabel(value) {
   if (mod10 === 1 && mod100 !== 11) return 'блюдо'
   if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'блюда'
   return 'блюд'
+}
+
+const SEASONAL_STATUS_LABELS = {
+  draft: 'Черновик',
+  scheduled: 'Запланировано',
+  active: 'Активно',
+  completed: 'Завершено',
+  moderation: 'На модерации',
+}
+
+function formatSeasonalPeriod(menu) {
+  if (!menu.end_date) return `с ${formatDate(menu.start_date)}`
+  return `до ${formatDate(menu.end_date)}`
+}
+
+function SeasonalMenuCard({ menu, onDelete }) {
+  return (
+    <article className="partners-seasonal__card">
+      <div className="partners-seasonal__card-heading">
+        <div>
+          <h3>{menu.name}</h3>
+          <span>{menu.dishes_count || 0} {dishCountLabel(menu.dishes_count)}</span>
+        </div>
+        <span className={`partners-seasonal__status partners-seasonal__status--${menu.status}`}>
+          {SEASONAL_STATUS_LABELS[menu.status] || menu.status}
+        </span>
+      </div>
+      <div className="partners-seasonal__period"><CalendarDays size={16} /> {formatSeasonalPeriod(menu)}</div>
+      <div className="partners-seasonal__actions">
+        <Link className="partners__btn" to={`/partners/seasonal/${menu.id}?view=1`}>Посмотреть</Link>
+        <Link className="partners__btn" to={`/partners/seasonal/${menu.id}`}>Редактировать</Link>
+        <details className="partners-seasonal__more">
+          <summary aria-label={`Другие действия для ${menu.name}`}><Ellipsis size={19} /></summary>
+          <div>
+            {menu.status === 'draft'
+              ? <button type="button" onClick={() => onDelete(menu)}>Удалить черновик</button>
+              : <span>После завершения меню сохранится в архиве</span>}
+          </div>
+        </details>
+      </div>
+    </article>
+  )
 }
 
 function MenuVersionModal({ data, loading, onClose, onRestore }) {
@@ -341,6 +385,9 @@ export default function PartnersDashboard() {
   const [activeDraft, setActiveDraft] = useState(null)
   const [draftLoading, setDraftLoading] = useState(false)
   const [publishedMenuItems, setPublishedMenuItems] = useState(null)
+  const [seasonalMenus, setSeasonalMenus] = useState([])
+  const [seasonalLoading, setSeasonalLoading] = useState(true)
+  const [seasonalError, setSeasonalError] = useState(null)
   const [confirmFreshnessOpen, setConfirmFreshnessOpen] = useState(false)
   const [confirmFreshnessBusy, setConfirmFreshnessBusy] = useState(false)
   const [confirmFreshnessError, setConfirmFreshnessError] = useState(null)
@@ -361,6 +408,24 @@ export default function PartnersDashboard() {
       })
     return () => { cancelled = true }
   }, [restaurant?.id])
+
+  const loadSeasonalMenus = useCallback(async () => {
+    setSeasonalLoading(true)
+    setSeasonalError(null)
+    try {
+      const data = await restaurantPortalApi.seasonalMenus()
+      setSeasonalMenus(data.menus || [])
+    } catch (err) {
+      setSeasonalError(err.message || 'Не получилось загрузить сезонные меню.')
+    } finally {
+      setSeasonalLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!restaurant?.id) return
+    loadSeasonalMenus()
+  }, [loadSeasonalMenus, restaurant?.id])
 
   useEffect(() => {
     setPublishedMenuItems(null)
@@ -407,6 +472,16 @@ export default function PartnersDashboard() {
     }
   }
 
+  const deleteSeasonalMenu = async (menu) => {
+    if (!window.confirm(`Удалить черновик «${menu.name}»?`)) return
+    try {
+      await restaurantPortalApi.deleteSeasonalMenu(menu.id)
+      await loadSeasonalMenus()
+    } catch (err) {
+      setSeasonalError(err.message || 'Не получилось удалить черновик.')
+    }
+  }
+
   return (
     <>
       <div className="partners-dashboard">
@@ -422,7 +497,7 @@ export default function PartnersDashboard() {
                 <BookOpenText size={42} strokeWidth={1.65} />
               </span>
               <div className="partners-dashboard__dish-count">
-                <span className="partners-dashboard__menu-label">Меню</span>
+                <span className="partners-dashboard__menu-label">Основное меню</span>
                 <span className="partners-dashboard__dish-total">
                   <strong>{publishedMenuItems ?? '—'}</strong>
                   <span>{publishedMenuItems == null ? 'блюд' : dishCountLabel(publishedMenuItems)}</span>
@@ -460,7 +535,7 @@ export default function PartnersDashboard() {
               >
                 {activeDraft
                   ? (activeDraft.status === 'submitted' ? 'Посмотреть обновление' : 'Продолжить обновление')
-                  : 'Обновить меню'}
+                  : 'Обновить основное меню'}
               </Link>
               {menuUrl && (
                 <a className="partners__btn" href={menuUrl} target="_blank" rel="noreferrer">
@@ -482,6 +557,31 @@ export default function PartnersDashboard() {
               )}
               {draftLoading && <span className="partners-dashboard__draft-loading">Проверяем черновики…</span>}
             </div>
+          </section>
+
+          <section className="partners-card partners-seasonal">
+            <div className="partners-seasonal__heading">
+              <div>
+                <span className="partners-dashboard__feature-icon" aria-hidden="true"><CalendarDays size={34} strokeWidth={1.65} /></span>
+                <div><h2>Сезонные меню</h2><p>Временные позиции публикуются отдельно от основного меню</p></div>
+              </div>
+              {(seasonalLoading || seasonalMenus.length > 0) && (
+                <Link className="partners__btn partners__btn--primary" to="/partners/seasonal/new">Добавить сезонное меню</Link>
+              )}
+            </div>
+            {seasonalError && <div className="partners__notice partners__notice--error">{seasonalError}</div>}
+            {seasonalLoading && <p className="partners-seasonal__empty">Загружаем сезонные меню…</p>}
+            {!seasonalLoading && seasonalMenus.length === 0 && (
+              <div className="partners-seasonal__empty-state">
+                <p>Сезонных меню пока нет. Добавьте временные блюда, не загружая основное меню заново.</p>
+                <Link className="partners__btn" to="/partners/seasonal/new">Добавить сезонное меню</Link>
+              </div>
+            )}
+            {!seasonalLoading && seasonalMenus.length > 0 && (
+              <div className="partners-seasonal__list">
+                {seasonalMenus.map((menu) => <SeasonalMenuCard key={menu.id} menu={menu} onDelete={deleteSeasonalMenu} />)}
+              </div>
+            )}
           </section>
 
           <section className="partners-card partners-dashboard__photos-card">

@@ -30,6 +30,7 @@ export default function PartnerShell() {
   const navigate = useNavigate()
   const isLoginPage = location.pathname.replace(/\/+$/, '') === '/partners/login'
   const isMenuFlowPage = location.pathname.replace(/\/+$/, '') === '/partners/upload'
+  const isSeasonalMenuFlowPage = /^\/partners\/seasonal\/[^/]+\/?$/.test(location.pathname)
   const isMenuPreviewPage = /^\/partners\/menu-preview\/[^/]+\/?$/.test(location.pathname)
 
   const [status, setStatus] = useState(isLoginPage ? 'idle' : 'loading') // idle | loading | ready | error
@@ -143,7 +144,7 @@ export default function PartnerShell() {
     )
   }
 
-  if (isMenuFlowPage) {
+  if (isMenuFlowPage || isSeasonalMenuFlowPage) {
     return (
       <div className="partners partners--setup">
         <Outlet context={{

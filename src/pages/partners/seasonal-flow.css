@@ -1,0 +1,62 @@
+.seasonal-flow__step { width: min(940px, 100%); margin: 0 auto; }
+.seasonal-flow__heading { max-width: 720px; }
+.seasonal-flow__parameters,
+.seasonal-flow__upload-block { margin-top: 28px; padding: 26px; border: 1px solid var(--u-line); border-radius: 18px; background: var(--u-paper); }
+.seasonal-flow__parameters { display: grid; gap: 23px; }
+.seasonal-flow__field { display: grid; gap: 7px; min-width: 0; }
+.seasonal-flow__field > span,
+.seasonal-flow__date-group > strong,
+.seasonal-flow__outlets legend { color: var(--u-ink); font-size: 12px; font-weight: 750; }
+.seasonal-flow__field input { width: 100%; min-height: 44px; box-sizing: border-box; padding: 10px 12px; color: var(--u-ink); border: 1px solid var(--u-line); border-radius: 10px; background: #fff; font: inherit; }
+.seasonal-flow__field input:focus { outline: 3px solid rgba(101,115,77,.16); border-color: #9baa8b; }
+.seasonal-flow__date-group { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)) auto; align-items: end; gap: 13px; }
+.seasonal-flow__date-group > strong { grid-column: 1/-1; }
+.seasonal-flow__no-end { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--u-muted); font-size: 11px; cursor: pointer; }
+.seasonal-flow__no-end input,
+.seasonal-flow__outlets input { width: 17px; height: 17px; accent-color: var(--u-green); }
+.seasonal-flow__outlets { display: grid; gap: 10px; margin: 0; padding: 18px; border: 1px solid var(--u-line); border-radius: 12px; }
+.seasonal-flow__outlets legend { padding: 0 6px; }
+.seasonal-flow__outlets label { display: flex; align-items: center; gap: 9px; font-size: 12px; }
+.seasonal-flow__upload-block > div:first-child h3 { margin: 0 0 6px; font: 400 25px 'DM Serif Display', Georgia, serif; }
+.seasonal-flow__upload-block > div:first-child p { margin: 0 0 18px; color: var(--u-muted); font-size: 12px; line-height: 1.55; }
+.seasonal-flow__dropzone { min-height: 245px; }
+.seasonal-flow__dropzone strong { font-size: 14px; }
+.seasonal-flow__file-result { display: flex; align-items: center; gap: 11px; margin-top: 14px; padding: 14px 16px; color: var(--u-green-dark); border: 1px solid #ccd9c2; border-radius: 11px; background: #f0f5eb; }
+.seasonal-flow__file-result div { display: grid; gap: 3px; }
+.seasonal-flow__file-result span { color: var(--u-muted); font-size: 10px; }
+.seasonal-flow__duplicates { margin-top: 20px; overflow: hidden; border: 1px solid #dfc38e; border-radius: 16px; background: #fffaf0; }
+.seasonal-flow__duplicates > div:first-child { padding: 18px 20px; border-bottom: 1px solid #ead9b8; background: #fff5dc; }
+.seasonal-flow__duplicates > div:first-child span { color: #87601d; font-size: 9px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+.seasonal-flow__duplicates h3 { margin: 4px 0 0; font: 400 23px 'DM Serif Display', Georgia, serif; }
+.seasonal-flow__duplicates article { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 20px; border-top: 1px solid #eee1ca; }
+.seasonal-flow__duplicates article:first-of-type { border-top: 0; }
+.seasonal-flow__duplicates article.is-resolved { background: #f6f8f1; }
+.seasonal-flow__duplicates article p { margin: 5px 0 0; color: var(--u-muted); font-size: 11px; }
+.seasonal-flow__duplicates article > div:last-child { display: flex; flex: 0 0 auto; gap: 7px; }
+.seasonal-flow__duplicates button { padding: 9px 12px; border: 1px solid #d4c4a5; border-radius: 9px; background: #fff; color: var(--u-green-dark); font: inherit; font-size: 10px; font-weight: 750; cursor: pointer; }
+.seasonal-flow__duplicates button.active { border-color: var(--u-green); background: var(--u-green); color: #fff; }
+.seasonal-flow .partners-update__flow-actions > a { display: inline-flex; align-items: center; gap: 7px; color: var(--u-muted); font-size: 11px; text-decoration: none; }
+.seasonal-flow .partners-update__flow-actions button:disabled { opacity: .55; cursor: wait; }
+.seasonal-flow__photo-grid { margin-top: 28px; }
+.seasonal-flow__category { color: var(--u-green); font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.seasonal-flow__preview-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin: 25px 0 18px; padding: 19px 21px; border: 1px solid #cad5c1; border-radius: 14px; background: #eef4e9; }
+.seasonal-flow__preview-header > div > span { color: var(--u-green); font-size: 9px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+.seasonal-flow__preview-header h3 { margin: 4px 0 0; font: 400 26px 'DM Serif Display', Georgia, serif; }
+.seasonal-flow__preview-header > span { display: inline-flex; align-items: center; gap: 7px; color: var(--u-green-dark); font-size: 11px; }
+.seasonal-flow__confirm-eyebrow { display: block; margin-bottom: 7px; color: var(--u-green); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.seasonal-flow__confirm-details { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1px; margin: 24px 0; overflow: hidden; border: 1px solid var(--u-line); border-radius: 13px; background: var(--u-line); text-align: left; }
+.seasonal-flow__confirm-details div { display: grid; gap: 5px; padding: 17px; background: #faf7f1; }
+.seasonal-flow__confirm-details span { color: var(--u-muted); font-size: 9px; text-transform: uppercase; }
+.seasonal-flow__confirm-details strong { font-size: 12px; line-height: 1.4; }
+.seasonal-flow__confirm > p { margin-bottom: 22px; }
+
+@media (max-width: 760px) {
+  .seasonal-flow__parameters,
+  .seasonal-flow__upload-block { padding: 18px; }
+  .seasonal-flow__date-group { grid-template-columns: 1fr; }
+  .seasonal-flow__date-group > strong { grid-column: auto; }
+  .seasonal-flow__duplicates article { align-items: stretch; flex-direction: column; }
+  .seasonal-flow__duplicates article > div:last-child { flex-wrap: wrap; }
+  .seasonal-flow__preview-header { align-items: flex-start; flex-direction: column; }
+  .seasonal-flow__confirm-details { grid-template-columns: 1fr; }
+}
