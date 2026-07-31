@@ -22,7 +22,9 @@ export default function MacroRing({ geometry, kcal, size = 'tile', className = '
     >
       <div className={coreClass}>
         <strong>{Number.isFinite(kcal) ? Math.round(kcal) : '—'}</strong>
-        {size !== 'row' && <span>ккал</span>}
+        {/* On the compact mobile row the label only fits once the ring is
+            rendered tall; CSS hides it in the small variant. */}
+        <span>ккал</span>
       </div>
     </div>
   )

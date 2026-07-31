@@ -136,8 +136,14 @@ export default function DishRowV2({ dish, restaurantSlug, restaurantName, isFree
           )}
         </div>
 
-        <div className={`rsm2-row__nutrition ${hasDishAccess ? '' : 'rsm2-row__nutrition--teaser'}`}>
-          <MacroRing geometry={geometry} kcal={dish.kcal} size="row" />
+        {/*
+          The ring sits in its own grid column spanning both the macro row and
+          the action row, so it can be much larger than the 30px it had when it
+          was trapped inside a single line. Everything else stacks to its right.
+        */}
+        <div className={`rsm2-row__lower ${hasDishAccess ? '' : 'rsm2-row__lower--teaser'}`}>
+          <MacroRing geometry={geometry} kcal={dish.kcal} size="row" className="rsm2-row__ring--tall" />
+
           <div className="rsm2-row__macro-col">
             <div className="rsm2-row__macrobar" aria-hidden="true">
               <span className="rsm2-macrobar__seg rsm2-macrobar__seg--protein" style={{ width: `${geometry.proteinPct}%` }} />
@@ -148,36 +154,36 @@ export default function DishRowV2({ dish, restaurantSlug, restaurantName, isFree
               Б {formatNumeric(dish.protein)} · Ж {formatNumeric(dish.fat)} · У {formatNumeric(dish.carbs)}
             </span>
           </div>
-        </div>
 
-        <div className="rsm2-row__footer">
-          {hasDishAccess ? (
-            <>
-              <button type="button" className="rsm2-composition-pill" onClick={handleRowClick}>
-                Состав<span style={{ fontSize: 9 }}>▾</span>
-              </button>
-              <div className="rsm2-row__actions">
-                <button type="button" className="rsm2-fav rsm2-fav--44" onClick={handleFavoriteClick} aria-label={favorited ? 'Удалить из избранного' : 'Добавить в избранное'}>
-                  <HeartIcon filled={favorited} size={20} />
+          <div className="rsm2-row__footer">
+            {hasDishAccess ? (
+              <>
+                <button type="button" className="rsm2-composition-pill" onClick={handleRowClick}>
+                  Состав<span style={{ fontSize: 9 }}>▾</span>
                 </button>
-                <button type="button" className="rsm2-dbtn rsm2-dbtn--icon" onClick={handleDiaryAdd} aria-label="В дневник" title="В дневник">
-                  <DiaryIcon size={19} />
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <span className="rsm2-row__locked-label">КБЖУ по подписке</span>
-              <div className="rsm2-row__actions">
-                <button type="button" className="rsm2-fav rsm2-fav--44" onClick={handleFavoriteClick} aria-label={favorited ? 'Удалить из избранного' : 'Добавить в избранное'}>
-                  <HeartIcon filled={favorited} size={20} />
-                </button>
-                <button type="button" className="rsm2-row__open-btn" onClick={handleOpen}>
-                  Открыть
-                </button>
-              </div>
-            </>
-          )}
+                <div className="rsm2-row__actions">
+                  <button type="button" className="rsm2-fav rsm2-fav--row" onClick={handleFavoriteClick} aria-label={favorited ? 'Удалить из избранного' : 'Добавить в избранное'}>
+                    <HeartIcon filled={favorited} size={19} />
+                  </button>
+                  <button type="button" className="rsm2-dbtn rsm2-dbtn--icon" onClick={handleDiaryAdd} aria-label="В дневник" title="В дневник">
+                    <DiaryIcon size={17} />
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <span className="rsm2-row__locked-label">КБЖУ по подписке</span>
+                <div className="rsm2-row__actions">
+                  <button type="button" className="rsm2-fav rsm2-fav--row" onClick={handleFavoriteClick} aria-label={favorited ? 'Удалить из избранного' : 'Добавить в избранное'}>
+                    <HeartIcon filled={favorited} size={19} />
+                  </button>
+                  <button type="button" className="rsm2-row__open-btn" onClick={handleOpen}>
+                    Открыть
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
