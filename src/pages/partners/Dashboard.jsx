@@ -159,7 +159,7 @@ function ConfirmFreshnessModal({ busy, error, onCancel, onConfirm }) {
   )
 }
 
-function MenuHistory({ restaurantId, refresh }) {
+function MenuHistory({ restaurantId, refresh, onVersionsLoaded }) {
   const [versions, setVersions] = useState([])
   const [status, setStatus] = useState('loading')
   const [error, setError] = useState(null)
@@ -175,13 +175,15 @@ function MenuHistory({ restaurantId, refresh }) {
     setError(null)
     try {
       const data = await restaurantPortalApi.menuHistory()
-      setVersions(data.versions || [])
+      const nextVersions = data.versions || []
+      setVersions(nextVersions)
+      onVersionsLoaded(nextVersions)
       setStatus('ready')
     } catch (err) {
       setError(err.message || 'Не получилось загрузить историю меню.')
       setStatus('error')
     }
-  }, [])
+  }, [onVersionsLoaded])
 
   useEffect(() => {
     loadHistory()
@@ -227,6 +229,7 @@ function MenuHistory({ restaurantId, refresh }) {
     try {
       await restaurantPortalApi.restoreMenuVersion(restoreTarget.id)
       setRestoreTarget(null)
+      await loadHistory()
       await refresh()
     } catch (err) {
       setRestoreError(err.message || 'Не получилось вернуться к этой версии.')
@@ -337,6 +340,7 @@ export default function PartnersDashboard() {
   const navigate = useNavigate()
   const [activeDraft, setActiveDraft] = useState(null)
   const [draftLoading, setDraftLoading] = useState(false)
+  const [publishedMenuItems, setPublishedMenuItems] = useState(null)
   const [confirmFreshnessOpen, setConfirmFreshnessOpen] = useState(false)
   const [confirmFreshnessBusy, setConfirmFreshnessBusy] = useState(false)
   const [confirmFreshnessError, setConfirmFreshnessError] = useState(null)
@@ -358,6 +362,15 @@ export default function PartnersDashboard() {
     return () => { cancelled = true }
   }, [restaurant?.id])
 
+  useEffect(() => {
+    setPublishedMenuItems(null)
+  }, [restaurant?.id])
+
+  const handleVersionsLoaded = useCallback((versions) => {
+    const currentVersion = versions.find((version) => version.is_current) || versions[0]
+    setPublishedMenuItems(currentVersion ? (Number(currentVersion.items_count) || 0) : 0)
+  }, [])
+
   if (!restaurant) return null
   if (isFirstPublication) {
     return (
@@ -375,7 +388,6 @@ export default function PartnersDashboard() {
     )
   }
 
-  const publishedDishes = lastUpload?.status === 'published' ? (lastUpload.dishes_count ?? 0) : 0
   const menuUpdatedAt = restaurant.menu_updated_at || lastUpload?.created_at
   const menuUrl = restaurant.slug
     ? `/restaurants/${encodeURIComponent(restaurant.slug)}/menu/`
@@ -412,8 +424,8 @@ export default function PartnersDashboard() {
               <div className="partners-dashboard__dish-count">
                 <span className="partners-dashboard__menu-label">Меню</span>
                 <span className="partners-dashboard__dish-total">
-                  <strong>{publishedDishes}</strong>
-                  <span>{dishCountLabel(publishedDishes)}</span>
+                  <strong>{publishedMenuItems ?? '—'}</strong>
+                  <span>{publishedMenuItems == null ? 'блюд' : dishCountLabel(publishedMenuItems)}</span>
                 </span>
               </div>
               <p className="partners-dashboard__updated">
@@ -486,7 +498,11 @@ export default function PartnersDashboard() {
           </section>
         </div>
 
-        <MenuHistory restaurantId={restaurant.id} refresh={refresh} />
+        <MenuHistory
+          restaurantId={restaurant.id}
+          refresh={refresh}
+          onVersionsLoaded={handleVersionsLoaded}
+        />
       </div>
 
       {confirmFreshnessOpen && (
