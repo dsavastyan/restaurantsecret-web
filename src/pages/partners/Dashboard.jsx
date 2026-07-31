@@ -377,7 +377,6 @@ export default function PartnersDashboard() {
 
   const publishedDishes = lastUpload?.status === 'published' ? (lastUpload.dishes_count ?? 0) : 0
   const menuUpdatedAt = restaurant.menu_updated_at || lastUpload?.created_at
-  const menuIsCurrent = Boolean(menuUpdatedAt) && !restaurant.menu_stale
   const menuUrl = restaurant.slug
     ? `/restaurants/${encodeURIComponent(restaurant.slug)}/menu/`
     : null
@@ -412,7 +411,6 @@ export default function PartnersDashboard() {
               </span>
               <div className="partners-dashboard__dish-count">
                 <span className="partners-dashboard__menu-label">Меню</span>
-                <span className="partners-dashboard__menu-separator" aria-hidden="true" />
                 <span className="partners-dashboard__dish-total">
                   <strong>{publishedDishes}</strong>
                   <span>{dishCountLabel(publishedDishes)}</span>
@@ -423,26 +421,21 @@ export default function PartnersDashboard() {
               </p>
             </div>
 
-            <button
-              className={`partners-dashboard__freshness${menuIsCurrent ? '' : ' partners-dashboard__freshness--stale'}`}
-              type="button"
-              aria-haspopup="dialog"
-              onClick={() => {
-                setConfirmFreshnessError(null)
-                setConfirmFreshnessOpen(true)
-              }}
-            >
-              <strong>Меню актуально?</strong>
-              <span className="partners-dashboard__freshness-status">
-                <span className="partners-dashboard__freshness-check" aria-hidden="true">
-                  {menuIsCurrent ? <Check size={20} strokeWidth={2.2} /> : '!'}
-                </span>
-                <span className="partners-dashboard__freshness-copy">
-                  <span>{menuIsCurrent ? 'Актуально' : 'Требует обновления'}</span>
-                  <small>Подтвердить</small>
-                </span>
-              </span>
-            </button>
+            <div className="partners-dashboard__freshness">
+              <strong id="partners-menu-freshness-label">Меню актуально?</strong>
+              <input
+                className="partners-dashboard__freshness-checkbox"
+                type="checkbox"
+                checked={confirmFreshnessOpen}
+                aria-labelledby="partners-menu-freshness-label"
+                aria-haspopup="dialog"
+                onChange={(event) => {
+                  if (!event.target.checked) return
+                  setConfirmFreshnessError(null)
+                  setConfirmFreshnessOpen(true)
+                }}
+              />
+            </div>
 
             {lastUpload?.status === 'error' && lastUpload.error_message && (
               <div className="partners__notice partners__notice--error">{lastUpload.error_message}</div>
