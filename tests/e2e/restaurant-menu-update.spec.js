@@ -142,20 +142,159 @@ test('published restaurant opens the shared four-step menu update flow', async (
   await expect(previewPage.getByText('Безопасное превью')).toBeVisible()
   await expect(previewPage.getByText('Эта версия меню ещё не опубликована и не видна гостям')).toBeVisible()
   await expect(previewPage.getByRole('heading', { name: 'Меню Aero Menu с КБЖУ' })).toBeVisible()
-  await expect(previewPage.getByRole('heading', { name: 'Омлет с форелью' })).toBeVisible()
-  await expect(previewPage.getByText('790 ₽')).toBeVisible()
+  await expect(previewPage.locator('.rsm2-tile__cover-name').filter({ hasText: 'Омлет с форелью' })).toBeVisible()
+  await expect(previewPage.locator('.rsm2-tile__cover-price').filter({ hasText: '790 ₽' })).toBeVisible()
   await expect(previewPage.getByText('Старое сезонное блюдо')).toHaveCount(0)
   await expect(previewPage.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow')
   expect(publicMenuRequests).toBe(0)
 
   await previewPage.setViewportSize({ width: 390, height: 844 })
   await expect(previewPage.getByRole('link', { name: /Вернуться к редактированию/ })).toBeVisible()
-  await expect(previewPage.getByRole('heading', { name: 'Омлет с форелью' })).toBeVisible()
+  await expect(previewPage.locator('.rsm2-row__name').filter({ hasText: 'Омлет с форелью' })).toBeVisible()
   await previewPage.close()
 
   await page.getByRole('button', { name: 'Продолжить' }).click()
   await expect(page.getByRole('heading', { name: 'Отправьте обновления' })).toBeVisible()
   await expect(page.getByText(/QR-код появится/)).toHaveCount(0)
+})
+
+test('returning from preview keeps the prepared draft until source files change', async ({ page }) => {
+  const payload = {
+    draft: {
+      id: 93,
+      restaurant_id: 42,
+      current_step: 3,
+      status: 'editing',
+      method: 'upload',
+      source_kind: 'unstructured',
+      revision: 2,
+    },
+    items: [{
+      id: 9,
+      dish_name: 'Томаты с брынзой',
+      category: 'Закуски',
+      price_rub: 620,
+      composition_text: 'Томаты, брынза',
+      photo_url: null,
+      photo_changed: 0,
+      photo_removed: 0,
+      photo_transferred: false,
+      change_type: 'added',
+    }],
+    photos: [],
+    summary: { added: 1, updated: 0, deleted: 0, unchanged: 0, photos: 0 },
+    revision: {
+      id: 13,
+      status: 'ready_for_restaurant',
+      messages: [],
+      source_files: [{
+        id: 6,
+        original_name: 'Меню — август.pdf',
+        content_type: 'application/pdf',
+        size_bytes: 204800,
+        page_count: 5,
+        sheet_count: null,
+      }],
+    },
+  }
+  let resetCalls = 0
+  let sourceDeletes = 0
+  let sourceUploads = 0
+
+  await page.route('**/api/restaurant/**', async (route) => {
+    const request = route.request()
+    const path = new URL(request.url()).pathname
+    if (path === '/api/restaurant/me') {
+      await route.fulfill({
+        json: {
+          restaurant: { id: 42, name: 'Aero Menu', has_published_menu: true },
+          restaurants: [{ id: 42, name: 'Aero Menu' }],
+          last_upload: { status: 'processing' },
+        },
+      })
+      return
+    }
+    if (path === '/api/restaurant/menu/drafts/93/reset') {
+      resetCalls += 1
+      await route.fulfill({ json: { ok: true, ...payload } })
+      return
+    }
+    if (path === '/api/restaurant/menu/drafts/93/source') {
+      sourceUploads += 1
+      payload.draft.current_step = 1
+      payload.draft.status = 'extracting'
+      payload.revision.status = 'needs_preparation'
+      payload.revision.source_files = [{
+        id: 7,
+        original_name: 'menu-september.pdf',
+        content_type: 'application/pdf',
+        size_bytes: 8,
+        page_count: 1,
+        sheet_count: null,
+      }]
+      await route.fulfill({ status: 202, json: { ok: true, ...payload } })
+      return
+    }
+    if (path === '/api/restaurant/menu/drafts/93/revision/files/6' && request.method() === 'DELETE') {
+      sourceDeletes += 1
+      payload.draft.current_step = 1
+      payload.draft.status = 'extracting'
+      payload.revision.status = 'needs_preparation'
+      payload.revision.source_files = []
+      await route.fulfill({ json: { ok: true, ...payload } })
+      return
+    }
+    if (path === '/api/restaurant/menu/drafts/93' && request.method() === 'PATCH') {
+      payload.draft = { ...payload.draft, ...request.postDataJSON() }
+      await route.fulfill({ json: { ok: true, ...payload } })
+      return
+    }
+    if (path === '/api/restaurant/menu/drafts/93') {
+      await route.fulfill({ json: { ok: true, ...payload } })
+      return
+    }
+    await route.fulfill({ json: { ok: true } })
+  })
+
+  await page.goto('/partners/upload?draft=93')
+  await expect(page.getByRole('heading', { name: 'Проверьте превью' })).toBeVisible()
+
+  const menuStep = page.locator('.partners-update__step').filter({ hasText: 'Меню' }).getByRole('button')
+  const photosStep = page.locator('.partners-update__step').filter({ hasText: 'Фотографии' }).getByRole('button')
+  const previewStep = page.locator('.partners-update__step').filter({ hasText: 'Превью' }).getByRole('button')
+  await menuStep.click()
+
+  await expect(page.getByRole('heading', { name: 'Файлы меню' })).toBeVisible()
+  await expect(page.getByText('Меню — август.pdf')).toBeVisible()
+  await expect(page.getByText('Текущий черновик сохранён')).toBeVisible()
+  await expect(photosStep).toBeEnabled()
+  await expect(previewStep).toBeEnabled()
+  expect(resetCalls).toBe(0)
+
+  await previewStep.click()
+  await expect(page.getByRole('heading', { name: 'Проверьте превью' })).toBeVisible()
+  await menuStep.click()
+
+  page.once('dialog', (dialog) => dialog.accept())
+  await page.locator('.partners-update__source-file').filter({ hasText: 'Меню — август.pdf' }).getByRole('button', { name: 'Удалить' }).click()
+
+  await expect(page.getByRole('heading', { name: 'Добавьте файл меню' })).toBeVisible()
+  await expect(photosStep).toBeDisabled()
+  await expect(previewStep).toBeDisabled()
+  expect(sourceDeletes).toBe(1)
+
+  await page.locator('.partners-update__source-file-add input').setInputFiles({
+    name: 'menu-september.pdf',
+    mimeType: 'application/pdf',
+    buffer: Buffer.from('%PDF-1.4'),
+  })
+
+  await expect(page.getByRole('heading', { name: 'Меню загружено — ожидает подготовки' })).toBeVisible()
+  await expect(photosStep).toBeDisabled()
+  await expect(previewStep).toBeDisabled()
+  expect(sourceUploads).toBe(1)
+  expect(sourceDeletes).toBe(1)
+  expect(resetCalls).toBe(0)
 })
 
 test('manual dish form blocks invalid numbers and submits only valid values', async ({ page }) => {

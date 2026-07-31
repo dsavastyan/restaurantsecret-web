@@ -1,8 +1,7 @@
 /*
-  Menu page redesign (preview only).
-  Scoped entirely under .rsm2-* classnames so it can never leak onto the
-  legacy menu page or any other part of the site. Gated behind
-  useMenuPreview() in Menu.jsx / DishCardModal.tsx — see src/lib/designPreview.js.
+  Restaurant menu page styles.
+  Scoped entirely under .rsm2-* classnames so nothing leaks onto other pages
+  that still use the older `menu-*` / `dish-card-*` styles in styles.css.
 
   Tokens transcribed from design_handoff_restaurant_menu/menu-page.dc.html.
 */
@@ -522,13 +521,154 @@ body[data-rs-menu-v2] main {
   align-self: center;
 }
 
+/* ---------- Ingredient filter ---------- */
+
 .rsm2-ingredients {
-  background: var(--rsm2-card);
+  background: var(--rsm2-surface-grad);
   border: 1px solid var(--rsm2-border);
   border-radius: 16px;
-  padding: 16px;
+  padding: 18px;
   font: 500 13.5px/1.5 Inter, sans-serif;
   color: var(--rsm2-text-2);
+  box-shadow: var(--rsm2-elev-2);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rsm2-ingredients__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+/* Segmented exclude/include switch — a recessed track with one raised pill. */
+.rsm2-modes {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--rsm2-cream-alt);
+  border: 1px solid var(--rsm2-border);
+  box-shadow: 0 2px 5px rgba(119, 98, 61, 0.12) inset;
+}
+
+.rsm2-mode {
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  padding: 8px 15px;
+  cursor: pointer;
+  font: 700 12.5px/1 Inter, sans-serif;
+  color: var(--rsm2-text-3);
+  white-space: nowrap;
+  transition: all 0.16s ease;
+}
+
+.rsm2-mode:hover {
+  color: var(--rsm2-ink);
+}
+
+.rsm2-mode.is-on {
+  background: linear-gradient(180deg, #fffefc, #f6efe1);
+  color: var(--rsm2-ink);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 3px 8px rgba(119, 98, 61, 0.2);
+}
+
+.rsm2-ingredients__hint {
+  margin: 0;
+  font: 600 12px/1.45 Inter, sans-serif;
+  color: var(--rsm2-muted);
+}
+
+.rsm2-ingredients__search {
+  width: min(100%, 320px);
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--rsm2-border);
+  background: var(--rsm2-card);
+  font: 500 13.5px/1 Inter, sans-serif;
+  color: var(--rsm2-ink);
+  outline: none;
+  box-shadow: 0 2px 5px rgba(119, 98, 61, 0.09) inset;
+}
+
+.rsm2-ingredients__search:focus {
+  border-color: var(--rsm2-border-hover);
+  box-shadow: 0 2px 5px rgba(119, 98, 61, 0.09) inset,
+    0 0 0 3px rgba(117, 132, 90, 0.14);
+}
+
+.rsm2-ingredients__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.rsm2-ing {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--rsm2-border);
+  background: var(--rsm2-card);
+  cursor: pointer;
+  font: 600 12.5px/1 Inter, sans-serif;
+  color: var(--rsm2-text-3);
+  box-shadow: var(--rsm2-elev-1);
+  transition: all 0.14s ease;
+}
+
+.rsm2-ing:hover {
+  border-color: var(--rsm2-border-hover);
+  color: var(--rsm2-ink);
+  transform: translateY(-1px);
+}
+
+/* Selected state is colour-coded by mode so the direction of the filter is
+   readable at a glance: warm red strikes things out, green keeps them in. */
+.rsm2-ing.is-on.is-exclude {
+  background: linear-gradient(180deg, #e08a6d 0%, #d36a4c 100%);
+  border-color: #c25f42;
+  color: #fff;
+  text-decoration: line-through;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset,
+    0 4px 11px rgba(194, 95, 66, 0.36);
+}
+
+.rsm2-ing.is-on.is-include {
+  background: linear-gradient(180deg, #849366 0%, #6d7c52 100%);
+  border-color: #66744c;
+  color: #fff;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.24) inset,
+    0 4px 11px rgba(90, 104, 66, 0.36);
+}
+
+.rsm2-ing__count {
+  font: 700 10.5px/1 Inter, sans-serif;
+  color: var(--rsm2-muted-3);
+}
+
+.rsm2-ing.is-on .rsm2-ing__count {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* Count of active ingredient selections, shown on the collapsed disclosure. */
+.rsm2-disclosure__badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--rsm2-accent);
+  color: #fff;
+  font: 800 10.5px/18px Inter, sans-serif;
+  text-align: center;
 }
 
 /* ---------- Category section ---------- */

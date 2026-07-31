@@ -219,7 +219,16 @@ function formatMessageTime(value) {
   }).format(date)
 }
 
-function FlowSidebar({ restaurant, step, onStep, initial = false, locked = false }) {
+function inferredFurthestStep(payload) {
+  if (!payload?.draft) return 1
+  const currentStep = Number(payload.draft.current_step) || 1
+  const preparedUpload = payload.draft.method === 'upload'
+    && payload.draft.status === 'editing'
+    && Boolean(payload.draft.source_kind)
+  return Math.max(currentStep, preparedUpload ? 3 : 1)
+}
+
+function FlowSidebar({ restaurant, step, furthestStep, onStep, initial = false, locked = false }) {
   return (
     <aside className="partners-update__sidebar">
       <div>
@@ -233,14 +242,14 @@ function FlowSidebar({ restaurant, step, onStep, initial = false, locked = false
           <strong>{initial ? 'Публикация меню' : 'Обновление меню'}</strong>
           <span>Шаг {step} из 4</span>
         </div>
-        <div className="partners-update__progress"><span style={{ width: `${step * 25}%` }} /></div>
+        <div className="partners-update__progress"><span style={{ width: `${furthestStep * 25}%` }} /></div>
         <ol className="partners-update__steps">
           {STEPS.map(([title, description, optional], index) => {
             const number = index + 1
-            const state = number < step ? 'complete' : number === step ? 'active' : 'pending'
+            const state = number === step ? 'active' : number < furthestStep ? 'complete' : 'pending'
             return (
               <li className={`partners-update__step partners-update__step--${state}`} key={title}>
-                <button type="button" disabled={locked || number > step} onClick={() => onStep(number)}>
+                <button type="button" disabled={locked || number > furthestStep} onClick={() => onStep(number)}>
                   <span>{state === 'complete' ? <Check size={16} /> : number}</span>
                   <span>
                     <span className="partners-update__step-title">
@@ -565,6 +574,7 @@ function SourceFiles({
   onDeleteFile,
   onReplaceFile,
   showAdd = false,
+  showRestartHint = false,
 }) {
   const sourceFiles = payload.revision?.source_files || []
   return (
@@ -589,6 +599,11 @@ function SourceFiles({
           </label>
         )}
       </div>
+      {showRestartHint && sourceFiles.length > 0 && (
+        <p className="partners-update__source-files-hint">
+          Если добавить, заменить или удалить файл, фотографии и превью будут подготовлены заново.
+        </p>
+      )}
       {sourceFiles.length > 0 ? (
         <div className="partners-update__source-file-list">
           {sourceFiles.map((file) => {
@@ -817,20 +832,27 @@ function UploadStep({
   const inputRef = useRef(null)
   const sourceFiles = payload.revision?.source_files || []
   const hasUploadedFile = sourceFiles.length > 0
+  const hasPreparedSources = payload.draft.source_kind === 'unstructured' && sourceFiles.length > 0
   return (
     <section className="partners-update__upload-step">
       <MethodSwitcher activeMethod="upload" busy={busy} onSelect={onSelectMethod} />
       <div className="partners-update__section-heading">
         <span>Новое меню</span>
-        <h2>{hasUploadedFile ? 'Загруженный файл' : 'Загрузите файл'}</h2>
+        <h2>{hasPreparedSources ? 'Файлы меню' : hasUploadedFile ? 'Загруженный файл' : 'Загрузите файл'}</h2>
+        {hasPreparedSources && (
+          <p>Вы остаетесь в текущем черновике. Его фотографии и превью сохранены, пока вы не измените файлы.</p>
+        )}
       </div>
       <a className="partners-update__template" href={restaurantPortalApi.templateDownloadUrl()} download><FileSpreadsheet size={25} /><span><strong>Шаблон Excel</strong><small>Используйте шаблон для быстрой автоматической проверки</small></span><span>Скачать</span></a>
       {hasUploadedFile ? (
         <SourceFiles
           payload={payload}
           busy={busy}
+          onAddFiles={onFile}
           onDeleteFile={onDeleteFile}
           onReplaceFile={onReplaceFile}
+          showAdd={hasPreparedSources}
+          showRestartHint={hasPreparedSources}
         />
       ) : (
         <label className="partners-update__dropzone">
@@ -855,6 +877,12 @@ function UploadStep({
         onClear={onClearUploadIssue}
         onReplace={onFile}
       />
+      {hasPreparedSources && (
+        <div className="partners-update__comparison">
+          <Check size={23} /><div><strong>Текущий черновик сохранён</strong><p>{changeSummary(payload.summary)}</p></div>
+          <button className="partners-update__primary" type="button" onClick={onNext}>Вернуться к фотографиям <ArrowRight size={17} /></button>
+        </div>
+      )}
       {payload.draft.source_kind === 'structured' && hasUploadedFile && (
         <div className="partners-update__comparison">
           <Check size={23} /><div><strong>Файл проверен</strong><p>{changeSummary(payload.summary)}</p></div>
@@ -1016,6 +1044,7 @@ export default function PartnersUploadMenu() {
   const [error, setError] = useState(null)
   const [uploadIssue, setUploadIssue] = useState(null)
   const [drawerItem, setDrawerItem] = useState(undefined)
+  const [furthestStep, setFurthestStep] = useState(1)
   const newDraftRequested = searchParams.get('new') === '1'
   const requestedDraftId = searchParams.get('draft')
 
@@ -1028,6 +1057,7 @@ export default function PartnersUploadMenu() {
     if (!draftId) return null
     const data = await restaurantPortalApi.draft(draftId)
     setPayload(data)
+    setFurthestStep((current) => Math.max(current, inferredFurthestStep(data)))
     return data
   }
 
@@ -1052,6 +1082,7 @@ export default function PartnersUploadMenu() {
         }
         if (!cancelled) {
           setPayload(data)
+          setFurthestStep(inferredFurthestStep(data))
           setStatus('ready')
         }
       } catch (err) {
@@ -1095,7 +1126,10 @@ export default function PartnersUploadMenu() {
       () => restaurantPortalApi.updateDraft(payload.draft.id, { current_step: step }),
       'Не получилось сохранить шаг.',
     )
-    if (result) setPayload(result)
+    if (result) {
+      setPayload(result)
+      setFurthestStep((current) => Math.max(current, inferredFurthestStep(result)))
+    }
   }
 
   const chooseMethod = async (method) => {
@@ -1107,6 +1141,7 @@ export default function PartnersUploadMenu() {
     if (result) {
       setPayload(result)
       setUploadIssue(null)
+      setFurthestStep(inferredFurthestStep(result))
     }
   }
 
@@ -1152,6 +1187,7 @@ export default function PartnersUploadMenu() {
     try {
       const result = await restaurantPortalApi.uploadDraftSources(payload.draft.id, files)
       setPayload(result)
+      setFurthestStep(inferredFurthestStep(result))
       return result
     } catch (err) {
       if (err.rowErrors?.length) {
@@ -1192,6 +1228,7 @@ export default function PartnersUploadMenu() {
     )
     if (!result) return false
     setPayload(result)
+    setFurthestStep(inferredFurthestStep(result))
     return true
   }
 
@@ -1206,6 +1243,7 @@ export default function PartnersUploadMenu() {
     if (!result) return false
     setPayload(result)
     setUploadIssue(null)
+    setFurthestStep(inferredFurthestStep(result))
     return true
   }
 
@@ -1221,6 +1259,7 @@ export default function PartnersUploadMenu() {
     if (!result) return false
     setPayload(result)
     setUploadIssue(null)
+    setFurthestStep(inferredFurthestStep(result))
     return true
   }
 
@@ -1231,6 +1270,7 @@ export default function PartnersUploadMenu() {
     )
     if (!result) return false
     setPayload(result)
+    if (files.length) setFurthestStep(inferredFurthestStep(result))
     return true
   }
 
@@ -1278,6 +1318,7 @@ export default function PartnersUploadMenu() {
         locked={Boolean(waitingForPreparation)}
         restaurant={restaurant}
         step={step}
+        furthestStep={furthestStep}
         onStep={payload.draft.status === 'submitted' ? () => {} : setStep}
       />
       <main className="partners-update__main">

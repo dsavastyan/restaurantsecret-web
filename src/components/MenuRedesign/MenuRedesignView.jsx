@@ -1,9 +1,8 @@
-// Redesigned restaurant menu page (desktop hero/grid + mobile feed).
-// Rendered by Menu.jsx only when useMenuPreview() is true for this browser —
-// see src/lib/designPreview.js. All data-fetching, filtering and mutation
-// logic lives in Menu.jsx; this component is presentation only, so it can't
-// drift from the legacy page's actual behavior.
-import { useEffect } from 'react';
+// Restaurant menu page (desktop hero/grid + mobile feed).
+// All data-fetching, filtering and mutation logic lives in Menu.jsx; this
+// component is presentation only. Also reused by the partner portal's draft
+// preview via the `readOnly` prop, which suppresses every mutating action.
+import { useEffect, useMemo, useState } from 'react';
 import { MenuOutdatedModal } from '@/components/MenuOutdatedModal';
 import DishTileV2 from './DishTileV2';
 import DishRowV2 from './DishRowV2';
@@ -13,9 +12,9 @@ import '@/pages/menu-redesign.css';
 const CATS_VISIBLE = 3;
 
 // AppShell wraps every page in `.container--menu`, which adds a max-width and
-// side/top padding. The redesigned page is edge-to-edge by design, so we flag
-// the body while it is mounted and let the CSS strip that padding — scoped to
-// this page only, and reverted on unmount so no other route is affected.
+// side/top padding. This page is edge-to-edge by design, so we flag the body
+// while it is mounted and let the CSS strip that padding — scoped to this page
+// only, and reverted on unmount so no other route is affected.
 function useFullBleedLayout() {
   useEffect(() => {
     if (typeof document === 'undefined') return undefined;
@@ -62,6 +61,12 @@ export default function MenuRedesignView({
 
   isIngredientFilterOpen,
   setIsIngredientFilterOpen,
+  hasCompositions,
+  ingredientOptions,
+  ingredientFilter,
+  toggleIngredient,
+  setIngredientMode,
+  clearIngredients,
 
   isFavoriteRestaurant,
   handleToggleRestaurantFavorite,
@@ -77,6 +82,7 @@ export default function MenuRedesignView({
 }) {
   useFullBleedLayout();
 
+  const selectedIngredientCount = ingredientFilter?.selected?.length ?? 0;
   const visibleCats = allCategoriesExpanded ? categoryOptions : categoryOptions.slice(0, CATS_VISIBLE);
   const hasMoreCats = !allCategoriesExpanded && categoryOptions.length > CATS_VISIBLE;
 
@@ -134,15 +140,18 @@ export default function MenuRedesignView({
   return (
     <div className="rsm2-root">
       <div className="rsm2-hero">
-        <button
-          type="button"
-          className="rsm2-hero__report"
-          onClick={() => {
-            if (!readOnly) setIsOutdatedOpen(true);
-          }}
-        >
-          Меню устарело?
-        </button>
+        {/* Reporting a stale menu makes no sense inside the partner's own
+            draft preview, so the trigger is omitted there rather than shown
+            as a dead button. */}
+        {!readOnly && (
+          <button
+            type="button"
+            className="rsm2-hero__report"
+            onClick={() => setIsOutdatedOpen(true)}
+          >
+            Меню устарело?
+          </button>
+        )}
         <div className="rsm2-hero__grid">
           <div className="rsm2-hero__lead">
             <h1 className="rsm2-hero__title" aria-label={`Меню ${seoRestaurantName} с КБЖУ`}>
@@ -165,15 +174,17 @@ export default function MenuRedesignView({
             </div>
           </div>
           <div className="rsm2-hero__actions">
-            <button
-              type="button"
-              className="rsm2-icon-btn"
-              onClick={handleToggleRestaurantFavorite}
-              aria-label={isFavoriteRestaurant ? 'Удалить ресторан из избранного' : 'Добавить ресторан в избранное'}
-              style={isFavoriteRestaurant ? { color: '#f0855a' } : undefined}
-            >
-              <HeartIcon filled={isFavoriteRestaurant} size={22} />
-            </button>
+            {!readOnly && (
+              <button
+                type="button"
+                className="rsm2-icon-btn"
+                onClick={handleToggleRestaurantFavorite}
+                aria-label={isFavoriteRestaurant ? 'Удалить ресторан из избранного' : 'Добавить ресторан в избранное'}
+                style={isFavoriteRestaurant ? { color: '#f0855a' } : undefined}
+              >
+                <HeartIcon filled={isFavoriteRestaurant} size={22} />
+              </button>
+            )}
             <button type="button" className="rsm2-icon-btn" onClick={openMapInBrowser} aria-label="Показать на карте">
               <MapPinIcon size={20} />
             </button>
@@ -210,13 +221,21 @@ export default function MenuRedesignView({
           >
             Свои КБЖУ<span className="rsm2-disclosure__caret">{isAdvancedFiltersOpen ? '▴' : '▾'}</span>
           </button>
-          <button
-            type="button"
-            className={`rsm2-disclosure ${isIngredientFilterOpen ? 'is-on' : ''}`}
-            onClick={() => setIsIngredientFilterOpen((prev) => !prev)}
-          >
-            Фильтр по ингредиентам<span className="rsm2-disclosure__caret">{isIngredientFilterOpen ? '▴' : '▾'}</span>
-          </button>
+          {/* Hidden entirely when the restaurant filled in no compositions —
+              there would be nothing to pick from. */}
+          {hasCompositions && (
+            <button
+              type="button"
+              className={`rsm2-disclosure ${isIngredientFilterOpen || selectedIngredientCount ? 'is-on' : ''}`}
+              onClick={() => setIsIngredientFilterOpen((prev) => !prev)}
+            >
+              Фильтр по ингредиентам
+              {selectedIngredientCount > 0 && (
+                <span className="rsm2-disclosure__badge">{selectedIngredientCount}</span>
+              )}
+              <span className="rsm2-disclosure__caret">{isIngredientFilterOpen ? '▴' : '▾'}</span>
+            </button>
+          )}
         </div>
 
         <div className={`rsm2-advanced ${isAdvancedFiltersOpen ? 'is-open' : ''}`}>
@@ -231,11 +250,15 @@ export default function MenuRedesignView({
           </div>
         </div>
 
-        {isIngredientFilterOpen && (
+        {hasCompositions && isIngredientFilterOpen && (
           <div className="rsm2-advanced is-open" style={{ order: 11 }}>
-            <div className="rsm2-ingredients">
-              Фильтр по составу скоро появится — сейчас поиск ищет только по названию блюда.
-            </div>
+            <IngredientPanel
+              options={ingredientOptions}
+              filter={ingredientFilter}
+              onToggle={toggleIngredient}
+              onModeChange={setIngredientMode}
+              onClear={clearIngredients}
+            />
           </div>
         )}
       </div>
@@ -319,6 +342,110 @@ export default function MenuRedesignView({
           isOpen={isOutdatedOpen}
           onClose={() => setIsOutdatedOpen(false)}
         />
+      )}
+    </div>
+  );
+}
+
+// Ingredient picker. Two modes, exclude by default: people reach for this
+// far more often to rule something out ("без грибов") than to hunt for it.
+// Menus can carry 150+ distinct ingredients, so the list is searchable and
+// ordered by how many dishes use each one.
+const INGREDIENT_VISIBLE_LIMIT = 40;
+
+function IngredientPanel({ options, filter, onToggle, onModeChange, onClear }) {
+  const [search, setSearch] = useState('');
+  const selected = filter?.selected ?? [];
+  const mode = filter?.mode ?? 'exclude';
+
+  const matching = useMemo(() => {
+    const q = search.trim().toLowerCase().replace(/ё/g, 'е');
+    if (!q) return options;
+    return options.filter((option) => option.value.includes(q));
+  }, [options, search]);
+
+  // Selected chips always stay visible even when the search or the cap would
+  // scroll them out, so it's never unclear what is currently applied.
+  const visible = useMemo(() => {
+    const capped = matching.slice(0, INGREDIENT_VISIBLE_LIMIT);
+    const shown = new Set(capped.map((option) => option.value));
+    const pinned = options.filter(
+      (option) => selected.includes(option.value) && !shown.has(option.value)
+    );
+    return [...pinned, ...capped];
+  }, [matching, options, selected]);
+
+  const hiddenCount = Math.max(0, matching.length - INGREDIENT_VISIBLE_LIMIT);
+
+  return (
+    <div className="rsm2-ingredients">
+      <div className="rsm2-ingredients__head">
+        <div className="rsm2-modes" role="group" aria-label="Режим фильтра по ингредиентам">
+          <button
+            type="button"
+            className={`rsm2-mode ${mode === 'exclude' ? 'is-on' : ''}`}
+            onClick={() => onModeChange('exclude')}
+            aria-pressed={mode === 'exclude'}
+          >
+            Без этих
+          </button>
+          <button
+            type="button"
+            className={`rsm2-mode ${mode === 'include' ? 'is-on' : ''}`}
+            onClick={() => onModeChange('include')}
+            aria-pressed={mode === 'include'}
+          >
+            Только с этими
+          </button>
+        </div>
+
+        {selected.length > 0 && (
+          <button type="button" className="rsm2-advanced__reset" onClick={onClear}>
+            Сбросить ингредиенты
+          </button>
+        )}
+      </div>
+
+      <p className="rsm2-ingredients__hint">
+        {mode === 'exclude'
+          ? 'Скроем блюда, где есть хотя бы один из выбранных ингредиентов.'
+          : 'Покажем блюда, где есть хотя бы один из выбранных ингредиентов.'}
+      </p>
+
+      <input
+        className="rsm2-ingredients__search"
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+        placeholder="Найти ингредиент"
+        aria-label="Поиск ингредиента"
+      />
+
+      {visible.length === 0 ? (
+        <p className="rsm2-ingredients__hint">Ничего не нашлось</p>
+      ) : (
+        <div className="rsm2-ingredients__list">
+          {visible.map((option) => {
+            const isOn = selected.includes(option.value);
+            return (
+              <button
+                key={option.value}
+                type="button"
+                className={`rsm2-ing ${isOn ? `is-on is-${mode}` : ''}`}
+                onClick={() => onToggle(option.value)}
+                aria-pressed={isOn}
+              >
+                {option.label}
+                <span className="rsm2-ing__count">{option.count}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {hiddenCount > 0 && (
+        <p className="rsm2-ingredients__hint">
+          И ещё {hiddenCount} — уточните поиск.
+        </p>
       )}
     </div>
   );
