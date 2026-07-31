@@ -177,7 +177,46 @@ function formatFileSize(bytes) {
 }
 
 function changeSummary(summary) {
-  return `${summary.added || 0} новых · ${summary.updated || 0} изменено · ${summary.deleted || 0} будет удалено`
+  return `${summary.added || 0} новых блюд · ${summary.updated || 0} изменено · ${summary.deleted || 0} будет удалено`
+}
+
+function parseMessageDate(value) {
+  if (!value) return null
+  const source = String(value).trim().replace(' ', 'T')
+  const normalized = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(source) ? source : `${source}Z`
+  const date = new Date(normalized)
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
+function messageDayKey(value) {
+  const date = parseMessageDate(value)
+  if (!date) return 'unknown'
+  return [date.getFullYear(), date.getMonth() + 1, date.getDate()].join('-')
+}
+
+function formatMessageDay(value) {
+  const date = parseMessageDate(value)
+  if (!date) return 'Дата не указана'
+  const today = new Date()
+  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+  const dateStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  const daysAgo = Math.round((todayStart - dateStart) / 86_400_000)
+  if (daysAgo === 0) return 'Сегодня'
+  if (daysAgo === 1) return 'Вчера'
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    year: date.getFullYear() === today.getFullYear() ? undefined : 'numeric',
+  }).format(date)
+}
+
+function formatMessageTime(value) {
+  const date = parseMessageDate(value)
+  if (!date) return ''
+  return new Intl.DateTimeFormat('ru-RU', {
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date)
 }
 
 function inferredFurthestStep(payload) {
@@ -528,26 +567,37 @@ function ManualStep({ payload, busy, error, onAdd, onConfirmMatch, onDelete, onE
   )
 }
 
-function SourceFiles({ payload, busy, onAddFiles, onDeleteFile, onReplaceFile, showRestartHint = false }) {
+function SourceFiles({
+  payload,
+  busy,
+  onAddFiles,
+  onDeleteFile,
+  onReplaceFile,
+  showAdd = false,
+  showRestartHint = false,
+}) {
   const sourceFiles = payload.revision?.source_files || []
   return (
-    <div className="partners-update__source-files">
+    <section className="partners-update__source-files" aria-label="Файлы меню">
       <div className="partners-update__source-files-heading">
         <strong>{sourceFiles.length === 1 ? 'Загруженный файл' : 'Загруженные файлы'}</strong>
-        <label className={`partners-update__source-file-add${busy ? ' is-disabled' : ''}`}>
-          <input
-            type="file"
-            multiple
-            disabled={busy}
-            accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp"
-            onChange={(event) => {
-              const selected = Array.from(event.target.files || [])
-              if (selected.length) onAddFiles(selected)
-              event.target.value = ''
-            }}
-          />
-          <Plus size={15} /> Добавить файлы
-        </label>
+        {showAdd && (
+          <label className={`partners-update__source-file-add${busy ? ' is-disabled' : ''}`}>
+            <input
+              type="file"
+              multiple
+              disabled={busy}
+              aria-label="Добавить файлы меню"
+              accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp"
+              onChange={(event) => {
+                const selected = Array.from(event.target.files || [])
+                if (selected.length) onAddFiles(selected)
+                event.target.value = ''
+              }}
+            />
+            <Plus size={15} /> Добавить файлы
+          </label>
+        )}
       </div>
       {showRestartHint && sourceFiles.length > 0 && (
         <p className="partners-update__source-files-hint">
@@ -581,6 +631,7 @@ function SourceFiles({ payload, busy, onAddFiles, onDeleteFile, onReplaceFile, s
                     <input
                       type="file"
                       disabled={busy}
+                      aria-label={`Заменить файл ${file.original_name}`}
                       accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp"
                       onChange={(event) => {
                         const replacement = event.target.files?.[0]
@@ -600,14 +651,76 @@ function SourceFiles({ payload, busy, onAddFiles, onDeleteFile, onReplaceFile, s
         </div>
       ) : (
         <p className="partners-update__source-files-empty">
-          Файлов пока нет. Добавьте новый файл, чтобы специалист мог продолжить подготовку меню.
+          Файлов пока нет. Добавьте актуальный файл или отмените эту загрузку.
         </p>
       )}
-    </div>
+    </section>
   )
 }
 
-function RevisionWaiting({ payload, busy, error, onAddFiles, onDeleteFile, onReplaceFile, onReply }) {
+function UploadValidationIssue({ issue, busy, onClear, onReplace }) {
+  if (!issue) return null
+  return (
+    <section className="partners-update__validation" aria-labelledby="partners-upload-validation-title">
+      <div className="partners-update__validation-file">
+        <span className="partners-update__source-file-icon"><FileSpreadsheet size={20} /></span>
+        <span>
+          <strong>{issue.fileName}</strong>
+          {issue.fileSize != null && <small>{formatFileSize(issue.fileSize)}</small>}
+        </span>
+        <span className="partners-update__source-file-actions">
+          <label className={busy ? 'is-disabled' : ''}>
+            <input
+              type="file"
+              disabled={busy}
+              aria-label="Заменить файл с ошибками"
+              accept=".xlsx,.xls"
+              onChange={(event) => {
+                const replacement = event.target.files?.[0]
+                if (replacement) onReplace([replacement])
+                event.target.value = ''
+              }}
+            />
+            Заменить
+          </label>
+          <button type="button" disabled={busy} onClick={onClear}>
+            <Trash2 size={15} /> Удалить
+          </button>
+        </span>
+      </div>
+      <div className="partners-update__validation-heading">
+        <div>
+          <strong id="partners-upload-validation-title">Найдены ошибки · {issue.rowErrors.length}</strong>
+          <p>Исправьте отмеченные строки и загрузите файл ещё раз.</p>
+        </div>
+        {issue.validationKey && (
+          <a href={restaurantPortalApi.validationDownloadUrl(issue.validationKey)} download>
+            <Download size={17} /> Скачать Excel с ошибками
+          </a>
+        )}
+      </div>
+      <ol>
+        {issue.rowErrors.map((rowError, index) => (
+          <li key={`${rowError.row || 'file'}-${rowError.field || rowError.type || index}-${index}`}>
+            {rowError.message || `Проверьте строку ${rowError.row || 'в файле'}.`}
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}
+
+function RevisionWaiting({
+  payload,
+  busy,
+  error,
+  onAddFiles,
+  onCancelUpload,
+  onDeleteFile,
+  onReplaceFile,
+  onReply,
+  onSwitchToManual,
+}) {
   const [message, setMessage] = useState('')
   const [files, setFiles] = useState([])
   const revision = payload.revision
@@ -632,10 +745,25 @@ function RevisionWaiting({ payload, busy, error, onAddFiles, onDeleteFile, onRep
       <p>
         {sourceFiles.length
           ? 'Мы сохранили исходные файлы без изменений. Специалист подготовит меню по шаблону, после чего автоматически откроется шаг с фотографиями и превью.'
-          : 'Все исходные файлы удалены. Загрузите актуальную версию меню, чтобы специалист мог продолжить подготовку.'}
+          : 'Загрузите актуальную версию меню или отмените процесс, чтобы вернуться к шаблону и ручному редактированию.'}
       </p>
-      <SourceFiles payload={payload} busy={busy} onAddFiles={onAddFiles} onDeleteFile={onDeleteFile} onReplaceFile={onReplaceFile} />
-      <div className="partners-update__chat">
+      <SourceFiles
+        payload={payload}
+        busy={busy}
+        onAddFiles={onAddFiles}
+        onDeleteFile={onDeleteFile}
+        onReplaceFile={onReplaceFile}
+        showAdd
+      />
+      <div className="partners-update__cancel-upload">
+        <button type="button" disabled={busy} onClick={onCancelUpload}>
+          <ArrowLeft size={17} /> Отменить загрузку и вернуться к шаблону
+        </button>
+        <button type="button" disabled={busy} onClick={onSwitchToManual}>
+          <Pencil size={17} /> Редактировать блюда вручную
+        </button>
+      </div>
+      <div className="partners-update__chat" role="region" aria-label="Переписка со специалистом">
         <header className="partners-update__chat-header">
           <span className="partners-update__chat-icon" aria-hidden="true">
             <MessageCircle size={20} />
@@ -648,13 +776,27 @@ function RevisionWaiting({ payload, busy, error, onAddFiles, onDeleteFile, onRep
             <span className="partners-update__clarification-badge">Нужно уточнение</span>
           )}
         </header>
-        <div className="partners-update__conversation">
-          {(revision?.messages || []).filter((item) => item.sender_role !== 'system').map((item) => (
-            <article className={`partners-update__message partners-update__message--${item.sender_role}`} key={item.id}>
-              <strong>{item.sender_role === 'admin' ? 'RestaurantSecret' : 'Вы'}</strong>
-              <p>{item.body}</p>
-            </article>
-          ))}
+        <div className="partners-update__conversation" role="log" aria-label="Сообщения со специалистом">
+          {(revision?.messages || []).filter((item) => item.sender_role !== 'system').map((item, index, messages) => {
+            const showDay = index === 0
+              || messageDayKey(item.created_at) !== messageDayKey(messages[index - 1].created_at)
+            return (
+              <div className="partners-update__message-row" key={item.id}>
+                {showDay && (
+                  <time className="partners-update__day-separator" role="separator" dateTime={item.created_at}>
+                    {formatMessageDay(item.created_at)}
+                  </time>
+                )}
+                <article className={`partners-update__message partners-update__message--${item.sender_role}`}>
+                  <header>
+                    <strong>{item.sender_role === 'admin' ? 'RestaurantSecret' : 'Вы'}</strong>
+                    <time dateTime={item.created_at}>{formatMessageTime(item.created_at)}</time>
+                  </header>
+                  <p>{item.body}</p>
+                </article>
+              </div>
+            )
+          })}
         </div>
         <form className="partners-update__chat-form" onSubmit={submit}>
           <label>
@@ -675,41 +817,75 @@ function RevisionWaiting({ payload, busy, error, onAddFiles, onDeleteFile, onRep
   )
 }
 
-function UploadStep({ payload, busy, error, onDeleteFile, onFile, onNext, onReplaceFile, onReply, onSelectMethod }) {
+function UploadStep({
+  payload,
+  busy,
+  error,
+  uploadIssue,
+  onClearUploadIssue,
+  onDeleteFile,
+  onFile,
+  onNext,
+  onReplaceFile,
+  onSelectMethod,
+}) {
   const inputRef = useRef(null)
-  const extracting = payload.draft.status === 'extracting'
   const sourceFiles = payload.revision?.source_files || []
+  const hasUploadedFile = sourceFiles.length > 0
   const hasPreparedSources = payload.draft.source_kind === 'unstructured' && sourceFiles.length > 0
-  if (extracting && payload.revision) {
-    return <RevisionWaiting payload={payload} busy={busy} error={error} onAddFiles={onFile} onDeleteFile={onDeleteFile} onReplaceFile={onReplaceFile} onReply={onReply} />
-  }
   return (
     <section className="partners-update__upload-step">
       <MethodSwitcher activeMethod="upload" busy={busy} onSelect={onSelectMethod} />
       <div className="partners-update__section-heading">
         <span>Новое меню</span>
-        <h2>{hasPreparedSources ? 'Файлы меню' : 'Загрузите файл'}</h2>
-        <p>{hasPreparedSources ? 'Вы остаетесь в текущем черновике. Его фотографии и превью сохранены, пока вы не измените файлы.' : 'Мы сравним новую версию с опубликованной и сохраним подходящие фотографии.'}</p>
+        <h2>{hasPreparedSources ? 'Файлы меню' : hasUploadedFile ? 'Загруженный файл' : 'Загрузите файл'}</h2>
+        {hasPreparedSources && (
+          <p>Вы остаетесь в текущем черновике. Его фотографии и превью сохранены, пока вы не измените файлы.</p>
+        )}
       </div>
       <a className="partners-update__template" href={restaurantPortalApi.templateDownloadUrl()} download><FileSpreadsheet size={25} /><span><strong>Шаблон Excel</strong><small>Используйте шаблон для быстрой автоматической проверки</small></span><span>Скачать</span></a>
-      {hasPreparedSources ? (
-        <SourceFiles payload={payload} busy={busy} onAddFiles={onFile} onDeleteFile={onDeleteFile} onReplaceFile={onReplaceFile} showRestartHint />
+      {hasUploadedFile ? (
+        <SourceFiles
+          payload={payload}
+          busy={busy}
+          onAddFiles={onFile}
+          onDeleteFile={onDeleteFile}
+          onReplaceFile={onReplaceFile}
+          showAdd={hasPreparedSources}
+          showRestartHint={hasPreparedSources}
+        />
       ) : (
         <label className="partners-update__dropzone">
-          <input ref={inputRef} multiple type="file" accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp" onChange={(event) => event.target.files?.length && onFile(Array.from(event.target.files))} />
+          <input
+            ref={inputRef}
+            multiple
+            type="file"
+            aria-label="Выбрать файлы меню"
+            accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp"
+            onChange={(event) => {
+              if (event.target.files?.length) onFile(Array.from(event.target.files))
+              event.target.value = ''
+            }}
+          />
           <Upload size={42} /><strong>{busy ? 'Проверяем файл…' : 'Перетащите файл сюда или выберите на компьютере'}</strong>
           <span>Excel, PDF, JPG, PNG или WEBP</span><i>Выбрать файл</i>
         </label>
       )}
+      <UploadValidationIssue
+        issue={uploadIssue}
+        busy={busy}
+        onClear={onClearUploadIssue}
+        onReplace={onFile}
+      />
       {hasPreparedSources && (
         <div className="partners-update__comparison">
           <Check size={23} /><div><strong>Текущий черновик сохранён</strong><p>{changeSummary(payload.summary)}</p></div>
           <button className="partners-update__primary" type="button" onClick={onNext}>Вернуться к фотографиям <ArrowRight size={17} /></button>
         </div>
       )}
-      {!extracting && payload.draft.source_kind === 'structured' && (
+      {payload.draft.source_kind === 'structured' && hasUploadedFile && (
         <div className="partners-update__comparison">
-          <Check size={23} /><div><strong>Файл проверен и сопоставлен</strong><p>{changeSummary(payload.summary)}</p></div>
+          <Check size={23} /><div><strong>Файл проверен</strong><p>{changeSummary(payload.summary)}</p></div>
           <button className="partners-update__primary" type="button" onClick={onNext}>Перейти к фотографиям <ArrowRight size={17} /></button>
         </div>
       )}
@@ -866,6 +1042,7 @@ export default function PartnersUploadMenu() {
   const [status, setStatus] = useState('loading')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
+  const [uploadIssue, setUploadIssue] = useState(null)
   const [drawerItem, setDrawerItem] = useState(undefined)
   const [furthestStep, setFurthestStep] = useState(1)
   const newDraftRequested = searchParams.get('new') === '1'
@@ -963,6 +1140,7 @@ export default function PartnersUploadMenu() {
     const result = await run(() => restaurantPortalApi.resetDraft(payload.draft.id, method), 'Не получилось выбрать способ.')
     if (result) {
       setPayload(result)
+      setUploadIssue(null)
       setFurthestStep(inferredFurthestStep(result))
     }
   }
@@ -1002,28 +1180,48 @@ export default function PartnersUploadMenu() {
   }
 
   const uploadSource = async (files) => {
-    const result = await run(
-      () => restaurantPortalApi.uploadDraftSources(payload.draft.id, files),
-      'Не получилось обработать файлы.',
-    )
-    if (result) {
+    if (!files.length) return null
+    setBusy(true)
+    setError(null)
+    setUploadIssue(null)
+    try {
+      const result = await restaurantPortalApi.uploadDraftSources(payload.draft.id, files)
       setPayload(result)
       setFurthestStep(inferredFurthestStep(result))
+      return result
+    } catch (err) {
+      if (err.rowErrors?.length) {
+        setUploadIssue({
+          fileName: files.length === 1 ? files[0].name : `${files.length} файлов`,
+          fileSize: files.length === 1 ? files[0].size : files.reduce((total, file) => total + file.size, 0),
+          rowErrors: err.rowErrors,
+          validationKey: err.validationKey,
+        })
+      } else {
+        setError(err.message || 'Не получилось обработать файлы.')
+      }
+      return null
+    } finally {
+      setBusy(false)
     }
   }
 
-  const replyToRevision = async (message, files) => {
-    const result = await run(
-      () => restaurantPortalApi.replyToRevision(payload.draft.id, message, files),
-      'Не получилось отправить ответ.',
-    )
-    if (!result) return false
-    setPayload(result)
-    if (files.length) setFurthestStep(inferredFurthestStep(result))
-    return true
-  }
-
-  const replaceRevisionSource = async (sourceFile, replacement) => {
+  const replaceSourceFile = async (sourceFile, replacement) => {
+    setUploadIssue(null)
+    if (payload.draft.source_kind === 'structured') {
+      setBusy(true)
+      setError(null)
+      try {
+        const reset = await restaurantPortalApi.resetDraft(payload.draft.id, 'upload')
+        setPayload(reset)
+      } catch (err) {
+        setError(err.message || 'Не получилось подготовить замену файла.')
+        setBusy(false)
+        return false
+      }
+      setBusy(false)
+      return Boolean(await uploadSource([replacement]))
+    }
     const result = await run(
       () => restaurantPortalApi.replaceRevisionSource(payload.draft.id, sourceFile.id, replacement),
       'Не получилось заменить файл.',
@@ -1034,15 +1232,45 @@ export default function PartnersUploadMenu() {
     return true
   }
 
-  const deleteRevisionSource = async (sourceFile) => {
-    if (!window.confirm(`Удалить файл «${sourceFile.original_name}»? Фотографии и превью будут подготовлены заново.`)) return false
+  const deleteSourceFile = async (sourceFile) => {
+    if (!window.confirm(`Удалить файл «${sourceFile.original_name}»?`)) return false
     const result = await run(
-      () => restaurantPortalApi.deleteRevisionSource(payload.draft.id, sourceFile.id),
+      () => payload.draft.source_kind === 'structured'
+        ? restaurantPortalApi.resetDraft(payload.draft.id, 'upload')
+        : restaurantPortalApi.deleteRevisionSource(payload.draft.id, sourceFile.id),
       'Не получилось удалить файл.',
     )
     if (!result) return false
     setPayload(result)
+    setUploadIssue(null)
     setFurthestStep(inferredFurthestStep(result))
+    return true
+  }
+
+  const cancelUpload = async (method) => {
+    const action = method === 'manual'
+      ? 'отменить загрузку и перейти к ручному редактированию'
+      : 'отменить загрузку и вернуться к шаблону'
+    if (!window.confirm(`Вы уверены, что хотите ${action}? Загруженные файлы будут удалены.`)) return false
+    const result = await run(
+      () => restaurantPortalApi.resetDraft(payload.draft.id, method),
+      'Не получилось отменить загрузку.',
+    )
+    if (!result) return false
+    setPayload(result)
+    setUploadIssue(null)
+    setFurthestStep(inferredFurthestStep(result))
+    return true
+  }
+
+  const replyToRevision = async (message, files) => {
+    const result = await run(
+      () => restaurantPortalApi.replyToRevision(payload.draft.id, message, files),
+      'Не получилось отправить ответ.',
+    )
+    if (!result) return false
+    setPayload(result)
+    if (files.length) setFurthestStep(inferredFurthestStep(result))
     return true
   }
 
@@ -1094,10 +1322,26 @@ export default function PartnersUploadMenu() {
         onStep={payload.draft.status === 'submitted' ? () => {} : setStep}
       />
       <main className="partners-update__main">
-        <header className="partners-update__topbar"><button type="button" onClick={() => navigate('/partners/dashboard')}>Сохранить и выйти</button></header>
+        <header className="partners-update__topbar">
+          <button className="partners-update__save-exit" type="button" onClick={() => navigate('/partners/dashboard')}>
+            <Check size={18} /> Сохранить и выйти
+          </button>
+        </header>
         <div className="partners-update__content">
           {payload.draft.status === 'submitted' && <SubmittedState onExit={() => navigate('/partners/dashboard')} />}
-          {waitingForPreparation && <RevisionWaiting payload={payload} busy={busy} error={error} onAddFiles={uploadSource} onDeleteFile={deleteRevisionSource} onReplaceFile={replaceRevisionSource} onReply={replyToRevision} />}
+          {waitingForPreparation && (
+            <RevisionWaiting
+              payload={payload}
+              busy={busy}
+              error={error}
+              onAddFiles={uploadSource}
+              onCancelUpload={() => cancelUpload('upload')}
+              onDeleteFile={deleteSourceFile}
+              onReplaceFile={replaceSourceFile}
+              onReply={replyToRevision}
+              onSwitchToManual={() => cancelUpload('manual')}
+            />
+          )}
           {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 1 && !payload.draft.method && <MethodCards initial={isFirstPublication} onSelect={chooseMethod} />}
           {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 1 && payload.draft.method === 'manual' && (
             <ManualStep
@@ -1115,7 +1359,21 @@ export default function PartnersUploadMenu() {
             />
           )}
           {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 1 && payload.draft.method === 'upload' && (
-            <UploadStep payload={payload} busy={busy} error={error} onDeleteFile={deleteRevisionSource} onFile={uploadSource} onNext={() => setStep(2)} onReplaceFile={replaceRevisionSource} onReply={replyToRevision} onSelectMethod={chooseMethod} />
+            <UploadStep
+              payload={payload}
+              busy={busy}
+              error={error}
+              uploadIssue={uploadIssue}
+              onClearUploadIssue={() => {
+                setUploadIssue(null)
+                setError(null)
+              }}
+              onDeleteFile={deleteSourceFile}
+              onFile={uploadSource}
+              onNext={() => setStep(2)}
+              onReplaceFile={replaceSourceFile}
+              onSelectMethod={chooseMethod}
+            />
           )}
           {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 2 && <PhotosStep payload={payload} busy={busy} onBack={() => setStep(1)} onDeletePhoto={deletePhoto} onNext={() => setStep(3)} onPhoto={uploadPhoto} onAssign={assignPhoto} />}
           {!waitingForPreparation && payload.draft.status !== 'submitted' && step === 3 && <PreviewStep payload={payload} busy={busy} error={error} onBack={() => setStep(2)} onNext={() => setStep(4)} onMessage={sendRevisionMessage} />}

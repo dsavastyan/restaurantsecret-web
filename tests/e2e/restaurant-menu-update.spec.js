@@ -142,15 +142,15 @@ test('published restaurant opens the shared four-step menu update flow', async (
   await expect(previewPage.getByText('Безопасное превью')).toBeVisible()
   await expect(previewPage.getByText('Эта версия меню ещё не опубликована и не видна гостям')).toBeVisible()
   await expect(previewPage.getByRole('heading', { name: 'Меню Aero Menu с КБЖУ' })).toBeVisible()
-  await expect(previewPage.getByRole('heading', { name: 'Омлет с форелью' })).toBeVisible()
-  await expect(previewPage.getByText('790 ₽')).toBeVisible()
+  await expect(previewPage.locator('.rsm2-tile__cover-name').filter({ hasText: 'Омлет с форелью' })).toBeVisible()
+  await expect(previewPage.locator('.rsm2-tile__cover-price').filter({ hasText: '790 ₽' })).toBeVisible()
   await expect(previewPage.getByText('Старое сезонное блюдо')).toHaveCount(0)
   await expect(previewPage.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow')
   expect(publicMenuRequests).toBe(0)
 
   await previewPage.setViewportSize({ width: 390, height: 844 })
   await expect(previewPage.getByRole('link', { name: /Вернуться к редактированию/ })).toBeVisible()
-  await expect(previewPage.getByRole('heading', { name: 'Омлет с форелью' })).toBeVisible()
+  await expect(previewPage.locator('.rsm2-row__name').filter({ hasText: 'Омлет с форелью' })).toBeVisible()
   await previewPage.close()
 
   await page.getByRole('button', { name: 'Продолжить' }).click()
@@ -478,6 +478,19 @@ test('waiting menu update shows uploaded source and lets the restaurant download
         sender_role: 'admin',
         message_type: 'clarification',
         body: 'КБЖУ блюда 12 расходится с фактом',
+        created_at: '2026-07-28 08:15:00',
+      }, {
+        id: 19,
+        sender_role: 'restaurant',
+        message_type: 'reply',
+        body: 'Проверим и вернёмся с ответом',
+        created_at: '2026-07-28 09:20:00',
+      }, {
+        id: 20,
+        sender_role: 'admin',
+        message_type: 'comment',
+        body: 'Спасибо, ждём уточнение',
+        created_at: '2026-07-29 11:45:00',
       }],
       source_files: [{
         id: 5,
@@ -491,7 +504,8 @@ test('waiting menu update shows uploaded source and lets the restaurant download
   }
 
   await page.route('**/api/restaurant/**', async (route) => {
-    const path = new URL(route.request().url()).pathname
+    const request = route.request()
+    const path = new URL(request.url()).pathname
     if (path === '/api/restaurant/me') {
       await route.fulfill({
         json: {
@@ -503,6 +517,20 @@ test('waiting menu update shows uploaded source and lets the restaurant download
       return
     }
     if (path === '/api/restaurant/menu/drafts/91/revision/files/5') {
+      if (request.method() === 'PUT') {
+        payload.revision.source_files[0] = {
+          ...payload.revision.source_files[0],
+          original_name: 'Меню — август.pdf',
+          size_bytes: 204800,
+        }
+        await route.fulfill({ json: { ok: true, ...payload } })
+        return
+      }
+      if (request.method() === 'DELETE') {
+        payload.revision.source_files = []
+        await route.fulfill({ json: { ok: true, ...payload } })
+        return
+      }
       await route.fulfill({
         body: 'source file',
         headers: {
@@ -510,6 +538,22 @@ test('waiting menu update shows uploaded source and lets the restaurant download
           'Content-Disposition': 'attachment; filename="menu-july.pdf"',
         },
       })
+      return
+    }
+    if (path === '/api/restaurant/menu/drafts/91/reset') {
+      payload.draft = {
+        ...payload.draft,
+        status: 'editing',
+        method: request.postDataJSON().method,
+        source_kind: null,
+      }
+      payload.revision = {
+        ...payload.revision,
+        status: 'discarded',
+        messages: [],
+        source_files: [],
+      }
+      await route.fulfill({ json: { ok: true, ...payload } })
       return
     }
     if (path === '/api/restaurant/menu/drafts/91') {
@@ -522,15 +566,186 @@ test('waiting menu update shows uploaded source and lets the restaurant download
   await page.goto('/partners/upload?draft=91')
 
   await expect(page.getByText('Загруженный файл')).toBeVisible()
-  const sourceFile = page.locator('.partners-update__source-file').filter({ hasText: 'Меню — июль.pdf' })
-  const sourceLink = sourceFile.getByRole('link', { name: 'Скачать' })
-  await expect(sourceFile).toContainText('150 КБ · 4 стр.')
+  const sourceFiles = page.getByRole('region', { name: 'Файлы меню' })
+  let sourceCard = sourceFiles.getByRole('article').filter({ hasText: 'Меню — июль.pdf' })
+  const sourceLink = sourceCard.getByRole('link', { name: 'Скачать' })
   await expect(sourceLink).toBeVisible()
   await expect(sourceLink).toHaveAttribute('href', /\/api\/restaurant\/menu\/drafts\/91\/revision\/files\/5$/)
+  await expect(sourceCard).toContainText('150 КБ · 4 стр.')
 
-  const chat = page.locator('.partners-update__chat')
+  const chat = page.getByRole('region', { name: 'Переписка со специалистом' })
   await expect(chat.getByText('Переписка со специалистом')).toBeVisible()
   await expect(chat.getByText('Нужно уточнение')).toBeVisible()
   await expect(chat.getByText('КБЖУ блюда 12 расходится с фактом')).toHaveCount(1)
   await expect(chat.getByPlaceholder('Напишите комментарий для специалиста')).toBeVisible()
+  await expect(chat.getByRole('separator')).toHaveCount(2)
+  const messages = chat.getByRole('log').getByRole('article')
+  await expect(messages).toHaveCount(3)
+  await expect(messages.first().locator('time')).not.toHaveText('')
+
+  await sourceCard.getByLabel('Заменить файл Меню — июль.pdf').setInputFiles({
+    name: 'Меню — август.pdf',
+    mimeType: 'application/pdf',
+    buffer: Buffer.from('%PDF-1.4 replacement'),
+  })
+  sourceCard = sourceFiles.getByRole('article').filter({ hasText: 'Меню — август.pdf' })
+  await expect(sourceCard).toContainText('200 КБ')
+
+  page.once('dialog', (dialog) => dialog.accept())
+  await sourceCard.getByRole('button', { name: 'Удалить' }).click()
+  await expect(page.getByText('Меню — август.pdf')).toHaveCount(0)
+  await expect(page.getByText('Файлов пока нет. Добавьте актуальный файл или отмените эту загрузку.')).toBeVisible()
+
+  page.once('dialog', (dialog) => dialog.accept())
+  await page.getByRole('button', { name: /Отменить загрузку и вернуться к шаблону/ }).click()
+  await expect(page.getByRole('heading', { name: 'Загрузите файл' })).toBeVisible()
+  await expect(page.getByText('Шаблон Excel')).toBeVisible()
+})
+
+test('Excel upload shows validation details, marked workbook, current file controls, and concise summary', async ({ page }) => {
+  let uploadAttempt = 0
+  const payload = {
+    draft: {
+      id: 94,
+      restaurant_id: 42,
+      current_step: 1,
+      status: 'editing',
+      method: 'upload',
+      source_kind: null,
+      revision: 1,
+    },
+    items: [],
+    photos: [],
+    summary: { added: 0, updated: 0, deleted: 0, unchanged: 0, photos: 0 },
+    revision: {
+      id: 32,
+      status: 'discarded',
+      messages: [],
+      source_files: [],
+    },
+  }
+
+  const setStructuredSource = (name) => {
+    payload.draft = { ...payload.draft, status: 'editing', source_kind: 'structured' }
+    payload.summary = { added: 0, updated: 2, deleted: 1, unchanged: 3, photos: 0 }
+    payload.revision = {
+      ...payload.revision,
+      source_files: [{
+        id: 70,
+        original_name: name,
+        content_type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        size_bytes: 18432,
+        sheet_count: 1,
+      }],
+    }
+  }
+
+  await page.route('**/api/restaurant/**', async (route) => {
+    const request = route.request()
+    const path = new URL(request.url()).pathname
+    if (path === '/api/restaurant/me') {
+      await route.fulfill({
+        json: {
+          restaurant: { id: 42, name: 'Aero Menu', has_published_menu: true },
+          restaurants: [{ id: 42, name: 'Aero Menu' }],
+          last_upload: { status: 'published' },
+        },
+      })
+      return
+    }
+    if (path === '/api/restaurant/menu/drafts/94/source') {
+      uploadAttempt += 1
+      if (uploadAttempt === 1) {
+        await route.fulfill({
+          status: 422,
+          json: {
+            ok: false,
+            error: { code: 'data_quality_gate_failed', message: 'Проверьте найденные ошибки в файле.' },
+            errors: [{
+              row: 3,
+              field: 'dish_name',
+              type: 'missing_value',
+              message: 'В строке 3 не указано название блюда.',
+            }, {
+              row: 4,
+              field: 'price_rub',
+              type: 'negative_value',
+              message: 'В строке 4 значение поля «Цена» выглядит ошибочным (-10).',
+            }],
+            validation_key: 'RestaurantPortal/Validation/aero-menu/errors.xlsx',
+          },
+        })
+        return
+      }
+      setStructuredSource(uploadAttempt === 2 ? 'исправленное-меню.xlsx' : 'меню-август.xlsx')
+      await route.fulfill({ json: { ok: true, ...payload } })
+      return
+    }
+    if (path === '/api/restaurant/menu/drafts/94/reset') {
+      payload.draft = {
+        ...payload.draft,
+        status: 'editing',
+        source_kind: null,
+        method: request.postDataJSON().method,
+      }
+      payload.summary = { added: 0, updated: 0, deleted: 0, unchanged: 0, photos: 0 }
+      payload.revision = { ...payload.revision, messages: [], source_files: [] }
+      await route.fulfill({ json: { ok: true, ...payload } })
+      return
+    }
+    if (path === '/api/restaurant/menu/drafts/94') {
+      await route.fulfill({ json: { ok: true, ...payload } })
+      return
+    }
+    await route.fulfill({ json: { ok: true } })
+  })
+
+  await page.goto('/partners/upload?draft=94')
+  await expect(page.getByText('Мы сравним новую версию с опубликованной и сохраним подходящие фотографии.')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Сохранить и выйти' })).toHaveClass(/partners-update__save-exit/)
+
+  const dropzoneInput = page.getByLabel('Выбрать файлы меню')
+  await dropzoneInput.setInputFiles({
+    name: 'меню-с-ошибками.xlsx',
+    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    buffer: Buffer.from('invalid workbook'),
+  })
+
+  const validation = page.getByRole('region', { name: /Найдены ошибки/ })
+  await expect(validation.getByText('меню-с-ошибками.xlsx')).toBeVisible()
+  await expect(validation.getByText('Найдены ошибки · 2')).toBeVisible()
+  await expect(validation.getByText('В строке 3 не указано название блюда.')).toBeVisible()
+  await expect(validation.getByText('В строке 4 значение поля «Цена» выглядит ошибочным (-10).')).toBeVisible()
+  await expect(validation.getByRole('link', { name: /Скачать Excel с ошибками/ })).toHaveAttribute(
+    'href',
+    /\/api\/restaurant\/menu\/validation-result\?key=RestaurantPortal%2FValidation%2Faero-menu%2Ferrors\.xlsx$/,
+  )
+
+  await validation.getByRole('button', { name: 'Удалить' }).click()
+  await expect(validation).toHaveCount(0)
+
+  await dropzoneInput.setInputFiles({
+    name: 'исправленное-меню.xlsx',
+    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    buffer: Buffer.from('corrected workbook'),
+  })
+  await expect(page.getByText('исправленное-меню.xlsx')).toBeVisible()
+  await expect(page.getByText('Файл проверен', { exact: true })).toBeVisible()
+  await expect(page.getByText('Файл проверен и сопоставлен')).toHaveCount(0)
+  await expect(page.getByText('0 новых блюд · 2 изменено · 1 будет удалено')).toBeVisible()
+
+  const sourceFiles = page.getByRole('region', { name: 'Файлы меню' })
+  let sourceCard = sourceFiles.getByRole('article').filter({ hasText: 'исправленное-меню.xlsx' })
+  await sourceCard.getByLabel('Заменить файл исправленное-меню.xlsx').setInputFiles({
+    name: 'меню-август.xlsx',
+    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    buffer: Buffer.from('replacement workbook'),
+  })
+  sourceCard = sourceFiles.getByRole('article').filter({ hasText: 'меню-август.xlsx' })
+  await expect(sourceCard).toBeVisible()
+
+  page.once('dialog', (dialog) => dialog.accept())
+  await sourceCard.getByRole('button', { name: 'Удалить' }).click()
+  await expect(page.getByText('меню-август.xlsx')).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: 'Загрузите файл' })).toBeVisible()
 })
