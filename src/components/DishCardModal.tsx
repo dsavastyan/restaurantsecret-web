@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import { useDishCardStore } from "@/store/dishCard";
 import { useAuth } from "@/store/auth";
@@ -11,44 +11,15 @@ import { useFavoritesStore } from "@/store/favorites";
 import { useDiaryStore } from "@/store/diary";
 import { computeMacroGeometry, formatNumeric, formatPriceRub } from "@/lib/nutrition";
 import { analytics } from "@/services/analytics";
-import { useMenuPreview } from "@/lib/designPreview";
 import MacroRing from "@/components/MenuRedesign/MacroRing";
 import { HeartIcon } from "@/components/MenuRedesign/icons";
 import "@/pages/menu-redesign.css";
 
 const root = typeof document !== "undefined" ? document.body : null;
 
-const macroLabel = {
-  kcal: "ккал",
-  proteins_g: "Белки",
-  fats_g: "Жиры",
-  carbs_g: "Углеводы",
-};
-
-type MacroKey = keyof typeof macroLabel;
-
-function MacroCell({
-  label,
-  value,
-  highlight,
-}: {
-  label: string;
-  value?: number | null;
-  highlight?: boolean;
-}) {
-  const display = Number.isFinite(value) ? Math.round(value!) : "—";
-  return (
-    <div className={`dish-card__macro${highlight ? " is-accent" : ""}`}>
-      <div className="dish-card__macro-value">{display}</div>
-      <div className="dish-card__macro-label">{label}</div>
-    </div>
-  );
-}
-
 export default function DishCardModal() {
   const navigate = useNavigate();
   const location = useLocation();
-  const isPreview = useMenuPreview();
   const { isOpen, isLoading, data, error, close } = useDishCardStore((s) => ({
     isOpen: s.isOpen,
     isLoading: s.isLoading,
@@ -206,16 +177,11 @@ export default function DishCardModal() {
     analytics.track("diary_add", { dish_id: data.id, name: data.name, restaurant: data.restaurantSlug });
   };
 
-  const anchorId = useMemo(() => {
-    if (!data) return "";
-    if (data.id) return `dish-${data.id}`;
-    return `dish-${data.name.replace(/\s+/g, "-").toLowerCase()}`;
-  }, [data]);
-
   if (!isOpen || !root) return null;
 
-  // Shared between the legacy and redesigned modal — the "report outdated
-  // menu" flow isn't part of the visual redesign, only the trigger button is.
+  // The "report outdated menu" form was not part of the visual redesign, so it
+  // keeps its existing feedback-modal styling; only its trigger lives in the
+  // new card body.
   const outdatedFormOverlay = isOutdatedOpen && (
     <div
       className="feedback-modal__backdrop"
@@ -327,159 +293,6 @@ export default function DishCardModal() {
     </div>
   );
 
-  const content = (
-    <div
-      className="dish-card-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="dish-card-title"
-      onClick={close}
-    >
-      <div className="dish-card" onClick={(event) => event.stopPropagation()}>
-        <button className="dish-card__close" type="button" aria-label="Закрыть" onClick={close}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-
-        {isLoading && (
-          <div className="dish-card__loading">
-            <div className="dish-card__spinner" aria-hidden />
-            <p>Загружаем карточку блюда…</p>
-          </div>
-        )}
-
-        {!isLoading && error && (
-          <div className="dish-card__error">
-            <p>{error}</p>
-            <button type="button" className="btn btn--primary" onClick={close}>
-              Закрыть
-            </button>
-          </div>
-        )}
-
-        {!isLoading && data && (
-          <div className="dish-card__body">
-            <div className="dish-card__header">
-              <div>
-                <div className="dish-card__eyebrow">Карточка блюда</div>
-                <h3 id="dish-card-title" className="dish-card__title">
-                  {data.name}
-                </h3>
-                <Link
-                  to={`/restaurants/${data.restaurantSlug}/menu/#${anchorId}`}
-                  className="dish-card__restaurant"
-                  onClick={close}
-                >
-                  {data.restaurantName || "Ресторан"}
-                </Link>
-              </div>
-              <div className="dish-card__actions">
-                <button
-                  type="button"
-                  className="dish-card__add-btn"
-                  onClick={handleDiaryAdd}
-                  title="Добавить в съеденное сегодня"
-                >
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="16"></line>
-                    <line x1="8" y1="12" x2="16" y2="12"></line>
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  className={`dish-card__fav-btn ${isFavorite ? "is-active" : ""}`}
-                  onClick={handleFavoriteClick}
-                  aria-label={isFavorite ? "Удалить из избранного" : "Добавить в избранное"}
-                >
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z"
-                      fill={isFavorite ? "#E11D48" : "none"}
-                      stroke={isFavorite ? "#E11D48" : "currentColor"}
-                      strokeWidth="2"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {hasDishAccess ? (
-              <>
-                <section className="dish-card__section">
-                  <div className="dish-card__section-title">КБЖУ на порцию</div>
-                  <div className="dish-card__macro-grid">
-                    {(Object.keys(macroLabel) as MacroKey[]).map((key) => (
-                      <MacroCell
-                        key={key}
-                        label={macroLabel[key]}
-                        value={(data as any)[key] as number | null}
-                        highlight={key === "kcal"}
-                      />
-                    ))}
-                  </div>
-                </section>
-
-                <section className="dish-card__section">
-                  <div className="dish-card__section-title">Состав</div>
-                  <p className="dish-card__text">
-                    {data.composition_text || "Ресторан не поделился данными о составе"}
-                  </p>
-                </section>
-
-
-              </>
-            ) : (
-              <section className="dish-card__section">
-                <div className="dish-card__section-title">Информация о блюде</div>
-                <p className="dish-card__text">
-                  Эта информация доступна только по подписке.
-                </p>
-                <button type="button" className="btn btn--primary" onClick={handleSubscribeClick}>
-                  {subscriptionCtaText}
-                </button>
-              </section>
-            )}
-
-            {data.menuCapturedAtLabel && (
-              <div className="dish-card__meta dish-card__meta--footer">
-                <span>Меню добавлено: {data.menuCapturedAtLabel}</span>
-
-                <button
-                  type="button"
-                  className="btn btn--ghost dish-card__outdated-btn"
-                  onClick={() => setIsOutdatedOpen(true)}
-                >
-                  <span className="dish-card__outdated-icon" aria-hidden>⟳</span>
-                  Меню устарело?
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {outdatedFormOverlay}
-    </div>
-  );
-
   const contentV2 = (
     <div className="rsm2-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="dish-card-title-v2" onClick={close}>
       <div className="rsm2-modal" onClick={(event) => event.stopPropagation()}>
@@ -524,7 +337,7 @@ export default function DishCardModal() {
     </div>
   );
 
-  return createPortal(isPreview ? contentV2 : content, root);
+  return createPortal(contentV2, root);
 }
 
 // Body of the redesigned full dish card (design_handoff_restaurant_menu,
