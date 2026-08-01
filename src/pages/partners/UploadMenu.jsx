@@ -228,7 +228,19 @@ function inferredFurthestStep(payload) {
   return Math.max(currentStep, preparedUpload ? 3 : 1)
 }
 
-function FlowSidebar({ restaurant, step, furthestStep, onStep, initial = false, locked = false }) {
+function inferredCompletedStep(payload) {
+  if (!payload?.draft) return 0
+  if (payload.draft.status === 'submitted') return STEPS.length
+
+  const currentStep = Number(payload.draft.current_step) || 1
+  const menuIsPrepared = payload.draft.method === 'upload'
+    && payload.draft.status === 'editing'
+    && Boolean(payload.draft.source_kind)
+
+  return Math.max(currentStep - 1, menuIsPrepared ? 1 : 0)
+}
+
+function FlowSidebar({ restaurant, step, completedStep, furthestStep, onStep, initial = false, locked = false }) {
   return (
     <aside className="partners-update__sidebar">
       <div>
@@ -246,10 +258,11 @@ function FlowSidebar({ restaurant, step, furthestStep, onStep, initial = false, 
         <ol className="partners-update__steps">
           {STEPS.map(([title, description, optional], index) => {
             const number = index + 1
-            const state = number === step ? 'active' : number < furthestStep ? 'complete' : 'pending'
+            const state = number <= completedStep ? 'complete' : number <= furthestStep ? 'available' : 'pending'
+            const isCurrent = number === step
             return (
-              <li className={`partners-update__step partners-update__step--${state}`} key={title}>
-                <button type="button" disabled={locked || number > furthestStep} onClick={() => onStep(number)}>
+              <li className={`partners-update__step partners-update__step--${state}${isCurrent ? ' partners-update__step--current' : ''}`} key={title}>
+                <button type="button" aria-current={isCurrent ? 'step' : undefined} disabled={locked || number > furthestStep} onClick={() => onStep(number)}>
                   <span>{state === 'complete' ? <Check size={16} /> : number}</span>
                   <span>
                     <span className="partners-update__step-title">
@@ -886,7 +899,7 @@ function UploadStep({
       {payload.draft.source_kind === 'structured' && hasUploadedFile && (
         <div className="partners-update__comparison">
           <Check size={23} /><div><strong>Файл проверен</strong><p>{changeSummary(payload.summary)}</p></div>
-          <button className="partners-update__primary" type="button" onClick={onNext}>Перейти к фотографиям <ArrowRight size={17} /></button>
+          <button className="partners-update__primary" type="button" onClick={onNext}>Перейти к следующему шагу <ArrowRight size={17} /></button>
         </div>
       )}
       {error && <div className="partners__notice partners__notice--error">{error}</div>}
@@ -1310,6 +1323,7 @@ export default function PartnersUploadMenu() {
   if (status === 'error' || !payload) return <div className="partners partners--centered"><div className="partners__notice partners__notice--error">{error}</div><button className="partners__btn" onClick={() => navigate('/partners/dashboard')}>Вернуться в кабинет</button></div>
 
   const step = payload.draft.current_step
+  const completedStep = inferredCompletedStep(payload)
   const waitingForPreparation = payload.draft.status === 'extracting' && payload.revision
   return (
     <div className="partners-update">
@@ -1318,6 +1332,7 @@ export default function PartnersUploadMenu() {
         locked={Boolean(waitingForPreparation)}
         restaurant={restaurant}
         step={step}
+        completedStep={completedStep}
         furthestStep={furthestStep}
         onStep={payload.draft.status === 'submitted' ? () => {} : setStep}
       />
