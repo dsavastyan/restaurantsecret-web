@@ -64,6 +64,58 @@ export const restaurantPortalApi = {
   confirmMenuFreshness: () =>
     portalRequest('/api/restaurant/menu/confirm-freshness', { method: 'POST' }),
 
+  seasonalMenus: () => portalRequest('/api/restaurant/seasonal-menus'),
+
+  createSeasonalMenu: (body) =>
+    portalRequest('/api/restaurant/seasonal-menus', { method: 'POST', body }),
+
+  seasonalMenu: (menuId) =>
+    portalRequest(`/api/restaurant/seasonal-menus/${encodeURIComponent(menuId)}`),
+
+  updateSeasonalMenu: (menuId, body) =>
+    portalRequest(`/api/restaurant/seasonal-menus/${encodeURIComponent(menuId)}`, {
+      method: 'PATCH',
+      body,
+    }),
+
+  deleteSeasonalMenu: (menuId) =>
+    portalRequest(`/api/restaurant/seasonal-menus/${encodeURIComponent(menuId)}`, {
+      method: 'DELETE',
+    }),
+
+  uploadSeasonalMenuSource: (menuId, file) => {
+    const form = new FormData()
+    form.append('file', file)
+    return portalRequest(`/api/restaurant/seasonal-menus/${encodeURIComponent(menuId)}/source`, {
+      method: 'POST',
+      body: form,
+      isFormData: true,
+    })
+  },
+
+  resolveSeasonalDuplicate: (menuId, itemId, duplicateResolution) =>
+    portalRequest(
+      `/api/restaurant/seasonal-menus/${encodeURIComponent(menuId)}/items/${encodeURIComponent(itemId)}`,
+      { method: 'PATCH', body: { duplicate_resolution: duplicateResolution } },
+    ),
+
+  uploadSeasonalItemPhoto: (menuId, itemId, file) => {
+    const form = new FormData()
+    form.append('photo', file)
+    return portalRequest(
+      `/api/restaurant/seasonal-menus/${encodeURIComponent(menuId)}/items/${encodeURIComponent(itemId)}/photo`,
+      { method: 'PUT', body: form, isFormData: true },
+    )
+  },
+
+  seasonalItemPhotoUrl: (menuId, itemId) =>
+    `${RESTAURANT_API_BASE}/api/restaurant/seasonal-menus/${encodeURIComponent(menuId)}/items/${encodeURIComponent(itemId)}/photo`,
+
+  submitSeasonalMenu: (menuId) =>
+    portalRequest(`/api/restaurant/seasonal-menus/${encodeURIComponent(menuId)}/submit`, {
+      method: 'POST',
+    }),
+
   switchRestaurant: (restaurantId) =>
     portalRequest('/api/restaurant/switch', {
       method: 'POST',
