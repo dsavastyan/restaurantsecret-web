@@ -1,6 +1,9 @@
 .partners-update {
   --u-green: #607d48;
   --u-green-dark: #4e6939;
+  --u-blue: #74a9c2;
+  --u-blue-dark: #3f7087;
+  --u-blue-soft: #e9f3f8;
   --u-ink: #292a26;
   --u-muted: #74756f;
   --u-line: #ded8cd;
@@ -36,10 +39,15 @@
 .partners-update__step strong { font-size: 13px; font-weight: 650; }
 .partners-update__step-title { display: flex; align-items: center; gap: 6px; }
 .partners-update__step-title i { padding: 3px 5px; border-radius: 99px; background: #e7e3da; color: #777870; font-size: 7px; font-style: normal; font-weight: 750; letter-spacing: .03em; text-transform: uppercase; }
-.partners-update__step--active .partners-update__step-title i { background: #dce8d3; color: var(--u-green-dark); }
+.partners-update__step--available .partners-update__step-title i,
+.partners-update__step--active .partners-update__step-title i { background: #dceef6; color: var(--u-blue-dark); }
 .partners-update__step small { margin-top: 3px; font-size: 10px; }
-.partners-update__step--active button { background: #edf2e8; color: var(--u-green-dark); }
-.partners-update__step--active button > span:first-child,
+.partners-update__step--available button,
+.partners-update__step--active button { background: var(--u-blue-soft); color: var(--u-blue-dark); }
+.partners-update__step--available button > span:first-child,
+.partners-update__step--active button > span:first-child { border-color: var(--u-blue); background: #f5fbfe; color: var(--u-blue-dark); }
+.partners-update__step--complete button { color: var(--u-green-dark); }
+.partners-update__step--complete.partners-update__step--current button { background: #edf2e8; }
 .partners-update__step--complete button > span:first-child { border-color: var(--u-green); background: var(--u-green); color: white; }
 .partners-update__support { display: flex; flex-direction: column; padding-top: 20px; border-top: 1px solid #ddd7cc; color: #88877f; font-size: 11px; line-height: 1.6; text-decoration: none; }
 .partners-update__support strong { color: var(--u-green-dark); }
