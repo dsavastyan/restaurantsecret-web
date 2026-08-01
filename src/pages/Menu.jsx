@@ -60,6 +60,7 @@ export default function Menu({
     fetchStatus: state.fetchStatus,
   }))
   const open = useDishCardStore((state) => state.open)
+  const openPreview = useDishCardStore((state) => state.openPreview)
   const {
     isFavoriteRestaurant,
     toggleFavoriteRestaurant,
@@ -412,6 +413,7 @@ export default function Menu({
       isOutdatedOpen={isOutdatedOpen}
       setIsOutdatedOpen={setIsOutdatedOpen}
       openDishCard={open}
+      openPreviewDishCard={openPreview}
       readOnly={previewMode}
     />
   )

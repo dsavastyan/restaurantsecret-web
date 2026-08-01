@@ -78,6 +78,7 @@ export default function MenuRedesignView({
   setIsOutdatedOpen,
 
   openDishCard,
+  openPreviewDishCard,
   readOnly = false,
 }) {
   useFullBleedLayout();
@@ -128,13 +129,18 @@ export default function MenuRedesignView({
 
   const openDish = (dish) => {
     const isFreeAccess = freeDishKeys.has(buildDishAccessKey(dish));
-    openDishCard({
+    const draft = {
       id: dish.id,
       dishName: dish.name,
       restaurantSlug: slug,
       restaurantName: menu?.name || slug,
       isFreeAccess,
-    });
+    };
+    if (readOnly) {
+      openPreviewDishCard(dish, draft, menu?.menuCapturedAt);
+      return;
+    }
+    openDishCard(draft);
   };
 
   return (
@@ -294,7 +300,7 @@ export default function MenuRedesignView({
                         restaurantSlug={slug}
                         restaurantName={menu?.name || slug}
                         isFreeAccess={isFreeAccess}
-                        interactive={!readOnly}
+                        interactive
                         readOnly={readOnly}
                         onClick={() => openDish(dish)}
                       />
@@ -312,7 +318,7 @@ export default function MenuRedesignView({
                         restaurantSlug={slug}
                         restaurantName={menu?.name || slug}
                         isFreeAccess={isFreeAccess}
-                        interactive={!readOnly}
+                        interactive
                         readOnly={readOnly}
                         onClick={() => openDish(dish)}
                       />

@@ -7,7 +7,7 @@ import { formatMenuCapturedAt } from "@/lib/dates";
 import { getAuthState } from "@/store/auth";
 
 type DishCardDraft = {
-  id?: number;
+  id?: number | string;
   dishName: string;
   restaurantSlug: string;
   restaurantName?: string;
@@ -35,9 +35,15 @@ type DishCardData = {
 type DishCardState = {
   isOpen: boolean;
   isLoading: boolean;
+  isReadOnly: boolean;
   error: string;
   data: DishCardData | null;
   open: (draft: DishCardDraft) => Promise<void>;
+  openPreview: (
+    dish: Record<string, unknown>,
+    draft: DishCardDraft,
+    capturedAt?: string | null,
+  ) => void;
   close: () => void;
 };
 
@@ -55,6 +61,7 @@ const subscribe = (listener: () => void) => {
 const initialSlice = {
   isOpen: false,
   isLoading: false,
+  isReadOnly: false,
   error: "",
   data: null,
 };
@@ -62,6 +69,7 @@ const initialSlice = {
 let state: DishCardState = {
   ...initialSlice,
   open: async () => undefined,
+  openPreview: () => undefined,
   close: () => undefined,
 };
 
@@ -308,11 +316,36 @@ async function openDishCard(draft: DishCardDraft) {
   }
 }
 
+function openPreviewDishCard(
+  dish: Record<string, unknown>,
+  draft: DishCardDraft,
+  capturedAt?: string | null,
+) {
+  const data = deriveCardData(
+    dish,
+    draft,
+    draft.restaurantName,
+    capturedAt,
+    true,
+  );
+  updateState({
+    ...initialSlice,
+    isOpen: true,
+    isReadOnly: true,
+    data,
+  });
+}
+
 function closeDishCard() {
   updateState({ ...initialSlice });
 }
 
-state = { ...state, open: openDishCard, close: closeDishCard } as DishCardState;
+state = {
+  ...state,
+  open: openDishCard,
+  openPreview: openPreviewDishCard,
+  close: closeDishCard,
+} as DishCardState;
 
 export const useDishCardStore = <T,>(selector: (state: DishCardState) => T): T => {
   const snapshot = useSyncExternalStore(subscribe, () => state, () => state);
