@@ -146,6 +146,17 @@ test('published restaurant opens the shared four-step menu update flow', async (
   await expect(previewPage.locator('.rsm2-tile__cover-price').filter({ hasText: '790 ₽' })).toBeVisible()
   await expect(previewPage.getByText('Старое сезонное блюдо')).toHaveCount(0)
   await expect(previewPage.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow')
+
+  const previewDish = previewPage.locator('.rsm2-tile').filter({ hasText: 'Омлет с форелью' })
+  await expect(previewDish).toHaveAttribute('role', 'button')
+  await previewDish.click()
+  const dishDialog = previewPage.getByRole('dialog', { name: 'Омлет с форелью' })
+  await expect(dishDialog).toBeVisible()
+  await expect(dishDialog.getByText('Яйца, форель')).toBeVisible()
+  await expect(dishDialog.getByText('Предпросмотр карточки блюда')).toBeVisible()
+  await expect(dishDialog.getByRole('button', { name: 'В дневник' })).toHaveCount(0)
+  await dishDialog.getByRole('button', { name: 'Закрыть' }).click()
+  await expect(dishDialog).toHaveCount(0)
   expect(publicMenuRequests).toBe(0)
 
   await previewPage.setViewportSize({ width: 390, height: 844 })

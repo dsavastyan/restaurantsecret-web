@@ -20,9 +20,10 @@ const root = typeof document !== "undefined" ? document.body : null;
 export default function DishCardModal() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isOpen, isLoading, data, error, close } = useDishCardStore((s) => ({
+  const { isOpen, isLoading, isReadOnly, data, error, close } = useDishCardStore((s) => ({
     isOpen: s.isOpen,
     isLoading: s.isLoading,
+    isReadOnly: s.isReadOnly,
     data: s.data,
     error: s.error,
     close: s.close,
@@ -38,7 +39,7 @@ export default function DishCardModal() {
     toggleFavorite: state.toggle,
   }));
   const addDiaryEntry = useDiaryStore((s) => s.addEntry);
-  const hasDishAccess = hasActiveSub || Boolean(data?.isFreeAccess);
+  const hasDishAccess = isReadOnly || hasActiveSub || Boolean(data?.isFreeAccess);
   const subscriptionCtaText = hasSubscriptionHistory ? "Возобновить подписку" : "Попробовать бесплатно";
 
   const [isOutdatedOpen, setIsOutdatedOpen] = useState(false);
@@ -59,17 +60,17 @@ export default function DishCardModal() {
   }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || isReadOnly) return;
     fetchStatus(accessToken);
     if (data) {
       analytics.track("dish_open", { dish_id: data.id, name: data.name, restaurant: data.restaurantSlug });
     }
-  }, [accessToken, fetchStatus, isOpen, data]);
+  }, [accessToken, fetchStatus, isOpen, isReadOnly, data]);
 
   useEffect(() => {
-    if (!isOpen || !hasDishAccess || !data) return;
+    if (!isOpen || isReadOnly || !hasDishAccess || !data) return;
     try { ym(108992733, 'reachGoal', 'dish_kbju_view'); } catch { /* ym not loaded */ }
-  }, [isOpen, hasDishAccess, data]);
+  }, [isOpen, isReadOnly, hasDishAccess, data]);
 
   const handleSubscribeClick = () => {
     const returnTo = location.pathname + location.search;
@@ -120,7 +121,7 @@ export default function DishCardModal() {
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!data) return;
+    if (isReadOnly || !data) return;
     if (!accessToken) {
       close();
       navigate("/login", { state: { from: location.pathname + location.search } });
@@ -141,7 +142,7 @@ export default function DishCardModal() {
 
   const handleDiaryAdd = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!data) return;
+    if (isReadOnly || !data) return;
     if (!accessToken) {
       close();
       navigate("/login", { state: { from: location.pathname + location.search } });
@@ -182,7 +183,7 @@ export default function DishCardModal() {
   // The "report outdated menu" form was not part of the visual redesign, so it
   // keeps its existing feedback-modal styling; only its trigger lives in the
   // new card body.
-  const outdatedFormOverlay = isOutdatedOpen && (
+  const outdatedFormOverlay = !isReadOnly && isOutdatedOpen && (
     <div
       className="feedback-modal__backdrop"
       role="dialog"
@@ -323,6 +324,7 @@ export default function DishCardModal() {
           <DishModalBodyV2
             data={data}
             hasDishAccess={hasDishAccess}
+            readOnly={isReadOnly}
             subscriptionCtaText={subscriptionCtaText}
             isFavorite={isFavorite}
             onSubscribeClick={handleSubscribeClick}
@@ -346,6 +348,7 @@ export default function DishCardModal() {
 function DishModalBodyV2({
   data,
   hasDishAccess,
+  readOnly,
   subscriptionCtaText,
   isFavorite,
   onSubscribeClick,
@@ -355,6 +358,7 @@ function DishModalBodyV2({
 }: {
   data: any;
   hasDishAccess: boolean;
+  readOnly: boolean;
   subscriptionCtaText: string;
   isFavorite: boolean;
   onSubscribeClick: () => void;
@@ -418,25 +422,31 @@ function DishModalBodyV2({
         </div>
       )}
 
-      <div className="rsm2-modal__actions">
-        <button type="button" className="rsm2-modal__cta" onClick={onDiaryAdd}>
-          <span>В дневник</span>
-          <span aria-hidden="true">→</span>
-        </button>
-        <button
-          type="button"
-          className="rsm2-modal__fav"
-          onClick={onFavoriteClick}
-          aria-label={isFavorite ? "Удалить из избранного" : "Добавить в избранное"}
-        >
-          <HeartIcon filled={isFavorite} size={22} />
-        </button>
-        {data.menuCapturedAtLabel && (
-          <span className="rsm2-modal__meta">Данные ресторана от {data.menuCapturedAtLabel}</span>
-        )}
-      </div>
+      {readOnly ? (
+        <div className="rsm2-modal__actions">
+          <span className="rsm2-modal__meta">Предпросмотр карточки блюда</span>
+        </div>
+      ) : (
+        <div className="rsm2-modal__actions">
+          <button type="button" className="rsm2-modal__cta" onClick={onDiaryAdd}>
+            <span>В дневник</span>
+            <span aria-hidden="true">→</span>
+          </button>
+          <button
+            type="button"
+            className="rsm2-modal__fav"
+            onClick={onFavoriteClick}
+            aria-label={isFavorite ? "Удалить из избранного" : "Добавить в избранное"}
+          >
+            <HeartIcon filled={isFavorite} size={22} />
+          </button>
+          {data.menuCapturedAtLabel && (
+            <span className="rsm2-modal__meta">Данные ресторана от {data.menuCapturedAtLabel}</span>
+          )}
+        </div>
+      )}
 
-      {data.menuCapturedAtLabel && (
+      {!readOnly && data.menuCapturedAtLabel && (
         <div className="rsm2-modal__footer-note">
           <button type="button" className="rsm2-modal__outdated" onClick={onReportOutdated}>
             <span aria-hidden="true">⟳</span> Меню устарело?

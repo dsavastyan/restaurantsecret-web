@@ -191,15 +191,17 @@ export default function DishTileV2({ dish, restaurantSlug, restaurantName, isFre
           </div>
         </div>
 
-        <div className="rsm2-tile__footer">
-          <button type="button" className="rsm2-fav" onClick={handleFavoriteClick} aria-label={favorited ? 'Удалить из избранного' : 'Добавить в избранное'}>
-            <HeartIcon filled={favorited} size={24} />
-          </button>
-          <button type="button" className="rsm2-dbtn" onClick={handleDiaryAdd}>
-            <span>В дневник</span>
-            <span aria-hidden="true">→</span>
-          </button>
-        </div>
+        {!readOnly && (
+          <div className="rsm2-tile__footer">
+            <button type="button" className="rsm2-fav" onClick={handleFavoriteClick} aria-label={favorited ? 'Удалить из избранного' : 'Добавить в избранное'}>
+              <HeartIcon filled={favorited} size={24} />
+            </button>
+            <button type="button" className="rsm2-dbtn" onClick={handleDiaryAdd}>
+              <span>В дневник</span>
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, Eye } from 'lucide-react'
 import { Link, useOutletContext, useParams } from 'react-router-dom'
 import Menu from '@/pages/Menu.jsx'
+import DishCardModal from '@/components/DishCardModal'
 import { restaurantPortalApi } from '@/api/restaurantPortal'
+import { useDishCardStore } from '@/store/dishCard'
 import './menu-preview.css'
 
 export function buildDraftMenuPreview(payload, restaurant) {
@@ -44,8 +46,11 @@ export function buildDraftMenuPreview(payload, restaurant) {
 export default function PartnersMenuPreview() {
   const { draftId } = useParams()
   const { restaurant } = useOutletContext()
+  const closeDishCard = useDishCardStore((state) => state.close)
   const [payload, setPayload] = useState(null)
   const [error, setError] = useState('')
+
+  useEffect(() => () => closeDishCard(), [closeDishCard])
 
   useEffect(() => {
     let cancelled = false
@@ -103,6 +108,7 @@ export default function PartnersMenuPreview() {
           <p>Загружаем новое меню…</p>
         </main>
       )}
+      <DishCardModal />
     </div>
   )
 }

@@ -161,14 +161,16 @@ export default function DishRowV2({ dish, restaurantSlug, restaurantName, isFree
                 <button type="button" className="rsm2-composition-pill" onClick={handleRowClick}>
                   Состав<span style={{ fontSize: 9 }}>▾</span>
                 </button>
-                <div className="rsm2-row__actions">
-                  <button type="button" className="rsm2-fav rsm2-fav--row" onClick={handleFavoriteClick} aria-label={favorited ? 'Удалить из избранного' : 'Добавить в избранное'}>
-                    <HeartIcon filled={favorited} size={19} />
-                  </button>
-                  <button type="button" className="rsm2-dbtn rsm2-dbtn--icon" onClick={handleDiaryAdd} aria-label="В дневник" title="В дневник">
-                    <DiaryIcon size={17} />
-                  </button>
-                </div>
+                {!readOnly && (
+                  <div className="rsm2-row__actions">
+                    <button type="button" className="rsm2-fav rsm2-fav--row" onClick={handleFavoriteClick} aria-label={favorited ? 'Удалить из избранного' : 'Добавить в избранное'}>
+                      <HeartIcon filled={favorited} size={19} />
+                    </button>
+                    <button type="button" className="rsm2-dbtn rsm2-dbtn--icon" onClick={handleDiaryAdd} aria-label="В дневник" title="В дневник">
+                      <DiaryIcon size={17} />
+                    </button>
+                  </div>
+                )}
               </>
             ) : (
               <>
