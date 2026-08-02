@@ -1,5 +1,13 @@
 const env = typeof import.meta !== 'undefined' ? (import.meta.env ?? {}) : {}
 const API_BASE = (env.VITE_RESTAURANT_API_BASE || 'https://tg.restaurantsecret.ru').replace(/\/+$/, '')
+const CSRF_HEADER = 'X-CSRF-Token'
+const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
+
+let csrfToken = null
+
+function updateCsrfToken(data) {
+  if (data?.csrf_token) csrfToken = data.csrf_token
+}
 
 async function request(path, {
   method = 'GET',
@@ -7,18 +15,25 @@ async function request(path, {
   form = false,
   responseType = 'json',
 } = {}) {
+  const normalizedMethod = method.toUpperCase()
+  const csrfHeaders = csrfToken && UNSAFE_METHODS.has(normalizedMethod)
+    ? { [CSRF_HEADER]: csrfToken }
+    : {}
   const response = await fetch(`${API_BASE}${path}`, {
-    method,
+    method: normalizedMethod,
     credentials: 'include',
     headers: {
       Accept: responseType === 'json' ? 'application/json' : '*/*',
       ...(body && !form ? { 'Content-Type': 'application/json' } : {}),
+      ...csrfHeaders,
     },
     body: form ? body : body ? JSON.stringify(body) : undefined,
   })
   if (responseType === 'blob' && response.ok) return response.blob()
   const data = await response.json().catch(() => null)
+  updateCsrfToken(data)
   if (!response.ok) {
+    if (data?.error?.code === 'csrf_token_invalid') csrfToken = null
     const error = new Error(data?.error?.message || data?.error?.code || response.statusText)
     error.status = response.status
     error.code = data?.error?.code

@@ -6,20 +6,33 @@
 // RestaurantSecret/functions/lib/restaurant-auth.js.
 const env = typeof import.meta !== 'undefined' ? (import.meta.env ?? {}) : {}
 const RESTAURANT_API_BASE = (env.VITE_RESTAURANT_API_BASE || 'https://tg.restaurantsecret.ru').replace(/\/+$/, '')
+const CSRF_HEADER = 'X-CSRF-Token'
+const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
 
 const createPortalError = (status, message, code, extra = null) => ({ status, message, code: code ?? null, ...(extra || {}) })
 
+let csrfToken = null
+
+function updateCsrfToken(data) {
+  if (data?.csrf_token) csrfToken = data.csrf_token
+}
+
 async function portalRequest(path, { method = 'GET', body, headers = {}, isFormData = false } = {}) {
   const url = `${RESTAURANT_API_BASE}${path}`
+  const normalizedMethod = method.toUpperCase()
+  const csrfHeaders = csrfToken && UNSAFE_METHODS.has(normalizedMethod)
+    ? { [CSRF_HEADER]: csrfToken }
+    : {}
 
   let res
   try {
     res = await fetch(url, {
-      method,
+      method: normalizedMethod,
       credentials: 'include', // send/receive the rs_session cookie cross-origin
       headers: {
         Accept: 'application/json',
         ...(body && !isFormData ? { 'Content-Type': 'application/json' } : {}),
+        ...csrfHeaders,
         ...headers,
       },
       body: isFormData ? body : body ? JSON.stringify(body) : undefined,
@@ -39,8 +52,10 @@ async function portalRequest(path, { method = 'GET', body, headers = {}, isFormD
       data = null
     }
   }
+  updateCsrfToken(data)
 
   if (!res.ok) {
+    if (data?.error?.code === 'csrf_token_invalid') csrfToken = null
     throw createPortalError(
       res.status,
       data?.error?.message || data?.error?.code || res.statusText,
