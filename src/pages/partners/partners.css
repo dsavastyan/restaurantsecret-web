@@ -351,7 +351,7 @@
 .partners-login { margin: 0; padding: 32px; }
 .partners-login__card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
 .partners-login__lock { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--partner-cream); color: var(--partner-green); font-size: 18px; }
-.partners-login__card-title { margin: 0 0 5px; font-family: 'DM Serif Display', Georgia, serif; font-size: 27px; font-weight: 400; }
+.partners-login__card-title { margin: 0 0 5px; font-family: 'DM Serif Display', Georgia, serif; font-size: 27px; font-weight: 400; overflow-wrap: anywhere; }
 .partners-login__subtitle { color: var(--partner-muted); font-size: 13px; line-height: 1.5; margin: 0 0 22px; }
 .partners-login__form { display: flex; flex-direction: column; gap: 10px; }
 .partners-login__label { color: var(--partner-ink); font-size: 12px; font-weight: 600; }
@@ -363,6 +363,7 @@
 .partners-login__state-copy { margin: 0 0 13px; color: var(--partner-ink); font-size: 13px; line-height: 1.55; overflow-wrap: anywhere; }
 .partners-login__state-copy--muted { color: var(--partner-muted); }
 .partners-login__state-copy a, .partners-login__support a { color: var(--partner-green); text-underline-offset: 2px; }
+.partners-login__email-fragment { overflow-wrap: anywhere; word-break: break-word; }
 .partners-login__action { width: 100%; margin-top: 8px; }
 .partners-login__text-action { align-self: center; margin-top: 14px; padding: 4px; border: 0; background: transparent; color: var(--partner-green); font: inherit; font-size: 12px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .partners-login__text-action:hover { color: #53623d; }

@@ -5,9 +5,21 @@ import { restaurantPortalApi } from '@/api/restaurantPortal'
 
 const RESEND_COOLDOWN_SECONDS = 60
 const SUPPORT_EMAIL = 'partners@restaurantsecret.ru'
+const EMAIL_MAX_LENGTH = 254
+const EMAIL_DISPLAY_MAX_LENGTH = 96
+const EMAIL_PATTERN = /^(?=.{1,254}$)(?=.{1,64}@)[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}$/
 
 function formatCooldown(seconds) {
   return `00:${String(Math.max(0, seconds - 1)).padStart(2, '0')}`
+}
+
+function isValidEmail(address) {
+  return EMAIL_PATTERN.test(address)
+}
+
+function formatEmailForDisplay(address) {
+  if (address.length <= EMAIL_DISPLAY_MAX_LENGTH) return address
+  return `${address.slice(0, EMAIL_DISPLAY_MAX_LENGTH)}…`
 }
 
 export default function PartnersLogin() {
@@ -65,7 +77,7 @@ export default function PartnersLogin() {
     setErr(null)
     const normalizedEmail = email.trim().toLowerCase()
 
-    if (!normalizedEmail || !/^\S+@\S+\.\S+$/.test(normalizedEmail)) {
+    if (!isValidEmail(normalizedEmail)) {
       setErr('Укажите корректный email.')
       return
     }
@@ -90,7 +102,15 @@ export default function PartnersLogin() {
   const title = {
     form: 'Вход для партнёров',
     sent: 'Проверьте почту',
-    'not-found': `Email ${submittedEmail} не найден`,
+    'not-found': (
+      <>
+        Email{' '}
+        <span className="partners-login__email-fragment" title={submittedEmail}>
+          {formatEmailForDisplay(submittedEmail)}
+        </span>{' '}
+        не найден
+      </>
+    ),
     expired: 'Ссылка больше не действует',
   }[screen]
 
@@ -118,7 +138,7 @@ export default function PartnersLogin() {
               <p className="partners-login__subtitle">
                 Введите email, указанный при регистрации ресторана. Мы отправим на него одноразовую ссылку для входа.
               </p>
-              <form className="partners-login__form" onSubmit={submit}>
+              <form className="partners-login__form" onSubmit={submit} noValidate>
                 <label className="partners-login__label" htmlFor="partner-email">Email</label>
                 <input
                   id="partner-email"
@@ -128,6 +148,8 @@ export default function PartnersLogin() {
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   autoComplete="email"
+                  inputMode="email"
+                  maxLength={EMAIL_MAX_LENGTH}
                   autoFocus
                   disabled={loading}
                 />
@@ -142,7 +164,7 @@ export default function PartnersLogin() {
           {screen === 'sent' && (
             <div className="partners-login__state">
               <p className="partners-login__state-copy">
-                Мы отправили ссылку для входа на <strong>{submittedEmail}</strong>.
+                Мы отправили ссылку для входа на <strong className="partners-login__email-fragment">{submittedEmail}</strong>.
               </p>
               <p className="partners-login__state-copy">
                 Перейдите по ссылке из письма. Она действует 15 минут и может быть использована только один раз.
@@ -153,7 +175,7 @@ export default function PartnersLogin() {
 
               {resent && (
                 <div className="partners__notice partners__notice--success partners-login__resend-confirmation" role="status">
-                  Новое письмо отправлено на {submittedEmail}.
+                  Новое письмо отправлено на <span className="partners-login__email-fragment">{submittedEmail}</span>.
                 </div>
               )}
               {err && <div className="partners__notice partners__notice--error" role="alert">{err}</div>}
