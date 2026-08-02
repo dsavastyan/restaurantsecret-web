@@ -49,10 +49,14 @@ export default function AdminShell() {
   return (
     <div className="admin-menu">
       <header className="admin-menu__header">
-        <Link to="/admin/menu-revisions" className="admin-menu__brand">
+        <Link to="/admin/restaurants" className="admin-menu__brand">
           <img src="/assets/logo-64.png" alt="" width="38" height="38" />
-          <span><strong>RestaurantSecret</strong><small>Подготовка меню</small></span>
+          <span><strong>RestaurantSecret</strong><small>Внутренний кабинет</small></span>
         </Link>
+        <nav className="admin-menu__nav" aria-label="Разделы администратора">
+          <Link className={location.pathname.startsWith('/admin/restaurants') ? 'active' : ''} to="/admin/restaurants">Рестораны</Link>
+          <Link className={location.pathname.startsWith('/admin/menu-revisions') ? 'active' : ''} to="/admin/menu-revisions">Задачи меню</Link>
+        </nav>
         <button type="button" onClick={logout}>Выйти</button>
       </header>
       <main className="admin-menu__main"><Outlet /></main>

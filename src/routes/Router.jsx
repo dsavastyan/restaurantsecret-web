@@ -31,6 +31,7 @@ const PartnersMenuPreview = lazy(() => import('../pages/partners/MenuPreview.jsx
 const PartnersSeasonalMenu = lazy(() => import('../pages/partners/SeasonalMenuFlow.jsx'))
 const AdminShell = lazy(() => import('../pages/admin/AdminShell.jsx'))
 const AdminLogin = lazy(() => import('../pages/admin/AdminLogin.jsx'))
+const AdminRestaurants = lazy(() => import('../pages/admin/AdminRestaurantList.jsx'))
 const AdminMenuRevisions = lazy(() => import('../pages/admin/MenuRevisionList.jsx'))
 const AdminMenuRevisionDetail = lazy(() => import('../pages/admin/MenuRevisionDetail.jsx'))
 const AccountLayout = lazy(() => import('../pages/account/Layout.tsx'))
@@ -121,11 +122,12 @@ function AppRoutes({ onReady }) {
         </Route>
 
         <Route path="admin" element={<AdminShell />}>
-          <Route index element={<Navigate to="/admin/menu-revisions" replace />} />
+          <Route index element={<Navigate to="/admin/restaurants" replace />} />
           <Route path="login" element={<AdminLogin />} />
+          <Route path="restaurants" element={<AdminRestaurants />} />
           <Route path="menu-revisions" element={<AdminMenuRevisions />} />
           <Route path="menu-revisions/:revisionId" element={<AdminMenuRevisionDetail />} />
-          <Route path="*" element={<Navigate to="/admin/menu-revisions" replace />} />
+          <Route path="*" element={<Navigate to="/admin/restaurants" replace />} />
         </Route>
       </Routes>
       <AppReadySignal onReady={onReady} />

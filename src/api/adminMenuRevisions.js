@@ -65,4 +65,29 @@ export const adminMenuRevisionsApi = {
     ),
   excelPreview: (fileId) =>
     request(`/api/admin/menu-revision-files/${encodeURIComponent(fileId)}/preview`),
+  restaurants: ({ city = '', menuStatus = '', partnership = '', requiresAction = false, query = '' } = {}) => {
+    const params = new URLSearchParams()
+    if (city) params.set('city', city)
+    if (menuStatus) params.set('menu_status', menuStatus)
+    if (partnership) params.set('partnership', partnership)
+    if (requiresAction) params.set('requires_action', '1')
+    if (query) params.set('query', query)
+    return request(`/api/admin/restaurants${params.size ? `?${params}` : ''}`)
+  },
+  createRestaurant: (body) => request('/api/admin/restaurants', { method: 'POST', body }),
+  addRestaurantContact: (slug, email) =>
+    request(`/api/admin/restaurants/${encodeURIComponent(slug)}/contacts`, {
+      method: 'POST',
+      body: { email },
+    }),
+  inviteRestaurantContact: (slug, userId, sendEmail = true) =>
+    request(`/api/admin/restaurants/${encodeURIComponent(slug)}/contacts/${encodeURIComponent(userId)}/invite`, {
+      method: 'POST',
+      body: { send_email: sendEmail },
+    }),
+  setRestaurantAccess: (slug, blocked) =>
+    request(`/api/admin/restaurants/${encodeURIComponent(slug)}/access`, {
+      method: 'PATCH',
+      body: { blocked },
+    }),
 }

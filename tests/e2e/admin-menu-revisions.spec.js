@@ -87,6 +87,8 @@ test('administrator validates versioned normalized menus without publishing', as
   await page.goto('/admin/login')
   await page.getByLabel('Ключ доступа').fill('secret')
   await page.getByRole('button', { name: 'Войти' }).click()
+  await expect(page.getByRole('heading', { name: 'Рестораны' })).toBeVisible()
+  await page.goto('/admin/menu-revisions')
   await expect(page.getByRole('heading', { name: 'Задачи по меню' })).toBeVisible()
   await page.goto('/admin/menu-revisions/12')
   await expect(page.getByRole('heading', { name: 'Aero Menu Шереметьево' })).toBeVisible()
