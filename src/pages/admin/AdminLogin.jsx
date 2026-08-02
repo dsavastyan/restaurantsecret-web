@@ -15,7 +15,7 @@ export default function AdminLogin() {
     try {
       await adminMenuRevisionsApi.login(key)
       setKey('')
-      navigate('/admin/menu-revisions', { replace: true })
+      navigate('/admin/restaurants', { replace: true })
     } catch (requestError) {
       setError(requestError.message || 'Не удалось войти.')
     } finally {
@@ -28,7 +28,7 @@ export default function AdminLogin() {
       <form onSubmit={submit}>
         <img src="/assets/logo-64.png" width="54" height="54" alt="" />
         <span>Внутренний кабинет</span>
-        <h1>Подготовка меню</h1>
+        <h1>Управление ресторанами</h1>
         <label>
           Ключ доступа
           <input
