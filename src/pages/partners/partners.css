@@ -391,6 +391,13 @@
 .partners-dashboard__grid {
   display: grid;
   grid-template-columns: minmax(0, 1.9fr) minmax(330px, 1fr);
+  align-items: start;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.partners-dashboard__side-cards {
+  display: grid;
+  min-width: 0;
   gap: 18px;
 }
 .partners-dashboard .partners-card {
@@ -402,6 +409,8 @@
   box-shadow: none;
   backdrop-filter: blur(10px);
 }
+.partners-dashboard__grid > .partners-card,
+.partners-dashboard__side-cards > .partners-card { margin-bottom: 0; }
 .partners-dashboard__menu-card {
   display: flex;
   min-height: 302px;
@@ -584,7 +593,6 @@
 }
 
 /* Seasonal menus live independently from the main published snapshot. */
-.partners-seasonal { grid-column: 1 / -1; }
 .partners-seasonal__heading,
 .partners-seasonal__heading > div,
 .partners-seasonal__card-heading,
@@ -618,6 +626,15 @@
 .partners-seasonal__empty { margin: 18px 0 0; color: var(--partner-muted); font-size: 12px; }
 .partners-seasonal__empty-state { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 18px; padding: 17px; border: 1px dashed #cbc8c0; border-radius: 11px; background: rgba(255,255,255,.38); }
 .partners-seasonal__empty-state p { margin: 0; color: var(--partner-muted); font-size: 12px; line-height: 1.5; }
+
+.partners-dashboard__side-cards .partners-seasonal__heading,
+.partners-dashboard__side-cards .partners-seasonal__empty-state {
+  align-items: stretch;
+  flex-direction: column;
+}
+.partners-dashboard__side-cards .partners-seasonal__heading > .partners__btn,
+.partners-dashboard__side-cards .partners-seasonal__empty-state .partners__btn { width: 100%; }
+.partners-dashboard__side-cards .partners-seasonal__list { grid-template-columns: 1fr; }
 .partners-seasonal__empty-state .partners__btn { flex: 0 0 auto; }
 
 /* Menu history */
@@ -2410,7 +2427,8 @@
   .partners-dashboard__intro .partners-eyebrow { margin-bottom: 10px; font-size: 12px; }
   .partners-dashboard__welcome { font-size: clamp(36px, 11vw, 47px); overflow-wrap: anywhere; }
   .partners-dashboard { width: 100%; }
-  .partners-dashboard__grid { display: block; }
+  .partners-dashboard__grid { display: block; margin-bottom: 0; }
+  .partners-dashboard__side-cards { gap: 0; }
   .partners-dashboard .partners-card { margin-bottom: 14px; padding: 18px; border-radius: 13px; }
   .partners-dashboard__menu-card { min-height: 0; }
   .partners-dashboard__menu-summary {
