@@ -564,7 +564,7 @@ export default function PartnersDashboard() {
               <div className="partners-seasonal__heading">
                 <div>
                   <span className="partners-dashboard__feature-icon" aria-hidden="true"><CalendarDays size={34} strokeWidth={1.65} /></span>
-                  <div><h2>Сезонные меню</h2><p>Временные позиции публикуются отдельно от основного меню</p></div>
+                  <div><h2>Сезонные меню</h2></div>
                 </div>
                 {(seasonalLoading || seasonalMenus.length > 0) && (
                   <Link className="partners__btn partners__btn--primary" to="/partners/seasonal/new">Добавить сезонное меню</Link>
@@ -574,7 +574,7 @@ export default function PartnersDashboard() {
               {seasonalLoading && <p className="partners-seasonal__empty">Загружаем сезонные меню…</p>}
               {!seasonalLoading && seasonalMenus.length === 0 && (
                 <div className="partners-seasonal__empty-state">
-                  <p>Сезонных меню пока нет. Добавьте временные блюда, не загружая основное меню заново.</p>
+                  <p>Сезонных меню пока нет.</p>
                   <Link className="partners__btn" to="/partners/seasonal/new">Добавить сезонное меню</Link>
                 </div>
               )}
