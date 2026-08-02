@@ -40,6 +40,9 @@ test('dashboard places seasonal menus and dish photos beside the main menu', asy
 
   await page.goto('/partners/dashboard')
   await expect(page.getByRole('heading', { name: 'Сезонные меню' })).toBeVisible()
+  await expect(page.getByText('Временные позиции публикуются отдельно от основного меню')).toHaveCount(0)
+  await expect(page.getByText('Добавьте временные блюда, не загружая основное меню заново.')).toHaveCount(0)
+  await expect(page.getByText('Сезонных меню пока нет.', { exact: true })).toBeVisible()
   await expect(page.locator('#rs-splash')).toHaveAttribute('data-state', 'hidden')
 
   const mainMenuCard = await page.locator('.partners-dashboard__menu-card').boundingBox()
@@ -51,6 +54,8 @@ test('dashboard places seasonal menus and dish photos beside the main menu', asy
   expect(seasonalCard.x).toBeGreaterThan(mainMenuCard.x + mainMenuCard.width)
   expect(photosCard.x).toBe(seasonalCard.x)
   expect(photosCard.y).toBeGreaterThan(seasonalCard.y + seasonalCard.height)
+  expect(Math.abs(mainMenuCard.height - (photosCard.y + photosCard.height - seasonalCard.y))).toBeLessThanOrEqual(1)
+  expect(photosCard.height).toBeLessThan(250)
 
   await page.setViewportSize({ width: 900, height: 900 })
   const narrowMainMenuCard = await page.locator('.partners-dashboard__menu-card').boundingBox()
