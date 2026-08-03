@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('dashboard places seasonal menus and dish photos beside the main menu', async ({ page }) => {
+test('dashboard stacks the main menu card above a row of secondary cards', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('rs_consent_v1', JSON.stringify({
       analytics: 'denied',
@@ -35,31 +35,50 @@ test('dashboard places seasonal menus and dish photos beside the main menu', asy
       await route.fulfill({ json: { menus: [] } })
       return
     }
+    if (path === '/api/restaurant/menu/photos') {
+      await route.fulfill({
+        json: {
+          dishes: Array.from({ length: 10 }, (_, index) => ({
+            id: index + 1,
+            name: `Блюдо ${index + 1}`,
+            photo_url: index < 6 ? 'https://example.test/photo.jpg' : null,
+          })),
+        },
+      })
+      return
+    }
     await route.fulfill({ json: { ok: true } })
   })
 
   await page.goto('/partners/dashboard')
-  await expect(page.getByRole('heading', { name: 'Сезонные меню' })).toBeVisible()
-  await expect(page.getByText('Временные позиции публикуются отдельно от основного меню')).toHaveCount(0)
-  await expect(page.getByText('Добавьте временные блюда, не загружая основное меню заново.')).toHaveCount(0)
-  await expect(page.getByText('Сезонных меню пока нет.', { exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Основное меню' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Сезонное меню' })).toBeVisible()
+  await expect(page.getByText('Нет активного меню', { exact: true })).toBeVisible()
+  await expect(page.getByText('6 из 10 позиций', { exact: true })).toBeVisible()
   await expect(page.locator('#rs-splash')).toHaveAttribute('data-state', 'hidden')
 
-  const mainMenuCard = await page.locator('.partners-dashboard__menu-card').boundingBox()
-  const seasonalCard = await page.locator('.partners-seasonal').boundingBox()
-  const photosCard = await page.locator('.partners-dashboard__photos-card').boundingBox()
-  expect(mainMenuCard).not.toBeNull()
+  const menuCard = await page.locator('.partners-dash__menu').boundingBox()
+  const logoCard = await page.locator('.partners-dash__mini--logo').boundingBox()
+  const seasonalCard = await page.locator('.partners-dash__mini--seasonal').boundingBox()
+  const photosCard = await page.locator('.partners-dash__mini--photos').boundingBox()
+  expect(menuCard).not.toBeNull()
+  expect(logoCard).not.toBeNull()
   expect(seasonalCard).not.toBeNull()
   expect(photosCard).not.toBeNull()
-  expect(seasonalCard.x).toBeGreaterThan(mainMenuCard.x + mainMenuCard.width)
-  expect(photosCard.x).toBe(seasonalCard.x)
-  expect(photosCard.y).toBeGreaterThan(seasonalCard.y + seasonalCard.height)
-  expect(Math.abs(mainMenuCard.height - (photosCard.y + photosCard.height - seasonalCard.y))).toBeLessThanOrEqual(1)
-  expect(photosCard.height).toBeLessThan(250)
 
-  await page.setViewportSize({ width: 900, height: 900 })
-  const narrowMainMenuCard = await page.locator('.partners-dashboard__menu-card').boundingBox()
-  const narrowSeasonalCard = await page.locator('.partners-seasonal').boundingBox()
-  expect(narrowSeasonalCard.x).toBe(narrowMainMenuCard.x)
-  expect(narrowSeasonalCard.y).toBeGreaterThan(narrowMainMenuCard.y + narrowMainMenuCard.height)
+  // Основное меню — во всю ширину сверху, три карточки — в один ряд под ним.
+  expect(logoCard.y).toBeGreaterThan(menuCard.y + menuCard.height - 1)
+  expect(logoCard.x).toBe(menuCard.x)
+  expect(Math.abs(logoCard.x + logoCard.width - (menuCard.x + menuCard.width))).toBeGreaterThan(100)
+  expect(seasonalCard.y).toBe(logoCard.y)
+  expect(photosCard.y).toBe(logoCard.y)
+  expect(seasonalCard.x).toBeGreaterThan(logoCard.x + logoCard.width - 1)
+  expect(photosCard.x).toBeGreaterThan(seasonalCard.x + seasonalCard.width - 1)
+
+  // На узком экране карточки перестраиваются в колонку.
+  await page.setViewportSize({ width: 700, height: 900 })
+  const narrowLogoCard = await page.locator('.partners-dash__mini--logo').boundingBox()
+  const narrowSeasonalCard = await page.locator('.partners-dash__mini--seasonal').boundingBox()
+  expect(narrowSeasonalCard.x).toBe(narrowLogoCard.x)
+  expect(narrowSeasonalCard.y).toBeGreaterThan(narrowLogoCard.y + narrowLogoCard.height - 1)
 })

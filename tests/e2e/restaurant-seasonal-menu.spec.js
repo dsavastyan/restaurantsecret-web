@@ -138,11 +138,11 @@ test('partner schedules a seasonal menu without replacing the main menu', async 
 
   await page.goto('/partners/dashboard')
   await expect(page.getByText('Основное меню', { exact: true })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Обновить основное меню' })).toBeVisible()
-  await expect(page.locator('.partners-dashboard__dish-total')).toContainText('124')
-  await expect(page.locator('.partners-dashboard__dish-total')).toContainText('блюда')
-  await expect(page.getByRole('heading', { name: 'Сезонные меню' })).toBeVisible()
-  await page.getByRole('link', { name: 'Добавить сезонное меню' }).first().click()
+  await expect(page.getByRole('link', { name: 'Обновить меню' })).toBeVisible()
+  await expect(page.locator('.partners-dash__chip')).toContainText('124')
+  await expect(page.locator('.partners-dash__chip')).toContainText('блюда')
+  await expect(page.getByRole('heading', { name: 'Сезонное меню' })).toBeVisible()
+  await page.getByRole('link', { name: 'Добавить меню' }).first().click()
 
   await expect(page.getByRole('heading', { name: 'Добавьте сезонное меню' })).toBeVisible()
   await page.getByLabel('Название меню').fill('Летнее меню')

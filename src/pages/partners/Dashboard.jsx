@@ -325,7 +325,7 @@ function RestaurantLogoCard({ restaurant, onRefresh }) {
   }
 
   return (
-    <section className="partners-dash__card partners-dash__mini">
+    <section className="partners-dash__card partners-dash__mini partners-dash__mini--logo">
       <div className="partners-dash__mini-head">
         <span className="partners-dash__icon" aria-hidden="true">
           {logoUrl ? <img src={logoUrl} alt="" /> : <Store size={26} strokeWidth={1.6} />}
@@ -837,7 +837,7 @@ export default function PartnersDashboard() {
         <div className="partners-dash__cards">
           <RestaurantLogoCard restaurant={restaurant} onRefresh={refresh} />
 
-          <section className="partners-dash__card partners-dash__mini">
+          <section className="partners-dash__card partners-dash__mini partners-dash__mini--seasonal">
             <div className="partners-dash__mini-head">
               <span className="partners-dash__icon" aria-hidden="true"><Sprout size={26} strokeWidth={1.6} /></span>
               <div>
@@ -859,7 +859,7 @@ export default function PartnersDashboard() {
             </Link>
           </section>
 
-          <section className="partners-dash__card partners-dash__mini">
+          <section className="partners-dash__card partners-dash__mini partners-dash__mini--photos">
             <div className="partners-dash__mini-head">
               <span className="partners-dash__icon" aria-hidden="true"><Camera size={26} strokeWidth={1.6} /></span>
               <div>
