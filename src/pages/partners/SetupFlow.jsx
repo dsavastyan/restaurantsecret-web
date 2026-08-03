@@ -409,12 +409,11 @@ function UploadValidationResult({
       <div className="partners-setup__validation-result partners-setup__validation-result--processing" role="status">
         <span className="partners-setup__validation-success"><Icon name="check" size={24} /></span>
         <div>
-          <h3>Файл успешно загружен</h3>
+          <h3>Файл загружен</h3>
           <p>
-            Спасибо за загрузку. Файл заполнен не по шаблону, поэтому нам понадобится немного больше
-            времени, чтобы обработать меню. Мы сообщим, когда превью будет готово.
+            Мы проверяем Excel-шаблон. Когда проверка завершится, вы сможете перейти к фотографиям и превью.
           </p>
-          <span className="partners-setup__processing-status-badge">Статус: На обработке</span>
+          <span className="partners-setup__processing-status-badge">Статус: Проверка шаблона</span>
         </div>
       </div>
     )
@@ -486,7 +485,7 @@ function UploadStep({
         <span className="partners-setup__template-icon"><Icon name="calculator" size={29} /></span>
         <span>
           <strong>Рекомендуем использовать шаблон Excel</strong>
-          <small>Так мы быстрее обработаем меню и реже будем обращаться к вам за уточнениями.</small>
+          <small>Меню принимается только в шаблоне RestaurantSecret без переименования колонок.</small>
         </span>
         <a href={restaurantPortalApi.templateDownloadUrl()} download>
           <Icon name="download" size={23} />
@@ -495,15 +494,15 @@ function UploadStep({
       </div>
 
       <section className="partners-setup__section">
-        <h2>Загрузите меню</h2>
+        <h2>Загрузите Excel-шаблон</h2>
         <FileDropzone
-          accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,application/pdf,image/jpeg,image/png,image/webp"
+          accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
           file={file}
           icon="upload"
           inputRef={inputRef}
-          label="Перетащите файл сюда или выберите на компьютере"
+          label="Перетащите заполненный шаблон сюда или выберите на компьютере"
           onFiles={onFile}
-          supportText="Поддерживаются Excel, PDF, JPG, PNG и WEBP"
+          supportText="Поддерживается только Excel-шаблон .xlsx или .xls"
         />
         {file && <MenuFileSummary file={file} onRemove={() => onFile(null)} />}
         {file && (

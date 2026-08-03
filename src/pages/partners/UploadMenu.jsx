@@ -303,9 +303,9 @@ function MethodCards({ onSelect, initial = false }) {
         </button>
         <button className="partners-update__method" type="button" onClick={() => onSelect('upload')}>
           <span className="partners-update__method-icon"><FileSpreadsheet size={29} /></span>
-          <strong>Загрузить новое меню</strong>
-          <p>Замените меню файлом Excel, PDF или фотографиями. Мы сравним его с опубликованной версией.</p>
-          <span className="partners-update__method-action">Загрузить файл <ChevronRight size={18} /></span>
+          <strong>Загрузить шаблон меню</strong>
+          <p>Замените меню заполненным Excel-шаблоном RestaurantSecret. Мы сравним его с опубликованной версией.</p>
+          <span className="partners-update__method-action">Загрузить шаблон <ChevronRight size={18} /></span>
           <small>Подойдёт для сезонной или полной замены меню</small>
         </button>
       </div>
@@ -318,7 +318,7 @@ function MethodSwitcher({ activeMethod, busy, onSelect }) {
     <section className="partners-update__method-switcher" aria-labelledby="partners-update-method-switcher-title">
       <div>
         <strong id="partners-update-method-switcher-title">Выберите способ обновления меню</strong>
-        <p>Обновить меню можно двумя способами: загрузить файл целиком или вручную отредактировать блюда.</p>
+        <p>Для полной замены загрузите Excel-шаблон RestaurantSecret; точечные правки можно внести вручную.</p>
       </div>
       <div className="partners-update__method-switcher-actions" role="group" aria-label="Способ обновления меню">
         <button
@@ -598,23 +598,22 @@ function SourceFiles({
           <label className={`partners-update__source-file-add${busy ? ' is-disabled' : ''}`}>
             <input
               type="file"
-              multiple
               disabled={busy}
-              aria-label="Добавить файлы меню"
-              accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp"
+              aria-label="Добавить Excel-шаблон меню"
+              accept=".xlsx,.xls"
               onChange={(event) => {
                 const selected = Array.from(event.target.files || [])
                 if (selected.length) onAddFiles(selected)
                 event.target.value = ''
               }}
             />
-            <Plus size={15} /> Добавить файлы
+            <Plus size={15} /> Добавить шаблон
           </label>
         )}
       </div>
       {showRestartHint && sourceFiles.length > 0 && (
         <p className="partners-update__source-files-hint">
-          Если добавить, заменить или удалить файл, фотографии и превью будут подготовлены заново.
+          Если добавить, заменить или удалить шаблон, фотографии и превью будут пересобраны заново.
         </p>
       )}
       {sourceFiles.length > 0 ? (
@@ -645,7 +644,7 @@ function SourceFiles({
                       type="file"
                       disabled={busy}
                       aria-label={`Заменить файл ${file.original_name}`}
-                      accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp"
+                      accept=".xlsx,.xls"
                       onChange={(event) => {
                         const replacement = event.target.files?.[0]
                         if (replacement) onReplaceFile(file, replacement)
@@ -664,7 +663,7 @@ function SourceFiles({
         </div>
       ) : (
         <p className="partners-update__source-files-empty">
-          Файлов пока нет. Добавьте актуальный файл или отмените эту загрузку.
+          Файлов пока нет. Добавьте актуальный Excel-шаблон или отмените эту загрузку.
         </p>
       )}
     </section>
@@ -735,7 +734,6 @@ function RevisionWaiting({
   onSwitchToManual,
 }) {
   const [message, setMessage] = useState('')
-  const [files, setFiles] = useState([])
   const revision = payload.revision
   const sourceFiles = revision?.source_files || []
   const lastClarification = [...(revision?.messages || [])]
@@ -743,10 +741,9 @@ function RevisionWaiting({
     .find((item) => item.message_type === 'clarification')
   const submit = async (event) => {
     event.preventDefault()
-    const saved = await onReply(message, files)
+    const saved = await onReply(message)
     if (saved) {
       setMessage('')
-      setFiles([])
       event.currentTarget.reset()
     }
   }
@@ -754,11 +751,11 @@ function RevisionWaiting({
     <section className="partners-update__waiting">
       <span className="partners-update__waiting-icon"><Upload size={34} /></span>
       <span>{sourceFiles.length ? 'Файл принят' : 'Ожидаем файл'}</span>
-      <h2>{sourceFiles.length ? 'Меню загружено — ожидает подготовки' : 'Добавьте файл меню'}</h2>
+      <h2>{sourceFiles.length ? 'Шаблон меню загружен' : 'Добавьте Excel-шаблон меню'}</h2>
       <p>
         {sourceFiles.length
-          ? 'Мы сохранили исходные файлы без изменений. Специалист подготовит меню по шаблону, после чего автоматически откроется шаг с фотографиями и превью.'
-          : 'Загрузите актуальную версию меню или отмените процесс, чтобы вернуться к шаблону и ручному редактированию.'}
+          ? 'Мы сохранили файл. Загрузите новый Excel-шаблон, если нужно заменить меню, или отмените процесс.'
+          : 'Загрузите актуальный Excel-шаблон или отмените процесс, чтобы вернуться к шаблону и ручному редактированию.'}
       </p>
       <SourceFiles
         payload={payload}
@@ -776,14 +773,14 @@ function RevisionWaiting({
           <Pencil size={17} /> Редактировать блюда вручную
         </button>
       </div>
-      <div className="partners-update__chat" role="region" aria-label="Переписка со специалистом">
+      <div className="partners-update__chat" role="region" aria-label="Переписка по меню">
         <header className="partners-update__chat-header">
           <span className="partners-update__chat-icon" aria-hidden="true">
             <MessageCircle size={20} />
           </span>
           <div>
-            <strong>Переписка со специалистом</strong>
-            <span>Здесь можно уточнить детали подготовки меню</span>
+            <strong>Переписка по меню</strong>
+            <span>Здесь можно уточнить детали проверки шаблона</span>
           </div>
           {lastClarification && (
             <span className="partners-update__clarification-badge">Нужно уточнение</span>
@@ -814,14 +811,10 @@ function RevisionWaiting({
         <form className="partners-update__chat-form" onSubmit={submit}>
           <label>
             Ответ или дополнительная информация
-            <textarea value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Напишите комментарий для специалиста" />
+            <textarea value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Напишите комментарий по шаблону" />
           </label>
           <div className="partners-update__chat-actions">
-            <label className="partners-update__attach">
-              <input type="file" multiple accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp" onChange={(event) => setFiles(Array.from(event.target.files || []))} />
-              <Plus size={17} /> {files.length ? `Выбрано файлов: ${files.length}` : 'Приложить дополнительные файлы'}
-            </label>
-            <button className="partners-update__primary" disabled={busy || (!message.trim() && !files.length)} type="submit">{busy ? 'Отправляем…' : 'Отправить ответ'}</button>
+            <button className="partners-update__primary" disabled={busy || !message.trim()} type="submit">{busy ? 'Отправляем…' : 'Отправить ответ'}</button>
           </div>
         </form>
       </div>
@@ -851,12 +844,12 @@ function UploadStep({
       <MethodSwitcher activeMethod="upload" busy={busy} onSelect={onSelectMethod} />
       <div className="partners-update__section-heading">
         <span>Новое меню</span>
-        <h2>{hasPreparedSources ? 'Файлы меню' : hasUploadedFile ? 'Загруженный файл' : 'Загрузите файл'}</h2>
+        <h2>{hasPreparedSources ? 'Файл меню' : hasUploadedFile ? 'Загруженный шаблон' : 'Загрузите Excel-шаблон'}</h2>
         {hasPreparedSources && (
-          <p>Вы остаетесь в текущем черновике. Его фотографии и превью сохранены, пока вы не измените файлы.</p>
+          <p>Вы остаетесь в текущем черновике. Его фотографии и превью сохранены, пока вы не измените шаблон.</p>
         )}
       </div>
-      <a className="partners-update__template" href={restaurantPortalApi.templateDownloadUrl()} download><FileSpreadsheet size={25} /><span><strong>Шаблон Excel</strong><small>Используйте шаблон для быстрой автоматической проверки</small></span><span>Скачать</span></a>
+      <a className="partners-update__template" href={restaurantPortalApi.templateDownloadUrl()} download><FileSpreadsheet size={25} /><span><strong>Шаблон Excel</strong><small>Меню принимается только в шаблоне RestaurantSecret</small></span><span>Скачать</span></a>
       {hasUploadedFile ? (
         <SourceFiles
           payload={payload}
@@ -871,17 +864,16 @@ function UploadStep({
         <label className="partners-update__dropzone">
           <input
             ref={inputRef}
-            multiple
             type="file"
-            aria-label="Выбрать файлы меню"
-            accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp"
+            aria-label="Выбрать Excel-шаблон меню"
+            accept=".xlsx,.xls"
             onChange={(event) => {
               if (event.target.files?.length) onFile(Array.from(event.target.files))
               event.target.value = ''
             }}
           />
-          <Upload size={42} /><strong>{busy ? 'Проверяем файл…' : 'Перетащите файл сюда или выберите на компьютере'}</strong>
-          <span>Excel, PDF, JPG, PNG или WEBP</span><i>Выбрать файл</i>
+          <Upload size={42} /><strong>{busy ? 'Проверяем шаблон…' : 'Перетащите заполненный шаблон сюда или выберите на компьютере'}</strong>
+          <span>Excel-шаблон .xlsx или .xls</span><i>Выбрать файл</i>
         </label>
       )}
       <UploadValidationIssue
@@ -1038,6 +1030,37 @@ function SubmittedState({ onExit }) {
   )
 }
 
+function BlockingDraftState({ issue, busy, onExit, onRetry, onStartFresh }) {
+  const stale = issue?.code === 'draft_stale'
+  const locked = issue?.code === 'draft_edit_locked'
+  const title = stale ? 'Черновик устарел' : locked ? 'Черновик уже открыт' : 'Черновик недоступен'
+  const message = stale
+    ? 'Пока вы редактировали меню, была опубликована более новая версия. Можно продолжить работу в новом черновике на базе актуального меню.'
+    : locked
+      ? 'Этот черновик открыт в другой вкладке или у другого сотрудника. Закройте вторую вкладку или попробуйте снова через несколько минут.'
+      : issue?.message || 'Не получилось открыть черновик.'
+  return (
+    <section className="partners-update__blocking" role="alert">
+      <span>{stale ? 'Новая версия меню' : 'Параллельная работа'}</span>
+      <h2>{title}</h2>
+      <p>{message}</p>
+      <div>
+        {stale && (
+          <button className="partners-update__primary" type="button" disabled={busy} onClick={onStartFresh}>
+            {busy ? 'Создаём…' : 'Продолжить в новом черновике'}
+          </button>
+        )}
+        {locked && (
+          <button className="partners-update__primary" type="button" disabled={busy} onClick={onRetry}>
+            Проверить ещё раз
+          </button>
+        )}
+        <button type="button" disabled={busy} onClick={onExit}>Вернуться в кабинет</button>
+      </div>
+    </section>
+  )
+}
+
 function FlowActions({ onBack, onNext, nextLabel }) {
   return (
     <footer className="partners-update__flow-actions">
@@ -1055,6 +1078,7 @@ export default function PartnersUploadMenu() {
   const [status, setStatus] = useState('loading')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
+  const [blockingIssue, setBlockingIssue] = useState(null)
   const [uploadIssue, setUploadIssue] = useState(null)
   const [drawerItem, setDrawerItem] = useState(undefined)
   const [furthestStep, setFurthestStep] = useState(1)
@@ -1070,6 +1094,7 @@ export default function PartnersUploadMenu() {
     if (!draftId) return null
     const data = await restaurantPortalApi.draft(draftId)
     setPayload(data)
+    setBlockingIssue(data.draft?.is_stale ? { code: 'draft_stale', message: 'Черновик устарел.' } : null)
     setFurthestStep((current) => Math.max(current, inferredFurthestStep(data)))
     return data
   }
@@ -1095,13 +1120,19 @@ export default function PartnersUploadMenu() {
         }
         if (!cancelled) {
           setPayload(data)
+          setBlockingIssue(data.draft?.is_stale ? { code: 'draft_stale', message: 'Черновик устарел.' } : null)
           setFurthestStep(inferredFurthestStep(data))
           setStatus('ready')
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err.message || 'Не получилось открыть черновик.')
-          setStatus('error')
+          if (['draft_stale', 'draft_edit_locked'].includes(err.code)) {
+            setBlockingIssue(err)
+            setStatus('ready')
+          } else {
+            setError(err.message || 'Не получилось открыть черновик.')
+            setStatus('error')
+          }
         }
       }
     }
@@ -1125,10 +1156,32 @@ export default function PartnersUploadMenu() {
     setBusy(true)
     setError(null)
     try {
-      return await operation()
+      const result = await operation()
+      setBlockingIssue(result?.draft?.is_stale ? { code: 'draft_stale', message: 'Черновик устарел.' } : null)
+      return result
     } catch (err) {
-      setError(err.message || fallback)
+      if (['draft_stale', 'draft_edit_locked'].includes(err.code)) {
+        setBlockingIssue(err)
+      } else {
+        setError(err.message || fallback)
+      }
       return null
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const startFreshDraft = async () => {
+    setBusy(true)
+    setError(null)
+    try {
+      const data = await restaurantPortalApi.createDraft({ replaceActive: true })
+      setPayload(data)
+      setBlockingIssue(null)
+      setFurthestStep(inferredFurthestStep(data))
+      navigate(`/partners/upload?draft=${data.draft.id}`, { replace: true })
+    } catch (err) {
+      setError(err.message || 'Не получилось создать новый черновик.')
     } finally {
       setBusy(false)
     }
@@ -1219,7 +1272,7 @@ export default function PartnersUploadMenu() {
     }
   }
 
-  const replaceSourceFile = async (sourceFile, replacement) => {
+  const replaceSourceFile = async (_sourceFile, replacement) => {
     setUploadIssue(null)
     if (payload.draft.source_kind === 'structured') {
       setBusy(true)
@@ -1235,14 +1288,7 @@ export default function PartnersUploadMenu() {
       setBusy(false)
       return Boolean(await uploadSource([replacement]))
     }
-    const result = await run(
-      () => restaurantPortalApi.replaceRevisionSource(payload.draft.id, sourceFile.id, replacement),
-      'Не получилось заменить файл.',
-    )
-    if (!result) return false
-    setPayload(result)
-    setFurthestStep(inferredFurthestStep(result))
-    return true
+    return Boolean(await uploadSource([replacement]))
   }
 
   const deleteSourceFile = async (sourceFile) => {
@@ -1276,14 +1322,13 @@ export default function PartnersUploadMenu() {
     return true
   }
 
-  const replyToRevision = async (message, files) => {
+  const replyToRevision = async (message) => {
     const result = await run(
-      () => restaurantPortalApi.replyToRevision(payload.draft.id, message, files),
+      () => restaurantPortalApi.replyToRevision(payload.draft.id, message),
       'Не получилось отправить ответ.',
     )
     if (!result) return false
     setPayload(result)
-    if (files.length) setFurthestStep(inferredFurthestStep(result))
     return true
   }
 
@@ -1320,7 +1365,23 @@ export default function PartnersUploadMenu() {
   }
 
   if (status === 'loading') return <div className="partners partners--centered"><p>Создаём черновик меню…</p></div>
-  if (status === 'error' || !payload) return <div className="partners partners--centered"><div className="partners__notice partners__notice--error">{error}</div><button className="partners__btn" onClick={() => navigate('/partners/dashboard')}>Вернуться в кабинет</button></div>
+  if (status === 'error' || (!payload && !blockingIssue)) return <div className="partners partners--centered"><div className="partners__notice partners__notice--error">{error}</div><button className="partners__btn" onClick={() => navigate('/partners/dashboard')}>Вернуться в кабинет</button></div>
+  if (blockingIssue) {
+    return (
+      <div className="partners-update">
+        <main className="partners-update__main partners-update__main--centered">
+          <BlockingDraftState
+            issue={blockingIssue}
+            busy={busy}
+            onExit={() => navigate('/partners/dashboard')}
+            onRetry={() => window.location.reload()}
+            onStartFresh={startFreshDraft}
+          />
+          {error && <div className="partners__notice partners__notice--error">{error}</div>}
+        </main>
+      </div>
+    )
+  }
 
   const step = payload.draft.current_step
   const completedStep = inferredCompletedStep(payload)
