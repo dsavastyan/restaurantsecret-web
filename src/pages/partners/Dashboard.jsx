@@ -7,6 +7,7 @@ import {
   CalendarDays,
   Camera,
   Check,
+  ChevronDown,
   ChevronRight,
   CircleCheck,
   Ellipsis,
@@ -62,6 +63,28 @@ function dishCountLabel(value) {
   return 'блюд'
 }
 
+// Если на аккаунте несколько ресторанов — заголовок становится переключателем:
+// поверх названия лежит прозрачный нативный select (работает и на мобильных).
+function RestaurantPicker({ restaurant, restaurants, onRestaurantChange, className, children }) {
+  if (!restaurants || restaurants.length <= 1) return children
+
+  return (
+    <label className={`partners-dash__picker${className ? ` ${className}` : ''}`}>
+      {children}
+      <ChevronDown className="partners-dash__picker-caret" size={22} strokeWidth={2} aria-hidden="true" />
+      <select
+        aria-label="Выберите ресторан"
+        value={restaurant.id}
+        onChange={(event) => onRestaurantChange?.(event.target.value)}
+      >
+        {restaurants.map((item) => (
+          <option key={item.id} value={item.id}>{item.name}</option>
+        ))}
+      </select>
+    </label>
+  )
+}
+
 function pluralize(value, one, few, many) {
   const count = Number(value) || 0
   const mod10 = count % 10
@@ -69,33 +92,6 @@ function pluralize(value, one, few, many) {
   if (mod10 === 1 && mod100 !== 11) return one
   if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few
   return many
-}
-
-// Декоративная ветка в правом верхнем углу карточки основного меню.
-const LEAVES = [
-  { x: 104, y: 244, r: -40 },
-  { x: 112, y: 216, r: 216 },
-  { x: 122, y: 186, r: -34 },
-  { x: 134, y: 156, r: 210 },
-  { x: 148, y: 124, r: -28 },
-  { x: 164, y: 92, r: 204 },
-  { x: 180, y: 58, r: -22 },
-]
-
-function LeafMark() {
-  return (
-    <svg className="partners-dash__leaf" viewBox="0 0 260 300" fill="none" aria-hidden="true">
-      <g stroke="#6E8F52" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none">
-        <path d="M92 296C96 226 118 152 194 34" />
-        {LEAVES.map((leaf) => (
-          <g key={`${leaf.x}-${leaf.y}`} transform={`translate(${leaf.x} ${leaf.y}) rotate(${leaf.r})`}>
-            <path d="M0 0C16-17 46-19 66-2 46 17 16 17 0 0Z" />
-            <path d="M6 0C22 3 42 2 60-2" />
-          </g>
-        ))}
-      </g>
-    </svg>
-  )
 }
 
 const SEASONAL_STATUS_LABELS = {
@@ -542,9 +538,11 @@ function MenuHistory({ restaurantId, refresh, onVersionsLoaded }) {
 export default function PartnersDashboard() {
   const {
     restaurant,
+    restaurants = [],
     lastUpload,
     refresh,
     handleLogout,
+    handleRestaurantChange,
     isFirstPublication,
   } = useOutletContext()
   const navigate = useNavigate()
@@ -633,7 +631,14 @@ export default function PartnersDashboard() {
             RestaurantSecret
           </span>
           <div className="partners-onboard__bar-right">
-            <span className="partners-onboard__restaurant">{restaurant.name}</span>
+            <RestaurantPicker
+              className="partners-dash__picker--compact"
+              restaurant={restaurant}
+              restaurants={restaurants}
+              onRestaurantChange={handleRestaurantChange}
+            >
+              <span className="partners-onboard__restaurant">{restaurant.name}</span>
+            </RestaurantPicker>
             <span aria-hidden="true">•</span>
             <button className="partners-onboard__logout" type="button" onClick={handleLogout}>Выйти</button>
           </div>
@@ -728,7 +733,13 @@ export default function PartnersDashboard() {
         <header className="partners-dash__top">
           <div className="partners-dash__title">
             <span className="partners-eyebrow">Панель ресторана</span>
-            <h1>{restaurant.name}</h1>
+            <RestaurantPicker
+              restaurant={restaurant}
+              restaurants={restaurants}
+              onRestaurantChange={handleRestaurantChange}
+            >
+              <h1>{restaurant.name}</h1>
+            </RestaurantPicker>
           </div>
           <div className="partners-dash__top-right">
             <span className="partners-dash__status">
@@ -743,7 +754,6 @@ export default function PartnersDashboard() {
         </header>
 
         <section className="partners-dash__card partners-dash__menu">
-          <LeafMark />
           <div className="partners-dash__menu-head">
             <span className="partners-dash__icon partners-dash__icon--lg" aria-hidden="true">
               <BookOpenText size={34} strokeWidth={1.5} />
