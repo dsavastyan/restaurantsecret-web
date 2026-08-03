@@ -407,7 +407,7 @@ test('manual dish form blocks invalid numbers and submits only valid values', as
   })
 })
 
-test('photo step explains transferred photos and loads them through the authenticated API', async ({ page }) => {
+test('photo step loads transferred photos through the authenticated API and keeps preview reachable', async ({ page }) => {
   const payload = {
     draft: {
       id: 92,
@@ -459,8 +459,10 @@ test('photo step explains transferred photos and loads them through the authenti
   await page.goto('/partners/upload?draft=92')
 
   await expect(page.getByRole('heading', { name: 'Проверьте фотографии' })).toBeVisible()
-  await expect(page.getByText('Существующие фотографии уже перенесены. Загрузите новые только там, где это необходимо.')).toBeVisible()
+  await expect(page.getByText('Существующие фотографии уже перенесены')).toHaveCount(0)
   await expect(page.getByText('Загрузить несколько фото')).toHaveCount(0)
+  // Фотографии необязательны: после ручной правки блюд превью открыто.
+  await expect(page.getByRole('listitem').filter({ hasText: 'Превью' }).getByRole('button')).toBeEnabled()
   await expect(page.locator('.partners-update__photo-card img')).toHaveAttribute(
     'src',
     'https://tg.restaurantsecret.ru/api/restaurant/menu/drafts/92/items/8/photo',
@@ -782,4 +784,69 @@ test('Excel upload shows validation details, marked workbook, current file contr
   await sourceCard.getByRole('button', { name: 'Удалить' }).click()
   await expect(page.getByText('меню-август.xlsx')).toHaveCount(0)
   await expect(page.getByRole('heading', { name: 'Загрузите Excel-шаблон' })).toBeVisible()
+})
+
+test('manual edits unlock preview and the sidebar switches steps without waiting for the save', async ({ page }) => {
+  const payload = {
+    draft: {
+      id: 93,
+      restaurant_id: 42,
+      current_step: 1,
+      status: 'editing',
+      method: 'manual',
+      source_kind: null,
+      revision: 1,
+    },
+    items: [{
+      id: 5,
+      dish_name: 'Том ям',
+      category: 'Супы',
+      change_type: 'updated',
+      kcal: 320,
+      proteins_g: 12,
+      fats_g: 9,
+      carbs_g: 14,
+      price_rub: 590,
+    }],
+    photos: [],
+    summary: { added: 0, updated: 1, deleted: 0, unchanged: 0, photos: 0 },
+  }
+
+  await page.route('**/api/restaurant/**', async (route) => {
+    const request = route.request()
+    const path = new URL(request.url()).pathname
+    if (path === '/api/restaurant/me') {
+      await route.fulfill({
+        json: {
+          restaurant: { id: 42, name: 'Aero Menu', has_published_menu: true },
+          restaurants: [{ id: 42, name: 'Aero Menu' }],
+          last_upload: { status: 'published' },
+        },
+      })
+      return
+    }
+    if (path === '/api/restaurant/menu/drafts/93' && request.method() === 'PATCH') {
+      // Медленное сохранение шага: экран не должен его дожидаться.
+      await new Promise((resolve) => { setTimeout(resolve, 3000) })
+      payload.draft.current_step = request.postDataJSON().current_step
+      await route.fulfill({ json: { ok: true, ...payload } })
+      return
+    }
+    if (path === '/api/restaurant/menu/drafts/93') {
+      await route.fulfill({ json: { ok: true, ...payload } })
+      return
+    }
+    await route.fulfill({ json: { ok: true } })
+  })
+
+  await page.goto('/partners/upload?draft=93')
+  await expect(page.getByRole('heading', { name: 'Блюда меню' })).toBeVisible()
+
+  // Блюда правились вручную — фотографии можно пропустить и открыть превью.
+  const previewStep = page.getByRole('listitem').filter({ hasText: 'Превью' })
+  await expect(previewStep.getByRole('button')).toBeEnabled()
+  await expect(previewStep.getByRole('button')).toHaveCSS('background-color', 'rgb(233, 243, 248)')
+
+  await previewStep.getByRole('button').click()
+  await expect(page.getByRole('heading', { name: 'Проверьте превью' })).toBeVisible({ timeout: 1500 })
 })
