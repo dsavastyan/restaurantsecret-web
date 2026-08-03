@@ -593,6 +593,104 @@
   background: #f5f7f2;
 }
 
+.partners-dashboard__logo-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-inline: 30px !important;
+}
+.partners-dashboard__logo-summary {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr);
+  align-items: center;
+  gap: 22px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #d8d4cd;
+}
+.partners-dashboard__logo-preview {
+  display: grid;
+  width: 80px;
+  height: 80px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #d8d4cd;
+  border-radius: 12px;
+  background: rgba(250, 248, 244, .8);
+  color: #7f837d;
+}
+.partners-dashboard__logo-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.partners-dashboard__logo-summary h2 {
+  margin: 0;
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 25px;
+  font-weight: 400;
+}
+.partners-dashboard__logo-summary p {
+  max-width: 280px;
+  margin: 9px 0 0;
+  color: #626462;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.partners-dashboard__logo-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.partners-dashboard__logo-upload {
+  min-height: 46px;
+  border-color: #4c7639;
+  border-radius: 6px;
+  background: transparent;
+  color: #11130f;
+  font-size: 14px;
+  font-weight: 500;
+}
+.partners-dashboard__logo-upload:hover:not(:disabled) {
+  border-color: #315d27;
+  background: #f5f7f2;
+}
+.partners-dashboard__logo-upload.is-loading {
+  opacity: .7;
+  cursor: wait;
+}
+.partners-dashboard__logo-upload input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+.partners-dashboard__logo-delete {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  color: #8b463c;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.partners-dashboard__logo-delete:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+.partners-dashboard__logo-spinner {
+  animation: partners-setup-spin 1s linear infinite;
+}
+
 /* Seasonal menus live independently from the main published snapshot. */
 .partners-seasonal__heading,
 .partners-seasonal__heading > div,

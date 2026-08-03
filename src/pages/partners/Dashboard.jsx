@@ -1,5 +1,5 @@
 // src/pages/partners/Dashboard.jsx
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useOutletContext } from 'react-router-dom'
 import {
   BookOpenText,
@@ -8,8 +8,20 @@ import {
   ChevronRight,
   Ellipsis,
   Image as ImageIcon,
+  LoaderCircle,
+  Trash2,
+  Upload,
 } from 'lucide-react'
 import { restaurantPortalApi } from '@/api/restaurantPortal'
+
+const MAX_LOGO_SIZE = 2 * 1024 * 1024
+const ACCEPTED_LOGO_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif'])
+
+function logoError(file) {
+  if (!ACCEPTED_LOGO_TYPES.has(file.type)) return 'Поддерживаются JPG, PNG, WEBP и AVIF.'
+  if (file.size > MAX_LOGO_SIZE) return 'Размер логотипа не должен превышать 2 МБ.'
+  return null
+}
 
 function formatDate(value) {
   if (!value) return '—'
@@ -200,6 +212,115 @@ function ConfirmFreshnessModal({ busy, error, onCancel, onConfirm }) {
         </div>
       </section>
     </div>
+  )
+}
+
+function RestaurantLogoCard({ restaurant, onRefresh }) {
+  const inputRef = useRef(null)
+  const [previewUrl, setPreviewUrl] = useState(null)
+  const [busy, setBusy] = useState(null)
+  const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(null)
+  const logoUrl = previewUrl || restaurant.logo_url || null
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+    }
+  }, [previewUrl])
+
+  const replacePreview = (file) => {
+    setPreviewUrl((current) => {
+      if (current) URL.revokeObjectURL(current)
+      return URL.createObjectURL(file)
+    })
+  }
+
+  const uploadLogo = async (file) => {
+    const validationError = logoError(file)
+    if (validationError) {
+      setError(validationError)
+      return
+    }
+    replacePreview(file)
+    setBusy('upload')
+    setError(null)
+    setSuccess(null)
+    try {
+      await restaurantPortalApi.uploadRestaurantLogo(file)
+      setSuccess('Логотип обновлён.')
+      await onRefresh()
+    } catch (err) {
+      setPreviewUrl((current) => {
+        if (current) URL.revokeObjectURL(current)
+        return null
+      })
+      setError(err.message || 'Не получилось загрузить логотип. Попробуйте ещё раз.')
+    } finally {
+      setBusy(null)
+      if (inputRef.current) inputRef.current.value = ''
+    }
+  }
+
+  const deleteLogo = async () => {
+    if (!logoUrl || busy) return
+    if (!window.confirm('Удалить логотип ресторана?')) return
+    setBusy('delete')
+    setError(null)
+    setSuccess(null)
+    try {
+      await restaurantPortalApi.deleteRestaurantLogo()
+      setPreviewUrl((current) => {
+        if (current) URL.revokeObjectURL(current)
+        return null
+      })
+      setSuccess('Логотип удалён.')
+      await onRefresh()
+    } catch (err) {
+      setError(err.message || 'Не получилось удалить логотип. Попробуйте ещё раз.')
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  return (
+    <section className="partners-card partners-dashboard__logo-card">
+      <div className="partners-dashboard__logo-summary">
+        <span className="partners-dashboard__logo-preview" aria-hidden="true">
+          {logoUrl ? <img src={logoUrl} alt="" /> : <ImageIcon size={36} strokeWidth={1.65} />}
+        </span>
+        <div>
+          <h2>Логотип ресторана</h2>
+          <p>Покажем его в кабинете и подготовим для публичной страницы меню.</p>
+        </div>
+      </div>
+
+      {error && <div className="partners__notice partners__notice--error" role="alert">{error}</div>}
+      {success && <div className="partners__notice partners__notice--success" role="status">{success}</div>}
+
+      <div className="partners-dashboard__logo-actions">
+        <label className={`partners__btn partners-dashboard__logo-upload${busy === 'upload' ? ' is-loading' : ''}`}>
+          <input
+            ref={inputRef}
+            type="file"
+            accept=".jpg,.jpeg,.png,.webp,.avif,image/jpeg,image/png,image/webp,image/avif"
+            disabled={Boolean(busy)}
+            onChange={(event) => {
+              const file = event.target.files?.[0]
+              if (file) uploadLogo(file)
+            }}
+          />
+          {busy === 'upload' ? <LoaderCircle className="partners-dashboard__logo-spinner" size={18} /> : <Upload size={18} />}
+          {logoUrl ? 'Заменить логотип' : 'Загрузить логотип'}
+        </label>
+        {logoUrl && (
+          <button className="partners-dashboard__logo-delete" type="button" disabled={Boolean(busy)} onClick={deleteLogo}>
+            {busy === 'delete' ? <LoaderCircle className="partners-dashboard__logo-spinner" size={17} /> : <Trash2 size={17} />}
+            Удалить
+          </button>
+        )}
+      </div>
+    </section>
   )
 }
 
@@ -560,6 +681,8 @@ export default function PartnersDashboard() {
           </section>
 
           <div className="partners-dashboard__side-cards">
+            <RestaurantLogoCard restaurant={restaurant} onRefresh={refresh} />
+
             <section className="partners-card partners-seasonal">
               <div className="partners-seasonal__heading">
                 <div>
