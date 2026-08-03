@@ -2,17 +2,26 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useOutletContext } from 'react-router-dom'
 import {
+  ArrowRight,
   BookOpenText,
   CalendarDays,
+  Camera,
   Check,
   ChevronRight,
+  CircleCheck,
   Ellipsis,
   Image as ImageIcon,
   LoaderCircle,
+  LogOut,
+  Plus,
+  RefreshCw,
+  Sprout,
+  Store,
   Trash2,
   Upload,
 } from 'lucide-react'
 import { restaurantPortalApi } from '@/api/restaurantPortal'
+import FirstPublicationArt from './FirstPublicationArt'
 
 const MAX_LOGO_SIZE = 2 * 1024 * 1024
 const ACCEPTED_LOGO_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif'])
@@ -27,7 +36,7 @@ function formatDate(value) {
   if (!value) return '—'
   try {
     return new Date(value)
-      .toLocaleString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' })
+      .toLocaleString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
       .replace(/\s*г\.$/, '')
   } catch {
     return value
@@ -51,6 +60,42 @@ function dishCountLabel(value) {
   if (mod10 === 1 && mod100 !== 11) return 'блюдо'
   if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'блюда'
   return 'блюд'
+}
+
+function pluralize(value, one, few, many) {
+  const count = Number(value) || 0
+  const mod10 = count % 10
+  const mod100 = count % 100
+  if (mod10 === 1 && mod100 !== 11) return one
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few
+  return many
+}
+
+// Декоративная ветка в правом верхнем углу карточки основного меню.
+const LEAVES = [
+  { x: 104, y: 244, r: -40 },
+  { x: 112, y: 216, r: 216 },
+  { x: 122, y: 186, r: -34 },
+  { x: 134, y: 156, r: 210 },
+  { x: 148, y: 124, r: -28 },
+  { x: 164, y: 92, r: 204 },
+  { x: 180, y: 58, r: -22 },
+]
+
+function LeafMark() {
+  return (
+    <svg className="partners-dash__leaf" viewBox="0 0 260 300" fill="none" aria-hidden="true">
+      <g stroke="#6E8F52" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none">
+        <path d="M92 296C96 226 118 152 194 34" />
+        {LEAVES.map((leaf) => (
+          <g key={`${leaf.x}-${leaf.y}`} transform={`translate(${leaf.x} ${leaf.y}) rotate(${leaf.r})`}>
+            <path d="M0 0C16-17 46-19 66-2 46 17 16 17 0 0Z" />
+            <path d="M6 0C22 3 42 2 60-2" />
+          </g>
+        ))}
+      </g>
+    </svg>
+  )
 }
 
 const SEASONAL_STATUS_LABELS = {
@@ -284,42 +329,41 @@ function RestaurantLogoCard({ restaurant, onRefresh }) {
   }
 
   return (
-    <section className="partners-card partners-dashboard__logo-card">
-      <div className="partners-dashboard__logo-summary">
-        <span className="partners-dashboard__logo-preview" aria-hidden="true">
-          {logoUrl ? <img src={logoUrl} alt="" /> : <ImageIcon size={36} strokeWidth={1.65} />}
+    <section className="partners-dash__card partners-dash__mini">
+      <div className="partners-dash__mini-head">
+        <span className="partners-dash__icon" aria-hidden="true">
+          {logoUrl ? <img src={logoUrl} alt="" /> : <Store size={26} strokeWidth={1.6} />}
         </span>
         <div>
           <h2>Логотип ресторана</h2>
-          <p>Покажем его в кабинете и подготовим для публичной страницы меню.</p>
+          <p className="partners-dash__mini-status">{logoUrl ? 'Загружен' : 'Не загружен'}</p>
+          <p className="partners-dash__mini-hint">Нужен для страницы меню</p>
         </div>
       </div>
 
       {error && <div className="partners__notice partners__notice--error" role="alert">{error}</div>}
       {success && <div className="partners__notice partners__notice--success" role="status">{success}</div>}
 
-      <div className="partners-dashboard__logo-actions">
-        <label className={`partners__btn partners-dashboard__logo-upload${busy === 'upload' ? ' is-loading' : ''}`}>
-          <input
-            ref={inputRef}
-            type="file"
-            accept=".jpg,.jpeg,.png,.webp,.avif,image/jpeg,image/png,image/webp,image/avif"
-            disabled={Boolean(busy)}
-            onChange={(event) => {
-              const file = event.target.files?.[0]
-              if (file) uploadLogo(file)
-            }}
-          />
-          {busy === 'upload' ? <LoaderCircle className="partners-dashboard__logo-spinner" size={18} /> : <Upload size={18} />}
-          {logoUrl ? 'Заменить логотип' : 'Загрузить логотип'}
-        </label>
-        {logoUrl && (
-          <button className="partners-dashboard__logo-delete" type="button" disabled={Boolean(busy)} onClick={deleteLogo}>
-            {busy === 'delete' ? <LoaderCircle className="partners-dashboard__logo-spinner" size={17} /> : <Trash2 size={17} />}
-            Удалить
-          </button>
-        )}
-      </div>
+      <label className={`partners-dash__btn partners-dash__btn--block${busy === 'upload' ? ' is-loading' : ''}`}>
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".jpg,.jpeg,.png,.webp,.avif,image/jpeg,image/png,image/webp,image/avif"
+          disabled={Boolean(busy)}
+          onChange={(event) => {
+            const file = event.target.files?.[0]
+            if (file) uploadLogo(file)
+          }}
+        />
+        {busy === 'upload' ? <LoaderCircle className="partners-dash__spinner" size={19} /> : <Upload size={19} strokeWidth={1.7} />}
+        {logoUrl ? 'Заменить логотип' : 'Загрузить логотип'}
+      </label>
+      {logoUrl && (
+        <button className="partners-dash__text-action" type="button" disabled={Boolean(busy)} onClick={deleteLogo}>
+          {busy === 'delete' ? <LoaderCircle className="partners-dash__spinner" size={16} /> : <Trash2 size={16} />}
+          Удалить
+        </button>
+      )}
     </section>
   )
 }
@@ -405,8 +449,8 @@ function MenuHistory({ restaurantId, refresh, onVersionsLoaded }) {
 
   return (
     <>
-      <section className="partners-card partners-history partners-dashboard__recent">
-        <h2>Последние изменения</h2>
+      <section className="partners-dash__card partners-history partners-dash__history">
+        <h2>История версий</h2>
 
         {status === 'loading' && <p className="partners-history__state">Загружаем изменения…</p>}
         {status === 'error' && (
@@ -500,6 +544,7 @@ export default function PartnersDashboard() {
     restaurant,
     lastUpload,
     refresh,
+    handleLogout,
     isFirstPublication,
   } = useOutletContext()
   const navigate = useNavigate()
@@ -512,6 +557,7 @@ export default function PartnersDashboard() {
   const [confirmFreshnessOpen, setConfirmFreshnessOpen] = useState(false)
   const [confirmFreshnessBusy, setConfirmFreshnessBusy] = useState(false)
   const [confirmFreshnessError, setConfirmFreshnessError] = useState(null)
+  const [photoStats, setPhotoStats] = useState(null)
 
   useEffect(() => {
     if (!restaurant?.id) return undefined
@@ -552,6 +598,26 @@ export default function PartnersDashboard() {
     setPublishedMenuItems(null)
   }, [restaurant?.id])
 
+  // Покрытие меню фотографиями — для карточки «Фото блюд».
+  useEffect(() => {
+    if (!restaurant?.id || isFirstPublication) return undefined
+    let cancelled = false
+    setPhotoStats(null)
+    restaurantPortalApi.menuPhotos()
+      .then((data) => {
+        if (cancelled) return
+        const dishes = data.dishes || []
+        setPhotoStats({
+          total: dishes.length,
+          withPhotos: dishes.filter((dish) => dish.photo_url).length,
+        })
+      })
+      .catch(() => {
+        if (!cancelled) setPhotoStats(null)
+      })
+    return () => { cancelled = true }
+  }, [isFirstPublication, restaurant?.id])
+
   const handleVersionsLoaded = useCallback((versions) => {
     const currentVersion = versions.find((version) => version.is_current) || versions[0]
     setPublishedMenuItems(currentVersion ? (Number(currentVersion.items_count) || 0) : 0)
@@ -560,17 +626,35 @@ export default function PartnersDashboard() {
   if (!restaurant) return null
   if (isFirstPublication) {
     return (
-      <section className="partners-setup__section partners-setup__section--standalone">
-        <span className="partners-eyebrow">Первичная публикация</span>
-        <h1>Добавьте меню ресторана</h1>
-        <p>Загрузка, фотографии, превью и подтверждение собраны в одном четырёхшаговом процессе.</p>
-        <Link
-          className="partners__btn partners__btn--primary"
-          to={activeDraft ? `/partners/upload?draft=${activeDraft.id}` : '/partners/upload?new=1'}
-        >
-          {activeDraft ? 'Продолжить загрузку' : 'Начать загрузку меню'}
-        </Link>
-      </section>
+      <div className="partners-onboard">
+        <header className="partners-onboard__bar">
+          <span className="partners-onboard__brand">
+            <img src="/assets/logo-64.png" width="40" height="40" alt="" aria-hidden="true" />
+            RestaurantSecret
+          </span>
+          <div className="partners-onboard__bar-right">
+            <span className="partners-onboard__restaurant">{restaurant.name}</span>
+            <span aria-hidden="true">•</span>
+            <button className="partners-onboard__logout" type="button" onClick={handleLogout}>Выйти</button>
+          </div>
+        </header>
+
+        <div className="partners-onboard__hero">
+          <div className="partners-onboard__copy">
+            <span className="partners-eyebrow">Первичная публикация</span>
+            <h1>Добро пожаловать,<br />{restaurant.name}</h1>
+            <p>Начните с загрузки меню — дальше интерфейс подскажет, что делать на каждом шаге.</p>
+            <Link
+              className="partners-onboard__cta"
+              to={activeDraft ? `/partners/upload?draft=${activeDraft.id}` : '/partners/upload?new=1'}
+            >
+              {activeDraft ? 'Продолжить загрузку' : 'Начать загрузку меню'}
+              <ArrowRight size={22} strokeWidth={2} aria-hidden="true" />
+            </Link>
+          </div>
+          <FirstPublicationArt />
+        </div>
+      </div>
     )
   }
 
@@ -603,125 +687,201 @@ export default function PartnersDashboard() {
     }
   }
 
+  const updateHref = activeDraft ? `/partners/upload?draft=${activeDraft.id}` : '/partners/upload?new=1'
+  const nextAction = activeDraft?.status === 'submitted'
+    ? {
+      title: 'Обновление меню на проверке',
+      copy: 'Мы проверяем загруженные изменения и скоро опубликуем их.',
+      primary: { kind: 'link', label: 'Посмотреть обновление', icon: <RefreshCw size={19} strokeWidth={1.8} /> },
+    }
+    : activeDraft
+      ? {
+        title: 'У вас есть незавершённое обновление',
+        copy: 'Продолжите с того шага, на котором остановились.',
+        primary: { kind: 'link', label: 'Продолжить обновление', icon: <RefreshCw size={19} strokeWidth={1.8} /> },
+        secondaryFreshness: true,
+      }
+      : {
+        title: 'Меню всё ещё актуально?',
+        copy: 'Подтвердите одним кликом или загрузите изменения.',
+        primary: { kind: 'freshness', label: 'Да, меню актуально', icon: <CircleCheck size={20} strokeWidth={1.8} /> },
+        secondaryUpdate: true,
+      }
+
+  const openFreshness = () => {
+    setConfirmFreshnessError(null)
+    setConfirmFreshnessOpen(true)
+  }
+
+  const photosLine = photoStats
+    ? `${photoStats.withPhotos} из ${photoStats.total} ${pluralize(photoStats.total, 'позиции', 'позиций', 'позиций')}`
+    : 'Считаем позиции…'
+  const photosHint = photoStats
+    ? (photoStats.total - photoStats.withPhotos > 0
+      ? `${photoStats.total - photoStats.withPhotos} ${pluralize(photoStats.total - photoStats.withPhotos, 'блюдо', 'блюда', 'блюд')} пока без фотографии`
+      : 'Все блюда с фотографиями')
+    : 'Добавляйте и заменяйте фотографии позиций'
+
   return (
     <>
-      <div className="partners-dashboard">
-        <div className="partners-dashboard__intro">
-          <span className="partners-eyebrow">Панель ресторана</span>
-          <h1 className="partners-dashboard__welcome">{restaurant.name}</h1>
-        </div>
+      <div className="partners-dash">
+        <header className="partners-dash__top">
+          <div className="partners-dash__title">
+            <span className="partners-eyebrow">Панель ресторана</span>
+            <h1>{restaurant.name}</h1>
+          </div>
+          <div className="partners-dash__top-right">
+            <span className="partners-dash__status">
+              <i aria-hidden="true" />
+              {menuUpdatedAt ? 'Меню опубликовано' : 'Меню готовится'}
+            </span>
+            <button className="partners-dash__logout" type="button" onClick={handleLogout}>
+              Выйти
+              <LogOut size={21} strokeWidth={1.7} aria-hidden="true" />
+            </button>
+          </div>
+        </header>
 
-        <div className="partners-dashboard__grid">
-          <section className="partners-card partners-dashboard__menu-card">
-            <div className="partners-dashboard__menu-summary">
-              <span className="partners-dashboard__feature-icon" aria-hidden="true">
-                <BookOpenText size={42} strokeWidth={1.65} />
+        <section className="partners-dash__card partners-dash__menu">
+          <LeafMark />
+          <div className="partners-dash__menu-head">
+            <span className="partners-dash__icon partners-dash__icon--lg" aria-hidden="true">
+              <BookOpenText size={34} strokeWidth={1.5} />
+            </span>
+            <div className="partners-dash__menu-title">
+              <h2>Основное меню</h2>
+              <span className="partners-dash__chip">
+                {publishedMenuItems ?? '—'} {publishedMenuItems == null ? 'блюд' : dishCountLabel(publishedMenuItems)}
               </span>
-              <div className="partners-dashboard__dish-count">
-                <span className="partners-dashboard__menu-label">Основное меню</span>
-                <span className="partners-dashboard__dish-total">
-                  <strong>{publishedMenuItems ?? '—'}</strong>
-                  <span>{publishedMenuItems == null ? 'блюд' : dishCountLabel(publishedMenuItems)}</span>
-                </span>
-              </div>
-              <p className="partners-dashboard__updated">
-                {menuUpdatedAt ? `Обновлено ${formatDate(menuUpdatedAt)}` : 'Меню ещё не опубликовано'}
-              </p>
             </div>
+            <p className="partners-dash__updated">
+              <CalendarDays size={18} strokeWidth={1.6} aria-hidden="true" />
+              {menuUpdatedAt ? `Обновлено ${formatDate(menuUpdatedAt)}` : 'Меню ещё не опубликовано'}
+            </p>
+          </div>
 
-            <div className="partners-dashboard__freshness">
-              <strong id="partners-menu-freshness-label">Меню актуально?</strong>
-              <input
-                className="partners-dashboard__freshness-checkbox"
-                type="checkbox"
-                checked={confirmFreshnessOpen}
-                aria-labelledby="partners-menu-freshness-label"
-                aria-haspopup="dialog"
-                onChange={(event) => {
-                  if (!event.target.checked) return
-                  setConfirmFreshnessError(null)
-                  setConfirmFreshnessOpen(true)
-                }}
-              />
-            </div>
+          {lastUpload?.status === 'error' && lastUpload.error_message && (
+            <div className="partners__notice partners__notice--error">{lastUpload.error_message}</div>
+          )}
 
-            {lastUpload?.status === 'error' && lastUpload.error_message && (
-              <div className="partners__notice partners__notice--error">{lastUpload.error_message}</div>
-            )}
+          <div className="partners-dash__next">
+            <span className="partners-dash__next-label">Следующее действие</span>
+            <h3>{nextAction.title}</h3>
+            <p>{nextAction.copy}</p>
 
-            <div className="partners-dashboard__menu-actions">
-              <Link
-                className="partners__btn partners__btn--primary"
-                to={activeDraft ? `/partners/upload?draft=${activeDraft.id}` : '/partners/upload?new=1'}
-              >
-                {activeDraft
-                  ? (activeDraft.status === 'submitted' ? 'Посмотреть обновление' : 'Продолжить обновление')
-                  : 'Обновить основное меню'}
-              </Link>
-              {menuUrl && (
-                <a className="partners__btn" href={menuUrl} target="_blank" rel="noreferrer">
-                  Посмотреть меню
-                </a>
+            <div className="partners-dash__actions">
+              {nextAction.primary.kind === 'freshness' ? (
+                <button className="partners-dash__btn partners-dash__btn--primary" type="button" onClick={openFreshness}>
+                  {nextAction.primary.icon}
+                  {nextAction.primary.label}
+                </button>
+              ) : (
+                <Link className="partners-dash__btn partners-dash__btn--primary" to={updateHref}>
+                  {nextAction.primary.icon}
+                  {nextAction.primary.label}
+                </Link>
               )}
-              {activeDraft?.status !== 'submitted' && activeDraft && (
-                <button
-                  className="partners-dashboard__restart"
-                  type="button"
-                  onClick={() => {
-                    if (window.confirm('Начать обновление заново? Текущий черновик будет удалён.')) {
-                      navigate('/partners/upload?new=1')
-                    }
-                  }}
-                >
-                  Начать заново
+
+              {nextAction.secondaryUpdate && (
+                <Link className="partners-dash__btn" to={updateHref}>
+                  <RefreshCw size={19} strokeWidth={1.8} />
+                  Обновить меню
+                </Link>
+              )}
+              {nextAction.secondaryFreshness && (
+                <button className="partners-dash__btn" type="button" onClick={openFreshness}>
+                  <CircleCheck size={19} strokeWidth={1.8} />
+                  Меню актуально
                 </button>
               )}
-              {draftLoading && <span className="partners-dashboard__draft-loading">Проверяем черновики…</span>}
+
+              {menuUrl && (
+                <a className="partners-dash__link" href={menuUrl} target="_blank" rel="noreferrer">
+                  Открыть публичное меню
+                  <ArrowRight size={19} strokeWidth={1.8} aria-hidden="true" />
+                </a>
+              )}
             </div>
+
+            {(draftLoading || (activeDraft && activeDraft.status !== 'submitted')) && (
+              <div className="partners-dash__aside-actions">
+                {activeDraft && activeDraft.status !== 'submitted' && (
+                  <button
+                    className="partners-dash__text-action"
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm('Начать обновление заново? Текущий черновик будет удалён.')) {
+                        navigate('/partners/upload?new=1')
+                      }
+                    }}
+                  >
+                    Начать заново
+                  </button>
+                )}
+                {draftLoading && <span className="partners-dash__hint">Проверяем черновики…</span>}
+              </div>
+            )}
+          </div>
+        </section>
+
+        <div className="partners-dash__cards">
+          <RestaurantLogoCard restaurant={restaurant} onRefresh={refresh} />
+
+          <section className="partners-dash__card partners-dash__mini">
+            <div className="partners-dash__mini-head">
+              <span className="partners-dash__icon" aria-hidden="true"><Sprout size={26} strokeWidth={1.6} /></span>
+              <div>
+                <h2>Сезонное меню</h2>
+                <p className="partners-dash__mini-status">
+                  {seasonalLoading
+                    ? 'Загружаем…'
+                    : seasonalMenus.length === 0
+                      ? 'Нет активного меню'
+                      : `${seasonalMenus.length} ${pluralize(seasonalMenus.length, 'меню', 'меню', 'меню')}`}
+                </p>
+                <p className="partners-dash__mini-hint">Добавляйте отдельные сезонные позиции</p>
+              </div>
+            </div>
+            {seasonalError && <div className="partners__notice partners__notice--error">{seasonalError}</div>}
+            <Link className="partners-dash__btn partners-dash__btn--block" to="/partners/seasonal/new">
+              <Plus size={19} strokeWidth={1.9} />
+              Добавить меню
+            </Link>
           </section>
 
-          <div className="partners-dashboard__side-cards">
-            <RestaurantLogoCard restaurant={restaurant} onRefresh={refresh} />
-
-            <section className="partners-card partners-seasonal">
-              <div className="partners-seasonal__heading">
-                <div>
-                  <span className="partners-dashboard__feature-icon" aria-hidden="true"><CalendarDays size={34} strokeWidth={1.65} /></span>
-                  <div><h2>Сезонные меню</h2></div>
-                </div>
-                {(seasonalLoading || seasonalMenus.length > 0) && (
-                  <Link className="partners__btn partners__btn--primary" to="/partners/seasonal/new">Добавить сезонное меню</Link>
-                )}
+          <section className="partners-dash__card partners-dash__mini">
+            <div className="partners-dash__mini-head">
+              <span className="partners-dash__icon" aria-hidden="true"><Camera size={26} strokeWidth={1.6} /></span>
+              <div>
+                <h2>Фото блюд</h2>
+                <p className="partners-dash__mini-status">{photosLine}</p>
+                <p className="partners-dash__mini-hint">{photosHint}</p>
               </div>
-              {seasonalError && <div className="partners__notice partners__notice--error">{seasonalError}</div>}
-              {seasonalLoading && <p className="partners-seasonal__empty">Загружаем сезонные меню…</p>}
-              {!seasonalLoading && seasonalMenus.length === 0 && (
-                <div className="partners-seasonal__empty-state">
-                  <p>Сезонных меню пока нет.</p>
-                  <Link className="partners__btn" to="/partners/seasonal/new">Добавить сезонное меню</Link>
-                </div>
-              )}
-              {!seasonalLoading && seasonalMenus.length > 0 && (
-                <div className="partners-seasonal__list">
-                  {seasonalMenus.map((menu) => <SeasonalMenuCard key={menu.id} menu={menu} onDelete={deleteSeasonalMenu} />)}
-                </div>
-              )}
-            </section>
-
-            <section className="partners-card partners-dashboard__photos-card">
-              <div className="partners-dashboard__photos-summary">
-                <span className="partners-dashboard__feature-icon" aria-hidden="true">
-                  <ImageIcon size={42} strokeWidth={1.65} />
-                </span>
-                <div>
-                  <h2>Фото блюд</h2>
-                  <p>Добавляйте и заменяйте фотографии позиций</p>
-                </div>
-              </div>
-              <Link className="partners__btn" to="/partners/photos">Управлять фото</Link>
-            </section>
-          </div>
+            </div>
+            <Link className="partners-dash__btn partners-dash__btn--block" to="/partners/photos">
+              <ImageIcon size={19} strokeWidth={1.7} />
+              Управлять фото
+            </Link>
+          </section>
         </div>
+
+        {!seasonalLoading && seasonalMenus.length > 0 && (
+          <section className="partners-dash__card partners-seasonal">
+            <div className="partners-seasonal__heading">
+              <div>
+                <h2>Сезонные меню</h2>
+                <p>Отдельные позиции с ограниченным сроком публикации</p>
+              </div>
+              <Link className="partners-dash__btn" to="/partners/seasonal/new">
+                <Plus size={19} strokeWidth={1.9} />
+                Добавить меню
+              </Link>
+            </div>
+            <div className="partners-seasonal__list">
+              {seasonalMenus.map((menu) => <SeasonalMenuCard key={menu.id} menu={menu} onDelete={deleteSeasonalMenu} />)}
+            </div>
+          </section>
+        )}
 
         <MenuHistory
           restaurantId={restaurant.id}
