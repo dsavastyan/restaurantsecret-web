@@ -52,6 +52,7 @@
 .partners-update__support { display: flex; flex-direction: column; padding-top: 20px; border-top: 1px solid #ddd7cc; color: #88877f; font-size: 11px; line-height: 1.6; text-decoration: none; }
 .partners-update__support strong { color: var(--u-green-dark); }
 .partners-update__main { min-height: 100vh; margin-left: 292px; }
+.partners-update__main--centered { display: grid; place-items: center; margin-left: 0; padding: 32px; }
 .partners-update__topbar { display: flex; justify-content: flex-end; min-height: 68px; padding: 18px 38px; border-bottom: 1px solid rgba(216,210,199,.75); }
 .partners-update__topbar button { border: 0; background: transparent; color: var(--u-muted); cursor: pointer; }
 .partners-update__topbar .partners-update__save-exit { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 10px 18px; border: 1px solid var(--u-green-dark); border-radius: 10px; background: var(--u-green); color: #fff; font-weight: 750; box-shadow: 0 7px 18px rgba(78,105,57,.2); transition: background .15s ease, transform .15s ease, box-shadow .15s ease; }
@@ -240,6 +241,13 @@
 .partners-update__confirm-summary span { margin-top: 3px; color: var(--u-muted); font-size: 10px; }
 .partners-update__submit { width: 100%; min-height: 50px; border: 0; border-radius: 11px; background: var(--u-green); color: #fff; font-weight: 750; cursor: pointer; }
 .partners-update__confirm-back { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; border: 0; background: transparent; color: var(--u-muted); font-size: 11px; cursor: pointer; }
+.partners-update__blocking { width: min(680px,100%); padding: 44px; box-sizing: border-box; border: 1px solid var(--u-line); border-radius: 22px; background: var(--u-paper); text-align: center; box-shadow: 0 18px 55px rgba(66,59,46,.08); }
+.partners-update__blocking > span { display: block; color: var(--u-green); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.partners-update__blocking h2 { margin: 9px 0 12px; font: 400 38px 'DM Serif Display', Georgia, serif; }
+.partners-update__blocking p { max-width: 520px; margin: 0 auto 26px; color: var(--u-muted); font-size: 13px; line-height: 1.65; }
+.partners-update__blocking > div { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+.partners-update__blocking button { min-height: 44px; padding: 10px 18px; border: 1px solid var(--u-line); border-radius: 10px; background: #fff; color: inherit; font-weight: 700; cursor: pointer; }
+.partners-update__blocking button:disabled { opacity: .6; cursor: wait; }
 
 .partners-update__waiting { width: min(760px,100%); margin: 40px auto; padding: 42px; box-sizing: border-box; text-align: center; border: 1px solid var(--u-line); border-radius: 24px; background: var(--u-paper); }
 .partners-update__waiting > span:not(.partners-update__waiting-icon) { display: block; color: var(--u-green); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }

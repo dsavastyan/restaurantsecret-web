@@ -8,6 +8,7 @@ const env = typeof import.meta !== 'undefined' ? (import.meta.env ?? {}) : {}
 const RESTAURANT_API_BASE = (env.VITE_RESTAURANT_API_BASE || 'https://tg.restaurantsecret.ru').replace(/\/+$/, '')
 const CSRF_HEADER = 'X-CSRF-Token'
 const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
+const DRAFT_EDITOR_STORAGE_KEY = 'rs_draft_editor_id'
 
 const createPortalError = (status, message, code, extra = null) => ({ status, message, code: code ?? null, ...(extra || {}) })
 
@@ -17,8 +18,33 @@ function updateCsrfToken(data) {
   if (data?.csrf_token) csrfToken = data.csrf_token
 }
 
+function randomEditorId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`
+}
+
+function draftEditorId() {
+  if (typeof window === 'undefined') return null
+  let editorId = window.sessionStorage.getItem(DRAFT_EDITOR_STORAGE_KEY)
+  if (!editorId) {
+    editorId = randomEditorId()
+    window.sessionStorage.setItem(DRAFT_EDITOR_STORAGE_KEY, editorId)
+  }
+  return editorId
+}
+
+function withDraftEditor(path) {
+  if (!path.startsWith('/api/restaurant/menu/drafts')) return path
+  const editorId = draftEditorId()
+  if (!editorId) return path
+  const separator = path.includes('?') ? '&' : '?'
+  return `${path}${separator}editor_id=${encodeURIComponent(editorId)}`
+}
+
 async function portalRequest(path, { method = 'GET', body, headers = {}, isFormData = false } = {}) {
-  const url = `${RESTAURANT_API_BASE}${path}`
+  const url = `${RESTAURANT_API_BASE}${withDraftEditor(path)}`
   const normalizedMethod = method.toUpperCase()
   const csrfHeaders = csrfToken && UNSAFE_METHODS.has(normalizedMethod)
     ? { [CSRF_HEADER]: csrfToken }
@@ -211,10 +237,9 @@ export const restaurantPortalApi = {
     })
   },
 
-  replyToRevision: (draftId, message, files = []) => {
+  replyToRevision: (draftId, message) => {
     const form = new FormData()
     form.append('message', message || '')
-    for (const file of files) form.append('files', file)
     return portalRequest(`/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/revision/reply`, {
       method: 'POST',
       body: form,
@@ -224,15 +249,6 @@ export const restaurantPortalApi = {
 
   revisionSourceDownloadUrl: (draftId, fileId) =>
     `${RESTAURANT_API_BASE}/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/revision/files/${encodeURIComponent(fileId)}`,
-
-  replaceRevisionSource: (draftId, fileId, file) => {
-    const form = new FormData()
-    form.append('file', file)
-    return portalRequest(
-      `/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}/revision/files/${encodeURIComponent(fileId)}`,
-      { method: 'PUT', body: form, isFormData: true },
-    )
-  },
 
   deleteRevisionSource: (draftId, fileId) =>
     portalRequest(
