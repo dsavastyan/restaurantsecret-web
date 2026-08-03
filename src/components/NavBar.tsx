@@ -19,11 +19,22 @@ export default function NavBar({ forceGuest = false }: { forceGuest?: boolean })
   const isLoginPage = location.pathname === "/login";
   const isOnboardingPage = location.pathname.startsWith("/onboarding");
   const isRestaurantMenuPage = /^\/(?:restaurants|r)\/[^/]+\/menu\/?$/.test(location.pathname);
+  const isCatalogPage =
+    location.pathname === "/catalog" ||
+    location.pathname.startsWith("/catalog/") ||
+    location.pathname === "/restaurants" ||
+    location.pathname === "/restaurants/";
   const currentPath = location.pathname + location.search;
   const subscriptionCheckoutLink = getSubscriptionCheckoutLink(token, currentPath);
   const goBackToCatalog = () => navigate("/catalog");
 
-  if (forceGuest || !token) {
+  // Полная «лендинговая» шапка: для гостей везде, а для авторизованных —
+  // на каталоге, чтобы навигация по разделам не пропадала после входа.
+  const showFullNav = forceGuest || !token || isCatalogPage;
+
+  if (showFullNav) {
+    const isGuestView = forceGuest || !token;
+
     return (
       <header className="navbar navbar--guest">
         <div className="navbar__inner navbar__inner--guest">
@@ -44,23 +55,42 @@ export default function NavBar({ forceGuest = false }: { forceGuest?: boolean })
           </nav>
 
           <div className="navbar__right">
-            {!isLoginPage && (
+            {isGuestView ? (
+              !isLoginPage && (
+                <div className="navbar__guest-actions">
+                  <Link
+                    to="/login"
+                    state={{ from: currentPath }}
+                    className="navbar__login-link"
+                  >
+                    Войти
+                  </Link>
+                  <Link
+                    to={subscriptionCheckoutLink.to}
+                    state={subscriptionCheckoutLink.state}
+                    className="navbar__trial-link"
+                    onClick={() => analytics.track("cta_clicked", { location: "nav", text: "Попробовать бесплатно" })}
+                  >
+                    Попробовать бесплатно
+                  </Link>
+                </div>
+              )
+            ) : (
               <div className="navbar__guest-actions">
-                <Link
-                  to="/login"
-                  state={{ from: currentPath }}
-                  className="navbar__login-link"
-                >
-                  Войти
-                </Link>
-                <Link
-                  to={subscriptionCheckoutLink.to}
-                  state={subscriptionCheckoutLink.state}
-                  className="navbar__trial-link"
-                  onClick={() => analytics.track("cta_clicked", { location: "nav", text: "Попробовать бесплатно" })}
-                >
-                  Попробовать бесплатно
-                </Link>
+                {showAccountAction ? (
+                  <AccountButton />
+                ) : (
+                  isSubscriptionStatusLoaded && (
+                    <Link
+                      to={subscriptionCheckoutLink.to}
+                      state={subscriptionCheckoutLink.state}
+                      className="navbar__trial-link"
+                      onClick={() => analytics.track("cta_clicked", { location: "nav", text: "Попробовать бесплатно" })}
+                    >
+                      Попробовать бесплатно
+                    </Link>
+                  )
+                )}
               </div>
             )}
           </div>

@@ -27,14 +27,6 @@ const CuisineIcon = () => (
   </svg>
 )
 
-const MetroIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <path d="M4 19 11 5c.4-.8 1.6-.8 2 0l7 14" />
-    <path d="M8.2 14h7.6" />
-    <path d="M10.1 10h3.8" />
-  </svg>
-)
-
 const RestaurantWebIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="9.25" />
@@ -43,17 +35,6 @@ const RestaurantWebIcon = () => (
     <path d="M12 2.75C9.65 5.3 8.45 8.38 8.45 12s1.2 6.7 3.55 9.25" />
     <path d="M5.35 6.05c1.72.83 3.93 1.25 6.65 1.25s4.93-.42 6.65-1.25" />
     <path d="M5.35 17.95c1.72-.83 3.93-1.25 6.65-1.25s4.93.42 6.65 1.25" />
-  </svg>
-)
-
-const WeeklyAddedIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <path d="M7 3v3" />
-    <path d="M17 3v3" />
-    <path d="M5 9h14" />
-    <path d="M6.6 5h10.8c1.1 0 2 .9 2 2v10.8c0 1.1-.9 2-2 2H6.6c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2Z" />
-    <path d="M12 12v5" />
-    <path d="M9.5 14.5h5" />
   </svg>
 )
 
@@ -299,16 +280,6 @@ export default function Catalog() {
     ].filter(Boolean).join(' ')
   }, [getInitials])
 
-  const getMetroName = useCallback((restaurant) => {
-    return [
-      restaurant?.metro,
-      restaurant?.metro_name,
-      restaurant?.metroName,
-      restaurant?.metro_station,
-      restaurant?.metroStation,
-    ].find(Boolean) || ''
-  }, [])
-
   const shownFrom = filteredItems.length ? ((currentPage - 1) * PAGE_SIZE) + 1 : 0
   const shownTo = Math.min(currentPage * PAGE_SIZE, filteredItems.length)
   const totalRestaurantCount = allItems.length || Number(rawData?.total ?? rawData?.count ?? 0)
@@ -323,38 +294,22 @@ export default function Catalog() {
   return (
     <div className="catalog-page">
       <header className="catalog-heading">
-        <div>
-          <h1 className="catalog-heading__title">Рестораны</h1>
-        </div>
-        <div className="catalog-heading__metrics">
-          <div className="catalog-heading__stat" aria-label={`${totalRestaurantCount} ресторанов`}>
-            <div className="catalog-heading__stat-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" focusable="false">
-                <path d="M5 20h14" />
-                <path d="M7 20V9.8c0-.9.7-1.6 1.6-1.6h6.8c.9 0 1.6.7 1.6 1.6V20" />
-                <path d="M9.2 8.2a2.8 2.8 0 0 1 5.6 0" />
-                <path d="M10 12h4" />
-                <path d="M10 15h4" />
-                <path d="M12 4.5V3" />
-              </svg>
-            </div>
-            <div>
-              <strong>{totalRestaurantCount.toLocaleString('ru-RU')}</strong>
-              <span>{getRussianPluralWord(totalRestaurantCount, 'ресторан', 'ресторана', 'ресторанов')}</span>
-            </div>
-          </div>
+        <p className="catalog-heading__eyebrow">Каталог</p>
+        <h1 className="catalog-heading__title">Рестораны</h1>
+        <p className="catalog-heading__lead">
+          <strong>{totalRestaurantCount.toLocaleString('ru-RU')}</strong>
+          {' '}
+          {getRussianPluralWord(totalRestaurantCount, 'ресторан', 'ресторана', 'ресторанов')}
+          {' Москвы с полным меню и КБЖУ'}
           {weeklyAdded > 0 && (
-            <div className="catalog-heading__weekly" aria-label={`Добавлено на этой неделе: ${weeklyAdded}`}>
-              <div className="catalog-heading__stat-icon catalog-heading__stat-icon--weekly" aria-hidden="true">
-                <WeeklyAddedIcon />
-              </div>
-              <div>
-                <strong>+{weeklyAdded.toLocaleString('ru-RU')}</strong>
-                <span>добавлено на этой неделе</span>
-              </div>
-            </div>
+            <>
+              <span className="catalog-heading__sep" aria-hidden="true">·</span>
+              <strong>{weeklyAdded.toLocaleString('ru-RU')}</strong>
+              {' '}
+              {getRussianPluralWord(weeklyAdded, 'добавлен', 'добавлено', 'добавлено')} за неделю
+            </>
           )}
-        </div>
+        </p>
       </header>
 
       <section className="catalog-hero" aria-label="Поиск и фильтры ресторанов">
@@ -436,13 +391,6 @@ export default function Catalog() {
         </div>
       </section>
 
-      {weeklyAdded > 0 && (
-        <div className="catalog-mobile-weekly" aria-label={`Добавлено на этой неделе: ${weeklyAdded}`}>
-          <strong>+{weeklyAdded.toLocaleString('ru-RU')}</strong>
-          <span>добавлено на этой неделе</span>
-        </div>
-      )}
-
       <section className="catalog-results">
         {isInitialLoading && <div className="catalog-state">Загружаем рестораны…</div>}
         {error && <p className="err">Ошибка: {String(error.message || error)}</p>}
@@ -473,12 +421,6 @@ export default function Catalog() {
                           <span className="catalog-card__meta-item">
                             <CuisineIcon />
                             {r.cuisine}
-                          </span>
-                        )}
-                        {getMetroName(r) && (
-                          <span className="catalog-card__meta-item">
-                            <MetroIcon />
-                            {getMetroName(r)}
                           </span>
                         )}
                       </div>
