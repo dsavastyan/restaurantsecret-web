@@ -219,13 +219,29 @@ function formatMessageTime(value) {
   }).format(date)
 }
 
+// Меню готово к просмотру, когда обработан загруженный шаблон либо когда блюда
+// правились вручную. Фотографии необязательны, поэтому в обоих случаях шаг
+// «Превью» открыт — на него можно перейти сразу, минуя второй шаг.
+function menuIsPrepared(payload) {
+  const draft = payload?.draft
+  if (!draft) return false
+  if (draft.method === 'upload') {
+    return draft.status === 'editing' && Boolean(draft.source_kind)
+  }
+  if (draft.method === 'manual') {
+    const summary = payload.summary || {}
+    const edited = (Number(summary.added) || 0)
+      + (Number(summary.updated) || 0)
+      + (Number(summary.deleted) || 0)
+    return edited > 0
+  }
+  return false
+}
+
 function inferredFurthestStep(payload) {
   if (!payload?.draft) return 1
   const currentStep = Number(payload.draft.current_step) || 1
-  const preparedUpload = payload.draft.method === 'upload'
-    && payload.draft.status === 'editing'
-    && Boolean(payload.draft.source_kind)
-  return Math.max(currentStep, preparedUpload ? 3 : 1)
+  return Math.max(currentStep, menuIsPrepared(payload) ? 3 : 1)
 }
 
 function inferredCompletedStep(payload) {
@@ -233,11 +249,7 @@ function inferredCompletedStep(payload) {
   if (payload.draft.status === 'submitted') return STEPS.length
 
   const currentStep = Number(payload.draft.current_step) || 1
-  const menuIsPrepared = payload.draft.method === 'upload'
-    && payload.draft.status === 'editing'
-    && Boolean(payload.draft.source_kind)
-
-  return Math.max(currentStep - 1, menuIsPrepared ? 1 : 0)
+  return Math.max(currentStep - 1, menuIsPrepared(payload) ? 1 : 0)
 }
 
 function FlowSidebar({ restaurant, step, completedStep, furthestStep, onStep, initial = false, locked = false }) {
@@ -911,7 +923,6 @@ function PhotosStep({ payload, busy, onBack, onDeletePhoto, onNext, onPhoto, onA
       <div className="partners-update__section-heading">
         <span>Шаг 2</span>
         <h2>{hasTransferredPhotos ? 'Проверьте фотографии' : 'Добавьте фотографии (опционально)'}</h2>
-        {hasTransferredPhotos && <p>Существующие фотографии уже перенесены. Загрузите новые только там, где это необходимо.</p>}
       </div>
       <div className="partners-update__tabs-row">
         <div className="partners-update__tabs">
@@ -1082,6 +1093,10 @@ export default function PartnersUploadMenu() {
   const [uploadIssue, setUploadIssue] = useState(null)
   const [drawerItem, setDrawerItem] = useState(undefined)
   const [furthestStep, setFurthestStep] = useState(1)
+  // Шаг, выбранный в боковой панели, показываем сразу, не дожидаясь ответа
+  // сервера: сохранение current_step идёт фоном.
+  const [pendingStep, setPendingStep] = useState(null)
+  const stepRequestRef = useRef(0)
   const newDraftRequested = searchParams.get('new') === '1'
   const requestedDraftId = searchParams.get('draft')
 
@@ -1089,6 +1104,14 @@ export default function PartnersUploadMenu() {
     () => [...new Set((payload?.items || []).map((item) => item.category).filter(Boolean))],
     [payload?.items],
   )
+
+  // Доступные шаги пересчитываем на любое обновление черновика — иначе после
+  // обработки шаблона или правки блюд боковая панель остаётся со старым
+  // состоянием до следующей перезагрузки.
+  useEffect(() => {
+    if (!payload) return
+    setFurthestStep((current) => Math.max(current, inferredFurthestStep(payload)))
+  }, [payload])
 
   const reload = async (draftId = payload?.draft?.id) => {
     if (!draftId) return null
@@ -1187,14 +1210,28 @@ export default function PartnersUploadMenu() {
     }
   }
 
+  // Переключаем экран сразу, а current_step сохраняем в фоне: ждать ответ
+  // сервера, чтобы просто перейти на другой шаг, незачем.
   const setStep = async (step) => {
-    const result = await run(
-      () => restaurantPortalApi.updateDraft(payload.draft.id, { current_step: step }),
-      'Не получилось сохранить шаг.',
-    )
-    if (result) {
+    const requestId = stepRequestRef.current + 1
+    stepRequestRef.current = requestId
+    setPendingStep(step)
+    setError(null)
+    setFurthestStep((current) => Math.max(current, step))
+    try {
+      const result = await restaurantPortalApi.updateDraft(payload.draft.id, { current_step: step })
+      if (stepRequestRef.current !== requestId) return
+      setBlockingIssue(result?.draft?.is_stale ? { code: 'draft_stale', message: 'Черновик устарел.' } : null)
       setPayload(result)
-      setFurthestStep((current) => Math.max(current, inferredFurthestStep(result)))
+      setPendingStep(null)
+    } catch (err) {
+      if (stepRequestRef.current !== requestId) return
+      setPendingStep(null)
+      if (['draft_stale', 'draft_edit_locked'].includes(err.code)) {
+        setBlockingIssue(err)
+      } else {
+        setError(err.message || 'Не получилось сохранить шаг.')
+      }
     }
   }
 
@@ -1383,7 +1420,7 @@ export default function PartnersUploadMenu() {
     )
   }
 
-  const step = payload.draft.current_step
+  const step = pendingStep ?? payload.draft.current_step
   const completedStep = inferredCompletedStep(payload)
   const waitingForPreparation = payload.draft.status === 'extracting' && payload.revision
   return (
