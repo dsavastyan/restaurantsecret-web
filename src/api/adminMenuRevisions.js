@@ -90,10 +90,16 @@ export const adminMenuRevisionsApi = {
     return request(`/api/admin/restaurants${params.size ? `?${params}` : ''}`)
   },
   createRestaurant: (body) => request('/api/admin/restaurants', { method: 'POST', body }),
-  addRestaurantContact: (slug, email) =>
+  updateRestaurant: (slug, body) =>
+    request(`/api/admin/restaurants/${encodeURIComponent(slug)}`, { method: 'PATCH', body }),
+  addRestaurantContact: (slug, email, sendInvite = false) =>
     request(`/api/admin/restaurants/${encodeURIComponent(slug)}/contacts`, {
       method: 'POST',
-      body: { email },
+      body: { email, send_invite: sendInvite },
+    }),
+  deleteRestaurantContact: (slug, userId) =>
+    request(`/api/admin/restaurants/${encodeURIComponent(slug)}/contacts/${encodeURIComponent(userId)}`, {
+      method: 'DELETE',
     }),
   inviteRestaurantContact: (slug, userId, sendEmail = true) =>
     request(`/api/admin/restaurants/${encodeURIComponent(slug)}/contacts/${encodeURIComponent(userId)}/invite`, {

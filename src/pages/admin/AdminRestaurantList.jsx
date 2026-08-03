@@ -7,10 +7,12 @@ import {
   Clipboard,
   ExternalLink,
   Mail,
+  Pencil,
   Plus,
   RotateCcw,
   Search,
   ShieldCheck,
+  Trash2,
   UserPlus,
   X,
 } from 'lucide-react'
@@ -53,15 +55,12 @@ function RestaurantForm({ onClose, onSaved }) {
     setError('')
     try {
       await adminMenuRevisionsApi.createRestaurant({ ...form, ...(existingSlug ? { existing_slug: existingSlug } : {}) })
-      onSaved('Ресторан добавлен в CRM, приглашение отправлено.')
+      onSaved('Ресторан добавлен в CRM. Письмо не отправлено — пригласите его, когда будете готовы.')
       onClose()
     } catch (requestError) {
       const found = requestError.details?.candidates || []
       if (requestError.code === 'existing_network_confirmation_required' && found.length) {
         setCandidates(found)
-      } else if (requestError.code === 'invite_delivery_failed') {
-        onSaved('Ресторан сохранён, но письмо не отправлено. Повторите приглашение из таблицы.', 'warning')
-        onClose()
       } else {
         setError(requestError.message || 'Не удалось добавить ресторан.')
       }
@@ -74,11 +73,12 @@ function RestaurantForm({ onClose, onSaved }) {
     <form className="admin-crm__form" onSubmit={submit}>
       <label>Название сети<input required autoFocus value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Например, Loulou" /></label>
       <label>Первый город<input required value={form.city} onChange={(event) => setForm({ ...form, city: event.target.value })} placeholder="Москва" /></label>
-      <label>Контактный email<input required type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} placeholder="manager@restaurant.ru" /></label>
+      <label>Контактный email <small>необязательно</small><input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} placeholder="manager@restaurant.ru" /></label>
+      <p className="admin-crm__hint">Письмо не уходит при сохранении. Приглашение отправится только по действию «Пригласить ресторан».</p>
       {candidates.length > 0 && (
         <div className="admin-crm__candidates">
           <strong>Похожая сеть уже есть</strong>
-          <p>Выберите её, чтобы не создавать дубль. Сеть станет партнёром, контакт получит приглашение.</p>
+          <p>Выберите её, чтобы не создавать дубль. Сеть станет партнёром, контакт добавится без письма.</p>
           {candidates.map((candidate) => (
             <button type="button" key={candidate.slug} disabled={busy} onClick={() => submit(null, candidate.slug)}>
               <span><b>{candidate.name}</b><small>{candidate.cities.join(', ') || 'Город не указан'} · {candidate.partnership_label}</small></span>
@@ -88,51 +88,98 @@ function RestaurantForm({ onClose, onSaved }) {
         </div>
       )}
       {error && <p className="admin-menu__error" role="alert">{error}</p>}
-      <footer><button type="button" onClick={onClose}>Отмена</button><button className="admin-crm__primary" disabled={busy}>{busy ? 'Сохраняем…' : 'Создать и отправить приглашение'}</button></footer>
+      <footer><button type="button" onClick={onClose}>Отмена</button><button className="admin-crm__primary" disabled={busy}>{busy ? 'Сохраняем…' : 'Создать ресторан'}</button></footer>
     </form>
   )
 }
 
-function ContactForm({ restaurant, onClose, onSaved }) {
-  const [email, setEmail] = useState('')
+function EditRestaurantForm({ restaurant, onClose, onSaved }) {
+  const multiCity = restaurant.cities.length > 1
+  const initialCity = multiCity ? '' : restaurant.cities[0] || ''
+  const [form, setForm] = useState({ name: restaurant.name, city: initialCity })
+  const [removed, setRemoved] = useState([])
+  const [emails, setEmails] = useState(restaurant.contacts.length ? [] : [''])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+
+  const toggleRemoved = (id) =>
+    setRemoved((current) => (current.includes(id) ? current.filter((value) => value !== id) : [...current, id]))
+  const setEmailAt = (index, value) =>
+    setEmails((current) => current.map((email, position) => (position === index ? value : email)))
+
   const submit = async (event) => {
     event.preventDefault()
     setBusy(true)
     setError('')
+    const patch = {}
+    const name = form.name.trim()
+    const city = form.city.trim()
+    if (name && name !== restaurant.name) patch.name = name
+    if (!multiCity && city !== initialCity) patch.city = city
+    const added = emails.map((email) => email.trim()).filter(Boolean)
     try {
-      await adminMenuRevisionsApi.addRestaurantContact(restaurant.slug, email)
-      onSaved('Контакт добавлен, приглашение отправлено.')
+      if (Object.keys(patch).length) await adminMenuRevisionsApi.updateRestaurant(restaurant.slug, patch)
+      for (const id of removed) await adminMenuRevisionsApi.deleteRestaurantContact(restaurant.slug, id)
+      for (const email of added) await adminMenuRevisionsApi.addRestaurantContact(restaurant.slug, email)
+      onSaved(added.length ? 'Сохранено. Новые адреса добавлены без письма.' : 'Изменения сохранены.')
       onClose()
     } catch (requestError) {
-      if (requestError.code === 'invite_delivery_failed') {
-        onSaved('Контакт добавлен, но письмо не отправлено.', 'warning')
-        onClose()
-      } else {
-        setError(requestError.message || 'Не удалось добавить контакт.')
-      }
+      setError(requestError.message || 'Не удалось сохранить изменения.')
     } finally {
       setBusy(false)
     }
   }
+
   return (
     <form className="admin-crm__form" onSubmit={submit}>
-      <p>Новый контакт получит отдельную ссылку для сети <strong>{restaurant.name}</strong>.</p>
-      <label>Email<input required autoFocus type="email" value={email} onChange={(event) => setEmail(event.target.value)} /></label>
+      <label>Название сети<input required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></label>
+      {multiCity ? (
+        <label>Города<input value={restaurant.cities.join(', ')} disabled /><small>У сети несколько городов — они меняются в карточках точек.</small></label>
+      ) : (
+        <label>Город<input value={form.city} onChange={(event) => setForm({ ...form, city: event.target.value })} placeholder="Москва" /></label>
+      )}
+
+      <div className="admin-crm__contacts">
+        <strong>Контактные email</strong>
+        {restaurant.contacts.map((contact) => (
+          <div className={`admin-crm__contact${removed.includes(contact.id) ? ' is-removed' : ''}`} key={contact.id}>
+            <span>{contact.email}{contact.invite_sent_at ? <small>приглашение отправлено</small> : <small>без приглашения</small>}</span>
+            <button type="button" aria-label={`Удалить ${contact.email}`} onClick={() => toggleRemoved(contact.id)}>
+              {removed.includes(contact.id) ? <RotateCcw size={16} /> : <Trash2 size={16} />}
+            </button>
+          </div>
+        ))}
+        {emails.map((email, index) => (
+          <input
+            key={`new-${index}`}
+            type="email"
+            value={email}
+            aria-label={`Новый email ${index + 1}`}
+            placeholder="manager@restaurant.ru"
+            onChange={(event) => setEmailAt(index, event.target.value)}
+          />
+        ))}
+        <button className="admin-crm__add-email" type="button" onClick={() => setEmails([...emails, ''])}>
+          <Plus size={16} />Добавить email
+        </button>
+      </div>
+
+      <p className="admin-crm__hint">Письма не отправляются: приглашение уходит отдельным действием.</p>
       {error && <p className="admin-menu__error" role="alert">{error}</p>}
-      <footer><button type="button" onClick={onClose}>Отмена</button><button className="admin-crm__primary" disabled={busy}>{busy ? 'Отправляем…' : 'Добавить и пригласить'}</button></footer>
+      <footer><button type="button" onClick={onClose}>Отмена</button><button className="admin-crm__primary" disabled={busy}>{busy ? 'Сохраняем…' : 'Сохранить'}</button></footer>
     </form>
   )
 }
 
-function RestaurantActions({ restaurant, onAddContact, onChanged, notify }) {
+function RestaurantActions({ restaurant, onEdit, onChanged, notify }) {
   const [contactId, setContactId] = useState(restaurant.contacts[0]?.id || '')
   const [busy, setBusy] = useState('')
   const selected = restaurant.contacts.find((contact) => String(contact.id) === String(contactId))
+  const inviteLabel = restaurant.invited ? 'Отправить повторно' : 'Пригласить ресторан'
 
   const invite = async (sendEmail) => {
-    if (!selected) return onAddContact()
+    if (!selected) return onEdit()
+    if (sendEmail && !window.confirm(`Отправить приглашение в кабинет на ${selected.email}?`)) return
     setBusy(sendEmail ? 'send' : 'copy')
     try {
       const result = await adminMenuRevisionsApi.inviteRestaurantContact(restaurant.slug, selected.id, sendEmail)
@@ -173,10 +220,11 @@ function RestaurantActions({ restaurant, onAddContact, onChanged, notify }) {
     <details className="admin-crm__actions">
       <summary>Действия <ChevronDown size={15} /></summary>
       <div>
+        <button type="button" onClick={onEdit}><Pencil size={16} />Редактировать</button>
         {restaurant.contacts.length > 1 && <select aria-label={`Контакт ${restaurant.name}`} value={contactId} onChange={(event) => setContactId(event.target.value)}>{restaurant.contacts.map((contact) => <option value={contact.id} key={contact.id}>{contact.email}</option>)}</select>}
-        {selected && <button type="button" disabled={!!busy} onClick={() => invite(true)}><Mail size={16} />{busy === 'send' ? 'Отправляем…' : 'Отправить повторно'}</button>}
+        {selected && <button type="button" disabled={!!busy} onClick={() => invite(true)}><Mail size={16} />{busy === 'send' ? 'Отправляем…' : inviteLabel}</button>}
         {selected && <button type="button" disabled={!!busy} onClick={() => invite(false)}><Clipboard size={16} />{busy === 'copy' ? 'Создаём…' : 'Скопировать ссылку'}</button>}
-        <button type="button" onClick={onAddContact}><UserPlus size={16} />{restaurant.contacts.length ? 'Добавить email' : 'Пригласить ресторан'}</button>
+        {!selected && <button type="button" onClick={onEdit}><UserPlus size={16} />Добавить email</button>}
         {restaurant.public_menu_url && <a href={restaurant.public_menu_url} target="_blank" rel="noreferrer"><ExternalLink size={16} />Открыть меню</a>}
         {!restaurant.public_menu_url && <button type="button" disabled title="Меню ещё не опубликовано"><ExternalLink size={16} />Открыть меню</button>}
         {restaurant.active_revision_id && <Link to={`/admin/menu-revisions/${restaurant.active_revision_id}`}><ShieldCheck size={16} />Открыть заявку</Link>}
@@ -251,10 +299,10 @@ export default function AdminRestaurantList() {
                   <td>{restaurant.city_label}</td>
                   <td>{restaurant.contacts.length ? <><span>{restaurant.contacts[0].email}</span>{restaurant.contacts.length > 1 && <small>+{restaurant.contacts.length - 1}</small>}{restaurant.invite_error && <span className="admin-crm__warning">Ошибка письма</span>}</> : <span className="admin-crm__muted">—</span>}</td>
                   <td><span className={`admin-crm__status admin-crm__status--${restaurant.menu_status}`}>{restaurant.menu_status_label}</span></td>
-                  <td><span className={`admin-crm__partnership admin-crm__partnership--${restaurant.partnership}`}>{restaurant.partnership_label}</span></td>
+                  <td><span className={`admin-crm__partnership admin-crm__partnership--${restaurant.partnership}`} title={restaurant.parsers?.length ? `Меню обновляет парсер: ${restaurant.parsers.join(', ')}` : undefined}>{restaurant.partnership_label}</span></td>
                   <td>{formatDate(restaurant.last_activity_at)}</td>
                   <td>{restaurant.active_revision_id && restaurant.requires_action ? <Link to={`/admin/menu-revisions/${restaurant.active_revision_id}`}>{restaurant.next_action}</Link> : restaurant.next_action}</td>
-                  <td><RestaurantActions restaurant={restaurant} onAddContact={() => setDialog({ type: 'contact', restaurant })} onChanged={reload} notify={notify} /></td>
+                  <td><RestaurantActions restaurant={restaurant} onEdit={() => setDialog({ type: 'edit', restaurant })} onChanged={reload} notify={notify} /></td>
                 </tr>
               ))}
             </tbody>
@@ -264,7 +312,7 @@ export default function AdminRestaurantList() {
       )}
 
       {dialog?.type === 'restaurant' && <Dialog title="Добавить ресторан" onClose={() => setDialog(null)}><RestaurantForm onClose={() => setDialog(null)} onSaved={saved} /></Dialog>}
-      {dialog?.type === 'contact' && <Dialog title="Добавить ещё один email" onClose={() => setDialog(null)}><ContactForm restaurant={dialog.restaurant} onClose={() => setDialog(null)} onSaved={saved} /></Dialog>}
+      {dialog?.type === 'edit' && <Dialog title={`Редактировать: ${dialog.restaurant.name}`} onClose={() => setDialog(null)}><EditRestaurantForm restaurant={dialog.restaurant} onClose={() => setDialog(null)} onSaved={saved} /></Dialog>}
     </section>
   )
 }
