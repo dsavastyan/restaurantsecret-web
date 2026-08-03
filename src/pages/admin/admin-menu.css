@@ -134,7 +134,10 @@
 .admin-crm__status--published { color: #28603b; background: #daf0df; }
 .admin-crm__status--stale { color: #84342e; background: #f9e4e1; }
 .admin-crm__status--logged_in { color: #315f78; background: #e0eff6; }
+.admin-crm__status--not_invited { color: #62635e; background: #ecece8; }
 .admin-crm__partnership--partner { color: #285d39; background: #dceee0; }
+.admin-crm__partnership--parsing { color: #2f5674; background: #e2edf6; }
+.admin-crm__partnership--not_invited { color: #7a6a33; background: #f6efd9; }
 .admin-crm__partnership--not_partner { color: #62635e; background: #ecece8; }
 .admin-crm__warning { display: flex; align-items: center; gap: 4px; width: fit-content; margin-top: 6px; color: #96372e; font-size: 11px; font-weight: 800; }
 .admin-crm__actions { position: relative; }
@@ -165,6 +168,18 @@
 .admin-crm__form input:focus { border-color: #77845c; box-shadow: 0 0 0 3px rgba(119, 132, 92, .12); }
 .admin-crm__form footer { display: flex; justify-content: flex-end; gap: 9px; padding-top: 4px; }
 .admin-crm__form footer button:not(.admin-crm__primary) { padding: 11px 14px; border: 1px solid #d8d4ca; border-radius: 10px; background: #fff; }
+.admin-crm__form label small { color: #85857d; font-weight: 600; }
+.admin-crm__form input:disabled { color: #7d7c74; background: #f3f2ed; }
+.admin-crm__hint { margin: 0; color: #77766e; font-size: 13px; }
+.admin-crm__contacts { display: grid; gap: 9px; padding: 14px; border: 1px solid #e2ded3; border-radius: 12px; background: #faf9f5; }
+.admin-crm__contacts > strong { font-size: 14px; }
+.admin-crm__contact { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 11px; border: 1px solid #e4e0d6; border-radius: 9px; background: #fff; }
+.admin-crm__contact span { display: grid; gap: 2px; }
+.admin-crm__contact small { color: #85857d; font-size: 12px; font-weight: 600; }
+.admin-crm__contact button { display: grid; place-items: center; padding: 6px; color: #9b332d; border: 0; border-radius: 7px; background: transparent; }
+.admin-crm__contact.is-removed { opacity: .55; }
+.admin-crm__contact.is-removed > span { text-decoration: line-through; }
+.admin-crm__add-email { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; color: #59653f; border: 1px dashed #b9c19f; border-radius: 9px; background: #fff; font-weight: 800; }
 .admin-crm__candidates { display: grid; gap: 8px; padding: 14px; border: 1px solid #ead49c; border-radius: 11px; background: #fff8e7; }
 .admin-crm__candidates > p { margin: 0 0 4px; color: #6e6040; font-size: 13px; }
 .admin-crm__candidates > button { display: flex; align-items: center; justify-content: space-between; padding: 10px; border: 1px solid #ded5ba; border-radius: 9px; text-align: left; background: #fff; }
