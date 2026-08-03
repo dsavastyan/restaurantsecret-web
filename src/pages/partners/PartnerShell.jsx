@@ -32,6 +32,9 @@ export default function PartnerShell() {
   const isMenuFlowPage = location.pathname.replace(/\/+$/, '') === '/partners/upload'
   const isSeasonalMenuFlowPage = /^\/partners\/seasonal\/[^/]+\/?$/.test(location.pathname)
   const isMenuPreviewPage = /^\/partners\/menu-preview\/[^/]+\/?$/.test(location.pathname)
+  // Дашборд рисует собственную шапку (название ресторана, статус меню, выход),
+  // поэтому общий header портала там не нужен.
+  const isDashboardPage = location.pathname.replace(/\/+$/, '') === '/partners/dashboard'
 
   const [status, setStatus] = useState(isLoginPage ? 'idle' : 'loading') // idle | loading | ready | error
   const [restaurant, setRestaurant] = useState(null)
@@ -162,19 +165,21 @@ export default function PartnerShell() {
 
   return (
     <div className="partners">
-      <header className="partners__header">
-        <div className="partners__brand" aria-label="RestaurantSecret">
-          <img className="partners__brand-logo" src="/assets/logo-64.png" width="40" height="40" alt="" aria-hidden="true" />
-          <span className="partners__brand-name">RestaurantSecret</span>
-          <span className="partners__brand-sub">Кабинет ресторана</span>
-        </div>
-        <div className="partners__header-right">
-          <button className="partners__logout" onClick={handleLogout}>
-            Выйти
-            <LogOut size={30} strokeWidth={1.55} aria-hidden="true" />
-          </button>
-        </div>
-      </header>
+      {!isDashboardPage && (
+        <header className="partners__header">
+          <div className="partners__brand" aria-label="RestaurantSecret">
+            <img className="partners__brand-logo" src="/assets/logo-64.png" width="40" height="40" alt="" aria-hidden="true" />
+            <span className="partners__brand-name">RestaurantSecret</span>
+            <span className="partners__brand-sub">Кабинет ресторана</span>
+          </div>
+          <div className="partners__header-right">
+            <button className="partners__logout" onClick={handleLogout}>
+              Выйти
+              <LogOut size={30} strokeWidth={1.55} aria-hidden="true" />
+            </button>
+          </div>
+        </header>
+      )}
       <main className="partners__main">
         <Outlet context={{
           restaurant,
