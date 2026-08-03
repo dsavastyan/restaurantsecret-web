@@ -1,9 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { analytics } from "../services/analytics";
 
+const PARTNER_AREA = /^\/partners(\/|$)/;
+
 export function ConsentBanner() {
+    const { pathname } = useLocation();
+    const isPartnerArea = PARTNER_AREA.test(pathname);
     const [visible, setVisible] = useState(false);
+
+    // Кабинет ресторана — рабочий инструмент партнёра, его поведение мы не
+    // отслеживаем. Проставляем «отклонено» молча и баннер не показываем.
+    useEffect(() => {
+        if (!isPartnerArea) return;
+        if (analytics.getConsentStatus() === "unset") analytics.setConsent("denied");
+    }, [isPartnerArea]);
 
     useEffect(() => {
         let showTimer = null;
@@ -40,7 +51,7 @@ export function ConsentBanner() {
         analytics.setConsent("denied");
     };
 
-    if (!visible) return null;
+    if (isPartnerArea || !visible) return null;
 
     return (
         <div className="rs-banner">
