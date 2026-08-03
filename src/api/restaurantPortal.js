@@ -76,6 +76,15 @@ export const restaurantPortalApi = {
 
   me: () => portalRequest('/api/restaurant/me'),
 
+  uploadRestaurantLogo: (file) => {
+    const form = new FormData()
+    form.append('logo', file)
+    return portalRequest('/api/restaurant/logo', { method: 'PUT', body: form, isFormData: true })
+  },
+
+  deleteRestaurantLogo: () =>
+    portalRequest('/api/restaurant/logo', { method: 'DELETE' }),
+
   confirmMenuFreshness: () =>
     portalRequest('/api/restaurant/menu/confirm-freshness', { method: 'POST' }),
 
