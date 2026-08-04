@@ -2789,6 +2789,17 @@
 .partners-dash__text-action:hover { color: var(--dash-body); }
 .partners-dash__spinner { animation: partners-photo-spin .8s linear infinite; }
 
+.partners-dash__qr-preview {
+  display: flex;
+  justify-content: center;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid var(--dash-border, #e3e0d4);
+  border-radius: 14px;
+}
+.partners-dash__qr-preview img { width: 140px; height: 140px; }
+a.partners-dash__btn.is-disabled { pointer-events: none; opacity: .5; }
+
 .partners-dash__cards {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
