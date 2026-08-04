@@ -1,6 +1,7 @@
 // src/pages/partners/Dashboard.jsx
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useOutletContext } from 'react-router-dom'
+import QRCode from 'qrcode'
 import {
   ArrowRight,
   BookOpenText,
@@ -10,11 +11,14 @@ import {
   ChevronDown,
   ChevronRight,
   CircleCheck,
+  ClipboardCopy,
+  Download,
   Ellipsis,
   Image as ImageIcon,
   LoaderCircle,
   LogOut,
   Plus,
+  QrCode,
   RefreshCw,
   Sprout,
   Store,
@@ -360,6 +364,83 @@ function RestaurantLogoCard({ restaurant, onRefresh }) {
           Удалить
         </button>
       )}
+    </section>
+  )
+}
+
+function MenuQrCard({ restaurant }) {
+  const [url, setUrl] = useState(null)
+  const [qrDataUrl, setQrDataUrl] = useState(null)
+  const [error, setError] = useState(null)
+  const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    if (!restaurant.has_published_menu) return undefined
+    let cancelled = false
+    setError(null)
+    restaurantPortalApi.menuPublicLink()
+      .then(async (data) => {
+        if (cancelled || !data?.url) return
+        setUrl(data.url)
+        const dataUrl = await QRCode.toDataURL(data.url, { width: 320, margin: 1 })
+        if (!cancelled) setQrDataUrl(dataUrl)
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err.message || 'Не получилось получить ссылку.')
+      })
+    return () => { cancelled = true }
+  }, [restaurant.has_published_menu, restaurant.id])
+
+  if (!restaurant.has_published_menu) return null
+
+  const copyLink = async () => {
+    if (!url) return
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setError('Не получилось скопировать ссылку.')
+    }
+  }
+
+  return (
+    <section className="partners-dash__card partners-dash__mini partners-dash__mini--qr">
+      <div className="partners-dash__mini-head">
+        <span className="partners-dash__icon" aria-hidden="true"><QrCode size={26} strokeWidth={1.6} /></span>
+        <div>
+          <h2>QR и ссылка на меню</h2>
+          <p className="partners-dash__mini-status">{url ? 'Готово' : 'Загружаем…'}</p>
+          <p className="partners-dash__mini-hint">Постоянная ссылка на ваше меню для гостей</p>
+        </div>
+      </div>
+
+      {error && <div className="partners__notice partners__notice--error">{error}</div>}
+
+      {qrDataUrl && (
+        <div className="partners-dash__qr-preview">
+          <img src={qrDataUrl} alt="QR-код на меню ресторана" width={140} height={140} />
+        </div>
+      )}
+
+      <button
+        className="partners-dash__btn partners-dash__btn--block"
+        type="button"
+        disabled={!url}
+        onClick={copyLink}
+      >
+        <ClipboardCopy size={19} strokeWidth={1.7} />
+        {copied ? 'Скопировано' : 'Скопировать ссылку'}
+      </button>
+      <a
+        className={`partners-dash__btn partners-dash__btn--block${qrDataUrl ? '' : ' is-disabled'}`}
+        href={qrDataUrl || undefined}
+        download={qrDataUrl ? `${restaurant.slug || 'menu'}-qr.png` : undefined}
+        onClick={(event) => { if (!qrDataUrl) event.preventDefault() }}
+      >
+        <Download size={19} strokeWidth={1.7} />
+        Скачать QR
+      </a>
     </section>
   )
 }
@@ -836,6 +917,7 @@ export default function PartnersDashboard() {
 
         <div className="partners-dash__cards">
           <RestaurantLogoCard restaurant={restaurant} onRefresh={refresh} />
+          <MenuQrCard restaurant={restaurant} />
 
           <section className="partners-dash__card partners-dash__mini partners-dash__mini--seasonal">
             <div className="partners-dash__mini-head">

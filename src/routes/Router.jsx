@@ -9,6 +9,7 @@ import NotFound from '../pages/NotFound.jsx'
 import { analytics } from '../services/analytics'
 
 const Landing = lazy(() => import('../pages/Landing.jsx'))
+const QrMenuAccess = lazy(() => import('../pages/QrMenuAccess.jsx'))
 const Catalog = lazy(() => import('../pages/Catalog.jsx'))
 const Menu = lazy(() => import('../pages/Menu.jsx'))
 const Search = lazy(() => import('../pages/Search.jsx'))
@@ -85,6 +86,7 @@ function AppRoutes({ onReady }) {
           <Route path="search" element={<Search />} />
           <Route path="restaurants/:slug" element={<RestaurantMenuRedirect />} />
           <Route path="restaurants/:slug/menu" element={<Menu />} />
+          <Route path="qr/:token" element={<QrMenuAccess />} />
           <Route path="r/:slug" element={<ShortRestaurantRedirect />} />
           <Route path="r/:slug/menu" element={<ShortMenuRedirect />} />
           <Route path="pay/success" element={<PaySuccess />} />

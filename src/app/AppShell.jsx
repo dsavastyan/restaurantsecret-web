@@ -8,6 +8,7 @@ import { loadTelegramWebApp } from '@/lib/telegram'
 import { toast } from '@/lib/toast'
 import { useAuth } from '@/store/auth'
 import { useSubscriptionStore } from '@/store/subscription'
+import { clearQrMenuSession, expiredQrMenuSlug, touchQrMenuActivity } from '@/lib/qrMenuAccess'
 
 const NavBar = lazy(() => import('@/components/NavBar'))
 const SearchInput = lazy(() => import('@/components/SearchInput'))
@@ -271,6 +272,33 @@ export default function AppShell() {
     normalizedPath === '/catalog' ||
     normalizedPath === '/app/catalog'
   const isSearchPage = normalizedPath === '/search' || normalizedPath === '/app/search'
+
+  // Idle guard for QR-scanned menu access: any interaction resets the clock,
+  // and 15 minutes of inactivity revokes the temporary pass and, if the user
+  // is still looking at that menu, sends them back to the catalog.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const onActivity = () => touchQrMenuActivity()
+    const activityEvents = ['click', 'keydown', 'scroll', 'touchstart', 'pointerdown']
+    activityEvents.forEach((event) => window.addEventListener(event, onActivity, { passive: true }))
+
+    const checkExpiry = () => {
+      const expiredSlug = expiredQrMenuSlug()
+      if (!expiredSlug) return
+      clearQrMenuSession()
+      const currentSlugMatch = /^\/(?:restaurants|r)\/([^/]+)\/menu\/?$/.exec(window.location.pathname)
+      if (currentSlugMatch && currentSlugMatch[1] === expiredSlug) {
+        navigate('/catalog', { replace: true })
+      }
+    }
+    const interval = window.setInterval(checkExpiry, 30 * 1000)
+
+    return () => {
+      activityEvents.forEach((event) => window.removeEventListener(event, onActivity))
+      window.clearInterval(interval)
+    }
+  }, [navigate])
 
   useEffect(() => {
     if (!accessToken || isOnboardingPage || isLoginPage) return

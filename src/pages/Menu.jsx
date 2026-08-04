@@ -19,6 +19,7 @@ import { useFavoriteRestaurantsStore } from '@/store/favoriteRestaurants'
 import { analytics } from '@/services/analytics'
 import { toast } from '@/lib/toast'
 import { useMeta } from '@/lib/useMeta'
+import { hasQrMenuAccess } from '@/lib/qrMenuAccess'
 import MenuRedesignView from '@/components/MenuRedesign/MenuRedesignView'
 
 const createDefaultPresets = () => ({ highProtein: false, lowFat: false, lowKcal: false })
@@ -174,9 +175,10 @@ export default function Menu({
 
   const dishes = useMemo(() => flattenMenuDishes(menu), [menu])
   const freeDishKeys = useMemo(() => {
-    const visibleDishes = previewMode ? dishes : dishes.slice(0, 3)
+    const isQrAccess = !previewMode && hasQrMenuAccess(slug)
+    const visibleDishes = (previewMode || isQrAccess) ? dishes : dishes.slice(0, 3)
     return new Set(visibleDishes.map((dish) => buildDishAccessKey(dish)))
-  }, [dishes, previewMode])
+  }, [dishes, previewMode, slug])
   const capturedAt = useMemo(() => formatMenuCapturedAt(menu?.menuCapturedAt), [menu?.menuCapturedAt])
 
   // Apply search and macro filters locally to keep the UI responsive.

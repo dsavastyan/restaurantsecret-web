@@ -114,6 +114,8 @@ export const restaurantPortalApi = {
   confirmMenuFreshness: () =>
     portalRequest('/api/restaurant/menu/confirm-freshness', { method: 'POST' }),
 
+  menuPublicLink: () => portalRequest('/api/restaurant/menu/public-link'),
+
   seasonalMenus: () => portalRequest('/api/restaurant/seasonal-menus'),
 
   createSeasonalMenu: (body) =>
