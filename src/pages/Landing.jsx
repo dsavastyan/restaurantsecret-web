@@ -23,6 +23,9 @@ const STATS_FALLBACK = {
   points: 0,
   weeklyAdded: 0,
 }
+// Временная заглушка: показываем базовые 5 "добавлено за неделю" + реальный счётчик поверх.
+// Убрать, когда бэкенд будет стабильно отдавать реальные еженедельные добавления.
+const WEEKLY_ADDED_BASELINE = 5
 const FEATURED_RESTAURANTS_LIMIT = 12
 const RestaurantMap = lazy(() => import('@/components/RestaurantMap'))
 
@@ -160,9 +163,7 @@ export default function Landing() {
   const dishesLabel = resolvedStats.dishes > 0
     ? resolvedStats.dishes.toLocaleString('ru-RU')
     : '—'
-  const weeklyAddedLabel = resolvedStats.weeklyAdded > 0
-    ? `+${resolvedStats.weeklyAdded.toLocaleString('ru-RU')}`
-    : '—'
+  const weeklyAddedLabel = `+${(WEEKLY_ADDED_BASELINE + resolvedStats.weeklyAdded).toLocaleString('ru-RU')}`
   const pointsLabel = resolvedStats.points > 0
     ? resolvedStats.points.toLocaleString('ru-RU')
     : '—'
