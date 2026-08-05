@@ -869,7 +869,7 @@ function MenuPreviewDialog({ data, onClose, photos, restaurant }) {
         </header>
         <div className="partners-menu-preview__body">
           <div className="partners-menu-preview__intro">
-            <span>{data.dishes_count} блюд</span>
+            <span>{data.dishes_count} {pluralizeDishes(data.dishes_count)}</span>
             <span>{data.categories_count} категорий</span>
             <span>{photos.length ? `${photos.length} фото` : 'Без фотографий'}</span>
           </div>
