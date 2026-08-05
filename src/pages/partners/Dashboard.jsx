@@ -162,7 +162,7 @@ function MenuVersionModal({ data, loading, onClose, onRestore }) {
         {!loading && version && (
           <>
             <div className="partners-history-modal__summary">
-              <span>{version.dishes_count} блюд</span>
+              <span>{version.dishes_count} {dishCountLabel(version.dishes_count)}</span>
               <span>{version.items_count} позиций</span>
               <span>{versionActionLabel(version.action)}</span>
               {version.is_current && <span className="partners-history__current">Текущая версия</span>}

@@ -176,8 +176,25 @@ function formatFileSize(bytes) {
   return `${(value / (1024 * 1024)).toFixed(value < 10 * 1024 * 1024 ? 1 : 0)} МБ`
 }
 
+function dishCountLabel(value) {
+  const count = Number(value) || 0
+  const mod10 = count % 10
+  const mod100 = count % 100
+  if (mod10 === 1 && mod100 !== 11) return 'блюдо'
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'блюда'
+  return 'блюд'
+}
+
+function newDishesLabel(count) {
+  const mod10 = count % 10
+  const mod100 = count % 100
+  if (mod10 === 1 && mod100 !== 11) return 'новое блюдо'
+  return `новых ${dishCountLabel(count)}`
+}
+
 function changeSummary(summary) {
-  return `${summary.added || 0} новых блюд · ${summary.updated || 0} изменено · ${summary.deleted || 0} будет удалено`
+  const added = summary.added || 0
+  return `${added} ${newDishesLabel(added)} · ${summary.updated || 0} изменено · ${summary.deleted || 0} будет удалено`
 }
 
 function parseMessageDate(value) {
@@ -957,7 +974,6 @@ function PhotosStep({ payload, busy, onBack, onDeletePhoto, onNext, onPhoto, onA
 }
 
 function PreviewStep({ payload, busy, error, onBack, onNext, onMessage }) {
-  const [mode, setMode] = useState('all')
   const [comment, setComment] = useState('')
   const openMenuPreview = () => {
     window.open(
@@ -971,28 +987,16 @@ function PreviewStep({ payload, busy, error, onBack, onNext, onMessage }) {
     const saved = await onMessage(comment, type)
     if (saved && type === 'comment') setComment('')
   }
-  const visible = payload.items.filter((item) => mode === 'changes' ? item.change_type !== 'unchanged' : item.change_type !== 'deleted')
   return (
     <section className="partners-update__preview-step">
       <div className="partners-update__section-heading"><span>Шаг 3</span><h2>Проверьте превью</h2><p>Так будет выглядеть обновлённое меню после публикации.</p></div>
       <div className="partners-update__preview-toolbar">
-        <div><button className={mode === 'all' ? 'active' : ''} type="button" onClick={() => setMode('all')}>Всё меню</button><button className={mode === 'changes' ? 'active' : ''} type="button" onClick={() => setMode('changes')}>Только изменения</button></div>
         <span>Добавлено {payload.summary.added || 0} · Изменено {payload.summary.updated || 0} · Удалено {payload.summary.deleted || 0}</span>
       </div>
       <button className="partners-update__open-menu-preview" type="button" onClick={openMenuPreview}>
         Просмотреть превью
         <ExternalLink size={18} aria-hidden="true" />
       </button>
-      <div className="partners-update__preview-grid">
-        {visible.map((item) => (
-          <article className={`partners-update__preview-card partners-update__preview-card--${item.change_type}`} key={item.id}>
-            {item.change_type === 'deleted'
-              ? <span className="partners-update__photo-placeholder"><Trash2 size={30} /></span>
-              : item.photo_url && !item.photo_removed ? <img src={restaurantPortalApi.draftItemPhotoUrl(payload.draft.id, item.id)} alt="" /> : <span className="partners-update__photo-placeholder"><ImageIcon size={30} /></span>}
-            <div><span className={`partners-update__status partners-update__status--${item.change_type}`}>{STATUS_LABELS[item.change_type]}</span><h3>{item.dish_name}</h3><p>{item.composition_text}</p><dl><div><dt>Ккал</dt><dd>{formatValue(item.kcal)}</dd></div><div><dt>Б</dt><dd>{formatValue(item.proteins_g)}</dd></div><div><dt>Ж</dt><dd>{formatValue(item.fats_g)}</dd></div><div><dt>У</dt><dd>{formatValue(item.carbs_g)}</dd></div></dl><strong>{formatValue(item.price_rub, ' ₽')}</strong></div>
-          </article>
-        ))}
-      </div>
       {payload.revision && (
         <section className="partners-update__preview-feedback">
           <h3>Нужно что-то уточнить?</h3>
@@ -1018,9 +1022,9 @@ function ConfirmStep({ payload, busy, error, onBack, onSubmit, initial = false }
       <h2>{initial ? 'Подтвердите меню' : 'Отправьте обновления'}</h2>
       <p>{initial ? 'Проверьте меню перед публикацией. После подтверждения оно станет доступно гостям.' : 'Проверьте изменения перед отправкой. Текущее меню продолжит работать, пока новая версия проходит обработку.'}</p>
       <div className="partners-update__confirm-summary">
-        <div><strong>{summary.added || 0}</strong><span>блюд добавлено</span></div>
-        <div><strong>{summary.updated || 0}</strong><span>блюд изменено</span></div>
-        <div><strong>{summary.deleted || 0}</strong><span>блюд будет удалено</span></div>
+        <div><strong>{summary.added || 0}</strong><span>{dishCountLabel(summary.added || 0)} добавлено</span></div>
+        <div><strong>{summary.updated || 0}</strong><span>{dishCountLabel(summary.updated || 0)} изменено</span></div>
+        <div><strong>{summary.deleted || 0}</strong><span>{dishCountLabel(summary.deleted || 0)} будет удалено</span></div>
         <div><strong>{summary.photos || 0}</strong><span>фотографий добавлено или заменено</span></div>
       </div>
       {error && <div className="partners__notice partners__notice--error">{error}</div>}
