@@ -55,7 +55,7 @@ export default function PartnersMenuPreview() {
   useEffect(() => {
     let cancelled = false
     setError('')
-    restaurantPortalApi.draft(draftId)
+    restaurantPortalApi.draft(draftId, { readOnly: true })
       .then((data) => {
         if (!cancelled) setPayload(data)
       })

@@ -204,8 +204,8 @@ export const restaurantPortalApi = {
       body: { replace_active: replaceActive },
     }),
 
-  draft: (draftId) =>
-    portalRequest(`/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}`),
+  draft: (draftId, { readOnly = false } = {}) =>
+    portalRequest(`/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}${readOnly ? '?readonly=1' : ''}`),
 
   updateDraft: (draftId, body) =>
     portalRequest(`/api/restaurant/menu/drafts/${encodeURIComponent(draftId)}`, {
