@@ -795,7 +795,7 @@ function DishPhotoExample() {
         </defs>
         <rect width="136" height="104" rx="12" fill="url(#table)" />
         <circle cx="68" cy="52" r="44" fill="url(#plate)" />
-        <g fill="#79a64f">
+        <g fill="#4fae78">
           <ellipse cx="47" cy="43" rx="15" ry="9" transform="rotate(-24 47 43)" />
           <ellipse cx="77" cy="34" rx="17" ry="9" transform="rotate(18 77 34)" />
           <ellipse cx="84" cy="61" rx="17" ry="10" transform="rotate(-21 84 61)" />

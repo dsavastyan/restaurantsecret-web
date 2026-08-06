@@ -990,13 +990,29 @@ function PreviewStep({ payload, busy, error, onBack, onNext, onMessage }) {
   return (
     <section className="partners-update__preview-step">
       <div className="partners-update__section-heading"><span>Шаг 3</span><h2>Проверьте превью</h2><p>Так будет выглядеть обновлённое меню после публикации.</p></div>
-      <div className="partners-update__preview-toolbar">
-        <span>Добавлено {payload.summary.added || 0} · Изменено {payload.summary.updated || 0} · Удалено {payload.summary.deleted || 0}</span>
+      <div className="partners-update__preview-hero">
+        <div className="partners-update__preview-frame" aria-hidden="true">
+          <div className="partners-update__preview-frame-bar"><i /><i /><i /></div>
+          <div className="partners-update__preview-skeleton">
+            <span className="partners-update__preview-skeleton-title" />
+            <span className="partners-update__preview-skeleton-chip" />
+            <div className="partners-update__preview-skeleton-card" /><div className="partners-update__preview-skeleton-card" /><div className="partners-update__preview-skeleton-card" />
+          </div>
+        </div>
+        <div className="partners-update__preview-copy">
+          <h3>Обновлённое меню готово к просмотру</h3>
+          <div className="partners-update__preview-stats">
+            <span><strong>{payload.summary.added || 0}</strong> добавлено</span>
+            <span><strong>{payload.summary.updated || 0}</strong> изменено</span>
+            <span><strong>{payload.summary.deleted || 0}</strong> удалено</span>
+          </div>
+          <button className="partners-update__open-menu-preview" type="button" onClick={openMenuPreview}>
+            Просмотреть превью
+            <ExternalLink size={18} aria-hidden="true" />
+          </button>
+          <small>Откроется в новой вкладке — именно так меню увидят гости.</small>
+        </div>
       </div>
-      <button className="partners-update__open-menu-preview" type="button" onClick={openMenuPreview}>
-        Просмотреть превью
-        <ExternalLink size={18} aria-hidden="true" />
-      </button>
       {payload.revision && (
         <section className="partners-update__preview-feedback">
           <h3>Нужно что-то уточнить?</h3>

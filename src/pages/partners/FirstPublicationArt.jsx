@@ -18,7 +18,7 @@ function StepCard({ x, y, width, height, lines, bar = true, children }) {
       />
       <g
         transform={`translate(${cx - 14} ${y + 21}) scale(1.16)`}
-        stroke="#4d7837"
+        stroke="#2f8f5b"
         strokeWidth="1.7"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -31,7 +31,7 @@ function StepCard({ x, y, width, height, lines, bar = true, children }) {
           {line}
         </text>
       ))}
-      {bar && <rect x={cx - 22} y={y + height - 22} width="44" height="6" rx="3" fill="#7A9A5C" />}
+      {bar && <rect x={cx - 22} y={y + height - 22} width="44" height="6" rx="3" fill="#4FAE78" />}
     </g>
   )
 }
@@ -76,10 +76,10 @@ export default function FirstPublicationArt() {
 
       {/* монитор */}
       <g>
-        <rect x="168" y="92" width="392" height="258" rx="17" fill="#FFFDF8" stroke="#4f6b3d" strokeWidth="2" />
+        <rect x="168" y="92" width="392" height="258" rx="17" fill="#FFFDF8" stroke="#26744a" strokeWidth="2" />
         <rect x="182" y="106" width="364" height="230" rx="9" fill="#FFFFFF" stroke="#E3E6DB" />
         <path d="M268 106v230" stroke="#E9EBE2" />
-        <circle cx="201" cy="130" r="10" stroke="#4d7837" strokeWidth="1.8" />
+        <circle cx="201" cy="130" r="10" stroke="#2f8f5b" strokeWidth="1.8" />
         {[160, 186, 212, 238].map((y) => (
           <g key={y}>
             <rect x="192" y={y} width="13" height="13" rx="3.5" stroke="#C9D0BD" />
@@ -88,7 +88,7 @@ export default function FirstPublicationArt() {
         ))}
         <rect x="290" y="124" width="92" height="9" rx="4.5" fill="#E9EBE2" />
         <g>
-          <rect x="506" y="118" width="26" height="26" rx="8" fill="#4d7837" />
+          <rect x="506" y="118" width="26" height="26" rx="8" fill="#2f8f5b" />
           <path d="M519 125v12M513 131h12" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" />
         </g>
         <g>
@@ -97,17 +97,17 @@ export default function FirstPublicationArt() {
           <path d="m305 162 3 3" stroke="#BEC5B2" strokeLinecap="round" />
         </g>
         <g>
-          <rect x="290" y="180" width="44" height="15" rx="7.5" fill="#7A9A5C" />
+          <rect x="290" y="180" width="44" height="15" rx="7.5" fill="#4FAE78" />
           <rect x="344" y="180" width="30" height="15" rx="7.5" stroke="#E0E3D8" />
           <rect x="384" y="180" width="38" height="15" rx="7.5" stroke="#E0E3D8" />
           <rect x="432" y="180" width="32" height="15" rx="7.5" stroke="#E0E3D8" />
         </g>
         <g>
           <rect x="290" y="208" width="100" height="62" rx="10" stroke="#E3E6DB" />
-          <path d="m300 254 18-16 14 8 20-22 18 8" stroke="#7A9A5C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="m300 254 18-16 14 8 20-22 18 8" stroke="#4FAE78" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           <rect x="400" y="208" width="100" height="62" rx="10" stroke="#E3E6DB" />
-          <rect x="414" y="246" width="10" height="16" rx="3" fill="#B9CB9C" />
-          <rect x="430" y="236" width="10" height="26" rx="3" fill="#7A9A5C" />
+          <rect x="414" y="246" width="10" height="16" rx="3" fill="#9DCBB2" />
+          <rect x="430" y="236" width="10" height="26" rx="3" fill="#4FAE78" />
           <rect x="446" y="242" width="10" height="20" rx="3" fill="#E3C68C" />
           <rect x="462" y="228" width="10" height="34" rx="3" fill="#D49830" />
         </g>
@@ -117,13 +117,13 @@ export default function FirstPublicationArt() {
             <rect x="313" y={y} width="150" height="8" rx="4" fill="#EDEEE8" />
           </g>
         ))}
-        <path d="M340 350l-8 36h64l-8-36" stroke="#4f6b3d" strokeWidth="2" strokeLinejoin="round" />
-        <path d="M296 390h136" stroke="#4f6b3d" strokeWidth="3" strokeLinecap="round" />
+        <path d="M340 350l-8 36h64l-8-36" stroke="#26744a" strokeWidth="2" strokeLinejoin="round" />
+        <path d="M296 390h136" stroke="#26744a" strokeWidth="3" strokeLinecap="round" />
       </g>
 
       {/* телефон */}
       <g>
-        <rect x="452" y="196" width="236" height="436" rx="34" fill="#FFFDF8" stroke="#4f6b3d" strokeWidth="2" />
+        <rect x="452" y="196" width="236" height="436" rx="34" fill="#FFFDF8" stroke="#26744a" strokeWidth="2" />
         <rect x="464" y="208" width="212" height="412" rx="26" fill="#FFFFFF" stroke="#E6E3DC" />
         <rect x="536" y="216" width="68" height="9" rx="4.5" fill="#EDEEE8" />
         <g stroke="#8A9184" strokeWidth="1.8" strokeLinecap="round">
@@ -131,7 +131,7 @@ export default function FirstPublicationArt() {
         </g>
         <path
           d="M652 244c-3-4-9-4-11 1-2-5-8-5-11-1-3 5 2 10 11 15 9-5 14-10 11-15Z"
-          stroke="#4d7837"
+          stroke="#2f8f5b"
           strokeWidth="1.6"
           strokeLinejoin="round"
         />
@@ -141,7 +141,7 @@ export default function FirstPublicationArt() {
           <path d="m499 286 3 3" stroke="#BEC5B2" strokeLinecap="round" />
         </g>
         <g>
-          <rect x="482" y="306" width="46" height="17" rx="8.5" fill="#7A9A5C" />
+          <rect x="482" y="306" width="46" height="17" rx="8.5" fill="#4FAE78" />
           <rect x="536" y="306" width="34" height="17" rx="8.5" stroke="#E0E3D8" />
           <rect x="578" y="306" width="40" height="17" rx="8.5" stroke="#E0E3D8" />
           <rect x="626" y="306" width="32" height="17" rx="8.5" stroke="#E0E3D8" />
