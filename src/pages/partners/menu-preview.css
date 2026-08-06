@@ -32,7 +32,7 @@
   height: 38px;
   border-radius: 50%;
   background: #dfeeda;
-  color: #456b32;
+  color: #2b8253;
 }
 
 .partner-menu-page-preview__status div {
@@ -42,7 +42,7 @@
 }
 
 .partner-menu-page-preview__status strong {
-  color: #29461e;
+  color: #215d3c;
   font-size: 14px;
 }
 
@@ -62,7 +62,7 @@
   border: 1px solid #b8caae;
   border-radius: 10px;
   background: #fff;
-  color: #365429;
+  color: #26744a;
   font-size: 13px;
   font-weight: 700;
   text-decoration: none;

@@ -21,7 +21,7 @@
 .seasonal-flow__upload-block > div:first-child p { margin: 0 0 18px; color: var(--u-muted); font-size: 12px; line-height: 1.55; }
 .seasonal-flow__dropzone { min-height: 245px; }
 .seasonal-flow__dropzone strong { font-size: 14px; }
-.seasonal-flow__file-result { display: flex; align-items: center; gap: 11px; margin-top: 14px; padding: 14px 16px; color: var(--u-green-dark); border: 1px solid #ccd9c2; border-radius: 11px; background: #f0f5eb; }
+.seasonal-flow__file-result { display: flex; align-items: center; gap: 11px; margin-top: 14px; padding: 14px 16px; color: var(--u-green-dark); border: 1px solid #ccd9c2; border-radius: 11px; background: #eef5f0; }
 .seasonal-flow__file-result div { display: grid; gap: 3px; }
 .seasonal-flow__file-result span { color: var(--u-muted); font-size: 10px; }
 .seasonal-flow__duplicates { margin-top: 20px; overflow: hidden; border: 1px solid #dfc38e; border-radius: 16px; background: #fffaf0; }
@@ -30,7 +30,7 @@
 .seasonal-flow__duplicates h3 { margin: 4px 0 0; font: 400 23px 'DM Serif Display', Georgia, serif; }
 .seasonal-flow__duplicates article { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 20px; border-top: 1px solid #eee1ca; }
 .seasonal-flow__duplicates article:first-of-type { border-top: 0; }
-.seasonal-flow__duplicates article.is-resolved { background: #f6f8f1; }
+.seasonal-flow__duplicates article.is-resolved { background: #f1f7f3; }
 .seasonal-flow__duplicates article p { margin: 5px 0 0; color: var(--u-muted); font-size: 11px; }
 .seasonal-flow__duplicates article > div:last-child { display: flex; flex: 0 0 auto; gap: 7px; }
 .seasonal-flow__duplicates button { padding: 9px 12px; border: 1px solid #d4c4a5; border-radius: 9px; background: #fff; color: var(--u-green-dark); font: inherit; font-size: 10px; font-weight: 750; cursor: pointer; }
@@ -39,7 +39,7 @@
 .seasonal-flow .partners-update__flow-actions button:disabled { opacity: .55; cursor: wait; }
 .seasonal-flow__photo-grid { margin-top: 28px; }
 .seasonal-flow__category { color: var(--u-green); font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
-.seasonal-flow__preview-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin: 25px 0 18px; padding: 19px 21px; border: 1px solid #cad5c1; border-radius: 14px; background: #eef4e9; }
+.seasonal-flow__preview-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin: 25px 0 18px; padding: 19px 21px; border: 1px solid #cad5c1; border-radius: 14px; background: #e9f3ee; }
 .seasonal-flow__preview-header > div > span { color: var(--u-green); font-size: 9px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
 .seasonal-flow__preview-header h3 { margin: 4px 0 0; font: 400 26px 'DM Serif Display', Georgia, serif; }
 .seasonal-flow__preview-header > span { display: inline-flex; align-items: center; gap: 7px; color: var(--u-green-dark); font-size: 11px; }

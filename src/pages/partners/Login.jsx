@@ -1,6 +1,7 @@
 // src/pages/partners/Login.jsx
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { ShieldCheck } from 'lucide-react'
 import { restaurantPortalApi } from '@/api/restaurantPortal'
 
 const RESEND_COOLDOWN_SECONDS = 60
@@ -123,12 +124,16 @@ export default function PartnersLogin() {
             <span>RestaurantSecret</span>
           </div>
           <h1 className="partners-login__title">Ваш ресторан<br /><em>в центре внимания</em></h1>
+          <p className="partners-login__lead">
+            Кабинет партнёра RestaurantSecret: публикуйте меню с КБЖУ, обновляйте блюда
+            и делитесь ссылкой и QR-кодом с гостями.
+          </p>
         </div>
 
         <div className="partners-card partners-login">
           <div className="partners-login__card-head">
-            <span className="partners-login__eyebrow">Вход для партнёров</span>
-            <span className="partners-login__lock" aria-hidden="true">⌁</span>
+            <span className="partners-login__eyebrow">Кабинет ресторана</span>
+            <span className="partners-login__lock" aria-hidden="true"><ShieldCheck size={16} strokeWidth={1.9} /></span>
           </div>
 
           <h2 className="partners-login__card-title">{title}</h2>
