@@ -165,13 +165,15 @@ body[data-rs-menu-v2] main {
 
 .rsm2-hero__auto-updated {
   vertical-align: middle;
-  margin-left: 0.28em;
+  margin-left: 0.22em;
+  width: clamp(24px, 3vw, 34px);
+  height: clamp(24px, 3vw, 34px);
   color: #6fd39b;
 }
 
 .rsm2-hero__auto-updated svg {
-  width: clamp(20px, 2.6vw, 32px);
-  height: clamp(20px, 2.6vw, 32px);
+  width: 55%;
+  height: 55%;
 }
 
 .rsm2-hero__stats {

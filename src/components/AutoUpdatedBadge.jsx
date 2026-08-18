@@ -1,29 +1,44 @@
 // Checkmark shown next to a restaurant's name when its menu is kept current
 // by an automated parser (see `autoUpdated` on the restaurant/menu API
-// response). Uses the native `title` attribute for the tooltip, matching the
-// pattern already used for icon buttons elsewhere (e.g. the restaurant
-// website link in Catalog.jsx).
-import React from 'react'
+// response). Ships its own tooltip bubble (state-driven, not the native
+// `title` attribute) since native tooltips are slow to appear and don't work
+// on tap, and this needs to read clearly on both the light catalog card and
+// the dark menu hero.
+import React, { useState } from 'react'
+
+const TOOLTIP_TEXT = 'Постоянное обновление'
 
 export default function AutoUpdatedBadge({ className = '' }) {
+  const [open, setOpen] = useState(false)
+
   return (
     <span
-      className={`auto-updated-badge ${className}`.trim()}
-      title="Постоянное обновление"
-      aria-label="Постоянное обновление"
+      className={`auto-updated-badge ${open ? 'is-open' : ''} ${className}`.trim()}
+      tabIndex={0}
       role="img"
+      aria-label={TOOLTIP_TEXT}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      onFocus={() => setOpen(true)}
+      onBlur={() => setOpen(false)}
+      onClick={(e) => {
+        e.stopPropagation()
+        setOpen((v) => !v)
+      }}
     >
-      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
-        <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.14" />
+      <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" focusable="false">
         <path
-          d="M7.5 12.5l3 3 6-6.5"
+          d="M5 12.5l4.2 4.2L19 6"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2.2"
+          strokeWidth="2.6"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
       </svg>
+      <span className="auto-updated-badge__tooltip" role="tooltip">
+        {TOOLTIP_TEXT}
+      </span>
     </span>
   )
 }
