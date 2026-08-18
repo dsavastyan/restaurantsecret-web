@@ -3255,20 +3255,31 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
 
 .catalog-card__identity .catalog-card__title {
   margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  display: block;
   max-width: 100%;
   font-size: clamp(17px, 1.4vw, 22px);
   line-height: 1.2;
   color: #0f172a;
   font-weight: 700;
-}
-
-.catalog-card__title-text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Wraps the (possibly line-clamped, per .catalog-page below) title together
+   with the auto-updated badge. The badge must live outside .catalog-card__title
+   itself: that element clips overflow for its line-clamp, which would also
+   clip the badge's tooltip bubble. */
+.catalog-card__title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.catalog-card__title-row .catalog-card__title {
+  flex: 1 1 auto;
   min-width: 0;
 }
 
@@ -3874,6 +3885,7 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
 
 .catalog-page .catalog-card__title {
   margin: 0;
+  min-width: 0;
   color: #231f1b;
   font-family: "Playfair Display", "DM Serif Display", Georgia, serif;
   font-size: clamp(20px, 2vw, 25px);
