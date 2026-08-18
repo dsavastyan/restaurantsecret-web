@@ -416,10 +416,10 @@ export default function Catalog() {
                   <div className="catalog-card__identity">
                     <div className={`${getBadgeClassName(r?.name)} catalog-card__badge--tone-${i % 4}`} aria-hidden="true">{badgeText}</div>
                     <div className="catalog-card__copy">
-                      <h3 className="catalog-card__title">
-                        <span className="catalog-card__title-text">{r.name}</span>
+                      <div className="catalog-card__title-row">
+                        <h3 className="catalog-card__title">{r.name}</h3>
                         {r?.autoUpdated && <AutoUpdatedBadge className="catalog-card__auto-updated" />}
-                      </h3>
+                      </div>
                       <div className="catalog-card__meta">
                         {r?.cuisine && (
                           <span className="catalog-card__meta-item">
