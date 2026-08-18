@@ -3273,10 +3273,61 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
 }
 
 .auto-updated-badge {
+  position: relative;
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-left: 4px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  background: color-mix(in srgb, currentColor 14%, transparent);
   color: var(--rs-accent);
-  cursor: default;
+  cursor: pointer;
+  outline: none;
+}
+
+.auto-updated-badge:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 30%, transparent);
+}
+
+.auto-updated-badge__tooltip {
+  position: absolute;
+  top: calc(100% + 9px);
+  left: 50%;
+  transform: translate(-50%, -4px);
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.14s ease, transform 0.14s ease;
+  z-index: 20;
+}
+
+.auto-updated-badge__tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-bottom-color: #0f172a;
+}
+
+.auto-updated-badge.is-open .auto-updated-badge__tooltip,
+.auto-updated-badge:hover .auto-updated-badge__tooltip,
+.auto-updated-badge:focus-visible .auto-updated-badge__tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 .catalog-card__top-actions {
