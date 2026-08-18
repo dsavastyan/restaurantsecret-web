@@ -4,6 +4,7 @@
 // preview via the `readOnly` prop, which suppresses every mutating action.
 import { useEffect, useMemo, useState } from 'react';
 import { MenuOutdatedModal } from '@/components/MenuOutdatedModal';
+import AutoUpdatedBadge from '@/components/AutoUpdatedBadge.jsx';
 import DishTileV2 from './DishTileV2';
 import DishRowV2 from './DishRowV2';
 import { HeartIcon, MapPinIcon, ShareIcon, SearchIcon } from './icons';
@@ -162,6 +163,7 @@ export default function MenuRedesignView({
           <div className="rsm2-hero__lead">
             <h1 className="rsm2-hero__title" aria-label={`Меню ${seoRestaurantName} с КБЖУ`}>
               {seoRestaurantName}
+              {menu?.autoUpdated && <AutoUpdatedBadge className="rsm2-hero__auto-updated" />}
             </h1>
             <div className="rsm2-hero__stats">
               <div className="rsm2-hero__stat">

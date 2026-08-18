@@ -163,6 +163,17 @@ body[data-rs-menu-v2] main {
   border-bottom: 1px solid rgba(244, 239, 228, 0.14);
 }
 
+.rsm2-hero__auto-updated {
+  vertical-align: middle;
+  margin-left: 0.28em;
+  color: #6fd39b;
+}
+
+.rsm2-hero__auto-updated svg {
+  width: clamp(20px, 2.6vw, 32px);
+  height: clamp(20px, 2.6vw, 32px);
+}
+
 .rsm2-hero__stats {
   display: flex;
   gap: 26px;

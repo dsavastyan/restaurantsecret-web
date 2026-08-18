@@ -10,6 +10,7 @@ import { useAuth } from '@/store/auth'
 import { analytics } from '@/services/analytics'
 import { getRussianPluralWord, matchesSearchQuery } from '@/lib/text'
 import { getLandingStats } from '@/lib/api'
+import AutoUpdatedBadge from '@/components/AutoUpdatedBadge.jsx'
 
 // Fetch a large number to emulate "all" items since backend pagination seems flaky
 const FETCH_LIMIT = 1000;
@@ -415,7 +416,10 @@ export default function Catalog() {
                   <div className="catalog-card__identity">
                     <div className={`${getBadgeClassName(r?.name)} catalog-card__badge--tone-${i % 4}`} aria-hidden="true">{badgeText}</div>
                     <div className="catalog-card__copy">
-                      <h3 className="catalog-card__title">{r.name}</h3>
+                      <h3 className="catalog-card__title">
+                        <span className="catalog-card__title-text">{r.name}</span>
+                        {r?.autoUpdated && <AutoUpdatedBadge className="catalog-card__auto-updated" />}
+                      </h3>
                       <div className="catalog-card__meta">
                         {r?.cuisine && (
                           <span className="catalog-card__meta-item">

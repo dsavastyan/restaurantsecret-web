@@ -3255,15 +3255,28 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
 
 .catalog-card__identity .catalog-card__title {
   margin: 0;
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   max-width: 100%;
   font-size: clamp(17px, 1.4vw, 22px);
   line-height: 1.2;
   color: #0f172a;
   font-weight: 700;
+}
+
+.catalog-card__title-text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
+}
+
+.auto-updated-badge {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--rs-accent);
+  cursor: default;
 }
 
 .catalog-card__top-actions {
