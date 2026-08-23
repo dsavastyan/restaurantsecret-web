@@ -111,4 +111,13 @@ export const adminMenuRevisionsApi = {
       method: 'PATCH',
       body: { blocked },
     }),
+  productMatches: (status = 'pending') => {
+    const params = new URLSearchParams({ status })
+    return request(`/api/admin/product-matches?${params}`)
+  },
+  decideProductMatch: (matchId, decision) =>
+    request(`/api/admin/product-matches/${encodeURIComponent(matchId)}/decision`, {
+      method: 'POST',
+      body: { decision },
+    }),
 }
