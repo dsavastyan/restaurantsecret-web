@@ -35,6 +35,7 @@ const AdminLogin = lazy(() => import('../pages/admin/AdminLogin.jsx'))
 const AdminRestaurants = lazy(() => import('../pages/admin/AdminRestaurantList.jsx'))
 const AdminMenuRevisions = lazy(() => import('../pages/admin/MenuRevisionList.jsx'))
 const AdminMenuRevisionDetail = lazy(() => import('../pages/admin/MenuRevisionDetail.jsx'))
+const AdminProductMatches = lazy(() => import('../pages/admin/ProductMatchReview.jsx'))
 const AccountLayout = lazy(() => import('../pages/account/Layout.tsx'))
 const AccountOverview = lazy(() => import('../pages/account/Overview.tsx'))
 const AccountSubscription = lazy(() => import('../pages/account/Subscription.tsx'))
@@ -129,6 +130,7 @@ function AppRoutes({ onReady }) {
           <Route path="restaurants" element={<AdminRestaurants />} />
           <Route path="menu-revisions" element={<AdminMenuRevisions />} />
           <Route path="menu-revisions/:revisionId" element={<AdminMenuRevisionDetail />} />
+          <Route path="product-matches" element={<AdminProductMatches />} />
           <Route path="*" element={<Navigate to="/admin/restaurants" replace />} />
         </Route>
       </Routes>

@@ -56,6 +56,7 @@ export default function AdminShell() {
         <nav className="admin-menu__nav" aria-label="Разделы администратора">
           <Link className={location.pathname.startsWith('/admin/restaurants') ? 'active' : ''} to="/admin/restaurants">Рестораны</Link>
           <Link className={location.pathname.startsWith('/admin/menu-revisions') ? 'active' : ''} to="/admin/menu-revisions">Задачи меню</Link>
+          <Link className={location.pathname.startsWith('/admin/product-matches') ? 'active' : ''} to="/admin/product-matches">Продукты</Link>
         </nav>
         <button type="button" onClick={logout}>Выйти</button>
       </header>
