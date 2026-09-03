@@ -21,6 +21,8 @@ const OnboardingProfile = lazy(() => import('../pages/OnboardingProfile.tsx'))
 const Contact = lazy(() => import('../pages/Contact.jsx'))
 const Legal = lazy(() => import('../pages/Legal.jsx'))
 const Privacy = lazy(() => import('../pages/Privacy.jsx'))
+const LegalVersionRoute = lazy(() => import('../pages/LegalVersionRoute.jsx'))
+const PrivacyVersionRoute = lazy(() => import('../pages/PrivacyVersionRoute.jsx'))
 const Tariffs = lazy(() => import('../pages/Tariffs.jsx'))
 const Licenses = lazy(() => import('../pages/Licenses.jsx'))
 const PartnerShell = lazy(() => import('../pages/partners/PartnerShell.jsx'))
@@ -63,8 +65,10 @@ function AppRoutes({ onReady }) {
           <Route path="onboarding/welcome" element={<OnboardingWelcome />} />
           <Route path="onboarding/profile/:step" element={<OnboardingProfile />} />
           <Route path="legal" element={<Legal />} />
+          <Route path="legal/versions/:date" element={<LegalVersionRoute />} />
           <Route path="tariffs" element={<Tariffs />} />
           <Route path="privacy" element={<Privacy />} />
+          <Route path="privacy/versions/:date" element={<PrivacyVersionRoute />} />
           <Route path="licenses" element={<Licenses />} />
           <Route path="contact" element={<Contact />} />
           <Route path="feedback" element={<Feedback />} />

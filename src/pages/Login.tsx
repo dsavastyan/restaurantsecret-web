@@ -271,11 +271,11 @@ export default function LoginPage() {
                     обработку персональных данных
                   </a>
                   , а также с{" "}
-                  <a href="https://restaurantsecret.ru/#/privacy" target="_blank" rel="noopener noreferrer">
+                  <a href="https://restaurantsecret.ru/privacy" target="_blank" rel="noopener noreferrer">
                     политикой конфиденциальности
                   </a>{" "}
                   и{" "}
-                  <a href="https://restaurantsecret.ru/#/legal" target="_blank" rel="noopener noreferrer">
+                  <a href="https://restaurantsecret.ru/legal" target="_blank" rel="noopener noreferrer">
                     пользовательским соглашением
                   </a>
                   .
