@@ -120,4 +120,5 @@ export const adminMenuRevisionsApi = {
       method: 'POST',
       body: { decision },
     }),
+  kbjuFlaggedProducts: () => request('/api/admin/kbju-flagged-products'),
 }
