@@ -400,8 +400,8 @@ export default function AccountSubscription() {
   const isNonRenewingPromoAccess =
     statusData?.source?.startsWith("promo:") && statusData?.promo_requires_subscribing === false;
   const isAutoRenewalEnabled = Boolean(statusData?.auto_renewal_enabled);
-  const activePlanTitle = isNonRenewingPromoAccess ? "Промодоступ" : currentPlanKey === "annual" ? "Год" : currentPlanKey === "monthly" ? "Месяц" : planTitle;
-  const activePlanPrice = isNonRenewingPromoAccess ? "0 ₽" : currentPlanKey === "annual" ? "1 490 ₽" : currentPlanKey === "monthly" ? "199 ₽" : planPriceBadge;
+  const activePlanTitle = isNonRenewingPromoAccess ? "Промодоступ" : currentPlanKey === "annual" ? "Год" : currentPlanKey === "monthly" ? "Месяц" : currentPlanKey === "mock" ? "Промодоступ" : planTitle;
+  const activePlanPrice = isNonRenewingPromoAccess ? "0 ₽" : currentPlanKey === "annual" ? "1 490 ₽" : currentPlanKey === "monthly" ? "199 ₽" : currentPlanKey === "mock" ? "0 ₽" : planPriceBadge;
   const activePlanPeriod = isNonRenewingPromoAccess ? "" : currentPlanKey === "annual" ? "/год" : currentPlanKey === "monthly" ? "/мес" : "";
   const activeRenewalLabel = isCancellationScheduled
     ? "Автопродление отключено"
