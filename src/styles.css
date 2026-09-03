@@ -10547,6 +10547,21 @@ body:has(.account--sheet-open) {
   font-size: 14px;
 }
 
+.legal-archive-notice {
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #9a3412;
+  margin-bottom: 24px;
+}
+
+.legal-archive-notice a {
+  color: inherit;
+  text-decoration: underline;
+}
+
 .legal-content {
   display: flex;
   flex-direction: column;
@@ -15587,6 +15602,12 @@ html[data-rs-theme="night"] .legal-container {
 html[data-rs-theme="night"] .legal-eyebrow,
 html[data-rs-theme="night"] .legal-updated {
   color: #9fb0c5;
+}
+
+html[data-rs-theme="night"] .legal-archive-notice {
+  background: rgba(251, 146, 60, 0.12);
+  border-color: rgba(251, 146, 60, 0.4);
+  color: #fdba74;
 }
 
 html[data-rs-theme="night"] .legal-title,
