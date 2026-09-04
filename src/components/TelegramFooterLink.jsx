@@ -1,12 +1,12 @@
 export default function TelegramFooterLink({ className = '' }) {
   return (
     <a
-      href="https://t.me/restaurantsecret"
+      href="https://t.me/RestSecretSupport_bot"
       className={className}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Telegram RestaurantSecret"
-      title="Telegram"
+      aria-label="Поддержка RestaurantSecret в Telegram"
+      title="Поддержка в Telegram"
     >
       <svg
         className="site-footer__social-icon"

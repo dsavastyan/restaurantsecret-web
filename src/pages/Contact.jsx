@@ -37,13 +37,21 @@ const contacts = [
 
 export default function Contact() {
   useMeta({
-    title: 'Контакты — RestaurantSecret',
+    title: 'Поддержка веб-сервиса RestaurantSecret и мобильного приложения AnyEat',
     description: 'Контакты и реквизиты RestaurantSecret. Поддержка по подписке и общие вопросы.',
-    canonical: 'https://restaurantsecret.ru/contact/',
+    canonical: 'https://restaurantsecret.ru/support/',
   })
 
   return (
     <main className="contact-page">
+      <section className="contact-hero" aria-labelledby="support-title">
+        <div className="container contact-hero__inner">
+          <h1 className="contact-hero__title" id="support-title">
+            Поддержка веб-сервиса RestaurantSecret и мобильного приложения AnyEat
+          </h1>
+        </div>
+      </section>
+
       <div className="container contact-layout">
         <section className="contact-card">
           <header className="contact-card__header">
@@ -85,7 +93,7 @@ export default function Contact() {
             <p className="contact-card__eyebrow">Нужна помощь?</p>
             <h2 className="contact-card__title">Свяжитесь удобным способом</h2>
             <p className="contact-card__hint">
-              Отвечаем в течение рабочего дня. Поделитесь деталями запроса — это ускорит решение.
+              Поделитесь деталями запроса — это ускорит решение.
             </p>
           </header>
 

@@ -256,7 +256,7 @@ export default function AppShell() {
   }), [access, handleAccessUpdate, refreshAccess, requestPaywall, closePaywall, requireAccess])
 
   const normalizedPath = location.pathname.replace(/\/+$/, '') || '/'
-  const isContact = normalizedPath.startsWith('/contact')
+  const isContact = normalizedPath.startsWith('/support')
   const isFeedbackPage = normalizedPath === '/feedback'
   const isLanding = normalizedPath === '/'
   const isTariffsPage = normalizedPath === '/tariffs'

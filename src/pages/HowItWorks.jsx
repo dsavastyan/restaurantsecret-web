@@ -462,8 +462,7 @@ export default function HowItWorks() {
             <Link to="/tariffs">Тарифы</Link>
             <Link to="/licenses">Лицензии</Link>
             <button type="button" onClick={() => setIsCookieModalOpen(true)}>Настройки cookies</button>
-            <Link to="/contact">Контакты</Link>
-            <a href="https://t.me/RestSecretSupport_bot" target="_blank" rel="noopener noreferrer">Поддержка</a>
+            <Link to="/support">Контакты и поддержка</Link>
             <Link to="/feedback">Оставить отзыв</Link>
             <TelegramFooterLink className="landing-warm__footer-social" />
           </div>

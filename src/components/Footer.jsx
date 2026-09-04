@@ -34,20 +34,9 @@ export default function Footer() {
               Настройки cookies
             </button>
 
-            <Link to="/contact" className="site-footer__link">
-              Контакты
+            <Link to="/support" className="site-footer__link">
+              Контакты и поддержка
             </Link>
-
-
-
-            <a
-              href="https://t.me/RestSecretSupport_bot"
-              className="site-footer__link"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Поддержка
-            </a>
 
             <Link to="/feedback" className="site-footer__link">
               Оставить отзыв
