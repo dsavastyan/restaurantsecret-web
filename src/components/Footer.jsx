@@ -34,7 +34,7 @@ export default function Footer() {
               Настройки cookies
             </button>
 
-            <Link to="/contact" className="site-footer__link">
+            <Link to="/support" className="site-footer__link">
               Контакты
             </Link>
 

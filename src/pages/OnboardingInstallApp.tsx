@@ -144,7 +144,7 @@ export default function OnboardingInstallAppPage() {
 
         <img className="onboarding-install__image" src={STEP_THREE_IMAGES[stepThreeLang]} alt="Шаг настройки веб-приложения" />
 
-        <a className="onboarding-install__support" href="/contact">
+        <a className="onboarding-install__support" href="/support">
           Поддержка
         </a>
 

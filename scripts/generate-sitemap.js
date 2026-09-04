@@ -355,12 +355,12 @@ function generateStaticRoutes(restaurants, menuBySlug) {
       }),
     },
     {
-      path: '/contact',
-      title: 'Контакты — RestaurantSecret',
+      path: '/support',
+      title: 'Поддержка веб-сервиса RestaurantSecret и мобильного приложения AnyEat',
       description: 'Контакты и реквизиты RestaurantSecret. Поддержка по подписке и общие вопросы.',
-      canonical: `${BASE_URL}/contact/`,
+      canonical: `${BASE_URL}/support/`,
       fallbackHtml: fallbackPage({
-        title: 'Контакты',
+        title: 'Поддержка веб-сервиса RestaurantSecret и мобильного приложения AnyEat',
         description: 'Контакты и реквизиты RestaurantSecret. Поддержка по подписке и общие вопросы.',
       }),
     },
@@ -528,7 +528,7 @@ async function main() {
     { loc: `${BASE_URL}/catalog/`,      priority: '0.9', changefreq: 'daily',   lastmod: today },
     { loc: `${BASE_URL}/how-it-works/`, priority: '0.6', changefreq: 'monthly', lastmod: today },
     { loc: `${BASE_URL}/tariffs/`,      priority: '0.6', changefreq: 'monthly', lastmod: today },
-    { loc: `${BASE_URL}/contact/`,      priority: '0.4', changefreq: 'monthly', lastmod: today },
+    { loc: `${BASE_URL}/support/`,      priority: '0.4', changefreq: 'monthly', lastmod: today },
   ]
 
   const restaurantUrls = restaurants

@@ -70,7 +70,8 @@ function AppRoutes({ onReady }) {
           <Route path="privacy" element={<Privacy />} />
           <Route path="privacy/versions/:date" element={<PrivacyVersionRoute />} />
           <Route path="licenses" element={<Licenses />} />
-          <Route path="contact" element={<Contact />} />
+          <Route path="support" element={<Contact />} />
+          <Route path="contact" element={<Navigate to="/support" replace />} />
           <Route path="feedback" element={<Feedback />} />
           <Route path="how-it-works" element={<HowItWorks />} />
           <Route path="account" element={<AccountLayout />}>

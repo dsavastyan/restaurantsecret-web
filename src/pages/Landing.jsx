@@ -741,7 +741,7 @@ export default function Landing() {
             <Link to="/tariffs">Тарифы</Link>
             <Link to="/licenses">Лицензии</Link>
             <button type="button" onClick={() => setIsCookieModalOpen(true)}>Настройки cookies</button>
-            <Link to="/contact">Контакты</Link>
+            <Link to="/support">Контакты</Link>
             <a href="https://t.me/RestSecretSupport_bot" target="_blank" rel="noopener noreferrer">Поддержка</a>
             <Link to="/feedback">Оставить отзыв</Link>
             <TelegramFooterLink className="landing-warm__footer-social" />
