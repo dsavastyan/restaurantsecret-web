@@ -12,6 +12,7 @@ const spaRoutes = [
   'admin',
   'admin/login',
   'admin/menu-revisions',
+  'admin/restaurant-reviews',
 ]
 
 await Promise.all(
