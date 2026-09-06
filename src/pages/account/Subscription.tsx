@@ -1191,6 +1191,42 @@ export default function AccountSubscription() {
                     )}
                   </>
                 ) : (
+                  isPaymentRetryScheduled ? (
+                    <div className="account-subscription-v2__retry-card">
+                      <div className="account-subscription-v2__retry-visual" aria-hidden="true">
+                        <img src={subscriptionExpiredPng} alt="" />
+                      </div>
+                      <div className="account-subscription-v2__retry-content">
+                        <span className="account-subscription-v2__retry-label">Платёж не прошёл</span>
+                        <h3>Не удалось продлить подписку</h3>
+                        <p className="account-subscription-v2__retry-description">
+                          Мы повторим списание <strong>{formatDate(statusData?.next_charge_at) ?? "в ближайшее время"}</strong>.
+                          До этого времени можно проверить карту или отменить повторную попытку.
+                        </p>
+                        <div className="account-subscription-v2__retry-actions">
+                          <button
+                            className="account-subscription-v2__btn-renew"
+                            type="button"
+                            onClick={handleOpenRenewCheckout}
+                            disabled={Boolean(paymentPlan)}
+                          >
+                            Возобновить подписку
+                          </button>
+                          <button
+                            className="account-subscription-v2__retry-cancel"
+                            type="button"
+                            onClick={handleOpenCancelReason}
+                            disabled={canceling}
+                          >
+                            {canceling ? "Отменяем..." : "Отменить повторное списание"}
+                          </button>
+                        </div>
+                        <p className="account-subscription-v2__retry-note">
+                          После отмены новых попыток списания не будет
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
                   <>
                     <div className="account-subscription-v2__floating-frame account-subscription-v2__floating-frame--expired">
                       <h3 className="account-subscription-v2__floating-title account-subscription-v2__floating-title--center">{expiredTitle}</h3>
@@ -1203,16 +1239,6 @@ export default function AccountSubscription() {
                       >
                         Возобновить подписку
                       </button>
-                      {isPaymentRetryScheduled && (
-                        <button
-                          className="account-subscription-v2__btn-cancel-inline"
-                          type="button"
-                          onClick={handleOpenCancelReason}
-                          disabled={canceling}
-                        >
-                          {canceling ? "Отмена..." : "Отменить повторное списание"}
-                        </button>
-                      )}
                     </div>
                     <div className="account-subscription-v2__mobile-illus account-subscription-v2__mobile-illus--expired">
                       <img
@@ -1221,11 +1247,10 @@ export default function AccountSubscription() {
                       />
                     </div>
                     <p className="account-subscription-v2__notice account-subscription-v2__notice--expired">
-                      {isPaymentRetryScheduled
-                        ? "После отмены новых попыток списания не будет"
-                        : "Чтобы и дальше продолжать пользоваться Премиум функциями, обновите подписку"}
+                      Чтобы и дальше продолжать пользоваться Премиум функциями, обновите подписку
                     </p>
                   </>
+                  )
                 )}
 
                 {showHistory && !isActive && (
