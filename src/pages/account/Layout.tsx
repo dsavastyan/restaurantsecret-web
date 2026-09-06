@@ -166,6 +166,7 @@ export default function AccountLayout() {
 
   const sub = me?.user?.subscription || null;
   const hasPremium = Boolean(sub && sub.status !== "none" && !sub.expired);
+  const hasSubscriptionHistory = Boolean(sub && sub.status !== "none");
   const showPremiumUpsell = !loading && Boolean(me?.user) && !hasPremium;
   const isAccountRoot = location.pathname === "/account";
   const isProfileSection = isAccountRoot || location.pathname === "/account/profile";
@@ -173,7 +174,7 @@ export default function AccountLayout() {
 
   const navItems = [
     { to: "/account", label: "Профиль", end: true },
-    { to: "/account/subscription", label: hasPremium ? "Управлять подпиской" : "Оформить подписку" },
+    { to: "/account/subscription", label: hasSubscriptionHistory ? "Управлять подпиской" : "Оформить подписку" },
     { to: "/account/payment-methods", label: "Способы оплаты" },
     { to: "/account/goals", label: "Мои цели" },
     { to: "/account/statistics", label: "Дневник питания" },

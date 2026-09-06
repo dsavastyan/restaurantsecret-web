@@ -28,6 +28,7 @@ type SubscriptionStatusResponse = {
   is_trial?: boolean;
   promo_requires_subscribing?: boolean | null;
   auto_renewal_enabled?: boolean;
+  payment_retry_scheduled?: boolean;
   error?: string | null;
 };
 
@@ -388,13 +389,20 @@ export default function AccountSubscription() {
   const isCanceled = status === "canceled";
   const isExpired = status === "expired";
   const isCancellationScheduled = Boolean(statusData?.canceled_at);
+  const isPaymentRetryScheduled = Boolean(
+    isExpired && statusData?.payment_retry_scheduled && statusData?.can_cancel,
+  );
   const expiresLabel = useMemo(() => formatDate(statusData?.expires_at), [statusData?.expires_at, formatDate]);
   const currentPlanKey = typeof statusData?.plan === "string" ? statusData.plan.trim().toLowerCase() : "";
   const currentUiPlan: UiPlan | null = currentPlanKey === "monthly" ? "month" : currentPlanKey === "annual" ? "year" : null;
   const planTitle = PLAN_LABELS[currentPlanKey] || "Тариф";
   const planPriceBadge = PLAN_PRICE_BADGES[currentPlanKey] || "ТЕКУЩИЙ ТАРИФ";
-  const expiredTitle = "Подписка истекла";
-  const expiredDescription = `Ваша подписка на ${planTitle} закончилась ${expiresLabel ?? ""}`.trim();
+  const expiredTitle = isPaymentRetryScheduled ? "Оплата не прошла" : "Подписка истекла";
+  const expiredDescription = isPaymentRetryScheduled
+    ? statusData?.next_charge_at
+      ? `Мы повторим списание ${formatDate(statusData.next_charge_at) ?? "в ближайшее время"}. Вы можете отменить повторное списание ниже.`
+      : "Мы попробуем списать оплату ещё раз. Вы можете отменить повторное списание ниже."
+    : `Ваша подписка на ${planTitle} закончилась ${expiresLabel ?? ""}`.trim();
   const isAnnualPlan = currentPlanKey === "annual";
   const canShowAnnualOffer = isActive && currentPlanKey === "monthly";
   const isNonRenewingPromoAccess =
@@ -427,11 +435,13 @@ export default function AccountSubscription() {
     ? "Сэкономь с годовым тарифом"
     : showRenewCheckout
       ? "Возобновить подписку"
-    : isNeverSubscribed
-      ? "Оформить подписку"
-      : isActive
-        ? "Моя подписка"
-        : "Управление подпиской";
+      : isPaymentRetryScheduled
+        ? "Управление подпиской"
+        : isNeverSubscribed
+          ? "Оформить подписку"
+          : isActive
+            ? "Моя подписка"
+            : "Управление подпиской";
 
   const promoErrorLabel = useMemo(() => {
     if (!promoError) return null;
@@ -1193,6 +1203,16 @@ export default function AccountSubscription() {
                       >
                         Возобновить подписку
                       </button>
+                      {isPaymentRetryScheduled && (
+                        <button
+                          className="account-subscription-v2__btn-cancel-inline"
+                          type="button"
+                          onClick={handleOpenCancelReason}
+                          disabled={canceling}
+                        >
+                          {canceling ? "Отмена..." : "Отменить повторное списание"}
+                        </button>
+                      )}
                     </div>
                     <div className="account-subscription-v2__mobile-illus account-subscription-v2__mobile-illus--expired">
                       <img
@@ -1201,7 +1221,9 @@ export default function AccountSubscription() {
                       />
                     </div>
                     <p className="account-subscription-v2__notice account-subscription-v2__notice--expired">
-                      Чтобы и дальше продолжать пользоваться Премиум функциями, обновите подписку
+                      {isPaymentRetryScheduled
+                        ? "После отмены новых попыток списания не будет"
+                        : "Чтобы и дальше продолжать пользоваться Премиум функциями, обновите подписку"}
                     </p>
                   </>
                 )}

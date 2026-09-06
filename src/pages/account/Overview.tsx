@@ -149,7 +149,8 @@ export default function AccountOverview() {
     return source.trim().charAt(0).toUpperCase();
   }, [profileName, me?.user?.email]);
   const hasPremium = Boolean(sub && sub.status !== "none" && !sub.expired);
-  const subscriptionMenuLabel = hasPremium ? "Управлять подпиской" : "Оформить подписку";
+  const hasSubscriptionHistory = Boolean(sub && sub.status !== "none");
+  const subscriptionMenuLabel = hasSubscriptionHistory ? "Управлять подпиской" : "Оформить подписку";
   const profileCompletion = useMemo(() => {
     const fields = [
       form.gender,
