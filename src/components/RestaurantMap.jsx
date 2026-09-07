@@ -468,7 +468,7 @@ export default function RestaurantMap({
           <div className="filters-row">
             <MetroFilter
               metroData={metroData}
-              selectedStationName={selectedMetroStation?.name_ru || ''}
+              selectedStationName={selectedMetroStation?.displayName || selectedMetroStation?.name_ru || ''}
               onSelectStation={(station) => setSelectedMetroStation(station)}
               onClearStation={() => setSelectedMetroStation(null)}
               onJumpToStation={(station) =>

@@ -13,26 +13,41 @@ export default function MetroFilter({
 
     const stations = metroData.stations || [];
 
-    // Group stations by name to avoid duplicates (different lines)
+    // # Group by (city, name) rather than name alone: several real metro systems reuse
+    // # the same station name - "Автозаводская" exists in Moscow, Minsk and Nizhny
+    // # Novgorod; "Академическая" in Moscow, Saint Petersburg and Kazan. Grouping by
+    // # name alone averaged all of them into one meaningless midpoint (selecting
+    // # "Автозаводская" centered the map on a forest between the three cities).
+    // # Same-city duplicates (e.g. Moscow's two "Академическая" Wikidata entries,
+    // # ~10m apart) still legitimately average together.
     const groupedStations = useMemo(() => {
         const groups = {};
+        const citiesByName = new Map();
         stations.forEach((station) => {
-            if (!groups[station.name_ru]) {
-                groups[station.name_ru] = {
+            const key = `${station.city}||${station.name_ru}`;
+            if (!groups[key]) {
+                groups[key] = {
+                    city: station.city,
                     name_ru: station.name_ru,
                     points: []
                 };
             }
 
+            if (!citiesByName.has(station.name_ru)) citiesByName.set(station.name_ru, new Set());
+            citiesByName.get(station.name_ru).add(station.city);
+
             if (Number.isFinite(Number(station.lat)) && Number.isFinite(Number(station.lon))) {
-                groups[station.name_ru].points.push({ lat: Number(station.lat), lon: Number(station.lon) });
+                groups[key].points.push({ lat: Number(station.lat), lon: Number(station.lon) });
             }
         });
 
         return Object.values(groups)
             .map((group) => {
+                const isAmbiguous = (citiesByName.get(group.name_ru)?.size ?? 0) > 1;
+                const displayName = isAmbiguous ? `${group.name_ru} (${group.city})` : group.name_ru;
+
                 if (group.points.length === 0) {
-                    return { ...group, lat: null, lon: null };
+                    return { ...group, displayName, lat: null, lon: null };
                 }
 
                 const sum = group.points.reduce(
@@ -42,17 +57,18 @@ export default function MetroFilter({
 
                 return {
                     ...group,
+                    displayName,
                     lat: sum.lat / group.points.length,
                     lon: sum.lon / group.points.length
                 };
             })
-            .sort((a, b) => a.name_ru.localeCompare(b.name_ru));
+            .sort((a, b) => a.displayName.localeCompare(b.displayName));
     }, [stations]);
 
     const filteredStations = useMemo(() => {
         if (!searchQuery) return groupedStations;
         const lower = searchQuery.toLowerCase();
-        return groupedStations.filter((station) => station.name_ru.toLowerCase().includes(lower));
+        return groupedStations.filter((station) => station.displayName.toLowerCase().includes(lower));
     }, [groupedStations, searchQuery]);
 
     useEffect(() => {
@@ -113,8 +129,8 @@ export default function MetroFilter({
                             <div className="no-results">Ничего не найдено</div>
                         ) : (
                             filteredStations.map((station) => (
-                                <div key={station.name_ru} className="option-item">
-                                    <span className="station-name">{station.name_ru}</span>
+                                <div key={station.displayName} className="option-item">
+                                    <span className="station-name">{station.displayName}</span>
                                     <button
                                         className="jump-btn"
                                         type="button"
