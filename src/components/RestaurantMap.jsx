@@ -11,6 +11,7 @@ import { useAuth } from '@/store/auth'
 import { useFavoriteRestaurantsStore } from '@/store/favoriteRestaurants'
 import MetroFilter from './MetroFilter'
 import MapCuisineFilter from './MapCuisineFilter'
+import MapCityFilter from './MapCityFilter'
 
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -308,6 +309,7 @@ export default function RestaurantMap({
   const [metroData, setMetroData] = useState({ lines: [], stations: [] })
   const [cuisines, setCuisines] = useState([])
   const [filters, setFilters] = useState({ cuisines: [], excludeFastFood: false })
+  const [selectedCity, setSelectedCity] = useState('Москва')
   const [selectedMetroStation, setSelectedMetroStation] = useState(null)
   const [focusTarget, setFocusTarget] = useState(null)
   const [isDefaultView, setIsDefaultView] = useState(true)
@@ -321,6 +323,23 @@ export default function RestaurantMap({
     () => new Set(Array.from(favoriteLookup || []).map((slug) => String(slug).trim().toLowerCase())),
     [favoriteLookup],
   )
+  // # Several real metro systems reuse the same station name (Автозаводская: Moscow,
+  // # Minsk, Nizhny Novgorod), so the picker needs one city at a time to stay
+  // # unambiguous - "Москва" as the default since that's where the catalog's
+  // # restaurants actually are today.
+  const availableCities = useMemo(() => {
+    const cities = new Set(metroData.stations.map((s) => s.city).filter(Boolean))
+    cities.add('Москва')
+    return Array.from(cities).sort((a, b) => a.localeCompare(b))
+  }, [metroData.stations])
+  const cityMetroData = useMemo(
+    () => ({ stations: metroData.stations.filter((s) => s.city === selectedCity) }),
+    [metroData.stations, selectedCity],
+  )
+  const handleSelectCity = useCallback((city) => {
+    setSelectedCity(city)
+    setSelectedMetroStation(null)
+  }, [])
   const selectedMetroStationName = useMemo(
     () => normalizeStationName(selectedMetroStation?.name_ru),
     [selectedMetroStation],
@@ -466,8 +485,13 @@ export default function RestaurantMap({
       {isFullscreen && (
         <div className="fullscreen-topbar">
           <div className="filters-row">
+            <MapCityFilter
+              cities={availableCities}
+              selectedCity={selectedCity}
+              onChange={handleSelectCity}
+            />
             <MetroFilter
-              metroData={metroData}
+              metroData={cityMetroData}
               selectedStationName={selectedMetroStation?.name_ru || ''}
               onSelectStation={(station) => setSelectedMetroStation(station)}
               onClearStation={() => setSelectedMetroStation(null)}
@@ -694,6 +718,11 @@ export default function RestaurantMap({
         .filters-row .cuisine-filter-container {
           margin: 0 !important;
           width: 260px;
+        }
+
+        .filters-row .city-filter-container {
+          margin: 0 !important;
+          width: 160px;
         }
 
         .map-fastfood-filter {
@@ -952,6 +981,7 @@ export default function RestaurantMap({
 
           .filters-row .metro-filter-container,
           .filters-row .cuisine-filter-container,
+          .filters-row .city-filter-container,
           .filters-row .map-fastfood-filter {
             width: 100%;
           }
