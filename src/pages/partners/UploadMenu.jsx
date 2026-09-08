@@ -30,7 +30,6 @@ const STEPS = [
 const EMPTY_ITEM = {
   dish_name: '',
   category: '',
-  price_rub: '',
   per: 'portion',
   portion_g: '',
   kcal: '',
@@ -45,7 +44,6 @@ const DECIMAL_VALUE_PATTERN = /^\d+(?:[.,]\d+)?$/
 const ITEM_FIELD_ORDER = [
   'dish_name',
   'category',
-  'price_rub',
   'composition_text',
   'portion_g',
   'kcal',
@@ -59,13 +57,6 @@ const REQUIRED_TEXT_MESSAGES = {
   composition_text: 'Укажите состав блюда.',
 }
 const NUMERIC_FIELD_RULES = {
-  price_rub: {
-    empty: 'Укажите цену.',
-    range: 'Введите цену больше 0 и не более 1 000 000 ₽.',
-    min: 0,
-    max: 1_000_000,
-    positive: true,
-  },
   portion_g: {
     empty: 'Укажите вес порции.',
     range: 'Введите вес больше 0 и не более 5 000 г.',
@@ -153,7 +144,6 @@ function itemFormPayload(form) {
   return {
     dish_name: form.dish_name.trim(),
     category: form.category.trim(),
-    price_rub: numberOrNull(form.price_rub),
     per: form.per,
     portion_g: numberOrNull(form.portion_g),
     kcal: numberOrNull(form.kcal),
@@ -486,11 +476,6 @@ function ItemDrawer({ item, categories, busy, onClose, onSave }) {
             <datalist id="partners-menu-categories">{categories.map((category) => <option value={category} key={category} />)}</datalist>
             {fieldError('category')}
           </label>
-          <label className="partners-update__field">
-            <span>Цена, ₽</span>
-            <input {...fieldA11y('price_rub')} type="text" inputMode="decimal" autoComplete="off" value={form.price_rub ?? ''} onChange={setNumeric('price_rub')} onBlur={validateOnBlur('price_rub')} required />
-            {fieldError('price_rub')}
-          </label>
           <label className="partners-update__field partners-update__field--wide">
             <span>Состав</span>
             <textarea {...fieldA11y('composition_text')} rows="4" value={form.composition_text ?? ''} onChange={set('composition_text')} onBlur={validateOnBlur('composition_text')} required />
@@ -585,7 +570,7 @@ function ManualStep({ payload, busy, error, onAdd, onConfirmMatch, onDelete, onE
             <tbody>
               {visible.map((item) => (
                 <tr className={`partners-update__row--${item.change_type}`} key={item.id}>
-                  <td><strong>{item.dish_name}</strong>{item.price_rub != null && <small>{item.price_rub} ₽</small>}</td>
+                  <td><strong>{item.dish_name}</strong></td>
                   <td>{item.category || '—'}</td><td>{formatValue(item.portion_g, ' г')}</td><td>{formatValue(item.kcal)}</td>
                   <td>{formatValue(item.proteins_g)}</td><td>{formatValue(item.fats_g)}</td><td>{formatValue(item.carbs_g)}</td>
                   <td><span className={`partners-update__status partners-update__status--${item.change_type}`}>{STATUS_LABELS[item.change_type]}</span></td>

@@ -178,7 +178,6 @@ function MenuVersionModal({ data, loading, onClose, onRestore }) {
                     <strong>{item.kcal ?? '—'} ккал</strong>
                     <span>Б {item.proteins_g ?? '—'} · Ж {item.fats_g ?? '—'} · У {item.carbs_g ?? '—'}</span>
                     {item.portion_g != null && <span>{item.portion_g} г</span>}
-                    {item.price_rub != null && <span>{item.price_rub} ₽</span>}
                   </div>
                 </article>
               ))}
