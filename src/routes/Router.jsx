@@ -21,6 +21,7 @@ const OnboardingProfile = lazy(() => import('../pages/OnboardingProfile.tsx'))
 const Contact = lazy(() => import('../pages/Contact.jsx'))
 const Legal = lazy(() => import('../pages/Legal.jsx'))
 const Privacy = lazy(() => import('../pages/Privacy.jsx'))
+const IOSLegalDocument = lazy(() => import('../pages/IOSLegalDocument.jsx'))
 const LegalVersionRoute = lazy(() => import('../pages/LegalVersionRoute.jsx'))
 const PrivacyVersionRoute = lazy(() => import('../pages/PrivacyVersionRoute.jsx'))
 const Tariffs = lazy(() => import('../pages/Tariffs.jsx'))
@@ -59,6 +60,15 @@ function AppRoutes({ onReady }) {
   return (
     <Suspense fallback={null}>
       <Routes>
+        <Route
+          path="legal/ios/privacy"
+          element={<IOSLegalDocument><Privacy /></IOSLegalDocument>}
+        />
+        <Route
+          path="legal/ios/terms"
+          element={<IOSLegalDocument><Legal /></IOSLegalDocument>}
+        />
+
         <Route path="/" element={<AppShell />}>
           {/* Публичные страницы */}
           <Route index element={<Landing />} />

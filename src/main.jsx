@@ -14,6 +14,7 @@ import './account-mobile-profile.css'
 const SPLASH_MAX_WAIT_MS = 5000
 const SPLASH_IDLE_MS = 350
 const MAINTENANCE_MAX_WAIT_MS = 3500
+const isStandaloneIOSLegalPage = /^\/legal\/ios\/(?:privacy|terms)\/?$/.test(window.location.pathname)
 let splashGeneration = 0
 let splashFailsafeTimer = 0
 
@@ -259,6 +260,12 @@ function Root() {
   useEffect(() => {
     scheduleSplashFailsafe()
 
+    if (isStandaloneIOSLegalPage) {
+      setMaintenance(null)
+      setReady(true)
+      return () => clearSplashFailsafe()
+    }
+
     // Analytics: Session Start
     analytics.trackSessionStart().catch(() => { })
     analytics.trackLandingAttribution().catch(() => { })
@@ -318,8 +325,8 @@ function Root() {
 
   return (
     <Router onRouteStart={showInitialSplash} onReady={handleReady}>
-      <ToastViewport />
-      <ConsentBanner />
+      {!isStandaloneIOSLegalPage && <ToastViewport />}
+      {!isStandaloneIOSLegalPage && <ConsentBanner />}
     </Router>
   )
 }
