@@ -4,6 +4,8 @@ import { resolve } from 'node:path'
 const distDir = resolve('dist')
 const source = resolve(distDir, 'index.html')
 const spaRoutes = [
+  'legal/ios/privacy',
+  'legal/ios/terms',
   'partners',
   'partners/login',
   'partners/dashboard',
