@@ -38,7 +38,7 @@ export function buildDraftMenuPreview(payload, restaurant) {
   return {
     name: restaurant?.name || 'Меню ресторана',
     menuCapturedAt: payload?.draft?.updated_at || null,
-    instagramUrl: restaurant?.instagram_url || restaurant?.website_url || null,
+    instagramUrl: restaurant?.instagram_url || null,
     categories: Array.from(categories, ([name, dishes]) => ({ name, dishes })),
   }
 }
