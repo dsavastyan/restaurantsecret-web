@@ -29,6 +29,89 @@ function formatDate(value) {
   }).format(date)
 }
 
+function formatDateTime(value) {
+  if (!value) return '—'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+  }).format(date)
+}
+
+const PARSER_STATUS = {
+  success: 'Успешно',
+  no_change: 'Без изменений',
+  error: 'Ошибка',
+  never: 'Не запускался',
+  disabled: 'Отключён',
+}
+
+function ParserDashboard() {
+  const [items, setItems] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [query, setQuery] = useState('')
+  const [status, setStatus] = useState('')
+
+  useEffect(() => {
+    let active = true
+    adminMenuRevisionsApi.parserRuns()
+      .then((data) => active && setItems(data.parsers || []))
+      .catch((requestError) => active && setError(requestError.message || 'Не удалось загрузить статусы парсеров.'))
+      .finally(() => active && setLoading(false))
+    return () => { active = false }
+  }, [])
+
+  const visible = useMemo(() => items.filter((parser) => {
+    const parserStatus = parser.enabled ? (parser.run?.status || 'never') : 'disabled'
+    if (status && parserStatus !== status) return false
+    return `${parser.restaurant_name} ${parser.parser_id} ${parser.cities.join(' ')}`.toLowerCase().includes(query.trim().toLowerCase())
+  }), [items, query, status])
+
+  if (loading) return <p className="admin-crm__loading">Загружаем статусы парсеров…</p>
+  if (error) return <p className="admin-menu__error" role="alert">{error}</p>
+  return (
+    <>
+      <div className="admin-crm__filters">
+        <label className="admin-crm__search"><Search size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Ресторан или парсер" /></label>
+        <select aria-label="Статус парсера" value={status} onChange={(event) => setStatus(event.target.value)}>
+          <option value="">Все статусы</option>
+          {Object.entries(PARSER_STATUS).map(([value, label]) => <option value={value} key={value}>{label}</option>)}
+        </select>
+      </div>
+      <div className="admin-crm__table-wrap admin-parser__table-wrap">
+        <table className="admin-crm__table admin-parser__table">
+          <thead><tr><th>Ресторан</th><th>Статус</th><th>Последняя проверка</th><th>Последний успех</th><th>Меню опубликовано</th><th>Позиций</th><th>Источник</th></tr></thead>
+          <tbody>{visible.map((parser) => {
+            const parserStatus = parser.enabled ? (parser.run?.status || 'never') : 'disabled'
+            return (
+              <tr key={parser.parser_id}>
+                <td><strong>{parser.restaurant_name}</strong><small>{parser.parser_id}{parser.cities.length ? ` · ${parser.cities.join(', ')}` : ''}</small></td>
+                <td>
+                  <span className={`admin-parser__status admin-parser__status--${parserStatus}`}>{PARSER_STATUS[parserStatus]}</span>
+                  {parserStatus === 'error' && (
+                    <details className="admin-parser__error"><summary>Что случилось</summary>
+                      <strong>{parser.run.error_message || `Парсер завершился с кодом ${parser.run.exit_code}`}</strong>
+                      {parser.run.log_excerpt && <pre>{parser.run.log_excerpt}</pre>}
+                      {parser.run.github_run_url && <a href={parser.run.github_run_url} target="_blank" rel="noreferrer">Полный запуск <ExternalLink size={13} /></a>}
+                    </details>
+                  )}
+                </td>
+                <td>{formatDateTime(parser.run?.finished_at)}</td>
+                <td>{formatDateTime(parser.run?.last_success_at)}</td>
+                <td>{formatDateTime(parser.published_at)}</td>
+                <td>{parser.run?.item_count ?? '—'}</td>
+                <td>{parser.run?.source_url ? <a href={parser.run.source_url} target="_blank" rel="noreferrer">Открыть <ExternalLink size={13} /></a> : <span className="admin-crm__muted">—</span>}</td>
+              </tr>
+            )
+          })}</tbody>
+        </table>
+        {!visible.length && <div className="admin-menu__empty">По выбранным условиям парсеров нет.</div>}
+      </div>
+    </>
+  )
+}
+
 function Dialog({ title, children, onClose }) {
   return (
     <div className="admin-crm__dialog-layer" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
@@ -235,6 +318,7 @@ function RestaurantActions({ restaurant, onEdit, onChanged, notify }) {
 }
 
 export default function AdminRestaurantList() {
+  const [section, setSection] = useState('restaurants')
   const [items, setItems] = useState([])
   const [filterOptions, setFilterOptions] = useState({ cities: [], menu_statuses: [], partnerships: [] })
   const [filters, setFilters] = useState({ query: '', city: '', menuStatus: '', partnership: '', requiresAction: false })
@@ -277,6 +361,13 @@ export default function AdminRestaurantList() {
         <div><strong>{items.length}</strong><button className="admin-crm__primary" type="button" onClick={() => setDialog({ type: 'restaurant' })}><Plus size={18} />Добавить ресторан</button></div>
       </div>
 
+      <div className="admin-crm__section-tabs" role="tablist" aria-label="Раздел ресторанов">
+        <button type="button" role="tab" aria-selected={section === 'restaurants'} className={section === 'restaurants' ? 'active' : ''} onClick={() => setSection('restaurants')}>Все рестораны</button>
+        <button type="button" role="tab" aria-selected={section === 'parsers'} className={section === 'parsers' ? 'active' : ''} onClick={() => setSection('parsers')}>Автоматическое обновление</button>
+      </div>
+
+      {section === 'parsers' ? <ParserDashboard /> : <>
+
       <div className="admin-crm__filters">
         <label className="admin-crm__search"><Search size={18} /><input value={filters.query} onChange={(event) => setFilters({ ...filters, query: event.target.value })} placeholder="Сеть или email" /></label>
         <select aria-label="Город" value={filters.city} onChange={(event) => setFilters({ ...filters, city: event.target.value })}><option value="">Все города</option>{filterOptions.cities.map((city) => <option key={city}>{city}</option>)}</select>
@@ -313,6 +404,7 @@ export default function AdminRestaurantList() {
 
       {dialog?.type === 'restaurant' && <Dialog title="Добавить ресторан" onClose={() => setDialog(null)}><RestaurantForm onClose={() => setDialog(null)} onSaved={saved} /></Dialog>}
       {dialog?.type === 'edit' && <Dialog title={`Редактировать: ${dialog.restaurant.name}`} onClose={() => setDialog(null)}><EditRestaurantForm restaurant={dialog.restaurant} onClose={() => setDialog(null)} onSaved={saved} /></Dialog>}
+      </>}
     </section>
   )
 }
