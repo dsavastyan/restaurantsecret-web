@@ -39,6 +39,8 @@ export type SearchRestaurant = {
   slug: string;
   name: string;
   city?: string | null;
+  cuisine?: string | null;
+  branchesCount?: number;
 };
 
 export type SearchDish = {
@@ -46,11 +48,19 @@ export type SearchDish = {
   dishName: string;
   restaurantName: string;
   restaurantSlug: string;
+  city?: string | null;
+};
+
+export type SearchOtherCity = {
+  city: string;
+  restaurants: SearchRestaurant[];
+  dishes: SearchDish[];
 };
 
 export type SearchResult = {
   restaurants: SearchRestaurant[];
   dishes: SearchDish[];
+  otherCities?: SearchOtherCity[];
 };
 
 export type LandingStats = {
@@ -390,9 +400,9 @@ export async function searchSuggest(query: string): Promise<SearchSuggestions> {
   );
 }
 
-export async function searchFull(query: string): Promise<SearchResult> {
+export async function searchFull(query: string, city = "Москва"): Promise<SearchResult> {
   return publicGet<SearchResult>(
-    `/search?query=${encodeURIComponent(query)}`
+    `/search?query=${encodeURIComponent(query)}&city=${encodeURIComponent(city)}`
   );
 }
 

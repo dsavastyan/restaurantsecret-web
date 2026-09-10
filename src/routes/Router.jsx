@@ -101,6 +101,7 @@ function AppRoutes({ onReady }) {
 
           {/* Основной контент */}
           <Route path="catalog" element={<Catalog />} />
+          <Route path="catalog/:city" element={<Catalog />} />
           <Route path="restaurants" element={<Catalog />} />
           <Route path="search" element={<Search />} />
           <Route path="restaurants/:slug" element={<RestaurantMenuRedirect />} />

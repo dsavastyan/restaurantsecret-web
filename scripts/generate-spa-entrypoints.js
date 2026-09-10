@@ -15,6 +15,11 @@ const spaRoutes = [
   'admin/login',
   'admin/menu-revisions',
   'admin/restaurant-reviews',
+  // City catalog pages are routable in previews, but intentionally stay out of
+  // the production sitemap until the city rollout is approved.
+  'catalog/moskva',
+  'catalog/sankt-peterburg',
+  'catalog/izhevsk',
 ]
 
 await Promise.all(

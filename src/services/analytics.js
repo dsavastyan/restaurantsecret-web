@@ -306,6 +306,7 @@ class AnalyticsService {
             viewport_width: window.innerWidth,
             viewport_height: window.innerHeight,
             device_pixel_ratio: window.devicePixelRatio,
+            selected_city: localStorage.getItem("catalog_city") || "Москва",
         };
 
         const sent = await this.track("session_start", props, {

@@ -19,9 +19,10 @@ import { analytics } from "@/services/analytics";
 export type SearchInputProps = {
   value: string;
   onChange: (value: string) => void;
+  onSubmit?: (value: string) => void;
 };
 
-export function SearchInput({ value, onChange }: SearchInputProps) {
+export function SearchInput({ value, onChange, onSubmit }: SearchInputProps) {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [suggestions, setSuggestions] = useState<SearchSuggestions | null>(null);
@@ -144,6 +145,10 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
       const q = value.trim();
       if (!q) return;
       e.preventDefault();
+      if (onSubmit) {
+        onSubmit(q);
+        return;
+      }
       analytics.track("search_submit", { type: "query", query: q });
       navigate(buildSearchUrl(q));
       return;
