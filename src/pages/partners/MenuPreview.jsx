@@ -22,7 +22,6 @@ export function buildDraftMenuPreview(payload, restaurant) {
       name: item.dish_name,
       description: item.composition_text || '',
       ingredients: item.composition_text || '',
-      price_rub: item.price_rub,
       per: item.per,
       portion_g: item.portion_g,
       kcal: item.kcal,
@@ -38,7 +37,7 @@ export function buildDraftMenuPreview(payload, restaurant) {
   return {
     name: restaurant?.name || 'Меню ресторана',
     menuCapturedAt: payload?.draft?.updated_at || null,
-    instagramUrl: restaurant?.instagram_url || restaurant?.website_url || null,
+    instagramUrl: restaurant?.instagram_url || null,
     categories: Array.from(categories, ([name, dishes]) => ({ name, dishes })),
   }
 }
