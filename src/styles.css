@@ -3365,10 +3365,48 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
 }
 
 .catalog-card__title-text {
+  position: relative;
+  display: block;
+  flex: 1 1 auto;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
+}
+
+.catalog-card__title-measure {
+  position: absolute;
+  visibility: hidden;
+  width: max-content;
+  pointer-events: none;
+}
+
+.catalog-card__title-marquee {
+  display: flex;
+  width: max-content;
+  gap: 48px;
+  animation: catalog-title-marquee 14s linear infinite;
+  will-change: transform;
+}
+
+.catalog-card__title-marquee > span {
+  flex: 0 0 auto;
+}
+
+.catalog-card:hover .catalog-card__title-marquee,
+.catalog-card:focus-within .catalog-card__title-marquee {
+  animation-play-state: paused;
+}
+
+@keyframes catalog-title-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-50% - 24px)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalog-card__title-marquee {
+    animation: none;
+  }
 }
 
 .auto-updated-badge {

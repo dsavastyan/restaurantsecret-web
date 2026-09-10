@@ -1,5 +1,5 @@
 // Catalog page showing the full list of restaurants with lightweight filters.
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useMeta } from '@/lib/useMeta'
 import { useNavigate, useOutletContext, useParams, useSearchParams } from 'react-router-dom'
 import { api } from '../api/client.js'
@@ -40,6 +40,43 @@ const RestaurantWebIcon = () => (
     <path d="M5.35 17.95c1.72-.83 3.93-1.25 6.65-1.25s4.93.42 6.65 1.25" />
   </svg>
 )
+
+const ScrollingRestaurantName = ({ name }) => {
+  const viewportRef = useRef(null)
+  const measureRef = useRef(null)
+  const [isOverflowing, setIsOverflowing] = useState(false)
+
+  useEffect(() => {
+    const viewport = viewportRef.current
+    const measure = measureRef.current
+    if (!viewport || !measure) return undefined
+
+    const update = () => setIsOverflowing(measure.offsetWidth > viewport.clientWidth + 1)
+    update()
+
+    const observer = new ResizeObserver(update)
+    observer.observe(viewport)
+    observer.observe(measure)
+    return () => observer.disconnect()
+  }, [name])
+
+  return (
+    <span
+      ref={viewportRef}
+      className={`catalog-card__title-text${isOverflowing ? ' is-overflowing' : ''}`}
+      title={name}
+      aria-label={name}
+    >
+      <span ref={measureRef} className="catalog-card__title-measure" aria-hidden="true">{name}</span>
+      {isOverflowing ? (
+        <span className="catalog-card__title-marquee" aria-hidden="true">
+          <span>{name}</span>
+          <span>{name}</span>
+        </span>
+      ) : name}
+    </span>
+  )
+}
 
 const normalizeRestaurantLinkUrl = (rawUrl) => {
   if (!rawUrl) return null
@@ -481,7 +518,7 @@ export default function Catalog() {
                     <div className={`${getBadgeClassName(r?.name)} catalog-card__badge--tone-${i % 4}`} aria-hidden="true">{badgeText}</div>
                     <div className="catalog-card__copy">
                       <h3 className="catalog-card__title">
-                        <span className="catalog-card__title-text">{r.name}</span>
+                        <ScrollingRestaurantName name={r.name} />
                         {r?.autoUpdated && <AutoUpdatedBadge className="catalog-card__auto-updated" />}
                       </h3>
                       <div className="catalog-card__meta">
