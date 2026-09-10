@@ -348,7 +348,6 @@ function summarizeValidationErrors(errors) {
       category: 'категория',
       portion_g: 'выход блюда',
       composition_text: 'состав',
-      price_rub: 'цена',
       serving_kcal: 'калорийность на порцию',
       serving_proteins_g: 'белки на порцию',
       serving_fats_g: 'жиры на порцию',
@@ -887,7 +886,6 @@ function MenuPreviewDialog({ data, onClose, photos, restaurant }) {
                       <div>
                         <h4>{item.dish_name}</h4>
                         {item.composition_text && <p>{item.composition_text}</p>}
-                        {item.price_rub != null && <strong>{item.price_rub} ₽</strong>}
                         <dl>
                           <div><dt>Ккал</dt><dd>{item.kcal}</dd></div>
                           <div><dt>Белки</dt><dd>{item.proteins_g}</dd></div>
