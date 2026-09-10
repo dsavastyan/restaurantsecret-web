@@ -169,3 +169,34 @@ test('administrator edits a restaurant row and adds emails without sending lette
   expect(contactCalls.map(({ body }) => body.email)).toEqual(['owner@sage.test', 'chef@sage.test'])
   expect(contactCalls.every(({ body }) => body.send_invite === false)).toBeTruthy()
 })
+
+test('administrator sees parser status, source and error without leaving the restaurant dashboard', async ({ page }) => {
+  await page.route('**/api/admin/**', async (route) => {
+    const path = new URL(route.request().url()).pathname
+    if (path === '/api/admin/auth/me') return route.fulfill({ json: { ok: true, role: 'admin', csrf_token: 'csrf' } })
+    if (path === '/api/admin/restaurants') return route.fulfill({ json: { ok: true, restaurants: [], filters: { cities: [], menu_statuses: [], partnerships: [] } } })
+    if (path === '/api/admin/parser-runs') return route.fulfill({ json: {
+      ok: true,
+      parsers: [{
+        parser_id: 'sage', enabled: true, restaurant_name: 'Sage', cities: ['Москва'],
+        published_at: '2026-09-09T06:00:00Z',
+        run: {
+          status: 'error', finished_at: '2026-09-10T06:00:05Z', last_success_at: '2026-09-08T06:00:05Z',
+          source_url: 'https://sage.example/menu', exit_code: 1,
+          error_message: 'Не найден список блюд', log_excerpt: 'ValueError: menu is empty',
+          github_run_url: 'https://github.com/example/actions/runs/123',
+        },
+      }],
+    } })
+    return route.fulfill({ json: { ok: true } })
+  })
+
+  await page.goto('/admin/restaurants')
+  await page.getByRole('tab', { name: 'Автоматическое обновление' }).click()
+  const row = page.getByRole('row').filter({ hasText: 'Sage' })
+  await expect(row.getByText('Ошибка', { exact: true })).toBeVisible()
+  await expect(row.getByRole('link', { name: 'Открыть' })).toHaveAttribute('href', 'https://sage.example/menu')
+  await row.getByText('Что случилось').click()
+  await expect(row.getByText('Не найден список блюд')).toBeVisible()
+  await expect(row.getByText('ValueError: menu is empty')).toBeVisible()
+})

@@ -89,6 +89,7 @@ export const adminMenuRevisionsApi = {
     if (query) params.set('query', query)
     return request(`/api/admin/restaurants${params.size ? `?${params}` : ''}`)
   },
+  parserRuns: () => request('/api/admin/parser-runs'),
   createRestaurant: (body) => request('/api/admin/restaurants', { method: 'POST', body }),
   updateRestaurant: (slug, body) =>
     request(`/api/admin/restaurants/${encodeURIComponent(slug)}`, { method: 'PATCH', body }),
