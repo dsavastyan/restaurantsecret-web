@@ -1,7 +1,12 @@
 import { expect, test } from '@playwright/test'
 
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => window.localStorage.removeItem('catalog_city'))
+  await page.addInitScript(() => {
+    window.localStorage.removeItem('catalog_city')
+    // City-selection scenarios must exercise the application while the
+    // production rollout maintenance screen is intentionally enabled.
+    window.localStorage.setItem('rs_maint_bypass', 'RS-DEV-BYPASS-KEY-TOKEN-2026')
+  })
 
   await page.route('**/cities', (route) => route.fulfill({
     status: 200,
