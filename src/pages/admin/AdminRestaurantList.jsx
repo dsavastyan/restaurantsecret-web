@@ -17,6 +17,7 @@ import {
   X,
 } from 'lucide-react'
 import { adminMenuRevisionsApi } from '@/api/adminMenuRevisions'
+import { PARTNER_ADMIN_ENABLED } from './adminFeatures'
 
 function formatDate(value) {
   if (!value) return '—'
@@ -318,6 +319,17 @@ function RestaurantActions({ restaurant, onEdit, onChanged, notify }) {
 }
 
 export default function AdminRestaurantList() {
+  if (!PARTNER_ADMIN_ENABLED) {
+    return (
+      <section className="admin-crm">
+        <div className="admin-menu__title admin-crm__title">
+          <div><span>Парсеры меню</span><h1>Автоматическое обновление</h1><p>Статусы проверок и публикации ресторанных меню.</p></div>
+        </div>
+        <ParserDashboard />
+      </section>
+    )
+  }
+
   const [section, setSection] = useState('restaurants')
   const [items, setItems] = useState([])
   const [filterOptions, setFilterOptions] = useState({ cities: [], menu_statuses: [], partnerships: [] })
