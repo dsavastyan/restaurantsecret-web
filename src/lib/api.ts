@@ -412,12 +412,12 @@ export async function searchStoreProducts(query: string, limit = 12): Promise<St
   );
 }
 
-export async function getLandingStats(): Promise<LandingStats> {
-  return publicGet<LandingStats>("/landing/stats");
+export async function getLandingStats(city = "Москва"): Promise<LandingStats> {
+  return publicGet<LandingStats>(`/landing/stats?city=${encodeURIComponent(city)}`);
 }
 
-export async function getRestaurants(limit = 2000): Promise<RestaurantListResponse> {
-  return publicGet<RestaurantListResponse>(`/restaurants?limit=${limit}`);
+export async function getRestaurants(limit = 2000, city = "Москва"): Promise<RestaurantListResponse> {
+  return publicGet<RestaurantListResponse>(`/restaurants?limit=${limit}&city=${encodeURIComponent(city)}`);
 }
 // Goals
 export type UserGoalData = {

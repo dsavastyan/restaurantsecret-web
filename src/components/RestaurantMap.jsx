@@ -304,13 +304,14 @@ export default function RestaurantMap({
   onStatsChange,
   showSummaryHeader = true,
   openFullscreenSignal = 0,
+  selectedCity: controlledCity,
 }) {
   const [restaurants, setRestaurants] = useState([])
   const [loading, setLoading] = useState(true)
   const [metroData, setMetroData] = useState({ lines: [], stations: [] })
   const [cuisines, setCuisines] = useState([])
   const [filters, setFilters] = useState({ cuisines: [], excludeFastFood: false })
-  const [selectedCity, setSelectedCity] = useState(() => localStorage.getItem('catalog_city') || 'Москва')
+  const [selectedCity, setSelectedCity] = useState(() => controlledCity || localStorage.getItem('catalog_city') || 'Москва')
   const [cityOptions, setCityOptions] = useState([])
   const [selectedMetroStation, setSelectedMetroStation] = useState(null)
   const [focusTarget, setFocusTarget] = useState(null)
@@ -368,12 +369,31 @@ export default function RestaurantMap({
   const isNight = themeMode === 'night'
   const hasOverlayMapButton = !showSummaryHeader
 
+  const cityZoom = selectedCityMeta?.recommendedZoom || defaultZoom
+
   const handleViewportChange = useCallback(({ lat, lon, zoom }) => {
-    const sameZoom = Math.abs(zoom - defaultZoom) < 0.01
-    const sameLat = Math.abs(lat - defaultCenter[0]) < 0.001
-    const sameLon = Math.abs(lon - defaultCenter[1]) < 0.001
+    const sameZoom = Math.abs(zoom - cityZoom) < 0.01
+    const sameLat = Math.abs(lat - cityCenter[0]) < 0.001
+    const sameLon = Math.abs(lon - cityCenter[1]) < 0.001
     setIsDefaultView(sameZoom && sameLat && sameLon)
-  }, [])
+  }, [cityCenter, cityZoom])
+
+  useEffect(() => {
+    if (!controlledCity || controlledCity === selectedCity) return
+    setSelectedCity(controlledCity)
+    setSelectedMetroStation(null)
+    setFilters({ cuisines: [], excludeFastFood: false })
+  }, [controlledCity, selectedCity])
+
+  useEffect(() => {
+    if (!selectedCityMeta?.center) return
+    setFocusTarget({
+      lat: selectedCityMeta.center.lat,
+      lon: selectedCityMeta.center.lon,
+      zoom: cityZoom,
+      key: `city-${selectedCity}`,
+    })
+  }, [cityZoom, selectedCity, selectedCityMeta])
 
   useEffect(() => {
     loadFavoriteRestaurants(accessToken || '')
@@ -564,9 +584,9 @@ export default function RestaurantMap({
             className={`show-city-btn ${hasOverlayMapButton && !isFullscreen ? 'show-city-btn--stacked' : ''}`}
             onClick={() =>
               setFocusTarget({
-                lat: defaultCenter[0],
-                lon: defaultCenter[1],
-                zoom: defaultZoom,
+                lat: cityCenter[0],
+                lon: cityCenter[1],
+                zoom: cityZoom,
                 key: `default-${Date.now()}`,
               })
             }
@@ -577,7 +597,7 @@ export default function RestaurantMap({
 
         <MapContainer
           center={cityCenter}
-          zoom={defaultZoom}
+          zoom={cityZoom}
           scrollWheelZoom={isFullscreen}
           className="restaurant-map"
           attributionControl={false}
