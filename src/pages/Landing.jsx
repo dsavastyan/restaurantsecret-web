@@ -25,14 +25,18 @@ const STATS_FALLBACK = {
   points: 0,
   weeklyAdded: 0,
 }
-// Временная заглушка: показываем базовые 5 "добавлено за неделю" + реальный счётчик поверх.
-// Убрать, когда бэкенд будет стабильно отдавать реальные еженедельные добавления.
-const WEEKLY_ADDED_BASELINE = 5
 const FEATURED_RESTAURANTS_LIMIT = 12
 const RestaurantMap = lazy(() => import('@/components/RestaurantMap'))
 
 const POPULAR_QUERIES = ['бургер', 'боул с лососем', 'салат цезарь', 'стейк', 'паста']
-const CITY_SLUGS = { 'Москва': 'moskva', 'Санкт-Петербург': 'sankt-peterburg', 'Ижевск': 'izhevsk' }
+const CITY_SLUGS = {
+  'Москва': 'moskva',
+  'Санкт-Петербург': 'sankt-peterburg',
+  'Нижний Новгород': 'nizhniy-novgorod',
+  'Екатеринбург': 'ekaterinburg',
+  'Казань': 'kazan',
+  'Ижевск': 'izhevsk',
+}
 const DEV_DETECTED_CITY = import.meta.env.DEV
   ? new URLSearchParams(window.location.search).get('detected_city')?.trim() || null
   : null
@@ -206,14 +210,14 @@ export default function Landing() {
   const dishesLabel = resolvedStats.dishes > 0
     ? resolvedStats.dishes.toLocaleString('ru-RU')
     : '—'
-  const weeklyAddedLabel = `+${(WEEKLY_ADDED_BASELINE + resolvedStats.weeklyAdded).toLocaleString('ru-RU')}`
+  const weeklyAddedLabel = `+${resolvedStats.weeklyAdded.toLocaleString('ru-RU')}`
   const pointsLabel = resolvedStats.points > 0
     ? resolvedStats.points.toLocaleString('ru-RU')
     : '—'
   const extraRestaurantsCount = Math.max(totalRestaurantsCount - featuredRestaurants.length, 0)
   const extraRestaurantsLabel = totalRestaurantsCount > 0
-    ? `- и ещё ${extraRestaurantsCount.toLocaleString('ru-RU')} заведений Москвы -`
-    : '- и ещё — заведений Москвы -'
+    ? `- и ещё ${extraRestaurantsCount.toLocaleString('ru-RU')} заведений города ${selectedCatalogCity} -`
+    : `- и ещё — заведений города ${selectedCatalogCity} -`
 
   useEffect(() => {
     analytics.track('landing_open')
@@ -223,7 +227,8 @@ export default function Landing() {
   useEffect(() => {
     let cancelled = false
 
-    getLandingStats()
+    setHeroStats({ restaurants: 0, dishes: 0, weeklyAdded: 0 })
+    getLandingStats(selectedCatalogCity)
       .then((payload) => {
         if (cancelled) return
         setHeroStats({
@@ -239,12 +244,14 @@ export default function Landing() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [selectedCatalogCity])
 
   useEffect(() => {
     let cancelled = false
 
-    getRestaurants(2000)
+    setFeaturedRestaurants([])
+    setTotalRestaurantsCount(0)
+    getRestaurants(2000, selectedCatalogCity)
       .then((payload) => {
         if (cancelled) return
         const items = Array.isArray(payload?.items) ? payload.items : []
@@ -271,7 +278,7 @@ export default function Landing() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [selectedCatalogCity])
 
   useEffect(() => {
     if (!suggestOpen) return
@@ -614,7 +621,7 @@ export default function Landing() {
 
           <div className="landing-warm__stats">
             <Link
-              to="/catalog/"
+              to={`/catalog/${CITY_SLUGS[selectedCatalogCity] || encodeURIComponent(selectedCatalogCity.toLowerCase())}/`}
               className="landing-warm__stat"
               aria-label="Открыть список ресторанов"
             >
@@ -629,7 +636,7 @@ export default function Landing() {
               </span>
             </Link>
             <Link
-              to="/catalog/"
+              to={`/catalog/${CITY_SLUGS[selectedCatalogCity] || encodeURIComponent(selectedCatalogCity.toLowerCase())}/`}
               className="landing-warm__stat"
               aria-label="Открыть список ресторанов с блюдами КБЖУ"
             >
@@ -637,7 +644,7 @@ export default function Landing() {
               <span>блюд с КБЖУ</span>
             </Link>
             <Link
-              to="/catalog/"
+              to={`/catalog/${CITY_SLUGS[selectedCatalogCity] || encodeURIComponent(selectedCatalogCity.toLowerCase())}/`}
               className="landing-warm__stat"
               aria-label="Открыть список ресторанов с новыми блюдами"
             >
@@ -759,7 +766,7 @@ export default function Landing() {
             ))}
           </div>
 
-          <Link className="landing-warm__featured-caption" to="/catalog/">
+          <Link className="landing-warm__featured-caption" to={`/catalog/${CITY_SLUGS[selectedCatalogCity] || encodeURIComponent(selectedCatalogCity.toLowerCase())}/`}>
             {extraRestaurantsLabel}
           </Link>
 
@@ -837,6 +844,7 @@ export default function Landing() {
               <Suspense fallback={<div className="landing-warm__map-placeholder" aria-hidden="true" />}>
                 <RestaurantMap
                   themeMode={themeMode}
+                  selectedCity={selectedCatalogCity}
                   showSummaryHeader={false}
                   openFullscreenSignal={openMapFullscreenSignal}
                   onStatsChange={(next) => {
@@ -849,7 +857,7 @@ export default function Landing() {
             )}
 
             <aside className="landing-warm__map-overlay">
-              <h3>{pointsLabel} точек на карте Москвы</h3>
+              <h3>{pointsLabel} точек на карте города {selectedCatalogCity}</h3>
               <p>Посмотрите ближайшие рестораны и их меню.</p>
               <button
                 type="button"
