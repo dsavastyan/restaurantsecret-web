@@ -1,4 +1,4 @@
-import { PD_API_BASE } from '@/config/api'
+import { IS_PREVIEW, PD_API_BASE } from '@/config/api'
 
 const VISITOR_ID_KEY = 'rs_city_visitor_id'
 
@@ -19,7 +19,8 @@ function getVisitorId() {
 }
 
 export async function persistCityPreference(city, source, accessToken) {
-  if (!city) return
+  // Until a staging personal-data API exists, previews persist locally only.
+  if (!city || IS_PREVIEW) return
   const response = await fetch(`${PD_API_BASE}/api/city-preference`, {
     method: 'PUT',
     headers: {

@@ -9,15 +9,26 @@ const BASE_URL = (process.env.SITEMAP_BASE_URL || 'https://restaurantsecret.ru')
 const MENU_FETCH_CONCURRENCY = Math.max(1, Number(process.env.SITEMAP_MENU_FETCH_CONCURRENCY || 8))
 const FETCH_TIMEOUT_MS = Math.max(1000, Number(process.env.SITEMAP_FETCH_TIMEOUT_MS || 10000))
 const STRICT_API_FETCH = process.env.SITEMAP_STRICT_API_FETCH === 'true'
-const API_URLS = Array.from(
-  new Set(
-    [
+const cloudflarePagesBranch = process.env.CF_PAGES_BRANCH
+const isCloudflarePagesPreview = Boolean(
+  cloudflarePagesBranch && !['main', 'master'].includes(cloudflarePagesBranch)
+)
+const defaultApiUrls = isCloudflarePagesPreview
+  ? ['https://restaurantsecret-api-staging.dsavastyan.workers.dev']
+  : ['https://pd.restaurantsecret.ru/cf', 'https://api.restaurantsecret.ru/cf']
+const configuredApiUrls = isCloudflarePagesPreview
+  ? []
+  : [
       process.env.SITEMAP_API_URL,
       process.env.VITE_API_BASE_URL,
       process.env.VITE_API_BASE,
       process.env.VITE_API_URL,
-      'https://pd.restaurantsecret.ru/cf',
-      'https://api.restaurantsecret.ru/cf',
+    ]
+const API_URLS = Array.from(
+  new Set(
+    [
+      ...configuredApiUrls,
+      ...defaultApiUrls,
     ]
       .filter(Boolean)
       .map((url) => url.replace(/\/+$/, '')),

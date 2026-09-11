@@ -20,3 +20,4 @@ const normalizedPd = (configuredPd || FALLBACK_PD_API_BASE).replace(/\/+$/, '')
 export const API_BASE = normalizedPublic
 export const PUBLIC_API_BASE = normalizedPublic
 export const PD_API_BASE = normalizedPd
+export const IS_PREVIEW = env.VITE_DEPLOY_ENV === 'preview'

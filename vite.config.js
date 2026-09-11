@@ -5,6 +5,20 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+const cloudflarePagesBranch = process.env.CF_PAGES_BRANCH
+const isCloudflarePagesPreview = Boolean(
+  cloudflarePagesBranch && !['main', 'master'].includes(cloudflarePagesBranch)
+)
+
+// PR previews must never inherit production endpoints from the Pages project.
+if (isCloudflarePagesPreview) {
+  const stagingApi = 'https://restaurantsecret-api-staging.dsavastyan.workers.dev'
+  process.env.VITE_API_BASE_URL = stagingApi
+  process.env.VITE_API_BASE = stagingApi
+  process.env.VITE_API_URL = stagingApi
+  process.env.VITE_DEPLOY_ENV = 'preview'
+}
+
 export default defineConfig({
   base: '/',
   plugins: [react()],
