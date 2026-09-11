@@ -214,6 +214,9 @@ export default function Landing() {
   const pointsLabel = resolvedStats.points > 0
     ? resolvedStats.points.toLocaleString('ru-RU')
     : '—'
+  const pointsWord = resolvedStats.points > 0
+    ? getRussianPluralWord(resolvedStats.points, 'точка', 'точки', 'точек')
+    : 'точек'
   const extraRestaurantsCount = Math.max(totalRestaurantsCount - featuredRestaurants.length, 0)
   const extraRestaurantsLabel = totalRestaurantsCount > 0
     ? `- и ещё ${extraRestaurantsCount.toLocaleString('ru-RU')} заведений города ${selectedCatalogCity} -`
@@ -857,7 +860,7 @@ export default function Landing() {
             )}
 
             <aside className="landing-warm__map-overlay">
-              <h3>{pointsLabel} точек на карте города {selectedCatalogCity}</h3>
+              <h3>{pointsLabel} {pointsWord} на карте города {selectedCatalogCity}</h3>
               <p>Посмотрите ближайшие рестораны и их меню.</p>
               <button
                 type="button"
