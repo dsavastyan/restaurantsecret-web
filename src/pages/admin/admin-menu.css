@@ -264,6 +264,7 @@
 .admin-product-match__actions button:disabled { cursor: wait; opacity: .55; }
 .admin-product-match__actions .is-reject { color: #8b332d; border: 1px solid #e3c0bc; background: #fff; }
 .admin-product-match__actions .is-approve { color: #fff; border: 1px solid #65734d; background: #65734d; }
+.admin-product-match__actions .is-approve { display: inline-flex; align-items: center; gap: 7px; }
 .admin-menu__badge--auto_matched, .admin-menu__badge--approved { color: #28603b; background: #daf0df; }
 .admin-menu__badge--rejected { color: #8d312b; background: #fce5e1; }
 

@@ -132,6 +132,11 @@ export const adminMenuRevisionsApi = {
       body: { decision },
     }),
   kbjuFlaggedProducts: () => request('/api/admin/kbju-flagged-products'),
+  kbjuFlaggedRestaurantItems: () => request('/api/admin/kbju-flagged-restaurant-items'),
+  approveKbjuFlag: (kind, itemId) =>
+    request(`/api/admin/kbju-flags/${encodeURIComponent(kind)}/${encodeURIComponent(itemId)}/approve`, {
+      method: 'POST',
+    }),
   searchRestaurants: (query) => {
     const params = new URLSearchParams({ query })
     return request(`/api/admin/restaurants/search?${params}`)
