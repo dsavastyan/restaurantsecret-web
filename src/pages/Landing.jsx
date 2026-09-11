@@ -495,25 +495,23 @@ export default function Landing() {
             Все меню ресторанов с КБЖУ и составом блюд - выбирайте то, что подходит именно вам
           </p>
 
-          {suggestedCity && (
-            <aside className="landing-warm__city-suggestion" aria-live="polite">
-              <span>Ваш город — <strong>{suggestedCity}</strong>?</span>
-              <span className="landing-warm__city-suggestion-actions">
-                <button type="button" onClick={() => {
-                  setSelectedCatalogCity(suggestedCity)
-                  localStorage.setItem('catalog_city', suggestedCity)
-                  setSuggestedCity(null)
-                }}>Да</button>
-                <span aria-hidden="true">·</span>
-                <button type="button" onClick={() => {
-                  setSuggestedCity(null)
-                  setCityPickerOpen(true)
-                }}>Выбрать другой</button>
-              </span>
-            </aside>
-          )}
-
           <div className="landing-warm__search-shell">
+            {suggestedCity && (
+              <aside className="landing-warm__city-suggestion" aria-live="polite">
+                <span>Ваш город — <strong>{suggestedCity}</strong>?</span>
+                <span className="landing-warm__city-suggestion-actions">
+                  <button className="landing-warm__city-confirm" type="button" onClick={() => {
+                    setSelectedCatalogCity(suggestedCity)
+                    localStorage.setItem('catalog_city', suggestedCity)
+                    setSuggestedCity(null)
+                  }}>Да, это мой город</button>
+                  <button type="button" onClick={() => {
+                    setSuggestedCity(null)
+                    setCityPickerOpen(true)
+                  }}>Сменить</button>
+                </span>
+              </aside>
+            )}
             <div className="landing-warm__city-picker landing-warm__city-picker--desktop">
               <span className="landing-warm__city-caption">Ищем рестораны в</span>
               <button

@@ -25,15 +25,15 @@ test('offers the detected catalog city on the first visit', async ({ page }) => 
   await page.goto('/')
 
   await expect(page.getByText('Ваш город —', { exact: false })).toContainText('Санкт-Петербург')
-  await expect(page.getByRole('button', { name: 'Да', exact: true })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Выбрать другой' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Да, это мой город', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Сменить', exact: true })).toBeVisible()
 })
 
 test('allows previewing the first-visit prompt in local development', async ({ page }) => {
   await page.goto('/?detected_city=Минск')
 
   await expect(page.getByText('Ваш город —', { exact: false })).toContainText('Минск')
-  await expect(page.getByRole('button', { name: 'Да', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Да, это мой город', exact: true })).toBeVisible()
   await expect.poll(() => page.evaluate(() => window.localStorage.getItem('catalog_city')))
     .toBe(null)
 })
@@ -48,7 +48,7 @@ test('offers Moscow when the city cannot be detected', async ({ page }) => {
   await page.goto('/')
 
   await expect(page.getByText('Ваш город —', { exact: false })).toContainText('Москва')
-  await expect(page.getByRole('button', { name: 'Да', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Да, это мой город', exact: true })).toBeVisible()
   await expect.poll(() => page.evaluate(() => window.localStorage.getItem('catalog_city')))
     .toBe(null)
 })
