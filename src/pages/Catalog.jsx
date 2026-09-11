@@ -1,7 +1,7 @@
 // Catalog page showing the full list of restaurants with lightweight filters.
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useMeta } from '@/lib/useMeta'
-import { useNavigate, useOutletContext } from 'react-router-dom'
+import { useNavigate, useOutletContext, useParams, useSearchParams } from 'react-router-dom'
 import { api } from '../api/client.js'
 import CuisineFilter from '../components/CuisineFilter.jsx'
 import { useSWRLite } from '../hooks/useSWRLite.js'
@@ -11,10 +11,13 @@ import { analytics } from '@/services/analytics'
 import { getRussianPluralWord, matchesSearchQuery } from '@/lib/text'
 import { getLandingStats } from '@/lib/api'
 import AutoUpdatedBadge from '@/components/AutoUpdatedBadge.jsx'
+import { saveCatalogCity } from '@/lib/cityPreference'
 
 // Fetch a large number to emulate "all" items since backend pagination seems flaky
 const FETCH_LIMIT = 1000;
 const PAGE_SIZE = 8;
+const CITY_SLUGS = { 'Москва': 'moskva', 'Санкт-Петербург': 'sankt-peterburg', 'Ижевск': 'izhevsk' }
+const citySlug = (name) => CITY_SLUGS[name] || encodeURIComponent(String(name).toLowerCase())
 
 const CuisineIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -39,6 +42,43 @@ const RestaurantWebIcon = () => (
   </svg>
 )
 
+const ScrollingRestaurantName = ({ name }) => {
+  const viewportRef = useRef(null)
+  const measureRef = useRef(null)
+  const [isOverflowing, setIsOverflowing] = useState(false)
+
+  useEffect(() => {
+    const viewport = viewportRef.current
+    const measure = measureRef.current
+    if (!viewport || !measure) return undefined
+
+    const update = () => setIsOverflowing(measure.offsetWidth > viewport.clientWidth + 1)
+    update()
+
+    const observer = new ResizeObserver(update)
+    observer.observe(viewport)
+    observer.observe(measure)
+    return () => observer.disconnect()
+  }, [name])
+
+  return (
+    <span
+      ref={viewportRef}
+      className={`catalog-card__title-text${isOverflowing ? ' is-overflowing' : ''}`}
+      title={name}
+      aria-label={name}
+    >
+      <span ref={measureRef} className="catalog-card__title-measure" aria-hidden="true">{name}</span>
+      {isOverflowing ? (
+        <span className="catalog-card__title-marquee" aria-hidden="true">
+          <span>{name}</span>
+          <span>{name}</span>
+        </span>
+      ) : name}
+    </span>
+  )
+}
+
 const normalizeRestaurantLinkUrl = (rawUrl) => {
   if (!rawUrl) return null
   const text = String(rawUrl).trim()
@@ -55,18 +95,26 @@ const normalizeRestaurantLinkUrl = (rawUrl) => {
 }
 
 export default function Catalog() {
+  const { city: cityPath } = useParams()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const { data: citiesData } = useSWRLite('cities', () => api.cities())
+  const cities = citiesData?.items || []
+  const selectedCity = cities.find((item) => citySlug(item.id) === cityPath || item.id === cityPath)
+    || cities.find((item) => item.id === localStorage.getItem('catalog_city'))
+    || { id: 'Москва', name: 'Москва' }
+
   useMeta({
-    title: 'Каталог ресторанов с КБЖУ — RestaurantSecret',
-    description: 'Все рестораны Москвы с полным меню и данными КБЖУ. Фильтрация по кухне, метро и целям питания.',
-    canonical: 'https://restaurantsecret.ru/catalog/',
+    title: `Рестораны ${selectedCity.name} с КБЖУ — RestaurantSecret`,
+    description: `Рестораны города ${selectedCity.name}: меню, состав блюд и КБЖУ.`,
+    canonical: `https://restaurantsecret.ru/catalog/${citySlug(selectedCity.id)}/`,
   })
 
-  const { data: filters } = useSWRLite('filters', () => api.filters())
+  const { data: filters } = useSWRLite(`filters:${selectedCity.id}`, () => api.filters(selectedCity.id))
   const { data: landingStats } = useSWRLite('landing-stats', () => getLandingStats())
   const [selectedCuisines, setSelectedCuisines] = useState([])
   const [selectedMetro, setSelectedMetro] = useState('')
-  const [query, setQuery] = useState('')
-  const [debouncedQuery, setDebouncedQuery] = useState('')
+  const [query, setQuery] = useState(searchParams.get('q') || '')
+  const [debouncedQuery, setDebouncedQuery] = useState(searchParams.get('q') || '')
   const [currentPage, setCurrentPage] = useState(1)
 
   const navigate = useNavigate()
@@ -103,10 +151,21 @@ export default function Catalog() {
   useEffect(() => {
     const handle = setTimeout(() => {
       setDebouncedQuery(query.trim())
+      const next = new URLSearchParams(searchParams)
+      if (query.trim()) next.set('q', query.trim()); else next.delete('q')
+      setSearchParams(next, { replace: true })
     }, 280)
 
     return () => clearTimeout(handle)
-  }, [query])
+  }, [query]) // URL intentionally follows the debounced query
+
+  const changeCity = useCallback((city) => {
+    analytics.track('city_changed', { from_city: selectedCity.id, selected_city: city.id })
+    saveCatalogCity(city.id, 'manual', accessToken)
+    navigate(`/catalog/${citySlug(city.id)}/${query.trim() ? `?q=${encodeURIComponent(query.trim())}` : ''}`)
+    setSelectedMetro('')
+    setCurrentPage(1)
+  }, [accessToken, navigate, query, selectedCity.id])
 
   // Ask the parent layout for access; show the paywall if the user is not
   // subscribed yet.
@@ -123,18 +182,29 @@ export default function Catalog() {
   const openMenu = useCallback((slug) => {
     if (!slug) return
     if (ensureAccess()) {
-      navigate(`/restaurants/${slug}/menu/`)
+      analytics.track('restaurant_open', { slug, selected_city: selectedCity.id })
+      navigate(`/restaurants/${slug}/menu/?city=${encodeURIComponent(selectedCity.id)}`)
     }
-  }, [ensureAccess, navigate])
+  }, [ensureAccess, navigate, selectedCity.id])
+
+  useEffect(() => {
+    if (debouncedQuery) analytics.track('catalog_search', { selected_city: selectedCity.id, has_query: true })
+  }, [debouncedQuery, selectedCity.id])
 
   // Fetch ALL restaurants once (or as many as limit allows)
   // We remove 'query' from here because we want to filter locally to ensure search works reliably
   // We remove 'page' because we want to fetch everything upfront
   const { data: rawData, loading, error } = useSWRLite(
-    'restaurants-all',
+    `restaurants-all:${selectedCity.id}`,
     () => api.restaurants({
       limit: FETCH_LIMIT,
+      city: selectedCity.id,
     })
+  )
+  const { data: crossCityResults } = useSWRLite(
+    debouncedQuery ? `search:${selectedCity.id}:${debouncedQuery}` : null,
+    () => api.search(debouncedQuery, { city: selectedCity.id }),
+    { enabled: Boolean(debouncedQuery) },
   )
 
   // Normalize data
@@ -209,6 +279,12 @@ export default function Catalog() {
   }, [currentPage, filteredItems])
 
   const isInitialLoading = loading && !allItems.length
+
+  useEffect(() => {
+    if (!loading && !error && allItems.length === 0) {
+      analytics.track('catalog_empty_city', { selected_city: selectedCity.id })
+    }
+  }, [allItems.length, error, loading, selectedCity.id])
 
   useEffect(() => {
     if (currentPage > totalPages) {
@@ -296,12 +372,12 @@ export default function Catalog() {
     <div className="catalog-page">
       <header className="catalog-heading">
         <p className="catalog-heading__eyebrow">Каталог</p>
-        <h1 className="catalog-heading__title">Рестораны</h1>
+        <h1 className="catalog-heading__title">Рестораны — {selectedCity.name}</h1>
         <p className="catalog-heading__lead">
           <strong>{totalRestaurantCount.toLocaleString('ru-RU')}</strong>
           {' '}
           {getRussianPluralWord(totalRestaurantCount, 'ресторан', 'ресторана', 'ресторанов')}
-          {' Москвы с полным меню и КБЖУ'}
+          {` города ${selectedCity.name} с полным меню и КБЖУ`}
           {weeklyAdded > 0 && (
             <>
               <span className="catalog-heading__sep" aria-hidden="true">·</span>
@@ -360,6 +436,21 @@ export default function Catalog() {
             </button>
             <div className="catalog-filter-row">
               <div className="catalog-filter">
+                <label className="catalog-filter__label" htmlFor="catalog-city">Город</label>
+                <div className="catalog-filter__select-wrap">
+                  <select id="catalog-city" className="catalog-metro-select" value={selectedCity.id}
+                    onFocus={() => analytics.track('city_selector_open', { selected_city: selectedCity.id })}
+                    onChange={(event) => {
+                    const city = cities.find((item) => item.id === event.target.value)
+                    if (city) changeCity(city)
+                  }}>
+                    {cities.length ? cities.map((city) => (
+                      <option key={city.id} value={city.id}>{city.name}</option>
+                    )) : <option value="Москва">Москва</option>}
+                  </select>
+                </div>
+              </div>
+              <div className="catalog-filter">
                 <div className="catalog-filter__label">Кухня</div>
                 <div className="catalog-filter__control">
                   <CuisineFilter
@@ -399,6 +490,17 @@ export default function Catalog() {
           <div className="catalog-state catalog-state--empty">
             <div className="catalog-state__badge">Ничего не нашли</div>
             <p className="catalog-state__text">Попробуйте изменить запрос или выбрать другую кухню.</p>
+            {(crossCityResults?.otherCities || []).length > 0 && (
+              <div aria-label="Результаты в других городах">
+                <strong>Есть в других городах</strong>
+                {(crossCityResults.otherCities || []).map((result) => (
+                  <button key={result.city} type="button" onClick={() => {
+                    const city = cities.find((item) => item.id === result.city)
+                    if (city && window.confirm(`Переключиться на город ${city.name}?`)) changeCity(city)
+                  }}>{result.city}</button>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -417,7 +519,7 @@ export default function Catalog() {
                     <div className={`${getBadgeClassName(r?.name)} catalog-card__badge--tone-${i % 4}`} aria-hidden="true">{badgeText}</div>
                     <div className="catalog-card__copy">
                       <h3 className="catalog-card__title">
-                        <span className="catalog-card__title-text">{r.name}</span>
+                        <ScrollingRestaurantName name={r.name} />
                         {r?.autoUpdated && <AutoUpdatedBadge className="catalog-card__auto-updated" />}
                       </h3>
                       <div className="catalog-card__meta">

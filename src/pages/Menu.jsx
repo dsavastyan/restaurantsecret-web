@@ -2,7 +2,7 @@
 // Rendering lives in components/MenuRedesign/*; this module owns data loading,
 // filtering and the mutation handlers those views call.
 import React, { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { apiGet } from '@/lib/requests'
 import { flattenMenuDishes } from '@/lib/nutrition'
 import { formatDescription, matchesSearchQuery } from '@/lib/text'
@@ -55,6 +55,8 @@ export default function Menu({
 }) {
   const { slug: routeSlug } = useParams()
   const slug = previewRestaurantSlug || routeSlug
+  const [routeSearchParams] = useSearchParams()
+  const city = routeSearchParams.get('city') || 'Москва'
   const navigate = useNavigate()
   const accessToken = useAuth((state) => state.accessToken)
   const { fetchStatus } = useSubscriptionStore((state) => ({
@@ -97,7 +99,7 @@ export default function Menu({
     setAllCategoriesExpanded(false)
     setIsIngredientFilterOpen(false)
     setIngredientFilter(createDefaultIngredientFilter())
-  }, [slug])
+  }, [city, slug])
 
   // Fetch the menu.
   useEffect(() => {
@@ -116,7 +118,7 @@ export default function Menu({
           setLoading(true)
           setError('')
           const raw = await apiGet(
-            `/restaurants/${slug}/menu`,
+            `/restaurants/${slug}/menu?city=${encodeURIComponent(city)}`,
             accessToken ? { headers: { Authorization: `Bearer ${accessToken}` } } : {},
           )
           const data = raw?.categories ? raw : { ...(raw || {}), name: raw?.name || slug, categories: [] }
@@ -139,7 +141,7 @@ export default function Menu({
     return () => {
       aborted = true
     }
-  }, [accessToken, fetchStatus, previewMenu, previewMode, slug])
+  }, [accessToken, city, fetchStatus, previewMenu, previewMode, slug])
 
   useEffect(() => {
     if (!previewMode && accessToken) {
@@ -153,7 +155,7 @@ export default function Menu({
 
     ; (async () => {
       try {
-        const mapData = await apiGet('/restaurants/map')
+        const mapData = await apiGet(`/restaurants/map?city=${encodeURIComponent(city)}`)
         if (aborted) return
         const targetSlug = String(slug || '').trim().toLowerCase()
         const points = Array.isArray(mapData?.items) ? mapData.items : []
@@ -171,7 +173,7 @@ export default function Menu({
     return () => {
       aborted = true
     }
-  }, [slug])
+  }, [city, slug])
 
   const dishes = useMemo(() => flattenMenuDishes(menu), [menu])
   const freeDishKeys = useMemo(() => {

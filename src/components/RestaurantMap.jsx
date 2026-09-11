@@ -12,6 +12,7 @@ import { useFavoriteRestaurantsStore } from '@/store/favoriteRestaurants'
 import MetroFilter from './MetroFilter'
 import MapCuisineFilter from './MapCuisineFilter'
 import MapCityFilter from './MapCityFilter'
+import { saveCatalogCity } from '@/lib/cityPreference'
 
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -309,7 +310,8 @@ export default function RestaurantMap({
   const [metroData, setMetroData] = useState({ lines: [], stations: [] })
   const [cuisines, setCuisines] = useState([])
   const [filters, setFilters] = useState({ cuisines: [], excludeFastFood: false })
-  const [selectedCity, setSelectedCity] = useState('Москва')
+  const [selectedCity, setSelectedCity] = useState(() => localStorage.getItem('catalog_city') || 'Москва')
+  const [cityOptions, setCityOptions] = useState([])
   const [selectedMetroStation, setSelectedMetroStation] = useState(null)
   const [focusTarget, setFocusTarget] = useState(null)
   const [isDefaultView, setIsDefaultView] = useState(true)
@@ -327,19 +329,22 @@ export default function RestaurantMap({
   // # Minsk, Nizhny Novgorod), so the picker needs one city at a time to stay
   // # unambiguous - "Москва" as the default since that's where the catalog's
   // # restaurants actually are today.
-  const availableCities = useMemo(() => {
-    const cities = new Set(metroData.stations.map((s) => s.city).filter(Boolean))
-    cities.add('Москва')
-    return Array.from(cities).sort((a, b) => a.localeCompare(b))
-  }, [metroData.stations])
+  const availableCities = useMemo(() => cityOptions.map((city) => city.id), [cityOptions])
+  const selectedCityMeta = cityOptions.find((city) => city.id === selectedCity)
+  const cityCenter = selectedCityMeta?.center
+    ? [selectedCityMeta.center.lat, selectedCityMeta.center.lon]
+    : defaultCenter
   const cityMetroData = useMemo(
     () => ({ stations: metroData.stations.filter((s) => s.city === selectedCity) }),
     [metroData.stations, selectedCity],
   )
   const handleSelectCity = useCallback((city) => {
     setSelectedCity(city)
+    saveCatalogCity(city, 'manual', accessToken)
     setSelectedMetroStation(null)
-  }, [])
+    const meta = cityOptions.find((item) => item.id === city)
+    if (meta?.center) setFocusTarget({ lat: meta.center.lat, lon: meta.center.lon, zoom: meta.recommendedZoom || defaultZoom, key: `city-${city}` })
+  }, [accessToken, cityOptions])
   const selectedMetroStationName = useMemo(
     () => normalizeStationName(selectedMetroStation?.name_ru),
     [selectedMetroStation],
@@ -387,9 +392,18 @@ export default function RestaurantMap({
       }
     }
 
+    async function fetchCities() {
+      try {
+        const res = await fetch(`${API_BASE}/cities`)
+        if (res.ok) setCityOptions((await res.json()).items || [])
+      } catch (err) {
+        console.error('Failed to load cities', err)
+      }
+    }
+
     async function fetchCuisines() {
       try {
-        const res = await fetch(`${API_BASE}/filters`)
+        const res = await fetch(`${API_BASE}/filters?city=${encodeURIComponent(selectedCity)}`)
         if (res.ok) {
           const data = await res.json()
           setCuisines(data.cuisines || [])
@@ -400,14 +414,16 @@ export default function RestaurantMap({
     }
 
     fetchMetro()
+    fetchCities()
     fetchCuisines()
-  }, [])
+  }, [selectedCity])
 
   useEffect(() => {
     async function fetchRestaurants() {
       setLoading(true)
       try {
         const params = new URLSearchParams()
+        params.set('city', selectedCity)
         if (filters.cuisines && filters.cuisines.length > 0) {
           filters.cuisines.forEach((cuisine) => params.append('cuisine', cuisine))
         }
@@ -425,7 +441,7 @@ export default function RestaurantMap({
     }
 
     fetchRestaurants()
-  }, [filters.cuisines])
+  }, [filters.cuisines, selectedCity])
 
   useEffect(() => {
     if (typeof onStatsChange !== 'function') return
@@ -560,7 +576,7 @@ export default function RestaurantMap({
         )}
 
         <MapContainer
-          center={defaultCenter}
+          center={cityCenter}
           zoom={defaultZoom}
           scrollWheelZoom={isFullscreen}
           className="restaurant-map"

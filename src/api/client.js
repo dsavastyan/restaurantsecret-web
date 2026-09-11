@@ -77,10 +77,12 @@ async function post(path, body, options = {}) {
 
 // Export a small client surface the rest of the app can use.
 export const api = {
-  filters: () => get('filters'),
+  cities: () => get('cities'),
+  detectedCity: () => get('location'),
+  filters: (city = 'Москва') => get('filters', { city }),
   restaurants: (opts) => get('restaurants', opts),
-  restaurant: (slug) => get(`restaurants/${encodeURIComponent(slug)}`),
-  menu: (slug) => get(`restaurants/${encodeURIComponent(slug)}/menu`),
+  restaurant: (slug, city = 'Москва') => get(`restaurants/${encodeURIComponent(slug)}`, { city }),
+  menu: (slug, city = 'Москва') => get(`restaurants/${encodeURIComponent(slug)}/menu`, { city }),
   search: (query, opts) => get('search', { query, ...opts }),
   post
 };
