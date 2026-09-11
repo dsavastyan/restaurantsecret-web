@@ -3,9 +3,11 @@
 // variables so CI workflows can point the frontend at staging or review
 // backends without touching the source.
 const FALLBACK_PD_API_BASE = 'https://pd.restaurantsecret.ru'
-const FALLBACK_PUBLIC_API_BASE = `${FALLBACK_PD_API_BASE}/cf`
+const PRODUCTION_PUBLIC_API_BASE = `${FALLBACK_PD_API_BASE}/cf`
+const STAGING_PUBLIC_API_BASE = 'https://restaurantsecret-api-staging.dsavastyan.workers.dev'
 
 const env = typeof import.meta !== 'undefined' ? (import.meta.env ?? {}) : {}
+const FALLBACK_PUBLIC_API_BASE = env.DEV ? STAGING_PUBLIC_API_BASE : PRODUCTION_PUBLIC_API_BASE
 const configuredPublic =
     env.VITE_API_BASE_URL || env.VITE_API_BASE || env.VITE_API_URL || ''
 const configuredPd = env.VITE_PD_API_BASE || ''
