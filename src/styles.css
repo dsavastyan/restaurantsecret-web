@@ -4242,9 +4242,11 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
 
   .catalog-heading__title {
     min-width: 0;
+    max-width: 100%;
     font-size: clamp(38px, 10vw, 44px);
     line-height: 0.98;
-    white-space: nowrap;
+    white-space: normal;
+    text-wrap: balance;
   }
 
   .catalog-heading__lead {
