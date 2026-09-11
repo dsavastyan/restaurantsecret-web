@@ -27,7 +27,6 @@ test('published restaurant opens the shared four-step menu update flow', async (
         id: 7,
         dish_name: 'Омлет с форелью',
         category: 'Завтраки',
-        price_rub: 790,
         per: 'portion',
         portion_g: 280,
         kcal: 420,
@@ -45,7 +44,6 @@ test('published restaurant opens the shared four-step menu update flow', async (
         id: 8,
         dish_name: 'Старое сезонное блюдо',
         category: 'Завтраки',
-        price_rub: 540,
         per: 'portion',
         portion_g: 220,
         kcal: 350,
@@ -143,7 +141,7 @@ test('published restaurant opens the shared four-step menu update flow', async (
   await expect(previewPage.getByText('Эта версия меню ещё не опубликована и не видна гостям')).toBeVisible()
   await expect(previewPage.getByRole('heading', { name: 'Меню Aero Menu с КБЖУ' })).toBeVisible()
   await expect(previewPage.locator('.rsm2-tile__cover-name').filter({ hasText: 'Омлет с форелью' })).toBeVisible()
-  await expect(previewPage.locator('.rsm2-tile__cover-price').filter({ hasText: '790 ₽' })).toBeVisible()
+  await expect(previewPage.getByText(/₽/)).toHaveCount(0)
   await expect(previewPage.getByText('Старое сезонное блюдо')).toHaveCount(0)
   await expect(previewPage.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow')
 
@@ -184,7 +182,6 @@ test('returning from preview keeps the prepared draft until source files change'
       id: 9,
       dish_name: 'Томаты с брынзой',
       category: 'Закуски',
-      price_rub: 620,
       composition_text: 'Томаты, брынза',
       photo_url: null,
       photo_changed: 0,
@@ -361,18 +358,18 @@ test('manual dish form blocks invalid numbers and submits only valid values', as
   await page.getByRole('button', { name: /Добавить блюдо/ }).click()
 
   const drawer = page.getByRole('dialog')
-  const price = drawer.getByLabel('Цена, ₽')
-  await price.fill('abc')
-  await expect(price).toHaveValue('')
+  await expect(drawer.getByLabel('Цена, ₽')).toHaveCount(0)
+  const portion = drawer.getByLabel('Вес порции, г')
+  await portion.fill('abc')
+  await expect(portion).toHaveValue('')
   await expect(page.getByText('Используйте только цифры и один десятичный разделитель.')).toBeVisible()
 
-  await price.fill('-10')
-  await expect(price).toHaveValue('')
+  await portion.fill('-10')
+  await expect(portion).toHaveValue('')
   await expect(page.getByText('Значение не может быть отрицательным.')).toBeVisible()
 
   await drawer.getByLabel('Название блюда').fill('   ')
   await drawer.getByLabel('Раздел меню').fill('Завтраки')
-  await price.fill('450,50')
   await drawer.getByLabel('Состав').fill('Яйца, молоко')
   await drawer.getByLabel('Вес порции, г').fill('0')
   await drawer.getByLabel('Калории').fill('6000')
@@ -397,7 +394,6 @@ test('manual dish form blocks invalid numbers and submits only valid values', as
   expect(submittedItems[0]).toMatchObject({
     dish_name: 'Омлет',
     category: 'Завтраки',
-    price_rub: 450.5,
     portion_g: 250,
     kcal: 390,
     proteins_g: 24,
@@ -691,9 +687,9 @@ test('Excel upload shows validation details, marked workbook, current file contr
               message: 'В строке 3 не указано название блюда.',
             }, {
               row: 4,
-              field: 'price_rub',
+              field: 'portion_g',
               type: 'negative_value',
-              message: 'В строке 4 значение поля «Цена» выглядит ошибочным (-10).',
+              message: 'В строке 4 значение поля «Выход блюда» выглядит ошибочным (-10).',
             }],
             validation_key: 'RestaurantPortal/Validation/aero-menu/errors.xlsx',
           },
@@ -738,7 +734,7 @@ test('Excel upload shows validation details, marked workbook, current file contr
   await expect(validation.getByText('меню-с-ошибками.xlsx')).toBeVisible()
   await expect(validation.getByText('Найдены ошибки · 2')).toBeVisible()
   await expect(validation.getByText('В строке 3 не указано название блюда.')).toBeVisible()
-  await expect(validation.getByText('В строке 4 значение поля «Цена» выглядит ошибочным (-10).')).toBeVisible()
+  await expect(validation.getByText('В строке 4 значение поля «Выход блюда» выглядит ошибочным (-10).')).toBeVisible()
   await expect(validation.getByRole('link', { name: /Скачать Excel с ошибками/ })).toHaveAttribute(
     'href',
     /\/api\/restaurant\/menu\/validation-result\?key=RestaurantPortal%2FValidation%2Faero-menu%2Ferrors\.xlsx$/,
@@ -806,7 +802,6 @@ test('manual edits unlock preview and the sidebar switches steps without waiting
       proteins_g: 12,
       fats_g: 9,
       carbs_g: 14,
-      price_rub: 590,
     }],
     photos: [],
     summary: { added: 0, updated: 1, deleted: 0, unchanged: 0, photos: 0 },

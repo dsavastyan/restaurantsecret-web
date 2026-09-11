@@ -22,7 +22,6 @@ export function buildDraftMenuPreview(payload, restaurant) {
       name: item.dish_name,
       description: item.composition_text || '',
       ingredients: item.composition_text || '',
-      price_rub: item.price_rub,
       per: item.per,
       portion_g: item.portion_g,
       kcal: item.kcal,
