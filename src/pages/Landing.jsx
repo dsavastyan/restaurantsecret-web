@@ -17,6 +17,7 @@ import { analytics } from '@/services/analytics'
 import { useMeta } from '@/lib/useMeta'
 import { getSubscriptionCheckoutLink } from '@/lib/subscriptionCta'
 import { api } from '@/api/client'
+import { persistCityPreference, saveCatalogCity } from '@/lib/cityPreference'
 
 const STATS_FALLBACK = {
   restaurants: 0,
@@ -167,12 +168,19 @@ export default function Landing() {
     }
     api.detectedCity()
       .then((response) => {
-        if (!localStorage.getItem('catalog_city')) setSuggestedCity(response?.city || 'Москва')
+        if (localStorage.getItem('catalog_city')) return
+        const detectedCity = response?.city || null
+        setSuggestedCity(detectedCity || 'Москва')
+        if (detectedCity) {
+          persistCityPreference(detectedCity, 'ip', accessToken).catch((error) => {
+            console.error('Failed to persist detected city', error)
+          })
+        }
       })
       .catch(() => {
         if (!localStorage.getItem('catalog_city')) setSuggestedCity('Москва')
       })
-  }, [])
+  }, [accessToken])
 
   useEffect(() => {
     if (!cityPickerOpen) return undefined
@@ -491,7 +499,7 @@ export default function Landing() {
               <span className="landing-warm__city-suggestion-actions">
                 <button className="landing-warm__city-confirm" type="button" onClick={() => {
                   setSelectedCatalogCity(suggestedCity)
-                  localStorage.setItem('catalog_city', suggestedCity)
+                  saveCatalogCity(suggestedCity, 'confirmed', accessToken)
                   setSuggestedCity(null)
                 }}>Да, это мой город</button>
                 <button type="button" onClick={() => {
@@ -518,7 +526,7 @@ export default function Landing() {
                 <span className="landing-warm__city-suggestion-actions">
                   <button className="landing-warm__city-confirm" type="button" onClick={() => {
                     setSelectedCatalogCity(suggestedCity)
-                    localStorage.setItem('catalog_city', suggestedCity)
+                    saveCatalogCity(suggestedCity, 'confirmed', accessToken)
                     setSuggestedCity(null)
                   }}>Да, это мой город</button>
                   <button type="button" onClick={() => {
@@ -576,7 +584,7 @@ export default function Landing() {
                       className={item.id === selectedCatalogCity ? 'is-selected' : ''}
                       onClick={() => {
                         setSelectedCatalogCity(item.id)
-                        localStorage.setItem('catalog_city', item.id)
+                        saveCatalogCity(item.id, 'manual', accessToken)
                         setSuggestedCity(null)
                         setCityPickerOpen(false)
                       }}

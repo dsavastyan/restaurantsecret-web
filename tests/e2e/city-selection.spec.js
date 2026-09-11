@@ -13,9 +13,18 @@ test.beforeEach(async ({ page }) => {
       ],
     }),
   }))
+  await page.route('**/api/city-preference', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ ok: true }),
+  }))
 })
 
 test('offers the detected catalog city on the first visit', async ({ page }) => {
+  const persistedPreferences = []
+  page.on('request', (request) => {
+    if (request.url().endsWith('/api/city-preference')) persistedPreferences.push(request.postDataJSON())
+  })
   await page.route('**/location', (route) => route.fulfill({
     status: 200,
     contentType: 'application/json',
@@ -28,6 +37,11 @@ test('offers the detected catalog city on the first visit', async ({ page }) => 
   await expect(suggestion).toContainText('Санкт-Петербург')
   await expect(suggestion.getByRole('button', { name: 'Да, это мой город', exact: true })).toBeVisible()
   await expect(suggestion.getByRole('button', { name: 'Сменить', exact: true })).toBeVisible()
+  await expect.poll(() => persistedPreferences.some((item) => item.city === 'Санкт-Петербург' && item.source === 'ip')).toBe(true)
+
+  await suggestion.getByRole('button', { name: 'Да, это мой город', exact: true }).evaluate((button) => button.click())
+  await expect.poll(() => page.evaluate(() => window.localStorage.getItem('catalog_city'))).toBe('Санкт-Петербург')
+  await expect.poll(() => persistedPreferences.some((item) => item.city === 'Санкт-Петербург' && item.source === 'confirmed')).toBe(true)
 })
 
 test('allows previewing the first-visit prompt in local development', async ({ page }) => {

@@ -8,6 +8,7 @@ import { useAuth } from '@/store/auth'
 import { useDishCardStore } from '@/store/dishCard'
 import { api } from '@/api/client'
 import { getRussianPluralWord } from '@/lib/text'
+import { saveCatalogCity } from '@/lib/cityPreference'
 
 const DEFAULT_TYPE = 'dish'
 const emptyResults = { restaurants: [], dishes: [], otherCities: [] }
@@ -102,11 +103,11 @@ export default function Search() {
   }, [searchType, selectedCity, setSearchParams])
 
   const changeCity = useCallback((city) => {
-    localStorage.setItem('catalog_city', city)
+    saveCatalogCity(city, 'manual', accessToken)
     const params = new URLSearchParams(searchParams)
     params.set('city', city)
     setSearchParams(params)
-  }, [searchParams, setSearchParams])
+  }, [accessToken, searchParams, setSearchParams])
 
   const handleSubmit = useCallback((event) => {
     event.preventDefault()

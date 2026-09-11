@@ -11,6 +11,7 @@ import { analytics } from '@/services/analytics'
 import { getRussianPluralWord, matchesSearchQuery } from '@/lib/text'
 import { getLandingStats } from '@/lib/api'
 import AutoUpdatedBadge from '@/components/AutoUpdatedBadge.jsx'
+import { saveCatalogCity } from '@/lib/cityPreference'
 
 // Fetch a large number to emulate "all" items since backend pagination seems flaky
 const FETCH_LIMIT = 1000;
@@ -160,11 +161,11 @@ export default function Catalog() {
 
   const changeCity = useCallback((city) => {
     analytics.track('city_changed', { from_city: selectedCity.id, selected_city: city.id })
-    localStorage.setItem('catalog_city', city.id)
+    saveCatalogCity(city.id, 'manual', accessToken)
     navigate(`/catalog/${citySlug(city.id)}/${query.trim() ? `?q=${encodeURIComponent(query.trim())}` : ''}`)
     setSelectedMetro('')
     setCurrentPage(1)
-  }, [navigate, query, selectedCity.id])
+  }, [accessToken, navigate, query, selectedCity.id])
 
   // Ask the parent layout for access; show the paywall if the user is not
   // subscribed yet.

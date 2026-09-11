@@ -12,6 +12,7 @@ import { useFavoriteRestaurantsStore } from '@/store/favoriteRestaurants'
 import MetroFilter from './MetroFilter'
 import MapCuisineFilter from './MapCuisineFilter'
 import MapCityFilter from './MapCityFilter'
+import { saveCatalogCity } from '@/lib/cityPreference'
 
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -339,11 +340,11 @@ export default function RestaurantMap({
   )
   const handleSelectCity = useCallback((city) => {
     setSelectedCity(city)
-    localStorage.setItem('catalog_city', city)
+    saveCatalogCity(city, 'manual', accessToken)
     setSelectedMetroStation(null)
     const meta = cityOptions.find((item) => item.id === city)
     if (meta?.center) setFocusTarget({ lat: meta.center.lat, lon: meta.center.lon, zoom: meta.recommendedZoom || defaultZoom, key: `city-${city}` })
-  }, [cityOptions])
+  }, [accessToken, cityOptions])
   const selectedMetroStationName = useMemo(
     () => normalizeStationName(selectedMetroStation?.name_ru),
     [selectedMetroStation],
