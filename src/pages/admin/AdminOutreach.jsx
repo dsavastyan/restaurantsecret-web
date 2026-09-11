@@ -5,7 +5,7 @@ import { adminMenuRevisionsApi } from '@/api/adminMenuRevisions'
 const STATUS_LABELS = {
   new: 'Новый', awaiting_parser: 'Ожидает парсинга', awaiting_manual: 'Ожидает добавления',
   awaiting_reply: 'Ожидает ответа', follow_up: 'Follow-up', menu_development: 'Меню в разработке',
-  ready: 'Готово', no_menu: 'Меню нет', in_person_only: 'Только лично',
+  ready: 'Готово', no_menu: 'Меню нет', in_person_only: 'Только лично', discarded: 'Не подходит',
 }
 
 function ActionButton({ children, onClick, disabled }) {
@@ -19,6 +19,7 @@ function CandidateActions({ candidate, busy, update }) {
   const save = (nextStatus, workflowKind = candidate.workflow_kind, url = null) =>
     update(candidate.id, { status: nextStatus, workflow_kind: workflowKind, menu_url: url })
 
+  if (status === 'discarded') return <ActionButton disabled={busy} onClick={() => save('new', null)}>Вернуть в новые</ActionButton>
   if (status === 'ready' || status === 'no_menu' || status === 'in_person_only' || status === 'awaiting_parser') return <span className="admin-crm__muted">—</span>
 
   if (showParser) {
@@ -31,7 +32,12 @@ function CandidateActions({ candidate, busy, update }) {
     )
   }
 
-  if (status === 'awaiting_manual') return <ActionButton disabled={busy} onClick={() => save('ready')}>Готово</ActionButton>
+  if (status === 'awaiting_manual') return (
+    <details className="admin-crm__actions"><summary>Действия</summary><div>
+      <ActionButton disabled={busy} onClick={() => save('ready')}>Готово</ActionButton>
+      <ActionButton disabled={busy} onClick={() => save('discarded', null)}>Не подходит</ActionButton>
+    </div></details>
+  )
 
   if (status === 'menu_development') {
     return (
@@ -39,6 +45,7 @@ function CandidateActions({ candidate, busy, update }) {
         <ActionButton disabled={busy} onClick={() => save('ready')}>Меню получено — готово</ActionButton>
         <ActionButton disabled={busy} onClick={() => save('no_menu')}>Меню нет</ActionButton>
         <ActionButton disabled={busy} onClick={() => save('in_person_only')}>Только лично</ActionButton>
+        <ActionButton disabled={busy} onClick={() => save('discarded', null)}>Не подходит</ActionButton>
       </div></details>
     )
   }
@@ -51,6 +58,7 @@ function CandidateActions({ candidate, busy, update }) {
         <ActionButton disabled={busy} onClick={() => save('no_menu')}>Меню нет</ActionButton>
         <ActionButton disabled={busy} onClick={() => save('menu_development', 'direct')}>Меню в разработке</ActionButton>
         <ActionButton disabled={busy} onClick={() => save('in_person_only')}>Только лично</ActionButton>
+        <ActionButton disabled={busy} onClick={() => save('discarded', null)}>Не подходит</ActionButton>
       </div></details>
     )
   }
@@ -61,6 +69,7 @@ function CandidateActions({ candidate, busy, update }) {
       <ActionButton disabled={busy} onClick={() => save('awaiting_manual', 'manual_website')}>Вручную с сайта</ActionButton>
       <ActionButton disabled={busy} onClick={() => save('awaiting_manual', 'instagram_highlights')}>Instagram Highlights</ActionButton>
       <ActionButton disabled={busy} onClick={() => save('awaiting_reply', 'direct')}>Написала в Direct</ActionButton>
+      <ActionButton disabled={busy} onClick={() => save('discarded', null)}>Не подходит</ActionButton>
     </div></details>
   )
 }
