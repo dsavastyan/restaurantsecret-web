@@ -170,6 +170,57 @@ test.skip('administrator edits a restaurant row and adds emails without sending 
   expect(contactCalls.every(({ body }) => body.send_invite === false)).toBeTruthy()
 })
 
+test('administrator configures and confirms a manual menu', async ({ page }) => {
+  const requests = []
+  let configured = false
+  let confirmed = false
+  await page.route('**/api/admin/**', async (route) => {
+    const request = route.request()
+    const path = new URL(request.url()).pathname
+    requests.push({ path, method: request.method(), body: request.postDataJSON?.() })
+    if (path === '/api/admin/auth/me') return route.fulfill({ json: { ok: true, role: 'admin', csrf_token: 'csrf' } })
+    if (path === '/api/admin/manual-menu-freshness' && request.method() === 'GET') {
+      return route.fulfill({ json: {
+        ok: true,
+        stale_after_days: 90,
+        restaurants: [{
+          slug: 'loulou', name: 'Loulou', cities: ['Москва'],
+          source_type: configured ? 'instagram_highlight' : null,
+          source_url: configured ? 'https://instagram.com/loulou/' : null,
+          last_checked_at: confirmed ? '2026-09-11T12:00:00Z' : '2026-09-01T12:00:00Z',
+          status: configured ? 'current' : 'source_missing',
+        }],
+      } })
+    }
+    if (path.endsWith('/source') && request.method() === 'PATCH') {
+      configured = true
+      return route.fulfill({ json: { ok: true } })
+    }
+    if (path.endsWith('/confirm') && request.method() === 'POST') {
+      confirmed = true
+      return route.fulfill({ json: { ok: true, last_checked_at: '2026-09-11T12:00:00Z' } })
+    }
+    return route.fulfill({ json: { ok: true } })
+  })
+
+  await page.goto('/admin/restaurants')
+  await expect(page.getByRole('tab', { name: 'Ручные меню' })).toHaveAttribute('aria-selected', 'true')
+  const row = page.getByRole('row').filter({ hasText: 'Loulou' })
+  await expect(row.getByText('Источник не указан')).toBeVisible()
+  await row.getByLabel('Источник меню Loulou').selectOption('instagram_highlight')
+  await row.getByLabel('Ссылка на меню Loulou').fill('https://instagram.com/loulou/')
+  await row.getByRole('button', { name: 'Сохранить' }).click()
+  await expect(row.getByText('Актуально')).toBeVisible()
+  await row.getByRole('button', { name: 'Подтвердить актуальность' }).click()
+
+  await expect.poll(() => requests.some(({ path, method }) => path.endsWith('/loulou/confirm') && method === 'POST')).toBeTruthy()
+  expect(requests.some(({ path, method, body }) => (
+    path.endsWith('/loulou/source') && method === 'PATCH'
+      && body?.source_type === 'instagram_highlight'
+      && body?.source_url === 'https://instagram.com/loulou/'
+  ))).toBeTruthy()
+})
+
 test('administrator sees parser status, source and error without leaving the restaurant dashboard', async ({ page }) => {
   await page.route('**/api/admin/**', async (route) => {
     const path = new URL(route.request().url()).pathname
@@ -192,7 +243,7 @@ test('administrator sees parser status, source and error without leaving the res
   })
 
   await page.goto('/admin/restaurants')
-  await expect(page.getByRole('heading', { name: 'Автоматическое обновление' })).toBeVisible()
+  await page.getByRole('tab', { name: 'Автоматическое обновление' }).click()
   await expect(page.getByRole('tab', { name: 'Все рестораны' })).toHaveCount(0)
   await expect(page.getByRole('link', { name: 'Задачи меню' })).toHaveCount(0)
   await expect(page.getByRole('link', { name: 'Ревью ресторанов' })).toHaveCount(0)

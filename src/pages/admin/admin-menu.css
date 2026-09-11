@@ -5,6 +5,21 @@
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
 }
 
+.admin-manual-menu__table-wrap { overflow-x: auto; }
+.admin-manual-menu__table { min-width: 980px; }
+.admin-manual-menu__source { display: grid; min-width: 320px; gap: 8px; }
+.admin-manual-menu__source > div { display: flex; align-items: center; gap: 8px; }
+.admin-manual-menu__source select,
+.admin-manual-menu__source input { width: 100%; padding: 9px 11px; border: 1px solid #d8d4ca; border-radius: 9px; background: #fff; font: inherit; }
+.admin-manual-menu__source a { display: inline-flex; color: #65734d; }
+.admin-manual-menu__source button { justify-self: start; padding: 8px 12px; border: 1px solid #d8d4ca; border-radius: 9px; background: #fff; font-weight: 700; }
+.admin-manual-menu__source button:disabled { opacity: .55; }
+.admin-manual-menu__source small[role="status"] { color: #66675f; }
+.admin-manual-menu__status { display: inline-flex; padding: 7px 10px; border-radius: 999px; white-space: nowrap; font-size: 13px; font-weight: 800; }
+.admin-manual-menu__status--current { color: #28603b; background: #e6f3e8; }
+.admin-manual-menu__status--needs_check { color: #8b332d; background: #f8e4e1; }
+.admin-manual-menu__status--source_missing { color: #735616; background: #fff3d5; }
+
 .admin-menu button,
 .admin-menu input,
 .admin-menu select,

@@ -90,6 +90,16 @@ export const adminMenuRevisionsApi = {
     return request(`/api/admin/restaurants${params.size ? `?${params}` : ''}`)
   },
   parserRuns: () => request('/api/admin/parser-runs'),
+  manualMenus: () => request('/api/admin/manual-menu-freshness'),
+  updateManualMenuSource: (slug, body) =>
+    request(`/api/admin/manual-menu-freshness/${encodeURIComponent(slug)}/source`, {
+      method: 'PATCH',
+      body,
+    }),
+  confirmManualMenu: (slug) =>
+    request(`/api/admin/manual-menu-freshness/${encodeURIComponent(slug)}/confirm`, {
+      method: 'POST',
+    }),
   createRestaurant: (body) => request('/api/admin/restaurants', { method: 'POST', body }),
   updateRestaurant: (slug, body) =>
     request(`/api/admin/restaurants/${encodeURIComponent(slug)}`, { method: 'PATCH', body }),
