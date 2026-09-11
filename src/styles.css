@@ -4006,8 +4006,10 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
 
 .catalog-card__copy {
   display: grid;
+  flex: 1 1 0;
   gap: 5px;
   min-width: 0;
+  overflow: hidden;
   padding-top: 1px;
 }
 
