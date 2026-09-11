@@ -131,4 +131,12 @@ export const adminMenuRevisionsApi = {
       method: 'PATCH',
       body,
     }),
+  outreach: ({ city = '' } = {}) => {
+    const params = new URLSearchParams()
+    if (city) params.set('city', city)
+    return request(`/api/admin/outreach${params.size ? `?${params}` : ''}`)
+  },
+  importOutreach: (city) => request('/api/admin/outreach/import', { method: 'POST', body: { city } }),
+  updateOutreach: (candidateId, body) =>
+    request(`/api/admin/outreach/${encodeURIComponent(candidateId)}`, { method: 'PATCH', body }),
 }
