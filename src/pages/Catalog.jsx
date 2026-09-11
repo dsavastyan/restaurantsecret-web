@@ -151,13 +151,10 @@ export default function Catalog() {
   useEffect(() => {
     const handle = setTimeout(() => {
       setDebouncedQuery(query.trim())
-      const next = new URLSearchParams(searchParams)
-      if (query.trim()) next.set('q', query.trim()); else next.delete('q')
-      setSearchParams(next, { replace: true })
     }, 280)
 
     return () => clearTimeout(handle)
-  }, [query]) // URL intentionally follows the debounced query
+  }, [query])
 
   const changeCity = useCallback((city) => {
     analytics.track('city_changed', { from_city: selectedCity.id, selected_city: city.id })
@@ -364,9 +361,22 @@ export default function Catalog() {
 
   const handleSubmit = useCallback((event) => {
     event.preventDefault()
-    setDebouncedQuery(query.trim())
+    const trimmedQuery = query.trim()
+    setDebouncedQuery(trimmedQuery)
     setCurrentPage(1)
-  }, [query])
+    const next = new URLSearchParams(searchParams)
+    if (trimmedQuery) next.set('q', trimmedQuery); else next.delete('q')
+    setSearchParams(next, { replace: true })
+  }, [query, searchParams, setSearchParams])
+
+  const handleClearSearch = useCallback(() => {
+    setQuery('')
+    setDebouncedQuery('')
+    setCurrentPage(1)
+    const next = new URLSearchParams(searchParams)
+    next.delete('q')
+    setSearchParams(next, { replace: true })
+  }, [searchParams, setSearchParams])
 
   return (
     <div className="catalog-page">
@@ -411,7 +421,7 @@ export default function Catalog() {
                 <button
                   type="button"
                   className="catalog-search__clear"
-                  onClick={() => setQuery('')}
+                  onClick={handleClearSearch}
                   aria-label="Очистить поиск"
                 >
                   ×
