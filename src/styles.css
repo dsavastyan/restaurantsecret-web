@@ -3766,6 +3766,31 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
   min-width: 0;
 }
 
+@media (min-width: 981px) {
+  .catalog-page .catalog-search {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-areas:
+      "search search search search city city"
+      "metro metro metro cuisine cuisine cuisine";
+  }
+
+  .catalog-page .catalog-search__field {
+    grid-area: search;
+  }
+
+  .catalog-page .catalog-filter-row > .catalog-filter:nth-child(1) {
+    grid-area: city;
+  }
+
+  .catalog-page .catalog-filter-row > .catalog-filter:nth-child(2) {
+    grid-area: cuisine;
+  }
+
+  .catalog-page .catalog-filter-row > .catalog-filter:nth-child(3) {
+    grid-area: metro;
+  }
+}
+
 .catalog-page .catalog-search__field {
   min-width: 0;
 }
