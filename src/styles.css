@@ -3592,6 +3592,84 @@ html[data-rs-theme="night"] .navbar.navbar--guest .navbar__brand--guest {
   color: #475569;
 }
 
+.catalog-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(32px, 5vw, 54px) 20px 18px;
+  color: var(--catalog-ink);
+  text-align: center;
+}
+
+.catalog-empty__icon {
+  display: grid;
+  width: 72px;
+  height: 72px;
+  place-items: center;
+  margin-bottom: 16px;
+  border-radius: 50%;
+  background: rgba(232, 240, 214, 0.82);
+  color: #667e3c;
+}
+
+.catalog-empty__icon svg {
+  width: 35px;
+  height: 35px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+
+.catalog-empty__title {
+  margin: 0;
+  font-family: "Playfair Display", "DM Serif Display", Georgia, serif;
+  font-size: clamp(30px, 4vw, 40px);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.catalog-empty__text {
+  max-width: 650px;
+  margin: 12px 0 0;
+  color: var(--catalog-muted);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.catalog-empty__cities {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 24px;
+  margin-top: 14px;
+}
+
+.catalog-empty__city {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: #627d36;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.catalog-empty__city:hover {
+  color: #496526;
+}
+
+.catalog-empty__city:focus-visible {
+  border-radius: 4px;
+  outline: 3px solid rgba(104, 134, 63, 0.25);
+  outline-offset: 3px;
+}
+
 @media (min-width: 780px) {
   .catalog-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -16876,6 +16954,19 @@ html[data-rs-theme="night"] .catalog-state__badge {
 html[data-rs-theme="night"] .catalog-state__text,
 html[data-rs-theme="night"] .catalog-loader span {
   color: #9fb0c5;
+}
+
+html[data-rs-theme="night"] .catalog-empty__icon {
+  background: rgba(104, 134, 63, 0.2);
+  color: #b7ce82;
+}
+
+html[data-rs-theme="night"] .catalog-empty__text {
+  color: #9fb0c5;
+}
+
+html[data-rs-theme="night"] .catalog-empty__city {
+  color: #b7ce82;
 }
 
 html[data-rs-theme="night"] .account-overview-form .form-group label,

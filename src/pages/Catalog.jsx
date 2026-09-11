@@ -358,6 +358,12 @@ export default function Catalog() {
   const shownTo = Math.min(currentPage * PAGE_SIZE, filteredItems.length)
   const totalRestaurantCount = allItems.length || Number(rawData?.total ?? rawData?.count ?? 0)
   const weeklyAdded = Number(landingStats?.weeklyAdded ?? 0)
+  const crossCitySuggestions = useMemo(() => (
+    (crossCityResults?.otherCities || []).map((result) => {
+      const city = cities.find((item) => item.id === result.city)
+      return city ? { ...result, city } : null
+    }).filter(Boolean)
+  ), [cities, crossCityResults?.otherCities])
 
   const handleSubmit = useCallback((event) => {
     event.preventDefault()
@@ -497,21 +503,38 @@ export default function Catalog() {
         {isInitialLoading && <div className="catalog-state">Загружаем рестораны…</div>}
         {error && <p className="err">Ошибка: {String(error.message || error)}</p>}
         {!loading && !visibleItems.length && !error && (
-          <div className="catalog-state catalog-state--empty">
-            <div className="catalog-state__badge">Ничего не нашли</div>
-            <p className="catalog-state__text">Попробуйте изменить запрос или выбрать другую кухню.</p>
-            {(crossCityResults?.otherCities || []).length > 0 && (
-              <div aria-label="Результаты в других городах">
-                <strong>Есть в других городах</strong>
-                {(crossCityResults.otherCities || []).map((result) => (
-                  <button key={result.city} type="button" onClick={() => {
-                    const city = cities.find((item) => item.id === result.city)
-                    if (city && window.confirm(`Переключиться на город ${city.name}?`)) changeCity(city)
-                  }}>{result.city}</button>
+          crossCitySuggestions.length > 0 ? (
+            <div className="catalog-empty" role="status">
+              <div className="catalog-empty__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <circle cx="10.75" cy="10.75" r="6.75" />
+                  <path d="m15.8 15.8 4.2 4.2" />
+                </svg>
+              </div>
+              <h2 className="catalog-empty__title">Здесь пока пусто</h2>
+              <p className="catalog-empty__text">
+                Попробуйте другой запрос или посмотрите результаты в другом городе.
+              </p>
+              <div className="catalog-empty__cities" aria-label="Результаты в других городах">
+                {crossCitySuggestions.map(({ city }) => (
+                  <button
+                    className="catalog-empty__city"
+                    key={city.id}
+                    type="button"
+                    onClick={() => changeCity(city)}
+                  >
+                    {city.name}
+                    <span aria-hidden="true">→</span>
+                  </button>
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="catalog-state catalog-state--empty">
+              <div className="catalog-state__badge">Ничего не нашли</div>
+              <p className="catalog-state__text">Попробуйте изменить запрос или выбрать другую кухню.</p>
+            </div>
+          )
         )}
 
         <ul className="catalog-grid">
