@@ -204,6 +204,19 @@
 .admin-parser__error > strong { display: block; margin-top: 8px; color: #742a25; overflow-wrap: anywhere; }
 .admin-parser__error pre { max-height: 240px; overflow: auto; padding: 10px; border-radius: 8px; color: #f5eee9; background: #342f2c; font: 11px/1.5 ui-monospace, SFMono-Regular, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
 
+.admin-outreach__table-wrap { overflow-x: auto; }
+.admin-outreach__table { min-width: 900px; }
+.admin-outreach__table td a { display: inline-flex; align-items: center; gap: 4px; color: #59653f; font-weight: 800; text-decoration: none; }
+.admin-outreach__status { display: inline-flex; padding: 6px 8px; border-radius: 999px; color: #62635e; background: #ecece8; font-size: 12px; font-weight: 800; white-space: nowrap; }
+.admin-outreach__status--ready { color: #28603b; background: #daf0df; }
+.admin-outreach__status--follow_up { color: #8a3a23; background: #fbe7dc; }
+.admin-outreach__status--awaiting_parser { color: #315f78; background: #e0eff6; }
+.admin-outreach__status--awaiting_manual, .admin-outreach__status--awaiting_reply, .admin-outreach__status--menu_development { color: #76571c; background: #fff0c9; }
+.admin-outreach__table td:last-child > button { padding: 8px 10px; color: #fff; border: 0; border-radius: 8px; background: #65734d; font-weight: 800; }
+.admin-outreach__parser-form { display: grid; grid-template-columns: minmax(160px, 1fr) auto auto; gap: 5px; min-width: 430px; }
+.admin-outreach__parser-form input { padding: 8px; border: 1px solid #cfcbc0; border-radius: 8px; }
+.admin-outreach__parser-form button { padding: 7px 9px; border: 1px solid #d8d4ca; border-radius: 8px; background: #fff; }
+
 .admin-product-match__filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 20px; }
 .admin-product-match__filters button { padding: 10px 13px; color: #66675f; border: 1px solid #d8d4ca; border-radius: 10px; background: #fff; font-weight: 700; }
 .admin-product-match__filters button.active { color: #fff; border-color: #65734d; background: #65734d; }
