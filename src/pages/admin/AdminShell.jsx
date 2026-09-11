@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { adminMenuRevisionsApi } from '@/api/adminMenuRevisions'
+import { PARTNER_ADMIN_ENABLED } from './adminFeatures'
 import './admin-menu.css'
 
 export default function AdminShell() {
@@ -55,10 +56,9 @@ export default function AdminShell() {
         </Link>
         <nav className="admin-menu__nav" aria-label="Разделы администратора">
           <Link className={location.pathname.startsWith('/admin/restaurants') ? 'active' : ''} to="/admin/restaurants">Рестораны</Link>
-          <Link className={location.pathname.startsWith('/admin/menu-revisions') ? 'active' : ''} to="/admin/menu-revisions">Задачи меню</Link>
+          {PARTNER_ADMIN_ENABLED && <Link className={location.pathname.startsWith('/admin/menu-revisions') ? 'active' : ''} to="/admin/menu-revisions">Задачи меню</Link>}
           <Link className={location.pathname.startsWith('/admin/product-matches') ? 'active' : ''} to="/admin/product-matches">Продукты</Link>
           <Link className={location.pathname.startsWith('/admin/kbju-flags') ? 'active' : ''} to="/admin/kbju-flags">Странные КБЖУ</Link>
-          <Link className={location.pathname.startsWith('/admin/restaurant-reviews') ? 'active' : ''} to="/admin/restaurant-reviews">Ревью ресторанов</Link>
         </nav>
         <button type="button" onClick={logout}>Выйти</button>
       </header>
