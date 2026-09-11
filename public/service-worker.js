@@ -1,8 +1,14 @@
 const STATIC_CACHE = 'static-v3';
 const API_CACHE = 'api-v3';
 const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest'];
+const IS_LOCAL_DEVELOPMENT = ['localhost', '127.0.0.1'].includes(self.location.hostname);
 
 self.addEventListener('install', (event) => {
+  if (IS_LOCAL_DEVELOPMENT) {
+    event.waitUntil(self.skipWaiting());
+    return;
+  }
+
   event.waitUntil((async () => {
     self.skipWaiting();
     const cache = await caches.open(STATIC_CACHE);
@@ -13,6 +19,14 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const cacheNames = await caches.keys();
+    if (IS_LOCAL_DEVELOPMENT) {
+      await Promise.all(cacheNames
+        .filter((name) => name.startsWith('static-') || name.startsWith('api-'))
+        .map((name) => caches.delete(name)));
+      await self.registration.unregister();
+      return;
+    }
+
     await Promise.all(cacheNames
       .filter((name) => name !== STATIC_CACHE && name !== API_CACHE)
       .map((name) => caches.delete(name)));
@@ -21,6 +35,7 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  if (IS_LOCAL_DEVELOPMENT) return;
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);

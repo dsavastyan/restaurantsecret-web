@@ -241,9 +241,25 @@ function fetchMaintenanceConfig() {
 // network caching can work in production. Errors are intentionally swallowed to
 // avoid surfacing noisy warnings to end users.
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js').catch(() => { })
-  })
+  if (import.meta.env.DEV) {
+    navigator.serviceWorker.getRegistrations()
+      .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
+      .catch(() => { })
+
+    if ('caches' in window) {
+      caches.keys()
+        .then((keys) => Promise.all(
+          keys
+            .filter((key) => key.startsWith('static-') || key.startsWith('api-'))
+            .map((key) => caches.delete(key)),
+        ))
+        .catch(() => { })
+    }
+  } else {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js').catch(() => { })
+    })
+  }
 }
 
 /**
