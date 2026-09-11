@@ -485,6 +485,22 @@ export default function Landing() {
               <span aria-hidden="true" className="landing-warm__city-chevron">⌄</span>
             </button>
           </div>
+          {suggestedCity && (
+            <aside className="landing-warm__city-suggestion landing-warm__city-suggestion--mobile" aria-live="polite">
+              <span>Ваш город — <strong>{suggestedCity}</strong>?</span>
+              <span className="landing-warm__city-suggestion-actions">
+                <button className="landing-warm__city-confirm" type="button" onClick={() => {
+                  setSelectedCatalogCity(suggestedCity)
+                  localStorage.setItem('catalog_city', suggestedCity)
+                  setSuggestedCity(null)
+                }}>Да, это мой город</button>
+                <button type="button" onClick={() => {
+                  setSuggestedCity(null)
+                  setCityPickerOpen(true)
+                }}>Сменить</button>
+              </span>
+            </aside>
+          )}
           <h1 className="landing-warm__hero-title">
             Ешь вкусно,
             <br />
@@ -497,7 +513,7 @@ export default function Landing() {
 
           <div className="landing-warm__search-shell">
             {suggestedCity && (
-              <aside className="landing-warm__city-suggestion" aria-live="polite">
+              <aside className="landing-warm__city-suggestion landing-warm__city-suggestion--desktop" aria-live="polite">
                 <span>Ваш город — <strong>{suggestedCity}</strong>?</span>
                 <span className="landing-warm__city-suggestion-actions">
                   <button className="landing-warm__city-confirm" type="button" onClick={() => {

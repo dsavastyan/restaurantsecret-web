@@ -24,16 +24,18 @@ test('offers the detected catalog city on the first visit', async ({ page }) => 
 
   await page.goto('/')
 
-  await expect(page.getByText('Ваш город —', { exact: false })).toContainText('Санкт-Петербург')
-  await expect(page.getByRole('button', { name: 'Да, это мой город', exact: true })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Сменить', exact: true })).toBeVisible()
+  const suggestion = page.locator('.landing-warm__city-suggestion--desktop')
+  await expect(suggestion).toContainText('Санкт-Петербург')
+  await expect(suggestion.getByRole('button', { name: 'Да, это мой город', exact: true })).toBeVisible()
+  await expect(suggestion.getByRole('button', { name: 'Сменить', exact: true })).toBeVisible()
 })
 
 test('allows previewing the first-visit prompt in local development', async ({ page }) => {
   await page.goto('/?detected_city=Минск')
 
-  await expect(page.getByText('Ваш город —', { exact: false })).toContainText('Минск')
-  await expect(page.getByRole('button', { name: 'Да, это мой город', exact: true })).toBeVisible()
+  const suggestion = page.locator('.landing-warm__city-suggestion--desktop')
+  await expect(suggestion).toContainText('Минск')
+  await expect(suggestion.getByRole('button', { name: 'Да, это мой город', exact: true })).toBeVisible()
   await expect.poll(() => page.evaluate(() => window.localStorage.getItem('catalog_city')))
     .toBe(null)
 })
@@ -47,8 +49,9 @@ test('offers Moscow when the city cannot be detected', async ({ page }) => {
 
   await page.goto('/')
 
-  await expect(page.getByText('Ваш город —', { exact: false })).toContainText('Москва')
-  await expect(page.getByRole('button', { name: 'Да, это мой город', exact: true })).toBeVisible()
+  const suggestion = page.locator('.landing-warm__city-suggestion--desktop')
+  await expect(suggestion).toContainText('Москва')
+  await expect(suggestion.getByRole('button', { name: 'Да, это мой город', exact: true })).toBeVisible()
   await expect.poll(() => page.evaluate(() => window.localStorage.getItem('catalog_city')))
     .toBe(null)
 })
@@ -58,7 +61,26 @@ test('offers Moscow when city detection fails', async ({ page }) => {
 
   await page.goto('/')
 
-  await expect(page.getByText('Ваш город —', { exact: false })).toContainText('Москва')
+  await expect(page.locator('.landing-warm__city-suggestion--desktop')).toContainText('Москва')
+})
+
+test('places the confirmation below the city picker on mobile', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.route('**/location', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ city: null }),
+  }))
+
+  await page.goto('/')
+
+  const picker = page.locator('.landing-warm__city-picker--mobile')
+  const suggestion = page.locator('.landing-warm__city-suggestion--mobile')
+  await expect(picker).toBeVisible()
+  await expect(suggestion).toBeVisible()
+  const pickerBox = await picker.boundingBox()
+  const suggestionBox = await suggestion.boundingBox()
+  expect(suggestionBox.y).toBeGreaterThan(pickerBox.y)
 })
 
 test('does not replace a manual choice with a late location response', async ({ page }) => {
