@@ -29,6 +29,38 @@ test('offers the detected catalog city on the first visit', async ({ page }) => 
   await expect(page.getByRole('button', { name: 'Выбрать другой' })).toBeVisible()
 })
 
+test('allows previewing the first-visit prompt in local development', async ({ page }) => {
+  await page.goto('/?detected_city=Минск')
+
+  await expect(page.getByText('Ваш город —', { exact: false })).toContainText('Минск')
+  await expect(page.getByRole('button', { name: 'Да', exact: true })).toBeVisible()
+  await expect.poll(() => page.evaluate(() => window.localStorage.getItem('catalog_city')))
+    .toBe(null)
+})
+
+test('offers Moscow when the city cannot be detected', async ({ page }) => {
+  await page.route('**/location', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ city: null }),
+  }))
+
+  await page.goto('/')
+
+  await expect(page.getByText('Ваш город —', { exact: false })).toContainText('Москва')
+  await expect(page.getByRole('button', { name: 'Да', exact: true })).toBeVisible()
+  await expect.poll(() => page.evaluate(() => window.localStorage.getItem('catalog_city')))
+    .toBe(null)
+})
+
+test('offers Moscow when city detection fails', async ({ page }) => {
+  await page.route('**/location', (route) => route.abort())
+
+  await page.goto('/')
+
+  await expect(page.getByText('Ваш город —', { exact: false })).toContainText('Москва')
+})
+
 test('does not replace a manual choice with a late location response', async ({ page }) => {
   let releaseLocation
   const locationReady = new Promise((resolve) => {

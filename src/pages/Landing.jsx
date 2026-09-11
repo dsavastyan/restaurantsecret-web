@@ -32,6 +32,9 @@ const RestaurantMap = lazy(() => import('@/components/RestaurantMap'))
 
 const POPULAR_QUERIES = ['бургер', 'боул с лососем', 'салат цезарь', 'стейк', 'паста']
 const CITY_SLUGS = { 'Москва': 'moskva', 'Санкт-Петербург': 'sankt-peterburg', 'Ижевск': 'izhevsk' }
+const DEV_DETECTED_CITY = import.meta.env.DEV
+  ? new URLSearchParams(window.location.search).get('detected_city')?.trim() || null
+  : null
 
 const SAMPLE_DISHES = [
   {
@@ -158,11 +161,17 @@ export default function Landing() {
 
   useEffect(() => {
     if (localStorage.getItem('catalog_city')) return
+    if (DEV_DETECTED_CITY) {
+      setSuggestedCity(DEV_DETECTED_CITY)
+      return
+    }
     api.detectedCity()
       .then((response) => {
-        if (response?.city && !localStorage.getItem('catalog_city')) setSuggestedCity(response.city)
+        if (!localStorage.getItem('catalog_city')) setSuggestedCity(response?.city || 'Москва')
       })
-      .catch(() => {})
+      .catch(() => {
+        if (!localStorage.getItem('catalog_city')) setSuggestedCity('Москва')
+      })
   }, [])
 
   useEffect(() => {
